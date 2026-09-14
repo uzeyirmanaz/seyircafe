@@ -129,13 +129,13 @@
   }
 
   /* Ürün Izgarası */
-  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; }
   .menu-item { background: var(--card-bg); border: 1px solid rgba(212, 175, 55, 0.15); border-radius: 8px; overflow: hidden; display: flex; flex-direction: column; }
-  .item-img-wrapper { position: relative; width: 100%; height: 120px; }
+  .item-img-wrapper { position: relative; width: 100%; height: 130px; }
   .item-img { width: 100%; height: 100%; object-fit: cover; }
-  .item-badge { position: absolute; top: 6px; right: 6px; background: var(--gold); color: #000; font-size: 0.75rem; font-weight: 700; padding: 3px 6px; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.5); }
-  .item-content { padding: 10px; display: flex; flex-direction: column; flex-grow: 1; justify-content: center; }
-  .item-title { font-family: 'Cinzel', serif; font-size: 0.9rem; color: var(--gold-light); font-weight: 600; text-align: center; }
+  .item-badge { position: absolute; top: 6px; right: 6px; background: #c0392b; color: #fff; font-size: 0.75rem; font-weight: 700; padding: 3px 8px; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.5); }
+  .item-content { padding: 10px; display: flex; flex-direction: column; flex-grow: 1; justify-content: center; background: #121215; }
+  .item-title { font-family: 'Cinzel', serif; font-size: 0.85rem; color: var(--gold-light); font-weight: 600; text-align: center; }
 
   .footer { margin-top: auto; padding-top: 30px; text-align: center; border-top: 1px solid rgba(212, 175, 55, 0.1); display: flex; justify-content: space-between; align-items: center; }
   .admin-toggle-btn-bottom { background: transparent; color: #444; border: none; cursor: pointer; font-size: 1rem; transition: color 0.3s; }
@@ -165,9 +165,7 @@
   </div>
 
   <!-- Kategori Butonları -->
-  <div id="categoriesBar" class="categories-bar">
-    <button class="cat-btn active" onclick="filterCategory('all')">Tümü</button>
-  </div>
+  <div id="categoriesBar" class="categories-bar"></div>
 
   <!-- Ürün Listesi -->
   <div id="menuGrid" class="grid"></div>
@@ -187,7 +185,7 @@
     <div class="admin-section">
       <h4 style="color:var(--gold-light); margin-bottom:8px;">Kategori Ekle</h4>
       <div style="display:flex; gap:6px;">
-        <input type="text" id="addCatName" class="admin-input" placeholder="Kategori Adı (Örn: Sıcak İçecekler)" style="margin-bottom:0;">
+        <input type="text" id="addCatName" class="admin-input" placeholder="Kategori Adı" style="margin-bottom:0;">
         <button class="btn btn-gold" onclick="addCategory()">Ekle</button>
       </div>
       <div id="adminCategoryList" style="margin-top:10px; display:flex; flex-wrap:wrap; gap:6px;"></div>
@@ -219,10 +217,114 @@
 </div>
 
 <script>
+  // DAHA ÖNCEKİ GÖRSELLERİNİZDEKİ TAM MENÜ LİSTESİ (HAZIR YÜKLÜ)
+  const defaultCategories = [
+    "Sıcak İçecekler", "Yemek", "Espresso", "Frozen", "Milkshake", "Nargile", "Çerez", "Filtre Çay", "Kahve", "Dondurma"
+  ];
+
+  const defaultProducts = [
+    // Sıcak İçecekler
+    { name: "Salep / Damla Sakızlı Salep", price: "150 TL", category: "Sıcak İçecekler", img: "https://images.unsplash.com/photo-1544787219-7f47ccb76574?w=500&q=80" },
+    { name: "Sıcak Çikolata", price: "150 TL", category: "Sıcak İçecekler", img: "https://images.unsplash.com/photo-1542990253-0d0f5be5f0ed?w=500&q=80" },
+    { name: "Sütlü Sahlep", price: "150 TL", category: "Sıcak İçecekler", img: "https://images.unsplash.com/photo-1572442388796-11668a67e53d?w=500&q=80" },
+    { name: "Ballı Süt", price: "120 TL", category: "Sıcak İçecekler", img: "https://images.unsplash.com/photo-1550583724-b2692b85b150?w=500&q=80" },
+    { name: "Süt Sıcak", price: "100 TL", category: "Sıcak İçecekler", img: "https://images.unsplash.com/photo-1563636619-e9143da7973b?w=500&q=80" },
+    { name: "Kuşburnu (Duble)", price: "70 TL", category: "Sıcak İçecekler", img: "https://images.unsplash.com/photo-1576092768241-dec231879fc3?w=500&q=80" },
+    { name: "Karadut (Duble)", price: "70 TL", category: "Sıcak İçecekler", img: "https://images.unsplash.com/photo-1597481499750-3e6b22637e12?w=500&q=80" },
+    { name: "Muz (Duble)", price: "70 TL", category: "Sıcak İçecekler", img: "https://images.unsplash.com/photo-1528825871115-3581a5387919?w=500&q=80" },
+    { name: "Limon (Duble)", price: "70 TL", category: "Sıcak İçecekler", img: "https://images.unsplash.com/photo-1534353473418-4cfa6c56fd38?w=500&q=80" },
+    { name: "Elma (Duble)", price: "70 TL", category: "Sıcak İçecekler", img: "https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6?w=500&q=80" },
+    { name: "Kivi (Duble)", price: "70 TL", category: "Sıcak İçecekler", img: "https://images.unsplash.com/photo-1585059895524-72fd59656789?w=500&q=80" },
+    { name: "Portakal (Duble)", price: "70 TL", category: "Sıcak İçecekler", img: "https://images.unsplash.com/photo-1611080626919-7cf5a9dbab5b?w=500&q=80" },
+    { name: "Atom (Duble)", price: "70 TL", category: "Sıcak İçecekler", img: "https://images.unsplash.com/photo-1513558161293-cdaf765ed2fd?w=500&q=80" },
+    { name: "Çay", price: "30 TL", category: "Sıcak İçecekler", img: "https://images.unsplash.com/photo-1576092768241-dec231879fc3?w=500&q=80" },
+
+    // Yemek
+    { name: "Tavuk Izgara", price: "300 TL", category: "Yemek", img: "https://images.unsplash.com/photo-1598515214211-89d3c73ae83b?w=500&q=80" },
+    { name: "Tavuk Şinitzel", price: "300 TL", category: "Yemek", img: "https://images.unsplash.com/photo-1562967914-608f82629710?w=500&q=80" },
+    { name: "Tost Sucuklu Kaşarlı", price: "200 TL", category: "Yemek", img: "https://images.unsplash.com/photo-1528735602780-2552fd46c7af?w=500&q=80" },
+    { name: "Tost Yumurtalı Sucuklu Kaşarlı", price: "200 TL", category: "Yemek", img: "https://images.unsplash.com/photo-1539252554453-80ab65ce3586?w=500&q=80" },
+    { name: "Tost Kavurmalı Kaşarlı", price: "250 TL", category: "Yemek", img: "https://images.unsplash.com/photo-1528735602780-2552fd46c7af?w=500&q=80" },
+    { name: "Menemen", price: "200 TL", category: "Yemek", img: "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=500&q=80" },
+    { name: "Menemen Kaşarlı", price: "220 TL", category: "Yemek", img: "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=500&q=80" },
+    { name: "Menemen Sucuklu Kaşarlı", price: "250 TL", category: "Yemek", img: "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=500&q=80" },
+    { name: "Hamburger", price: "250 TL", category: "Yemek", img: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=500&q=80" },
+    { name: "Mercimek Çorbası", price: "120 TL", category: "Yemek", img: "https://images.unsplash.com/photo-1547592166-23ac45744acd?w=500&q=80" },
+    { name: "Kiremitte Kaşarlı Köfte", price: "350 TL", category: "Yemek", img: "https://images.unsplash.com/photo-1529042410759-befb1204b468?w=500&q=80" },
+    { name: "Kuzu Pirzola", price: "450 TL", category: "Yemek", img: "https://images.unsplash.com/photo-1544025162-d76694265947?w=500&q=80" },
+    { name: "Çıtır Tavuk", price: "250 TL", category: "Yemek", img: "https://images.unsplash.com/photo-1562967914-608f82629710?w=500&q=80" },
+    { name: "Gözleme", price: "180 TL", category: "Yemek", img: "https://images.unsplash.com/photo-1589301760014-d929f3979dbc?w=500&q=80" },
+
+    // Espresso & Kahveler
+    { name: "Filtre Kahve", price: "130 TL", category: "Espresso", img: "https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?w=500&q=80" },
+    { name: "Beyaz Çikolata Latte", price: "130 TL", category: "Espresso", img: "https://images.unsplash.com/photo-1570968915860-54d5c301fa9f?w=500&q=80" },
+    { name: "Americano", price: "130 TL", category: "Kahve", img: "https://images.unsplash.com/photo-1551033406-611cf9a28f67?w=500&q=80" },
+    { name: "Cappuccino", price: "130 TL", category: "Kahve", img: "https://images.unsplash.com/photo-1572442388796-11668a67e53d?w=500&q=80" },
+    { name: "Caramel Macchiato", price: "130 TL", category: "Kahve", img: "https://images.unsplash.com/photo-1485808191679-5f86510681a2?w=500&q=80" },
+    { name: "Caffe Mocha", price: "130 TL", category: "Kahve", img: "https://images.unsplash.com/photo-1578314675249-a6910f80cc4e?w=500&q=80" },
+    { name: "Türk Kahvesi", price: "120 TL", category: "Kahve", img: "https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?w=500&q=80" },
+    { name: "Sütlü Türk Kahvesi", price: "130 TL", category: "Kahve", img: "https://images.unsplash.com/photo-1541167760496-1628856ab772?w=500&q=80" },
+    { name: "Menengiç Kahvesi", price: "130 TL", category: "Kahve", img: "https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?w=500&q=80" },
+    { name: "Dibek Kahvesi", price: "130 TL", category: "Kahve", img: "https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?w=500&q=80" },
+    { name: "Damla Sakızlı Türk Kahvesi", price: "130 TL", category: "Kahve", img: "https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?w=500&q=80" },
+    { name: "Osmanlı Kahvesi", price: "130 TL", category: "Kahve", img: "https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?w=500&q=80" },
+
+    // Frozen
+    { name: "Mango Frozen", price: "200 TL", category: "Frozen", img: "https://images.unsplash.com/photo-1534353473418-4cfa6c56fd38?w=500&q=80" },
+    { name: "Elma Frozen", price: "200 TL", category: "Frozen", img: "https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6?w=500&q=80" },
+    { name: "Çilek Frozen", price: "200 TL", category: "Frozen", img: "https://images.unsplash.com/photo-1464965911861-746a04b4bca6?w=500&q=80" },
+    { name: "Kivi Frozen", price: "200 TL", category: "Frozen", img: "https://images.unsplash.com/photo-1585059895524-72fd59656789?w=500&q=80" },
+    { name: "Şeftali Frozen", price: "200 TL", category: "Frozen", img: "https://images.unsplash.com/photo-1629828874514-c1e5103f2150?w=500&q=80" },
+    { name: "Limon Frozen", price: "200 TL", category: "Frozen", img: "https://images.unsplash.com/photo-1534353473418-4cfa6c56fd38?w=500&q=80" },
+    { name: "Muz Frozen", price: "200 TL", category: "Frozen", img: "https://images.unsplash.com/photo-1528825871115-3581a5387919?w=500&q=80" },
+
+    // Milkshake
+    { name: "Muz Milkshake", price: "200 TL", category: "Milkshake", img: "https://images.unsplash.com/photo-1572490122747-3968b75cc699?w=500&q=80" },
+    { name: "Çilek Milkshake", price: "200 TL", category: "Milkshake", img: "https://images.unsplash.com/photo-1572490122747-3968b75cc699?w=500&q=80" },
+    { name: "Vanilya Milkshake", price: "200 TL", category: "Milkshake", img: "https://images.unsplash.com/photo-1572490122747-3968b75cc699?w=500&q=80" },
+    { name: "Çikolata Milkshake", price: "200 TL", category: "Milkshake", img: "https://images.unsplash.com/photo-1572490122747-3968b75cc699?w=500&q=80" },
+    { name: "Karamel Milkshake", price: "200 TL", category: "Milkshake", img: "https://images.unsplash.com/photo-1572490122747-3968b75cc699?w=500&q=80" },
+    { name: "Vişne Milkshake", price: "200 TL", category: "Milkshake", img: "https://images.unsplash.com/photo-1572490122747-3968b75cc699?w=500&q=80" },
+
+    // Nargile
+    { name: "Kareşte Nargile", price: "300 TL", category: "Nargile", img: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=500&q=80" },
+    { name: "Ananas Nargile", price: "300 TL", category: "Nargile", img: "https://images.unsplash.com/photo-1550258987-190a2d41a8ba?w=500&q=80" },
+    { name: "Love 66 Nargile", price: "300 TL", category: "Nargile", img: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=500&q=80" },
+    { name: "Lady Killer", price: "300 TL", category: "Nargile", img: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=500&q=80" },
+    { name: "Gül Nargile", price: "300 TL", category: "Nargile", img: "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=500&q=80" },
+    { name: "Nane Nargile", price: "300 TL", category: "Nargile", img: "https://images.unsplash.com/photo-1608571423902-eed4a5ad8108?w=500&q=80" },
+    { name: "Üzüm Nargile", price: "300 TL", category: "Nargile", img: "https://images.unsplash.com/photo-1537640538966-79f369143f8f?w=500&q=80" },
+
+    // Çerez
+    { name: "Dakota Çekirdek", price: "150 TL", category: "Çerez", img: "https://images.unsplash.com/photo-1536599018102-9f803c140fc1?w=500&q=80" },
+    { name: "Leblebi", price: "150 TL", category: "Çerez", img: "https://images.unsplash.com/photo-1599599810769-bcde5a160d32?w=500&q=80" },
+    { name: "Kabak Çekirdeği", price: "200 TL", category: "Çerez", img: "https://images.unsplash.com/photo-1509358271058-acd05cc93219?w=500&q=80" },
+    { name: "Fındık", price: "400 TL", category: "Çerez", img: "https://images.unsplash.com/photo-1541781774459-bb2af2f05b55?w=500&q=80" },
+    { name: "Antep Fıstığı", price: "400 TL", category: "Çerez", img: "https://images.unsplash.com/photo-1563729784474-d77dbb933a9e?w=500&q=80" },
+    { name: "Karışık Çerez", price: "300 TL", category: "Çerez", img: "https://images.unsplash.com/photo-1599599810769-bcde5a160d32?w=500&q=80" },
+
+    // Filtre Çay
+    { name: "Ihlamur", price: "150 TL", category: "Filtre Çay", img: "https://images.unsplash.com/photo-1576092768241-dec231879fc3?w=500&q=80" },
+    { name: "Adaçayı", price: "150 TL", category: "Filtre Çay", img: "https://images.unsplash.com/photo-1576092768241-dec231879fc3?w=500&q=80" },
+    { name: "Kış Çayı", price: "150 TL", category: "Filtre Çay", img: "https://images.unsplash.com/photo-1576092768241-dec231879fc3?w=500&q=80" },
+    { name: "Papatya", price: "150 TL", category: "Filtre Çay", img: "https://images.unsplash.com/photo-1576092768241-dec231879fc3?w=500&q=80" },
+    { name: "Rezene", price: "150 TL", category: "Filtre Çay", img: "https://images.unsplash.com/photo-1576092768241-dec231879fc3?w=500&q=80" },
+    { name: "Yeşil Çay", price: "150 TL", category: "Filtre Çay", img: "https://images.unsplash.com/photo-1576092768241-dec231879fc3?w=500&q=80" },
+
+    // Dondurma
+    { name: "Vanilyalı Dondurma", price: "200 TL", category: "Dondurma", img: "https://images.unsplash.com/photo-1570197788417-0e82375c9371?w=500&q=80" },
+    { name: "Çikolatalı Dondurma", price: "200 TL", category: "Dondurma", img: "https://images.unsplash.com/photo-1563805042-7684c019e1cb?w=500&q=80" },
+    { name: "Muzlu Dondurma", price: "200 TL", category: "Dondurma", img: "https://images.unsplash.com/photo-1501443762994-82bd5dace89a?w=500&q=80" },
+    { name: "Limonlu Dondurma", price: "200 TL", category: "Dondurma", img: "https://images.unsplash.com/photo-1560008511-11c63416e52d?w=500&q=80" },
+    { name: "Karamelli Dondurma", price: "200 TL", category: "Dondurma", img: "https://images.unsplash.com/photo-1580915411954-282cb1b0d780?w=500&q=80" },
+    { name: "Çilekli Dondurma", price: "200 TL", category: "Dondurma", img: "https://images.unsplash.com/photo-1497034825429-c343d7c6a68f?w=500&q=80" }
+  ];
+
   const TARGET_PASS = "1171";
   let failedAttempts = 0;
-  let allProducts = [];
-  let currentCategory = 'all';
+  let allProducts = [...defaultProducts];
+  let categoriesList = [...defaultCategories];
+  let currentCategory = 'Tümü';
 
   function toggleLoginBox() {
     document.getElementById('loginBox').classList.toggle('open');
@@ -259,24 +361,26 @@
   }
 
   // --- KATEGORİ İŞLEMLERİ ---
-  async function addCategory() {
+  function addCategory() {
     const name = document.getElementById('addCatName').value.trim();
     if (!name) return alert("Lütfen kategori adı yazın!");
-    const { collection, addDoc } = window.dbTools;
-    await addDoc(collection(window.db, "categories"), { name, createdAt: Date.now() });
+    if (!categoriesList.includes(name)) {
+      categoriesList.push(name);
+    }
     document.getElementById('addCatName').value = '';
+    renderCategories();
     loadAdminData();
   }
 
-  async function deleteCategory(id) {
-    if (!confirm("Bu kategoriyi silmek istediğinize emin misiniz?")) return;
-    const { deleteDoc, doc } = window.dbTools;
-    await deleteDoc(doc(window.db, "categories", id));
+  function deleteCategory(catName) {
+    if (!confirm(`${catName} kategorisini silmek istediğinize emin misiniz?`)) return;
+    categoriesList = categoriesList.filter(c => c !== catName);
+    renderCategories();
     loadAdminData();
   }
 
   // --- ÜRÜN İŞLEMLERİ ---
-  async function uploadAndAddProduct() {
+  function uploadAndAddProduct() {
     const category = document.getElementById('addProdCategory').value;
     const name = document.getElementById('addProdName').value.trim();
     const price = document.getElementById('addProdPrice').value.trim();
@@ -284,79 +388,58 @@
 
     if (!name || !price) return alert("Lütfen ürün adını ve fiyatını yazın!");
 
-    let imgBase64 = "";
     if (fileInput.files.length > 0) {
       const file = fileInput.files[0];
       const reader = new FileReader();
-      reader.onloadend = async function() {
-        imgBase64 = reader.result;
-        await saveToFirebase(name, price, category, imgBase64);
+      reader.onloadend = function() {
+        saveProduct(name, price, category, reader.result);
       };
       reader.readAsDataURL(file);
     } else {
-      await saveToFirebase(name, price, category, "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400&q=80");
+      saveProduct(name, price, category, "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=500&q=80");
     }
   }
 
-  async function saveToFirebase(name, price, category, img) {
-    const { collection, addDoc } = window.dbTools;
-    await addDoc(collection(window.db, "products"), { name, price, category, img, createdAt: Date.now() });
+  function saveProduct(name, price, category, img) {
+    allProducts.unshift({ name, price, category, img });
     alert("Ürün başarıyla eklendi!");
     document.getElementById('addProdName').value = '';
     document.getElementById('addProdPrice').value = '';
     document.getElementById('addProdFile').value = '';
+    renderProducts();
     loadAdminData();
   }
 
-  async function deleteProduct(id) {
-    const { deleteDoc, doc } = window.dbTools;
-    await deleteDoc(doc(window.db, "products", id));
+  function deleteProduct(index) {
+    allProducts.splice(index, 1);
+    renderProducts();
     loadAdminData();
   }
 
-  // --- CANLI VERİ DİNLEME ---
-  window.addEventListener('load', () => {
-    setTimeout(() => {
-      const { collection, onSnapshot } = window.dbTools;
-      
-      // Kategorileri Dinle
-      onSnapshot(collection(window.db, "categories"), (snapshot) => {
-        const catBar = document.getElementById('categoriesBar');
-        catBar.innerHTML = `<button class="cat-btn ${currentCategory === 'all' ? 'active' : ''}" onclick="filterCategory('all')">Tümü</button>`;
-        snapshot.forEach((doc) => {
-          const cat = doc.data();
-          catBar.innerHTML += `<button class="cat-btn ${currentCategory === cat.name ? 'active' : ''}" onclick="filterCategory('${cat.name}')">${cat.name}</button>`;
-        });
-      });
-
-      // Ürünleri Dinle
-      onSnapshot(collection(window.db, "products"), (snapshot) => {
-        allProducts = [];
-        snapshot.forEach((doc) => {
-          allProducts.push({ id: doc.id, ...doc.data() });
-        });
-        renderProducts();
-      });
-    }, 1500);
-  });
+  // --- KATEGORİ VE ÜRÜNLERİ EKRANA BASTIRMA ---
+  function renderCategories() {
+    const catBar = document.getElementById('categoriesBar');
+    catBar.innerHTML = `<button class="cat-btn ${currentCategory === 'Tümü' ? 'active' : ''}" onclick="filterCategory('Tümü')">Tümü</button>`;
+    
+    categoriesList.forEach(cat => {
+      catBar.innerHTML += `<button class="cat-btn ${currentCategory === cat ? 'active' : ''}" onclick="filterCategory('${cat}')">${cat}</button>`;
+    });
+  }
 
   function filterCategory(catName) {
     currentCategory = catName;
-    document.querySelectorAll('.cat-btn').forEach(btn => {
-      if (btn.innerText === catName || (catName === 'all' && btn.innerText === 'Tümü')) {
-        btn.classList.add('active');
-      } else {
-        btn.classList.remove('active');
-      }
-    });
+    renderCategories();
     renderProducts();
   }
 
   function renderProducts() {
     const grid = document.getElementById('menuGrid');
     grid.innerHTML = '';
-    const filtered = currentCategory === 'all' ? allProducts : allProducts.filter(p => p.category === currentCategory);
     
+    const filtered = currentCategory === 'Tümü' 
+      ? allProducts 
+      : allProducts.filter(p => p.category === currentCategory);
+
     filtered.forEach((item) => {
       grid.innerHTML += `
         <div class="menu-item">
@@ -372,41 +455,39 @@
     });
   }
 
-  // --- ADMİN PANELİ VERİ YÜKLEME ---
-  async function loadAdminData() {
-    const { collection, getDocs } = window.dbTools;
-    
-    // Kategorileri Yükle
-    const catSnap = await getDocs(collection(window.db, "categories"));
+  // --- YÖNETİM PANELİ VERİLERİ ---
+  function loadAdminData() {
     const catList = document.getElementById('adminCategoryList');
     const catSelect = document.getElementById('addProdCategory');
     catList.innerHTML = '';
-    catSelect.innerHTML = '<option value="">Kategori Seçin (İsteğe Bağlı)</option>';
-    
-    catSnap.forEach((doc) => {
-      const data = doc.data();
+    catSelect.innerHTML = '<option value="">Kategori Seçin</option>';
+
+    categoriesList.forEach(cat => {
       catList.innerHTML += `
         <span style="background:#333; padding:4px 8px; border-radius:4px; font-size:0.75rem; display:flex; align-items:center; gap:6px;">
-          ${data.name} <i class="fa-solid fa-xmark" style="color:var(--danger); cursor:pointer;" onclick="deleteCategory('${doc.id}')"></i>
+          ${cat} <i class="fa-solid fa-xmark" style="color:var(--danger); cursor:pointer;" onclick="deleteCategory('${cat}')"></i>
         </span>
       `;
-      catSelect.innerHTML += `<option value="${data.name}">${data.name}</option>`;
+      catSelect.innerHTML += `<option value="${cat}">${cat}</option>`;
     });
 
-    // Ürünleri Yükle
-    const prodSnap = await getDocs(collection(window.db, "products"));
     const prodList = document.getElementById('adminProductList');
     prodList.innerHTML = '';
-    prodSnap.forEach((doc) => {
-      const data = doc.data();
+    allProducts.forEach((item, idx) => {
       prodList.innerHTML += `
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; background:#222; padding:8px; border-radius:4px;">
-          <span style="font-size:0.85rem;">${data.name} <b>(${data.price})</b> ${data.category ? '<small style="color:var(--gold);">['+data.category+']</small>' : ''}</span>
-          <button class="btn btn-danger" onclick="deleteProduct('${doc.id}')">Sil</button>
+          <span style="font-size:0.85rem;">${item.name} <b>(${item.price})</b> <small style="color:var(--gold);">[${item.category || 'Genel'}]</small></span>
+          <button class="btn btn-danger" onclick="deleteProduct(${idx})">Sil</button>
         </div>
       `;
     });
   }
+
+  // Sayfa İlk Açıldığında Çalışacak
+  window.addEventListener('load', () => {
+    renderCategories();
+    renderProducts();
+  });
 </script>
 
 </body>
