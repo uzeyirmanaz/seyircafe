@@ -55,7 +55,8 @@
 
   .container { 
     width: 100% !important;
-    padding: 15px 10px;
+    max-width: 600px;
+    padding: 15px 12px;
     margin: 0 auto;
     display: flex;
     flex-direction: column;
@@ -70,7 +71,7 @@
   }
   .header h1 { 
     font-family: 'Cinzel', serif; 
-    font-size: 2.8rem; 
+    font-size: 2.5rem; 
     font-weight: 900;
     letter-spacing: 3px; 
     text-transform: uppercase;
@@ -90,14 +91,45 @@
 
   .social-links { display: flex; justify-content: center; gap: 20px; margin-top: 15px; }
   .social-icon {
-    width: 42px; height: 42px; border-radius: 50%; border: 2px solid var(--gold);
+    width: 40px; height: 40px; border-radius: 50%; border: 1.5px solid var(--gold);
     background: rgba(212, 175, 55, 0.1); color: var(--gold);
-    display: flex; align-items: center; justify-content: center; text-decoration: none; font-size: 1.2rem;
+    display: flex; align-items: center; justify-content: center; text-decoration: none; font-size: 1.1rem;
     transition: all 0.3s;
   }
-  .social-icon:hover { background: var(--gold); color: #000; transform: scale(1.1); }
+  .social-icon:hover { background: var(--gold); color: #000; transform: scale(1.05); }
 
-  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; margin-top: 20px; }
+  /* Kategori Sekmeleri */
+  .categories-bar {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    padding-bottom: 10px;
+    margin-bottom: 15px;
+    scrollbar-width: none;
+  }
+  .categories-bar::-webkit-scrollbar { display: none; }
+  .cat-btn {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(212, 175, 55, 0.3);
+    color: var(--text-color);
+    padding: 8px 16px;
+    border-radius: 20px;
+    white-space: nowrap;
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+  .cat-btn.active {
+    background: var(--gold);
+    color: #000;
+    font-weight: 700;
+    border-color: var(--gold);
+    box-shadow: 0 0 10px var(--gold-glow);
+  }
+
+  /* Ürün Izgarası */
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; }
   .menu-item { background: var(--card-bg); border: 1px solid rgba(212, 175, 55, 0.15); border-radius: 8px; overflow: hidden; display: flex; flex-direction: column; }
   .item-img-wrapper { position: relative; width: 100%; height: 120px; }
   .item-img { width: 100%; height: 100%; object-fit: cover; }
@@ -115,6 +147,7 @@
   .btn { padding: 8px 16px; border-radius: 4px; border: none; cursor: pointer; font-size: 0.85rem; font-weight: 600; }
   .btn-gold { background: var(--gold); color: #000; }
   .btn-danger { background: var(--danger); color: #fff; }
+  .admin-section { background: #202025; padding: 10px; border-radius: 6px; margin-bottom: 15px; }
 </style>
 </head>
 <body>
@@ -131,6 +164,12 @@
     </div>
   </div>
 
+  <!-- Kategori Butonları -->
+  <div id="categoriesBar" class="categories-bar">
+    <button class="cat-btn active" onclick="filterCategory('all')">Tümü</button>
+  </div>
+
+  <!-- Ürün Listesi -->
   <div id="menuGrid" class="grid"></div>
 
   <!-- YÖNETİCİ GİRİŞİ -->
@@ -142,10 +181,24 @@
 
   <!-- YÖNETİCİ EKRANI -->
   <div id="adminPanel" class="admin-panel">
-    <h3 style="color:var(--gold); font-family:'Cinzel', serif; margin-bottom:12px;">Ürün Yönetim Paneli</h3>
+    <h3 style="color:var(--gold); font-family:'Cinzel', serif; margin-bottom:12px;">Yönetim Paneli</h3>
 
-    <div style="background:#202025; padding:10px; border-radius:6px; margin-bottom:15px;">
+    <!-- Kategori Yönetimi -->
+    <div class="admin-section">
+      <h4 style="color:var(--gold-light); margin-bottom:8px;">Kategori Ekle</h4>
+      <div style="display:flex; gap:6px;">
+        <input type="text" id="addCatName" class="admin-input" placeholder="Kategori Adı (Örn: Sıcak İçecekler)" style="margin-bottom:0;">
+        <button class="btn btn-gold" onclick="addCategory()">Ekle</button>
+      </div>
+      <div id="adminCategoryList" style="margin-top:10px; display:flex; flex-wrap:wrap; gap:6px;"></div>
+    </div>
+
+    <!-- Ürün Yönetimi -->
+    <div class="admin-section">
       <h4 style="color:var(--gold-light); margin-bottom:8px;">Yeni Ürün Ekle</h4>
+      <select id="addProdCategory" class="admin-input">
+        <option value="">Kategori Seçin</option>
+      </select>
       <input type="text" id="addProdName" class="admin-input" placeholder="Ürün Adı">
       <input type="text" id="addProdPrice" class="admin-input" placeholder="Fiyat (Örn: 150 TL)">
       <input type="file" id="addProdFile" class="admin-input" accept="image/*">
@@ -168,6 +221,8 @@
 <script>
   const TARGET_PASS = "1171";
   let failedAttempts = 0;
+  let allProducts = [];
+  let currentCategory = 'all';
 
   function toggleLoginBox() {
     document.getElementById('loginBox').classList.toggle('open');
@@ -190,7 +245,7 @@
       document.getElementById('lockIcon').className = "fa-solid fa-lock-open";
       errDiv.style.display = 'none';
       document.getElementById('passInput').value = '';
-      loadAdminProducts();
+      loadAdminData();
     } else {
       failedAttempts++;
       errDiv.style.display = 'block';
@@ -203,7 +258,26 @@
     document.getElementById('lockIcon').className = "fa-solid fa-lock";
   }
 
+  // --- KATEGORİ İŞLEMLERİ ---
+  async function addCategory() {
+    const name = document.getElementById('addCatName').value.trim();
+    if (!name) return alert("Lütfen kategori adı yazın!");
+    const { collection, addDoc } = window.dbTools;
+    await addDoc(collection(window.db, "categories"), { name, createdAt: Date.now() });
+    document.getElementById('addCatName').value = '';
+    loadAdminData();
+  }
+
+  async function deleteCategory(id) {
+    if (!confirm("Bu kategoriyi silmek istediğinize emin misiniz?")) return;
+    const { deleteDoc, doc } = window.dbTools;
+    await deleteDoc(doc(window.db, "categories", id));
+    loadAdminData();
+  }
+
+  // --- ÜRÜN İŞLEMLERİ ---
   async function uploadAndAddProduct() {
+    const category = document.getElementById('addProdCategory').value;
     const name = document.getElementById('addProdName').value.trim();
     const price = document.getElementById('addProdPrice').value.trim();
     const fileInput = document.getElementById('addProdFile');
@@ -216,68 +290,122 @@
       const reader = new FileReader();
       reader.onloadend = async function() {
         imgBase64 = reader.result;
-        await saveToFirebase(name, price, imgBase64);
+        await saveToFirebase(name, price, category, imgBase64);
       };
       reader.readAsDataURL(file);
     } else {
-      await saveToFirebase(name, price, "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400&q=80");
+      await saveToFirebase(name, price, category, "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400&q=80");
     }
   }
 
-  async function saveToFirebase(name, price, img) {
+  async function saveToFirebase(name, price, category, img) {
     const { collection, addDoc } = window.dbTools;
-    await addDoc(collection(window.db, "products"), { name, price, img, createdAt: Date.now() });
+    await addDoc(collection(window.db, "products"), { name, price, category, img, createdAt: Date.now() });
     alert("Ürün başarıyla eklendi!");
     document.getElementById('addProdName').value = '';
     document.getElementById('addProdPrice').value = '';
     document.getElementById('addProdFile').value = '';
-    loadAdminProducts();
-  }
-
-  window.addEventListener('load', () => {
-    setTimeout(() => {
-      const { collection, onSnapshot } = window.dbTools;
-      onSnapshot(collection(window.db, "products"), (snapshot) => {
-        const grid = document.getElementById('menuGrid');
-        grid.innerHTML = '';
-        snapshot.forEach((doc) => {
-          const item = doc.data();
-          grid.innerHTML += `
-            <div class="menu-item">
-              <div class="item-img-wrapper">
-                <img src="${item.img}" class="item-img" alt="${item.name}">
-                <div class="item-badge">${item.price}</div>
-              </div>
-              <div class="item-content">
-                <div class="item-title">${item.name}</div>
-              </div>
-            </div>
-          `;
-        });
-      });
-    }, 1500);
-  });
-
-  async function loadAdminProducts() {
-    const { collection, getDocs } = window.dbTools;
-    const snapshot = await getDocs(collection(window.db, "products"));
-    const list = document.getElementById('adminProductList');
-    list.innerHTML = '';
-    snapshot.forEach((doc) => {
-      const data = doc.data();
-      list.innerHTML += `
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; background:#222; padding:8px; border-radius:4px;">
-          <span style="font-size:0.85rem;">${data.name} <b>(${data.price})</b></span>
-          <button class="btn btn-danger" onclick="deleteProduct('${doc.id}')">Sil</button>
-        </div>
-      `;
-    });
+    loadAdminData();
   }
 
   async function deleteProduct(id) {
     const { deleteDoc, doc } = window.dbTools;
     await deleteDoc(doc(window.db, "products", id));
-    loadAdminProducts();
+    loadAdminData();
+  }
+
+  // --- CANLI VERİ DİNLEME ---
+  window.addEventListener('load', () => {
+    setTimeout(() => {
+      const { collection, onSnapshot } = window.dbTools;
+      
+      // Kategorileri Dinle
+      onSnapshot(collection(window.db, "categories"), (snapshot) => {
+        const catBar = document.getElementById('categoriesBar');
+        catBar.innerHTML = `<button class="cat-btn ${currentCategory === 'all' ? 'active' : ''}" onclick="filterCategory('all')">Tümü</button>`;
+        snapshot.forEach((doc) => {
+          const cat = doc.data();
+          catBar.innerHTML += `<button class="cat-btn ${currentCategory === cat.name ? 'active' : ''}" onclick="filterCategory('${cat.name}')">${cat.name}</button>`;
+        });
+      });
+
+      // Ürünleri Dinle
+      onSnapshot(collection(window.db, "products"), (snapshot) => {
+        allProducts = [];
+        snapshot.forEach((doc) => {
+          allProducts.push({ id: doc.id, ...doc.data() });
+        });
+        renderProducts();
+      });
+    }, 1500);
+  });
+
+  function filterCategory(catName) {
+    currentCategory = catName;
+    document.querySelectorAll('.cat-btn').forEach(btn => {
+      if (btn.innerText === catName || (catName === 'all' && btn.innerText === 'Tümü')) {
+        btn.classList.add('active');
+      } else {
+        btn.classList.remove('active');
+      }
+    });
+    renderProducts();
+  }
+
+  function renderProducts() {
+    const grid = document.getElementById('menuGrid');
+    grid.innerHTML = '';
+    const filtered = currentCategory === 'all' ? allProducts : allProducts.filter(p => p.category === currentCategory);
+    
+    filtered.forEach((item) => {
+      grid.innerHTML += `
+        <div class="menu-item">
+          <div class="item-img-wrapper">
+            <img src="${item.img}" class="item-img" alt="${item.name}">
+            <div class="item-badge">${item.price}</div>
+          </div>
+          <div class="item-content">
+            <div class="item-title">${item.name}</div>
+          </div>
+        </div>
+      `;
+    });
+  }
+
+  // --- ADMİN PANELİ VERİ YÜKLEME ---
+  async function loadAdminData() {
+    const { collection, getDocs } = window.dbTools;
+    
+    // Kategorileri Yükle
+    const catSnap = await getDocs(collection(window.db, "categories"));
+    const catList = document.getElementById('adminCategoryList');
+    const catSelect = document.getElementById('addProdCategory');
+    catList.innerHTML = '';
+    catSelect.innerHTML = '<option value="">Kategori Seçin (İsteğe Bağlı)</option>';
+    
+    catSnap.forEach((doc) => {
+      const data = doc.data();
+      catList.innerHTML += `
+        <span style="background:#333; padding:4px 8px; border-radius:4px; font-size:0.75rem; display:flex; align-items:center; gap:6px;">
+          ${data.name} <i class="fa-solid fa-xmark" style="color:var(--danger); cursor:pointer;" onclick="deleteCategory('${doc.id}')"></i>
+        </span>
+      `;
+      catSelect.innerHTML += `<option value="${data.name}">${data.name}</option>`;
+    });
+
+    // Ürünleri Yükle
+    const prodSnap = await getDocs(collection(window.db, "products"));
+    const prodList = document.getElementById('adminProductList');
+    prodList.innerHTML = '';
+    prodSnap.forEach((doc) => {
+      const data = doc.data();
+      prodList.innerHTML += `
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; background:#222; padding:8px; border-radius:4px;">
+          <span style="font-size:0.85rem;">${data.name} <b>(${data.price})</b> ${data.category ? '<small style="color:var(--gold);">['+data.category+']</small>' : ''}</span>
+          <button class="btn btn-danger" onclick="deleteProduct('${doc.id}')">Sil</button>
+        </div>
+      `;
+    });
   }
 </script>
 
