@@ -20,11 +20,11 @@
             color: var(--text-color);
         }
 
-        /* Header ve Logo Stilleri */
+        /* Header ve Kırmızı Logo / SEYİR CAFE Düzenlemesi */
         header {
             background-color: var(--dark-bg);
             color: white;
-            padding: 15px 20px;
+            padding: 20px;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -41,14 +41,14 @@
 
         .logo-icon {
             color: var(--primary-red);
-            font-size: 28px;
+            font-size: 32px;
             font-weight: bold;
         }
 
         .cafe-title {
-            font-size: 24px;
+            font-size: 26px;
             font-weight: bold;
-            letter-spacing: 1px;
+            letter-spacing: 1.5px;
             color: #fff;
         }
 
@@ -60,7 +60,7 @@
         .heart-i::after {
             content: '♥';
             position: absolute;
-            top: -8px;
+            top: -10px;
             left: 50%;
             transform: translateX(-50%);
             color: var(--primary-red);
@@ -69,20 +69,42 @@
 
         .cafe-subtitle {
             font-size: 14px;
-            color: #bbb;
-            margin-top: 5px;
+            color: #ccc;
+            margin-top: 8px;
             outline: none;
             border-bottom: 1px dashed transparent;
             cursor: pointer;
+            padding: 2px 5px;
         }
         .cafe-subtitle:focus {
             border-bottom: 1px dashed var(--primary-red);
+            background: rgba(255,255,255,0.05);
         }
 
-        /* Kategoriler (Telefonda Sağa Kaydırma & "Tümü" Yok) */
+        /* Yönetici Modu Barı */
+        .admin-bar {
+            background: #2c3e50;
+            color: white;
+            padding: 8px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 13px;
+        }
+        .admin-btn {
+            background: var(--primary-red);
+            color: white;
+            border: none;
+            padding: 5px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        /* Kategoriler: Tümü yok, Telefonda sağa doğru kaydırma aktif */
         .categories-wrapper {
             background: #fff;
-            padding: 10px;
+            padding: 12px 10px;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
             position: sticky;
             top: 0;
@@ -94,7 +116,6 @@
             gap: 10px;
             overflow-x: auto;
             white-space: nowrap;
-            padding-bottom: 5px;
             scrollbar-width: none; /* Firefox */
         }
         .categories::-webkit-scrollbar {
@@ -104,14 +125,14 @@
         .category-btn {
             background: #eee;
             border: none;
-            padding: 8px 16px;
+            padding: 8px 18px;
             border-radius: 20px;
             cursor: pointer;
             font-weight: bold;
             font-size: 14px;
             color: #555;
             flex-shrink: 0;
-            transition: all 0.3s ease;
+            transition: all 0.3s;
         }
 
         .category-btn.active {
@@ -119,7 +140,7 @@
             color: white;
         }
 
-        /* Ürün Listesi Grid Yapısı */
+        /* Ürün Listesi */
         .menu-container {
             padding: 20px;
             max-width: 1200px;
@@ -165,7 +186,6 @@
         .product-name {
             font-size: 14px;
             font-weight: bold;
-            margin-bottom: 8px;
             color: #222;
         }
 
@@ -180,21 +200,6 @@
             top: 10px;
             right: 10px;
         }
-
-        /* Yönetici Paneli / Düzenleme Butonu */
-        .admin-bar {
-            text-align: right;
-            padding: 10px 20px;
-        }
-        .admin-toggle {
-            background: #333;
-            color: #fff;
-            border: none;
-            padding: 6px 12px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 12px;
-        }
     </style>
 </head>
 <body>
@@ -202,33 +207,30 @@
     <header>
         <div class="logo-container">
             <span class="logo-icon">☕</span>
-            <!-- SEYİR CAFE - İ harfinin noktası kalp -->
+            <!-- SEYİR CAFE - İ harfinin noktası kalp ve logo kırmızı -->
             <div class="cafe-title">SEYİR CAF<span class="heart-i">I</span></div>
         </div>
-        <!-- Altındaki yazı düzenlenebilir (contenteditable) ve localStorage ile kalıcı -->
-        <div id="cafeSubtitle" class="cafe-subtitle" contenteditable="true" placeholder="Alt yazıyı düzenlemek için tıklayın...">Lezzetin ve Keyfin Buluşma Noktası</div>
+        <!-- Altındaki yazı düzenlenebilir ve localStorage ile kalıcı -->
+        <div id="cafeSubtitle" class="cafe-subtitle" contenteditable="true" title="Düzenlemek için tıklayın">Lezzetin ve Keyfin Buluşma Noktası</div>
     </header>
 
     <div class="admin-bar">
-        <button class="admin-toggle" onclick="toggleAdminMode()">Yönetici Modu</button>
+        <span>Yönetici Modu ile Değişiklikler Kalıcı Saklanır</span>
+        <button class="admin-btn" onclick="authenticateAdmin()">Yönetici Girişi</button>
     </div>
 
-    <!-- Kategoriler (Tümü kaldırıldı, sağa kaydırma aktif) -->
+    <!-- Kategoriler (Tümü kaldırıldı, mobilde sağa kayıyor) -->
     <div class="categories-wrapper">
-        <div class="categories" id="categoryContainer">
-            <!-- Dinamik Kategoriler -->
-        </div>
+        <div class="categories" id="categoryContainer"></div>
     </div>
 
     <!-- Ürünler -->
     <div class="menu-container">
-        <div class="product-grid" id="productGrid">
-            <!-- Dinamik Ürünler -->
-        </div>
+        <div class="product-grid" id="productGrid"></div>
     </div>
 
     <script>
-        // Ürün ve Kategori Verileri (Eski hatalı görseller temizlendi, doğru ürün görselleri atandı)
+        // Eksiksiz, doğru görsellerle güncellenmiş menü verileri
         const defaultMenuData = {
             "Sıcak İçecekler": [
                 { name: "Türk Kahvesi", price: "90 TL", image: "https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?w=300" },
@@ -238,7 +240,7 @@
             ],
             "Soğuk İçecekler": [
                 { name: "Buzlu Kahve (Iced Latte)", price: "120 TL", image: "https://images.unsplash.com/photo-1517701604599-bb29b565090c?w=300" },
-                { name: "Meşrubat (Kutu Kola)", price: "70 TL", image: "https://images.unsplash.com/photo-1622483767028-3f66f32aef97?w=300" },
+                { name: "Meşrubat (Kutu)", price: "70 TL", image: "https://images.unsplash.com/photo-1622483767028-3f66f32aef97?w=300" },
                 { name: "El Yapımı Limonata", price: "90 TL", image: "https://images.unsplash.com/photo-1621263764928-df1444c5e859?w=300" }
             ],
             "Tatlılar": [
@@ -251,27 +253,25 @@
             ]
         };
 
-        // Verileri localStorage'dan çek veya varsayılanı kullan (Yönetici şifresiyle değişenlerin kalıcı olması için)
+        // Sayfa yenilendiğinde verilerin gitmemesi için localStorage kontrolü
         let menuData = JSON.parse(localStorage.getItem('seyirCafeMenu')) || defaultMenuData;
-        let activeCategory = Object.keys(menuData)[0]; // İlk kategori varsayılan seçili
+        let activeCategory = Object.keys(menuData)[0];
 
         const categoryContainer = document.getElementById('categoryContainer');
         const productGrid = document.getElementById('productGrid');
         const cafeSubtitle = document.getElementById('cafeSubtitle');
 
-        // Alt yazıyı kaydetme
+        // Alt yazı kalıcılığı
         cafeSubtitle.addEventListener('input', () => {
             localStorage.setItem('seyirCafeSubtitle', cafeSubtitle.innerText);
         });
-
-        // Kayıtlı alt yazıyı yükle
         if(localStorage.getItem('seyirCafeSubtitle')) {
             cafeSubtitle.innerText = localStorage.getItem('seyirCafeSubtitle');
         }
 
         function renderCategories() {
             categoryContainer.innerHTML = '';
-            Object.keys(menuData).forEach((cat, index) => {
+            Object.keys(menuData).forEach((cat) => {
                 const btn = document.createElement('button');
                 btn.className = `category-btn ${cat === activeCategory ? 'active' : ''}`;
                 btn.innerText = cat;
@@ -301,19 +301,17 @@
             });
         }
 
-        // Yönetici Modu Kontrolü (Şifre ile değişiklikleri kalıcı kaydetme simülasyonu)
-        function toggleAdminMode() {
-            const pwd = prompt("Yönetici şifresini giriniz:");
-            if (pwd === "1234") { // Örnek şifre
-                alert("Yönetici girişi başarılı! Değişiklikler kalıcı olarak kaydedilecektir.");
-                // Burada veri güncelleme paneli aktif edilebilir.
+        function authenticateAdmin() {
+            const password = prompt("Yönetici şifrenizi giriniz:");
+            if (password === "1234") { // Şifreyi buradan değiştirebilirsiniz
+                alert("Yönetici girişi başarılı! Değişiklikler hafızaya kaydediliyor.");
                 localStorage.setItem('seyirCafeMenu', JSON.stringify(menuData));
-            } else if(pwd !== null) {
+            } else if (password !== null) {
                 alert("Hatalı şifre!");
             }
         }
 
-        // İlk Yükleme
+        // Başlat
         renderCategories();
         renderProducts();
     </script>
