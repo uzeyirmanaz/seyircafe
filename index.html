@@ -1,438 +1,662 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Seyir Cafe - Dijital Menü</title>
-    <!-- Modern ve şık FineDine tarzı font (Inter / Poppins) -->
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --primary-color: #d32f2f; /* Premium Kırmızı */
-            --bg-color: #f8f9fa;
-            --card-bg: #ffffff;
-            --text-main: #2d3436;
-            --text-muted: #636e72;
-            --border-color: #eee;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Seyir Cafe - Dijital Menü</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;900&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Poppins', sans-serif;
-            -webkit-tap-highlight-color: transparent;
-        }
+<!-- Firebase SDK -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+  import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        body {
-            background-color: var(--bg-color);
-            color: var(--text-main);
-            padding-bottom: 40px;
-        }
+  const firebaseConfig = {
+    apiKey: "AIzaSyCX7qg5a-d8LUa7Yqg7nJ26-zJUX0qT1Yg",
+    authDomain: "seyircafe-3eeb9.firebaseapp.com",
+    projectId: "seyircafe-3eeb9",
+    storageBucket: "seyircafe-3eeb9.firebasestorage.app",
+    messagingSenderId: "349937765089",
+    appId: "1:349937765089:web:b035c02fcbf5474c5a0",
+    measurementId: "G-C5RJ945450"
+  };
 
-        /* Üst Header (FineDine Tarzı Şık Karşılama) */
-        header {
-            background-color: #ffffff;
-            padding: 24px 20px 16px 20px;
-            text-align: center;
-            border-bottom: 1px solid var(--border-color);
-            box-shadow: 0 2px 10px rgba(0,0,0,0.02);
-        }
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
 
-        .cafe-title-wrapper {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            margin-bottom: 4px;
-        }
+  window.db = db;
+  window.dbTools = { collection, addDoc, getDocs, deleteDoc, doc, onSnapshot };
+</script>
 
-        .cafe-logo-icon {
-            font-size: 26px;
-        }
+<style>
+  :root {
+    --bg-color: #070709;
+    --card-bg: rgba(18, 18, 23, 0.96);
+    --gold: #d4af37;
+    --gold-light: #fbeccb;
+    --gold-glow: rgba(212, 175, 55, 0.5);
+    --text-color: #e5e5e5;
+    --text-muted: #999;
+    --danger: #e74c3c;
+  }
 
-        .cafe-title {
-            font-size: 24px;
-            font-weight: 700;
-            letter-spacing: 0.5px;
-            color: var(--text-main);
-        }
+  html, body {
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    font-family: 'Montserrat', sans-serif;
+    background-image: radial-gradient(circle at 50% 0%, #1c1505 0%, #070709 85%);
+  }
 
-        /* İ harfinin noktasını kalp yapma */
-        .heart-i {
-            position: relative;
-            display: inline-block;
-        }
-        .heart-i::after {
-            content: '♥';
-            position: absolute;
-            top: -9px;
-            left: 50%;
-            transform: translateX(-50%);
-            color: var(--primary-color);
-            font-size: 13px;
-        }
+  * { box-sizing: border-box !important; }
 
-        .cafe-subtitle {
-            font-size: 13px;
-            color: var(--text-muted);
-            font-weight: 400;
-            outline: none;
-            cursor: pointer;
-            border-bottom: 1px dashed transparent;
-            display: inline-block;
-            transition: border 0.2s;
-        }
-        .cafe-subtitle:focus {
-            border-bottom: 1px dashed var(--primary-color);
-        }
+  .container { 
+    width: 100% !important;
+    max-width: 600px;
+    padding: 15px 12px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+  }
 
-        /* Arama Çubuğu */
-        .search-section {
-            padding: 12px 16px;
-            background: #ffffff;
-            border-bottom: 1px solid var(--border-color);
-        }
+  /* Gösterişli Animasyonlu Başlık */
+  .header { 
+    text-align: center; 
+    padding: 25px 0 15px 0; 
+    border-bottom: 1px solid rgba(212, 175, 55, 0.25); 
+    margin-bottom: 15px; 
+    animation: headerEntrance 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+  @keyframes headerEntrance {
+    0% { opacity: 0; transform: translateY(-30px) scale(0.95); filter: blur(5px); }
+    100% { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+  }
 
-        .search-box {
-            position: relative;
-            max-width: 600px;
-            margin: 0 auto;
-        }
+  .header h1 { 
+    font-family: 'Cinzel', serif; 
+    font-size: 2.8rem; 
+    font-weight: 900;
+    letter-spacing: 4px; 
+    text-transform: uppercase;
+    margin: 0;
+    background: linear-gradient(180deg, #ffffff 0%, var(--gold) 55%, #8b6b10 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: goldGlowAnim 3s infinite alternate;
+  }
+  @keyframes goldGlowAnim {
+    0% { filter: drop-shadow(0 0 5px rgba(212,175,55,0.3)); }
+    100% { filter: drop-shadow(0 0 18px rgba(212,175,55,0.8)); }
+  }
 
-        .search-input {
-            width: 100%;
-            padding: 10px 15px 10px 40px;
-            border: 1px solid #dfe6e9;
-            border-radius: 25px;
-            font-size: 14px;
-            outline: none;
-            background: #fdfdfd;
-            transition: all 0.3s;
-        }
+  .header p { 
+    font-size: 0.8rem; 
+    letter-spacing: 3px; 
+    color: var(--gold-light); 
+    margin-top: 6px; 
+    text-transform: uppercase; 
+  }
 
-        .search-input:focus {
-            border-color: var(--primary-color);
-            background: #fff;
-            box-shadow: 0 0 0 3px rgba(211, 47, 47, 0.1);
-        }
+  /* Wi-Fi Şerit Alanı */
+  .wifi-bar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background: rgba(212, 175, 55, 0.08);
+    border: 1px solid rgba(212, 175, 55, 0.25);
+    padding: 8px 15px;
+    border-radius: 8px;
+    margin-top: 12px;
+    font-size: 0.85rem;
+    color: var(--gold-light);
+  }
+  .wifi-bar i { color: var(--gold); font-size: 1rem; }
 
-        .search-icon {
-            position: absolute;
-            left: 14px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #b2bec3;
-            font-size: 15px;
-        }
+  .social-links { display: flex; justify-content: center; gap: 15px; margin-top: 12px; }
+  .social-icon {
+    width: 38px; height: 38px; border-radius: 50%; border: 1.5px solid var(--gold);
+    background: rgba(212, 175, 55, 0.1); color: var(--gold);
+    display: flex; align-items: center; justify-content: center; text-decoration: none; font-size: 1rem;
+    transition: all 0.3s;
+  }
+  .social-icon:hover { background: var(--gold); color: #000; transform: scale(1.1); }
 
-        /* Yatay Kaydırılabilir Kategoriler ("Tümü" Yok, Akıcı Menü Çubuğu) */
-        .categories-container {
-            background: #ffffff;
-            padding: 12px 0 12px 16px;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            border-bottom: 1px solid var(--border-color);
-            box-shadow: 0 4px 6px -4px rgba(0,0,0,0.05);
-        }
+  /* Kategoriler (Karmaşık Olmayan, Net ve Temiz Tasarım) */
+  .categories-container {
+    margin-bottom: 15px;
+  }
+  .categories-bar {
+    display: flex;
+    gap: 10px;
+    overflow-x: auto;
+    padding: 5px 2px 12px 2px;
+    scrollbar-width: none;
+  }
+  .categories-bar::-webkit-scrollbar { display: none; }
+  
+  .cat-btn {
+    flex: 0 0 auto;
+    position: relative;
+    width: 110px;
+    height: 65px;
+    background-size: cover;
+    background-position: center;
+    border: 1.5px solid rgba(212, 175, 55, 0.3);
+    border-radius: 10px;
+    cursor: pointer;
+    overflow: hidden;
+    transition: all 0.3s ease;
+  }
+  .cat-btn::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: linear-gradient(180deg, rgba(0,0,0,0.4) 0%, rgba(10,10,14,0.85) 100%);
+    z-index: 1;
+  }
+  .cat-btn span {
+    position: absolute;
+    bottom: 6px; left: 0; width: 100%;
+    text-align: center;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #fff;
+    z-index: 2;
+    padding: 0 4px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+  }
+  .cat-btn.active {
+    border-color: var(--gold);
+    box-shadow: 0 0 12px var(--gold-glow);
+    transform: scale(1.05);
+  }
 
-        .categories-scroll {
-            display: flex;
-            gap: 10px;
-            overflow-x: auto;
-            white-space: nowrap;
-            scrollbar-width: none;
-            padding-right: 16px;
-        }
+  /* Aktif Kategori Başlığı ve Düzenleme Butonları */
+  .active-category-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    padding: 0 4px;
+    border-left: 3px solid var(--gold);
+    padding-left: 10px;
+  }
+  .active-category-title {
+    font-family: 'Cinzel', serif;
+    font-size: 1.25rem;
+    color: var(--gold);
+    font-weight: 700;
+  }
 
-        .categories-scroll::-webkit-scrollbar {
-            display: none;
-        }
+  /* Ürün Izgarası ve Akıcı Farklı Animasyonlar */
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(155px, 1fr)); gap: 12px; }
+  .menu-item { 
+    background: var(--card-bg); 
+    border: 1px solid rgba(212, 175, 55, 0.2); 
+    border-radius: 10px; 
+    overflow: hidden; 
+    display: flex; 
+    flex-direction: column; 
+    position: relative;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+    transition: transform 0.3s;
+  }
+  .menu-item:hover { transform: translateY(-3px); }
 
-        .category-tab {
-            background: #f1f2f6;
-            border: none;
-            padding: 8px 18px;
-            border-radius: 20px;
-            font-size: 13px;
-            font-weight: 500;
-            color: var(--text-muted);
-            cursor: pointer;
-            flex-shrink: 0;
-            transition: all 0.25s ease;
-        }
+  /* 4 Farklı Açılma Animasyonu */
+  .anim-1 { animation: animSlideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+  .anim-2 { animation: animFadeScale 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+  .anim-3 { animation: animSlideRight 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+  .anim-4 { animation: animRotateIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
 
-        .category-tab.active {
-            background: var(--primary-color);
-            color: #ffffff;
-            font-weight: 600;
-            box-shadow: 0 4px 10px rgba(211, 47, 47, 0.3);
-        }
+  @keyframes animSlideUp { from { opacity: 0; transform: translateY(35px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes animFadeScale { from { opacity: 0; transform: scale(0.8); } to { opacity: 1; transform: scale(1); } }
+  @keyframes animSlideRight { from { opacity: 0; transform: translateX(-35px); } to { opacity: 1; transform: translateX(0); } }
+  @keyframes animRotateIn { from { opacity: 0; transform: rotate(-4deg) scale(0.9); } to { opacity: 1; transform: rotate(0) scale(1); } }
 
-        /* Menü İçerik Alanı (FineDine Grid Düzeni) */
-        .menu-main {
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 16px;
-        }
+  .item-img-wrapper { position: relative; width: 100%; height: 130px; background: #000; }
+  .item-img { width: 100%; height: 100%; object-fit: cover; }
+  .item-badge { 
+    position: absolute; top: 6px; right: 6px; 
+    background: rgba(192, 57, 43, 0.92); color: #fff; 
+    font-size: 0.75rem; font-weight: 700; padding: 3px 8px; 
+    border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.5); 
+  }
+  .item-content { padding: 10px; display: flex; flex-direction: column; flex-grow: 1; justify-content: center; background: #131317; text-align: center; }
+  .item-title { font-family: 'Cinzel', serif; font-size: 0.85rem; color: var(--gold-light); font-weight: 600; }
 
-        .category-section-title {
-            font-size: 18px;
-            font-weight: 600;
-            color: var(--text-main);
-            margin-bottom: 14px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
+  /* Yönetici Hızlı Araçlar */
+  .admin-controls {
+    display: none;
+    position: absolute;
+    top: 6px; left: 6px;
+    gap: 5px;
+    z-index: 10;
+  }
+  body.admin-mode .admin-controls { display: flex; }
+  .admin-btn-icon {
+    width: 30px; height: 30px; border-radius: 50%;
+    background: rgba(0, 0, 0, 0.85); border: 1px solid var(--gold);
+    color: var(--gold); display: flex; align-items: center; justify-content: center;
+    cursor: pointer; font-size: 0.8rem;
+  }
+  .admin-btn-icon:hover { background: var(--gold); color: #000; }
+  .admin-btn-icon.delete { border-color: var(--danger); color: var(--danger); }
+  .admin-btn-icon.delete:hover { background: var(--danger); color: #fff; }
 
-        .products-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 12px;
-        }
+  /* Hızlı Ürün Ekleme Paneli (Yönetici) */
+  .quick-add-section {
+    display: none;
+    margin-top: 15px;
+    background: #14141a;
+    border: 1px dashed var(--gold);
+    padding: 12px;
+    border-radius: 8px;
+  }
+  body.admin-mode .quick-add-section { display: block; }
 
-        @media (min-width: 600px) {
-            .products-grid {
-                grid-template-columns: repeat(3, 1fr);
-                gap: 16px;
-            }
-        }
+  .footer { margin-top: auto; padding-top: 30px; text-align: center; border-top: 1px solid rgba(212, 175, 55, 0.15); display: flex; justify-content: space-between; align-items: center; }
+  .admin-toggle-btn-bottom { background: transparent; color: #444; border: none; cursor: pointer; font-size: 1rem; transition: color 0.3s; }
+  .admin-toggle-btn-bottom:hover { color: var(--gold); }
 
-        /* Ürün Kartı Tasarımı */
-        .product-card {
-            background: var(--card-bg);
-            border-radius: 12px;
-            overflow: hidden;
-            border: 1px solid #f0f0f0;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.03);
-            display: flex;
-            flex-direction: column;
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
-        }
-
-        .product-card:active {
-            transform: scale(0.98);
-        }
-
-        .product-img-wrapper {
-            width: 100%;
-            height: 130px;
-            overflow: hidden;
-            background: #eee;
-            position: relative;
-        }
-
-        .product-img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            transition: transform 0.3s;
-        }
-
-        .product-card:hover .product-img {
-            transform: scale(1.05);
-        }
-
-        .product-details {
-            padding: 10px 12px;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            flex-grow: 1;
-        }
-
-        .product-name {
-            font-size: 13px;
-            font-weight: 600;
-            color: var(--text-main);
-            line-height: 1.3;
-            margin-bottom: 6px;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-        }
-
-        .product-price {
-            font-size: 14px;
-            font-weight: 700;
-            color: var(--primary-color);
-        }
-
-        /* Yönetici Modu Butonu */
-        .admin-panel-bar {
-            text-align: center;
-            margin-top: 30px;
-            padding: 0 16px;
-        }
-
-        .admin-btn {
-            background: #2d3436;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 8px;
-            font-size: 12px;
-            font-weight: 500;
-            cursor: pointer;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
-    </style>
+  .login-box { display: none; background: #151518; border: 1px solid var(--gold); padding: 15px; border-radius: 8px; margin-top: 15px; }
+  .login-box.open { display: block; }
+  .admin-input { background: #0b0b0e; border: 1px solid #444; color: #fff; padding: 9px; border-radius: 5px; width: 100%; margin-bottom: 8px; font-size: 0.85rem; }
+  .btn { padding: 9px 14px; border-radius: 5px; border: none; cursor: pointer; font-size: 0.85rem; font-weight: 600; }
+  .btn-gold { background: var(--gold); color: #000; }
+  .btn-danger { background: var(--danger); color: #fff; }
+</style>
 </head>
-<body>
+<body id="bodyTag">
 
-    <!-- Header / Logo Alanı -->
-    <header>
-        <div class="cafe-title-wrapper">
-            <span class="cafe-logo-icon">☕</span>
-            <h1 class="cafe-title">SEYİR CAF<span class="heart-i">I</span></h1>
-        </div>
-        <div id="cafeSubtitle" class="cafe-subtitle" contenteditable="true" title="Alt yazıyı düzenlemek için tıklayın">Lezzetin ve Keyfin Buluşma Noktası</div>
-    </header>
-
-    <!-- Arama Bölümü -->
-    <div class="search-section">
-        <div class="search-box">
-            <span class="search-icon">🔍</span>
-            <input type="text" id="searchInput" class="search-input" placeholder="Menüde ürün arayın..." oninput="filterProducts()">
-        </div>
+<div class="container">
+  
+  <div class="header">
+    <h1>Seyir Cafe</h1>
+    <p>Lounge & Gourmet Experience</p>
+    
+    <!-- Wi-Fi Alanı -->
+    <div class="wifi-bar">
+      <i class="fa-solid fa-wifi"></i>
+      <span>Wi-Fi Şifresi: <b id="wifiPassText">Seyir2121</b></span>
+      <button id="wifiEditBtn" style="display:none; background:none; border:none; color:var(--gold); cursor:pointer; margin-left:5px;" onclick="editWifiPassword()" title="Şifreyi Değiştir"><i class="fa-solid fa-pen"></i></button>
     </div>
 
-    <!-- Yatay Kaydırılabilir Kategori Sekmeleri -->
-    <div class="categories-container">
-        <div class="categories-scroll" id="categoryContainer"></div>
+    <div class="social-links">
+      <a href="https://www.instagram.com/seyircafe.21" target="_blank" class="social-icon" title="Instagram"><i class="fa-brands fa-instagram"></i></a>
+      <a href="https://www.tiktok.com/@seyircafe21" target="_blank" class="social-icon" title="TikTok"><i class="fa-brands fa-tiktok"></i></a>
     </div>
+  </div>
 
-    <!-- Ana Ürün Grid Alanı -->
-    <main class="menu-main">
-        <div id="activeCategoryTitle" class="category-section-title"></div>
-        <div class="products-grid" id="productGrid"></div>
-    </main>
+  <!-- Kategoriler (Üst Üste Binmeyen Düzen) -->
+  <div class="categories-container">
+    <div id="categoriesBar" class="categories-bar"></div>
+  </div>
 
-    <!-- Yönetici Kalıcılık Paneli -->
-    <div class="admin-panel-bar">
-        <button class="admin-btn" onclick="saveDataPermanently()">🔒 Değişiklikleri Kalıcı Kaydet (Yönetici)</button>
-    </div>
+  <!-- Aktif Kategori Başlığı ve Düzenleme Kalemi -->
+  <div class="active-category-header">
+    <div id="activeCategoryTitle" class="active-category-title">Tümü</div>
+    <div id="categoryEditArea"></div>
+  </div>
 
-    <script>
-        // FineDine standartlarına uygun, eksiksiz ve ürünlerle tam uyumlu görseller içeren veritabanı
-        const defaultMenuData = {
-            "Sıcak İçecekler": [
-                { name: "Türk Kahvesi", price: "90 ₺", image: "https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?w=400" },
-                { name: "Filtre Kahve", price: "110 ₺", image: "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=400" },
-                { name: "Sıcak Çikolata", price: "100 ₺", image: "https://images.unsplash.com/photo-1542990253-0d0f5be5f0ed?w=400" },
-                { name: "Salep", price: "100 ₺", image: "https://images.unsplash.com/photo-1572442388796-11668a67e53d?w=400" }
-            ],
-            "Soğuk İçecekler": [
-                { name: "Buzlu Latte (Iced Latte)", price: "120 ₺", image: "https://images.unsplash.com/photo-1517701604599-bb29b565090c?w=400" },
-                { name: "El Yapımı Limonata", price: "90 ₺", image: "https://images.unsplash.com/photo-1621263764928-df1444c5e859?w=400" },
-                { name: "Kutu Meşrubat (Kola/Fanta)", price: "70 ₺", image: "https://images.unsplash.com/photo-1622483767028-3f66f32aef97?w=400" },
-                { name: "Soğuk Kahve (Cold Brew)", price: "115 ₺", image: "https://images.unsplash.com/photo-1517701550927-30cf4ba1dba5?w=400" }
-            ],
-            "Tatlılar": [
-                { name: "San Sebastian Cheesecake", price: "150 ₺", image: "https://images.unsplash.com/photo-1533134242443-d4fd215305ad?w=400" },
-                { name: "Çikolatalı Waffle", price: "160 ₺", image: "https://images.unsplash.com/photo-1568051243851-f9b136146e97?w=400" }
-            ],
-            "Atıştırmalıklar": [
-                { name: "Özel Soslu Patates Kızartması", price: "90 ₺", image: "https://images.unsplash.com/photo-1573080496219-bb080dd4f877?w=400" },
-                { name: "Karışık Çerez Tabağı", price: "110 ₺", image: "https://images.unsplash.com/photo-1536256263959-770b48d82b0a?w=400" }
-            ]
-        };
+  <!-- Ürünler Izgarası -->
+  <div id="menuGrid" class="grid"></div>
 
-        // localStorage kontrolü (Sayfa yenilense bile verilerin gitmemesi için)
-        let menuData = JSON.parse(localStorage.getItem('seyirCafeMenu')) || defaultMenuData;
-        let activeCategory = Object.keys(menuData)[0];
+  <!-- Yönetici Modunda Ürün Ekleme -->
+  <div id="quickAddSection" class="quick-add-section">
+    <h4 style="color:var(--gold); margin-bottom:8px; font-family:'Cinzel', serif; font-size:0.95rem;" id="quickAddTitle">+ Kategoriye Ürün Ekle</h4>
+    <input type="text" id="qAddName" class="admin-input" placeholder="Ürün Adı">
+    <input type="text" id="qAddPrice" class="admin-input" placeholder="Fiyat (Örn: 200 TL)">
+    <input type="file" id="qAddFile" class="admin-input" accept="image/*">
+    <button class="btn btn-gold" style="width:100%;" onclick="quickAddProductToCurrentCategory()">Ürünü Ekle</button>
+  </div>
 
-        const categoryContainer = document.getElementById('categoryContainer');
-        const productGrid = document.getElementById('productGrid');
-        const activeCategoryTitle = document.getElementById('activeCategoryTitle');
-        const cafeSubtitle = document.getElementById('cafeSubtitle');
-        const searchInput = document.getElementById('searchInput');
+  <!-- YÖNETİCİ ŞİFRE GİRİŞİ (Gizli Şifre Kutusu) -->
+  <div id="loginBox" class="login-box">
+    <input type="password" id="passInput" class="admin-input" placeholder="Yönetici Şifreniz" autocomplete="current-password">
+    <button class="btn btn-gold" style="width:100%;" onclick="checkPassword()">Yönetici Modunu Aç</button>
+    <div id="loginError" style="color:var(--danger); font-size:0.85rem; display:none; margin-top:8px; font-weight:600; text-align:center;"></div>
+  </div>
 
-        // Alt yazı değişikliğini hafızada tutma
-        cafeSubtitle.addEventListener('input', () => {
-            localStorage.setItem('seyirCafeSubtitle', cafeSubtitle.innerText);
-        });
-        if(localStorage.getItem('seyirCafeSubtitle')) {
-            cafeSubtitle.innerText = localStorage.getItem('seyirCafeSubtitle');
-        }
+  <div class="footer">
+    <span style="font-size: 0.75rem; color: #555;">© Seyir Cafe Dijital Menü</span>
+    <button class="admin-toggle-btn-bottom" onclick="toggleLoginBox()" title="Yönetici Paneli"><i class="fa-solid fa-lock" id="lockIcon"></i></button>
+  </div>
 
-        function renderCategories() {
-            categoryContainer.innerHTML = '';
-            Object.keys(menuData).forEach((cat) => {
-                const btn = document.createElement('button');
-                btn.className = `category-tab ${cat === activeCategory ? 'active' : ''}`;
-                btn.innerText = cat;
-                btn.onclick = () => {
-                    activeCategory = cat;
-                    searchInput.value = ''; // Arama kutusunu sıfırla
-                    renderCategories();
-                    renderProducts();
-                };
-                categoryContainer.appendChild(btn);
-            });
-        }
+</div>
 
-        function renderProducts(productsToRender = null, customTitle = null) {
-            productGrid.innerHTML = '';
-            const products = productsToRender || menuData[activeCategory] || [];
-            
-            activeCategoryTitle.innerText = customTitle || activeCategory;
+<script>
+  // KATEGORİLER VE GÖRSELLERİ
+  let categoriesData = [
+    { name: "Sıcak İçecekler", img: "https://images.unsplash.com/photo-1544787219-7f47ccb76574?w=500&q=80" },
+    { name: "Yemek", img: "https://images.unsplash.com/photo-1598515214211-89d3c73ae83b?w=500&q=80" },
+    { name: "Espresso", img: "https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?w=500&q=80" },
+    { name: "Kahve", img: "https://images.unsplash.com/photo-1551033406-611cf9a28f67?w=500&q=80" },
+    { name: "Frozen", img: "https://images.unsplash.com/photo-1534353473418-4cfa6c56fd38?w=500&q=80" },
+    { name: "Milkshake", img: "https://images.unsplash.com/photo-1572490122747-3968b75cc699?w=500&q=80" },
+    { name: "Nargile", img: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=500&q=80" },
+    { name: "Çerez", img: "https://images.unsplash.com/photo-1536599018102-9f803c140fc1?w=500&q=80" },
+    { name: "Filtre Çay", img: "https://images.unsplash.com/photo-1576092768241-dec231879fc3?w=500&q=80" },
+    { name: "Dondurma", img: "https://images.unsplash.com/photo-1570197788417-0e82375c9371?w=500&q=80" }
+  ];
 
-            if(products.length === 0) {
-                productGrid.innerHTML = '<p style="grid-column: 1/-1; text-align:center; color:#888; padding:30px;">Aradığınız kriterlere uygun ürün bulunamadı.</p>';
-                return;
-            }
+  // EKRAN GÖRÜNTÜLERİNİZDEKİ GERÇEK ÜRÜNLER VE FİYATLAR (EKSİKSİZ)
+  let allProducts = [
+    // Sıcak İçecekler
+    { name: "Salep / Damla Sakızlı Salep", price: "150 TL", category: "Sıcak İçecekler", img: "https://images.unsplash.com/photo-1544787219-7f47ccb76574?w=500&q=80" },
+    { name: "Sıcak Çikolata", price: "150 TL", category: "Sıcak İçecekler", img: "https://images.unsplash.com/photo-1542990253-0d0f5be5f0ed?w=500&q=80" },
+    { name: "Ballı Süt", price: "120 TL", category: "Sıcak İçecekler", img: "https://images.unsplash.com/photo-1550583724-b2692b85b150?w=500&q=80" },
+    { name: "Kuşburnu (Duble)", price: "70 TL", category: "Sıcak İçecekler", img: "https://images.unsplash.com/photo-1576092768241-dec231879fc3?w=500&q=80" },
+    { name: "Karadut (Duble)", price: "70 TL", category: "Sıcak İçecekler", img: "https://images.unsplash.com/photo-1597481499750-3e6b22637e12?w=500&q=80" },
+    { name: "Muz (Duble)", price: "70 TL", category: "Sıcak İçecekler", img: "https://images.unsplash.com/photo-1528825871115-3581a5387919?w=500&q=80" },
+    { name: "Limon (Duble)", price: "70 TL", category: "Sıcak İçecekler", img: "https://images.unsplash.com/photo-1534353473418-4cfa6c56fd38?w=500&q=80" },
+    { name: "Çay", price: "30 TL", category: "Sıcak İçecekler", img: "https://images.unsplash.com/photo-1576092768241-dec231879fc3?w=500&q=80" },
 
-            products.forEach(product => {
-                const card = document.createElement('div');
-                card.className = 'product-card';
-                card.innerHTML = `
-                    <div class="product-img-wrapper">
-                        <img src="${product.image}" alt="${product.name}" class="product-img" loading="lazy">
-                    </div>
-                    <div class="product-details">
-                        <div class="product-name">${product.name}</div>
-                        <div class="product-price">${product.price}</div>
-                    </div>
-                `;
-                productGrid.appendChild(card);
-            });
-        }
+    // Yemek
+    { name: "Tavuk Izgara", price: "300 TL", category: "Yemek", img: "https://images.unsplash.com/photo-1598515214211-89d3c73ae83b?w=500&q=80" },
+    { name: "Tavuk Şinitzel", price: "300 TL", category: "Yemek", img: "https://images.unsplash.com/photo-1562967914-608f82629710?w=500&q=80" },
+    { name: "Tost Sucuklu Kaşarlı", price: "200 TL", category: "Yemek", img: "https://images.unsplash.com/photo-1528735602780-2552fd46c7af?w=500&q=80" },
+    { name: "Tost Kavurmalı Kaşarlı", price: "250 TL", category: "Yemek", img: "https://images.unsplash.com/photo-1528735602780-2552fd46c7af?w=500&q=80" },
+    { name: "Menemen", price: "200 TL", category: "Yemek", img: "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=500&q=80" },
+    { name: "Menemen Sucuklu Kaşarlı", price: "250 TL", category: "Yemek", img: "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=500&q=80" },
+    { name: "Hamburger", price: "250 TL", category: "Yemek", img: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=500&q=80" },
+    { name: "Mercimek Çorbası", price: "120 TL", category: "Yemek", img: "https://images.unsplash.com/photo-1547592166-23ac45744acd?w=500&q=80" },
+    { name: "Kiremitte Kaşarlı Köfte", price: "350 TL", category: "Yemek", img: "https://images.unsplash.com/photo-1529042410759-befb1204b468?w=500&q=80" },
 
-        // Arama Motoru Fonksiyonu
-        function filterProducts() {
-            const query = searchInput.value.toLowerCase().trim();
-            if(!query) {
-                renderProducts();
-                return;
-            }
+    // Espresso & Kahveler
+    { name: "Filtre Kahve", price: "130 TL", category: "Espresso", img: "https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?w=500&q=80" },
+    { name: "Beyaz Çikolata Latte", price: "130 TL", category: "Espresso", img: "https://images.unsplash.com/photo-1570968915860-54d5c301fa9f?w=500&q=80" },
+    { name: "Americano", price: "130 TL", category: "Kahve", img: "https://images.unsplash.com/photo-1551033406-611cf9a28f67?w=500&q=80" },
+    { name: "Cappuccino", price: "130 TL", category: "Kahve", img: "https://images.unsplash.com/photo-1572442388796-11668a67e53d?w=500&q=80" },
+    { name: "Caramel Macchiato", price: "130 TL", category: "Kahve", img: "https://images.unsplash.com/photo-1485808191679-5f86510681a2?w=500&q=80" },
+    { name: "Türk Kahvesi", price: "120 TL", category: "Kahve", img: "https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?w=500&q=80" },
+    { name: "Sütlü Türk Kahvesi", price: "130 TL", category: "Kahve", img: "https://images.unsplash.com/photo-1541167760496-1628856ab772?w=500&q=80" },
 
-            let allProducts = [];
-            Object.values(menuData).forEach(categoryList => {
-                allProducts = allProducts.concat(categoryList);
-            });
+    // Frozen
+    { name: "Mango Frozen", price: "200 TL", category: "Frozen", img: "https://images.unsplash.com/photo-1534353473418-4cfa6c56fd38?w=500&q=80" },
+    { name: "Çilek Frozen", price: "200 TL", category: "Frozen", img: "https://images.unsplash.com/photo-1464965911861-746a04b4bca6?w=500&q=80" },
+    { name: "Kivi Frozen", price: "200 TL", category: "Frozen", img: "https://images.unsplash.com/photo-1585059895524-72fd59656789?w=500&q=80" },
+    { name: "Limon Frozen", price: "200 TL", category: "Frozen", img: "https://images.unsplash.com/photo-1560008511-11c63416e52d?w=500&q=80" },
 
-            const filtered = allProducts.filter(p => p.name.toLowerCase().includes(query));
-            renderProducts(filtered, `Arama Sonuçları ("${query}")`);
-        }
+    // Milkshake
+    { name: "Muz Milkshake", price: "200 TL", category: "Milkshake", img: "https://images.unsplash.com/photo-1572490122747-3968b75cc699?w=500&q=80" },
+    { name: "Çilek Milkshake", price: "200 TL", category: "Milkshake", img: "https://images.unsplash.com/photo-1497034825429-c343d7c6a68f?w=500&q=80" },
+    { name: "Çikolata Milkshake", price: "200 TL", category: "Milkshake", img: "https://images.unsplash.com/photo-1572490122747-3968b75cc699?w=500&q=80" },
 
-        // Şifre korumalı kalıcı kayıt fonksiyonu
-        function saveDataPermanently() {
-            const pwd = prompt("Yönetici şifresini giriniz:");
-            if (pwd === "1234") {
-                localStorage.setItem('seyirCafeMenu', JSON.stringify(menuData));
-                alert("Başarılı! Değişiklikler kalıcı olarak kaydedildi.");
-            } else if(pwd !== null) {
-                alert("Hatalı şifre!");
-            }
-        }
+    // Nargile
+    { name: "Love 66 Nargile", price: "300 TL", category: "Nargile", img: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=500&q=80" },
+    { name: "Ananas Nargile", price: "300 TL", category: "Nargile", img: "https://images.unsplash.com/photo-1550258987-190a2d41a8ba?w=500&q=80" },
+    { name: "Lady Killer", price: "300 TL", category: "Nargile", img: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=500&q=80" },
+    { name: "Nane Nargile", price: "300 TL", category: "Nargile", img: "https://images.unsplash.com/photo-1608571423902-eed4a5ad8108?w=500&q=80" },
 
-        // Başlangıç tetikleyicileri
+    // Çerez
+    { name: "Dakota Çekirdek", price: "150 TL", category: "Çerez", img: "https://images.unsplash.com/photo-1536599018102-9f803c140fc1?w=500&q=80" },
+    { name: "Kabak Çekirdeği", price: "200 TL", category: "Çerez", img: "https://images.unsplash.com/photo-1509358271058-acd05cc93219?w=500&q=80" },
+    { name: "Antep Fıstığı", price: "400 TL", category: "Çerez", img: "https://images.unsplash.com/photo-1563729784474-d77dbb933a9e?w=500&q=80" },
+    { name: "Karışık Çerez", price: "300 TL", category: "Çerez", img: "https://images.unsplash.com/photo-1599599810769-bcde5a160d32?w=500&q=80" },
+
+    // Filtre Çay
+    { name: "Ihlamur", price: "150 TL", category: "Filtre Çay", img: "https://images.unsplash.com/photo-1576092768241-dec231879fc3?w=500&q=80" },
+    { name: "Kış Çayı", price: "150 TL", category: "Filtre Çay", img: "https://images.unsplash.com/photo-1576092768241-dec231879fc3?w=500&q=80" },
+    { name: "Yeşil Çay", price: "150 TL", category: "Filtre Çay", img: "https://images.unsplash.com/photo-1627435601361-ec25f5b1d0e5?w=500&q=80" },
+
+    // Dondurma
+    { name: "Vanilyalı Dondurma", price: "200 TL", category: "Dondurma", img: "https://images.unsplash.com/photo-1570197788417-0e82375c9371?w=500&q=80" },
+    { name: "Çikolatalı Dondurma", price: "200 TL", category: "Dondurma", img: "https://images.unsplash.com/photo-1563805042-7684c019e1cb?w=500&q=80" }
+  ];
+
+  const TARGET_PASS = "1171";
+  let failedAttempts = 0;
+  let currentCategory = 'Tümü';
+  let isAdminMode = false;
+  let wifiPassword = "Seyir2121";
+
+  function toggleLoginBox() {
+    if (isAdminMode) {
+      isAdminMode = false;
+      document.getElementById('bodyTag').classList.remove('admin-mode');
+      document.getElementById('lockIcon').className = "fa-solid fa-lock";
+      document.getElementById('wifiEditBtn').style.display = 'none';
+      alert("Yönetici modu kapatıldı.");
+      renderProducts();
+      return;
+    }
+    document.getElementById('loginBox').classList.toggle('open');
+  }
+
+  function checkPassword() {
+    const input = document.getElementById('passInput').value;
+    const errDiv = document.getElementById('loginError');
+
+    if (failedAttempts >= 5) {
+      errDiv.style.display = 'block';
+      errDiv.innerText = "ÜZEYİR MANAZ ile iletişime geçin";
+      return;
+    }
+
+    if (input === TARGET_PASS) {
+      failedAttempts = 0;
+      isAdminMode = true;
+      document.getElementById('bodyTag').classList.add('admin-mode');
+      document.getElementById('loginBox').classList.remove('open');
+      document.getElementById('lockIcon').className = "fa-solid fa-lock-open";
+      document.getElementById('wifiEditBtn').style.display = 'inline-block';
+      errDiv.style.display = 'none';
+      document.getElementById('passInput').value = '';
+      renderCategories();
+      renderProducts();
+    } else {
+      failedAttempts++;
+      errDiv.style.display = 'block';
+      if (failedAttempts >= 5) {
+        errDiv.innerText = "ÜZEYİR MANAZ ile iletişime geçin";
+      } else {
+        errDiv.innerText = `Hatalı şifre! Kalan hak: ${5 - failedAttempts}`;
+      }
+    }
+  }
+
+  function editWifiPassword() {
+    const newWifi = prompt("Yeni Wi-Fi Şifresini Girin:", wifiPassword);
+    if (newWifi !== null && newWifi.trim() !== "") {
+      wifiPassword = newWifi.trim();
+      document.getElementById('wifiPassText').innerText = wifiPassword;
+    }
+  }
+
+  // --- KATEGORİ İŞLEMLERİ ---
+  function editCurrentCategory() {
+    if (currentCategory === 'Tümü') return;
+    const catObj = categoriesData.find(c => c.name === currentCategory);
+    if (!catObj) return;
+
+    const newName = prompt("Yeni Kategori Adı:", catObj.name);
+    if (!newName) return;
+
+    allProducts.forEach(p => {
+      if (p.category === catObj.name) p.category = newName;
+    });
+
+    catObj.name = newName;
+    currentCategory = newName;
+    renderCategories();
+    renderProducts();
+  }
+
+  function changeCategoryBgImg() {
+    if (currentCategory === 'Tümü') return;
+    const catObj = categoriesData.find(c => c.name === currentCategory);
+    if (!catObj) return;
+
+    const fileInput = document.createElement('input');
+    fileInput.type = 'file';
+    fileInput.accept = 'image/*';
+    fileInput.onchange = e => {
+      const file = e.target.files[0];
+      const reader = new FileReader();
+      reader.onload = function(event) {
+        catObj.img = event.target.result;
         renderCategories();
+      };
+      reader.readAsDataURL(file);
+    };
+    fileInput.click();
+  }
+
+  // --- ÜRÜN İÇİNDEYKEN HIZLI EKLEME ---
+  function quickAddProductToCurrentCategory() {
+    if (currentCategory === 'Tümü') return alert("Lütfen önce bir kategori seçin!");
+    const name = document.getElementById('qAddName').value.trim();
+    const price = document.getElementById('qAddPrice').value.trim();
+    const fileInput = document.getElementById('qAddFile');
+
+    if (!name || !price) return alert("Ürün adı ve fiyatı zorunludur!");
+
+    if (fileInput.files.length > 0) {
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        saveNewProduct(name, price, currentCategory, e.target.result);
+      };
+      reader.readAsDataURL(fileInput.files[0]);
+    } else {
+      saveNewProduct(name, price, currentCategory, "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=500&q=80");
+    }
+  }
+
+  function saveNewProduct(name, price, category, img) {
+    allProducts.unshift({ name, price, category, img });
+    document.getElementById('qAddName').value = '';
+    document.getElementById('qAddPrice').value = '';
+    document.getElementById('qAddFile').value = '';
+    renderProducts();
+    alert("Ürün başarıyla eklendi!");
+  }
+
+  // --- ÜRÜN DÜZENLEME VE SİLME ---
+  function updateProductName(index, globalIdx) {
+    const newName = prompt("Ürün Adını Düzenle:", allProducts[globalIdx].name);
+    if (newName !== null && newName.trim() !== "") {
+      allProducts[globalIdx].name = newName.trim();
+      renderProducts();
+    }
+  }
+
+  function updateProductPrice(index, globalIdx) {
+    const newPrice = prompt("Fiyatı Düzenle (Örn: 200 TL):", allProducts[globalIdx].price);
+    if (newPrice !== null && newPrice.trim() !== "") {
+      allProducts[globalIdx].price = newPrice.trim();
+      renderProducts();
+    }
+  }
+
+  function updateProductImage(globalIdx) {
+    const fileInput = document.createElement('input');
+    fileInput.type = 'file';
+    fileInput.accept = 'image/*';
+    fileInput.onchange = e => {
+      const file = e.target.files[0];
+      const reader = new FileReader();
+      reader.onload = function(event) {
+        allProducts[globalIdx].img = event.target.result;
         renderProducts();
-    </script>
+      };
+      reader.readAsDataURL(file);
+    };
+    fileInput.click();
+  }
+
+  function deleteProduct(globalIdx) {
+    if (confirm("Bu ürünü silmek istediğinize emin misiniz?")) {
+      allProducts.splice(globalIdx, 1);
+      renderProducts();
+    }
+  }
+
+  // --- RENDER FONKSİYONLARI ---
+  function renderCategories() {
+    const bar = document.getElementById('categoriesBar');
+    bar.innerHTML = `
+      <button class="cat-btn ${currentCategory === 'Tümü' ? 'active' : ''}" style="background-image:url('https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=500&q=80')" onclick="filterCat('Tümü')">
+        <span>Tümü</span>
+      </button>
+    `;
+
+    categoriesData.forEach(cat => {
+      bar.innerHTML += `
+        <button class="cat-btn ${currentCategory === cat.name ? 'active' : ''}" style="background-image:url('${cat.img}')" onclick="filterCat('${cat.name}')">
+          <span>${cat.name}</span>
+        </button>
+      `;
+    });
+
+    const titleEl = document.getElementById('activeCategoryTitle');
+    const editArea = document.getElementById('categoryEditArea');
+    const quickAddSec = document.getElementById('quickAddSection');
+
+    titleEl.innerText = currentCategory;
+    
+    if (isAdminMode && currentCategory !== 'Tümü') {
+      editArea.innerHTML = `
+        <button class="btn btn-gold" style="padding:4px 10px; font-size:0.75rem;" onclick="editCurrentCategory()"><i class="fa-solid fa-pen"></i> Adı Değiştir</button>
+        <button class="btn btn-gold" style="padding:4px 10px; font-size:0.75rem; margin-left:4px;" onclick="changeCategoryBgImg()"><i class="fa-solid fa-image"></i> Görsel</button>
+      `;
+      quickAddSec.style.display = 'block';
+      document.getElementById('quickAddTitle').innerText = `+ "${currentCategory}" Kategorisine Ürün Ekle`;
+    } else {
+      editArea.innerHTML = '';
+      quickAddSec.style.display = 'none';
+    }
+  }
+
+  function filterCat(catName) {
+    currentCategory = catName;
+    renderCategories();
+    renderProducts();
+  }
+
+  function renderProducts() {
+    const grid = document.getElementById('menuGrid');
+    grid.innerHTML = '';
+
+    const filtered = currentCategory === 'Tümü' 
+      ? allProducts 
+      : allProducts.map((item, idx) => ({ ...item, originalIndex: idx })).filter(p => p.category === currentCategory);
+
+    filtered.forEach((item, index) => {
+      const gIdx = item.originalIndex !== undefined ? item.originalIndex : allProducts.indexOf(item);
+      const animClass = `anim-${(index % 4) + 1}`;
+
+      grid.innerHTML += `
+        <div class="menu-item ${animClass}">
+          <div class="admin-controls">
+            <div class="admin-btn-icon" onclick="updateProductImage(${gIdx})" title="Fotoğrafı Değiştir"><i class="fa-solid fa-camera"></i></div>
+            <div class="admin-btn-icon delete" onclick="deleteProduct(${gIdx})" title="Ürünü Sil"><i class="fa-solid fa-trash"></i></div>
+          </div>
+
+          <div class="item-img-wrapper">
+            <img src="${item.img}" class="item-img" alt="${item.name}">
+            <div class="item-badge" onclick="${isAdminMode ? `updateProductPrice(${index}, ${gIdx})` : ''}" style="${isAdminMode ? 'cursor:pointer; border:1px dashed #fff;' : ''}" title="Fiyatı Değiştir">${item.price}</div>
+          </div>
+          <div class="item-content">
+            <div class="item-title" onclick="${isAdminMode ? `updateProductName(${index}, ${gIdx})` : ''}" style="${isAdminMode ? 'cursor:pointer; text-decoration:underline dashed var(--gold);' : ''}" title="İsmi Değiştir">${item.name}</div>
+          </div>
+        </div>
+      `;
+    });
+  }
+
+  window.addEventListener('load', () => {
+    renderCategories();
+    renderProducts();
+  });
+</script>
+
 </body>
 </html>
