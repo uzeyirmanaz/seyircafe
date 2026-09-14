@@ -10,7 +10,7 @@
 <!-- Firebase SDK -->
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-  import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+  import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, updateDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyCX7qg5a-d8LUa7Yqg7nJ26-zJUX0qT1Yg",
@@ -26,7 +26,10 @@
   const db = getFirestore(app);
 
   window.db = db;
-  window.dbTools = { collection, addDoc, getDocs, deleteDoc, doc, onSnapshot };
+  window.dbTools = { collection, addDoc, getDocs, deleteDoc, doc, updateDoc, setDoc };
+  
+  // Sayfa açıldığında Firebase'den verileri çek
+  window.loadDataFromFirebase();
 </script>
 
 <style>
@@ -126,10 +129,8 @@
   }
   .social-icon:hover { background: var(--gold); color: #000; transform: scale(1.1); }
 
-  /* Kategoriler (Karmaşık Olmayan, Net ve Temiz Tasarım) */
-  .categories-container {
-    margin-bottom: 15px;
-  }
+  /* Kategoriler */
+  .categories-container { margin-bottom: 15px; }
   .categories-bar {
     display: flex;
     gap: 10px;
@@ -195,7 +196,7 @@
     font-weight: 700;
   }
 
-  /* Ürün Izgarası ve Akıcı Farklı Animasyonlar */
+  /* Ürün Izgarası ve Animasyonlar */
   .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(155px, 1fr)); gap: 12px; }
   .menu-item { 
     background: var(--card-bg); 
@@ -210,7 +211,6 @@
   }
   .menu-item:hover { transform: translateY(-3px); }
 
-  /* 4 Farklı Açılma Animasyonu */
   .anim-1 { animation: animSlideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
   .anim-2 { animation: animFadeScale 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
   .anim-3 { animation: animSlideRight 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
@@ -251,7 +251,7 @@
   .admin-btn-icon.delete { border-color: var(--danger); color: var(--danger); }
   .admin-btn-icon.delete:hover { background: var(--danger); color: #fff; }
 
-  /* Hızlı Ürün Ekleme Paneli (Yönetici) */
+  /* Hızlı Ürün Ekleme Paneli */
   .quick-add-section {
     display: none;
     margin-top: 15px;
@@ -272,9 +272,23 @@
   .btn { padding: 9px 14px; border-radius: 5px; border: none; cursor: pointer; font-size: 0.85rem; font-weight: 600; }
   .btn-gold { background: var(--gold); color: #000; }
   .btn-danger { background: var(--danger); color: #fff; }
+  
+  /* Yükleniyor Göstergesi */
+  #loadingOverlay {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(7,7,9,0.85); z-index: 9999; display: flex;
+    flex-direction: column; align-items: center; justify-content: center;
+    color: var(--gold); font-family: 'Cinzel', serif; font-size: 1.1rem;
+    transition: opacity 0.5s ease;
+  }
 </style>
 </head>
 <body id="bodyTag">
+
+<div id="loadingOverlay">
+  <i class="fa-solid fa-spinner fa-spin" style="font-size: 2rem; margin-bottom: 10px;"></i>
+  Menü Buluttan Yükleniyor...
+</div>
 
 <div class="container">
   
@@ -282,7 +296,6 @@
     <h1>Seyir Cafe</h1>
     <p>Lounge & Gourmet Experience</p>
     
-    <!-- Wi-Fi Alanı -->
     <div class="wifi-bar">
       <i class="fa-solid fa-wifi"></i>
       <span>Wi-Fi Şifresi: <b id="wifiPassText">Seyir2121</b></span>
@@ -295,21 +308,17 @@
     </div>
   </div>
 
-  <!-- Kategoriler (Üst Üste Binmeyen Düzen) -->
   <div class="categories-container">
     <div id="categoriesBar" class="categories-bar"></div>
   </div>
 
-  <!-- Aktif Kategori Başlığı ve Düzenleme Kalemi -->
   <div class="active-category-header">
     <div id="activeCategoryTitle" class="active-category-title">Tümü</div>
     <div id="categoryEditArea"></div>
   </div>
 
-  <!-- Ürünler Izgarası -->
   <div id="menuGrid" class="grid"></div>
 
-  <!-- Yönetici Modunda Ürün Ekleme -->
   <div id="quickAddSection" class="quick-add-section">
     <h4 style="color:var(--gold); margin-bottom:8px; font-family:'Cinzel', serif; font-size:0.95rem;" id="quickAddTitle">+ Kategoriye Ürün Ekle</h4>
     <input type="text" id="qAddName" class="admin-input" placeholder="Ürün Adı">
@@ -318,7 +327,6 @@
     <button class="btn btn-gold" style="width:100%;" onclick="quickAddProductToCurrentCategory()">Ürünü Ekle</button>
   </div>
 
-  <!-- YÖNETİCİ ŞİFRE GİRİŞİ (Gizli Şifre Kutusu) -->
   <div id="loginBox" class="login-box">
     <input type="password" id="passInput" class="admin-input" placeholder="Yönetici Şifreniz" autocomplete="current-password">
     <button class="btn btn-gold" style="width:100%;" onclick="checkPassword()">Yönetici Modunu Aç</button>
@@ -333,8 +341,17 @@
 </div>
 
 <script>
-  // KATEGORİLER VE GÖRSELLERİ
-  let categoriesData = [
+  let categoriesData = [];
+  let allProducts = [];
+  let wifiPassword = "Seyir2121";
+
+  const TARGET_PASS = "1171";
+  let failedAttempts = 0;
+  let currentCategory = 'Tümü';
+  let isAdminMode = false;
+
+  // Varsayılan Başlangıç Verileri (Firebase boşsa yüklenecek)
+  const defaultCategories = [
     { name: "Sıcak İçecekler", img: "https://images.unsplash.com/photo-1544787219-7f47ccb76574?w=500&q=80" },
     { name: "Yemek", img: "https://images.unsplash.com/photo-1598515214211-89d3c73ae83b?w=500&q=80" },
     { name: "Espresso", img: "https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?w=500&q=80" },
@@ -347,77 +364,84 @@
     { name: "Dondurma", img: "https://images.unsplash.com/photo-1570197788417-0e82375c9371?w=500&q=80" }
   ];
 
-  // EKRAN GÖRÜNTÜLERİNİZDEKİ GERÇEK ÜRÜNLER VE FİYATLAR (EKSİKSİZ)
-  let allProducts = [
-    // Sıcak İçecekler
+  const defaultProducts = [
     { name: "Salep / Damla Sakızlı Salep", price: "150 TL", category: "Sıcak İçecekler", img: "https://images.unsplash.com/photo-1544787219-7f47ccb76574?w=500&q=80" },
     { name: "Sıcak Çikolata", price: "150 TL", category: "Sıcak İçecekler", img: "https://images.unsplash.com/photo-1542990253-0d0f5be5f0ed?w=500&q=80" },
     { name: "Ballı Süt", price: "120 TL", category: "Sıcak İçecekler", img: "https://images.unsplash.com/photo-1550583724-b2692b85b150?w=500&q=80" },
-    { name: "Kuşburnu (Duble)", price: "70 TL", category: "Sıcak İçecekler", img: "https://images.unsplash.com/photo-1576092768241-dec231879fc3?w=500&q=80" },
-    { name: "Karadut (Duble)", price: "70 TL", category: "Sıcak İçecekler", img: "https://images.unsplash.com/photo-1597481499750-3e6b22637e12?w=500&q=80" },
-    { name: "Muz (Duble)", price: "70 TL", category: "Sıcak İçecekler", img: "https://images.unsplash.com/photo-1528825871115-3581a5387919?w=500&q=80" },
-    { name: "Limon (Duble)", price: "70 TL", category: "Sıcak İçecekler", img: "https://images.unsplash.com/photo-1534353473418-4cfa6c56fd38?w=500&q=80" },
     { name: "Çay", price: "30 TL", category: "Sıcak İçecekler", img: "https://images.unsplash.com/photo-1576092768241-dec231879fc3?w=500&q=80" },
-
-    // Yemek
     { name: "Tavuk Izgara", price: "300 TL", category: "Yemek", img: "https://images.unsplash.com/photo-1598515214211-89d3c73ae83b?w=500&q=80" },
-    { name: "Tavuk Şinitzel", price: "300 TL", category: "Yemek", img: "https://images.unsplash.com/photo-1562967914-608f82629710?w=500&q=80" },
     { name: "Tost Sucuklu Kaşarlı", price: "200 TL", category: "Yemek", img: "https://images.unsplash.com/photo-1528735602780-2552fd46c7af?w=500&q=80" },
-    { name: "Tost Kavurmalı Kaşarlı", price: "250 TL", category: "Yemek", img: "https://images.unsplash.com/photo-1528735602780-2552fd46c7af?w=500&q=80" },
-    { name: "Menemen", price: "200 TL", category: "Yemek", img: "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=500&q=80" },
-    { name: "Menemen Sucuklu Kaşarlı", price: "250 TL", category: "Yemek", img: "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=500&q=80" },
     { name: "Hamburger", price: "250 TL", category: "Yemek", img: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=500&q=80" },
-    { name: "Mercimek Çorbası", price: "120 TL", category: "Yemek", img: "https://images.unsplash.com/photo-1547592166-23ac45744acd?w=500&q=80" },
-    { name: "Kiremitte Kaşarlı Köfte", price: "350 TL", category: "Yemek", img: "https://images.unsplash.com/photo-1529042410759-befb1204b468?w=500&q=80" },
-
-    // Espresso & Kahveler
     { name: "Filtre Kahve", price: "130 TL", category: "Espresso", img: "https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?w=500&q=80" },
-    { name: "Beyaz Çikolata Latte", price: "130 TL", category: "Espresso", img: "https://images.unsplash.com/photo-1570968915860-54d5c301fa9f?w=500&q=80" },
     { name: "Americano", price: "130 TL", category: "Kahve", img: "https://images.unsplash.com/photo-1551033406-611cf9a28f67?w=500&q=80" },
-    { name: "Cappuccino", price: "130 TL", category: "Kahve", img: "https://images.unsplash.com/photo-1572442388796-11668a67e53d?w=500&q=80" },
-    { name: "Caramel Macchiato", price: "130 TL", category: "Kahve", img: "https://images.unsplash.com/photo-1485808191679-5f86510681a2?w=500&q=80" },
     { name: "Türk Kahvesi", price: "120 TL", category: "Kahve", img: "https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?w=500&q=80" },
-    { name: "Sütlü Türk Kahvesi", price: "130 TL", category: "Kahve", img: "https://images.unsplash.com/photo-1541167760496-1628856ab772?w=500&q=80" },
-
-    // Frozen
     { name: "Mango Frozen", price: "200 TL", category: "Frozen", img: "https://images.unsplash.com/photo-1534353473418-4cfa6c56fd38?w=500&q=80" },
-    { name: "Çilek Frozen", price: "200 TL", category: "Frozen", img: "https://images.unsplash.com/photo-1464965911861-746a04b4bca6?w=500&q=80" },
-    { name: "Kivi Frozen", price: "200 TL", category: "Frozen", img: "https://images.unsplash.com/photo-1585059895524-72fd59656789?w=500&q=80" },
-    { name: "Limon Frozen", price: "200 TL", category: "Frozen", img: "https://images.unsplash.com/photo-1560008511-11c63416e52d?w=500&q=80" },
-
-    // Milkshake
-    { name: "Muz Milkshake", price: "200 TL", category: "Milkshake", img: "https://images.unsplash.com/photo-1572490122747-3968b75cc699?w=500&q=80" },
-    { name: "Çilek Milkshake", price: "200 TL", category: "Milkshake", img: "https://images.unsplash.com/photo-1497034825429-c343d7c6a68f?w=500&q=80" },
-    { name: "Çikolata Milkshake", price: "200 TL", category: "Milkshake", img: "https://images.unsplash.com/photo-1572490122747-3968b75cc699?w=500&q=80" },
-
-    // Nargile
-    { name: "Love 66 Nargile", price: "300 TL", category: "Nargile", img: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=500&q=80" },
-    { name: "Ananas Nargile", price: "300 TL", category: "Nargile", img: "https://images.unsplash.com/photo-1550258987-190a2d41a8ba?w=500&q=80" },
-    { name: "Lady Killer", price: "300 TL", category: "Nargile", img: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=500&q=80" },
-    { name: "Nane Nargile", price: "300 TL", category: "Nargile", img: "https://images.unsplash.com/photo-1608571423902-eed4a5ad8108?w=500&q=80" },
-
-    // Çerez
-    { name: "Dakota Çekirdek", price: "150 TL", category: "Çerez", img: "https://images.unsplash.com/photo-1536599018102-9f803c140fc1?w=500&q=80" },
-    { name: "Kabak Çekirdeği", price: "200 TL", category: "Çerez", img: "https://images.unsplash.com/photo-1509358271058-acd05cc93219?w=500&q=80" },
-    { name: "Antep Fıstığı", price: "400 TL", category: "Çerez", img: "https://images.unsplash.com/photo-1563729784474-d77dbb933a9e?w=500&q=80" },
-    { name: "Karışık Çerez", price: "300 TL", category: "Çerez", img: "https://images.unsplash.com/photo-1599599810769-bcde5a160d32?w=500&q=80" },
-
-    // Filtre Çay
-    { name: "Ihlamur", price: "150 TL", category: "Filtre Çay", img: "https://images.unsplash.com/photo-1576092768241-dec231879fc3?w=500&q=80" },
-    { name: "Kış Çayı", price: "150 TL", category: "Filtre Çay", img: "https://images.unsplash.com/photo-1576092768241-dec231879fc3?w=500&q=80" },
-    { name: "Yeşil Çay", price: "150 TL", category: "Filtre Çay", img: "https://images.unsplash.com/photo-1627435601361-ec25f5b1d0e5?w=500&q=80" },
-
-    // Dondurma
-    { name: "Vanilyalı Dondurma", price: "200 TL", category: "Dondurma", img: "https://images.unsplash.com/photo-1570197788417-0e82375c9371?w=500&q=80" },
-    { name: "Çikolatalı Dondurma", price: "200 TL", category: "Dondurma", img: "https://images.unsplash.com/photo-1563805042-7684c019e1cb?w=500&q=80" }
+    { name: "Love 66 Nargile", price: "300 TL", category: "Nargile", img: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=500&q=80" }
   ];
 
-  const TARGET_PASS = "1171";
-  let failedAttempts = 0;
-  let currentCategory = 'Tümü';
-  let isAdminMode = false;
-  let wifiPassword = "Seyir2121";
+  // --- FIREBASE VERİ YÖNETİMİ ---
+  window.loadDataFromFirebase = async function() {
+    try {
+      const querySnapshot = await window.dbTools.getDocs(window.dbTools.collection(window.db, "menu_data"));
+      let cloudData = {};
+      querySnapshot.forEach((doc) => {
+        cloudData[doc.id] = doc.data();
+      });
 
+      if (cloudData.categories && cloudData.categories.list) {
+        categoriesData = cloudData.categories.list;
+      } else {
+        categoriesData = defaultCategories;
+        await window.dbTools.setDoc(window.dbTools.doc(window.db, "menu_data", "categories"), { list: categoriesData });
+      }
+
+      if (cloudData.products && cloudData.products.list) {
+        allProducts = cloudData.products.list;
+      } else {
+        allProducts = defaultProducts;
+        await window.dbTools.setDoc(window.dbTools.doc(window.db, "menu_data", "products"), { list: allProducts });
+      }
+
+      if (cloudData.settings && cloudData.settings.wifi) {
+        wifiPassword = cloudData.settings.wifi;
+        document.getElementById('wifiPassText').innerText = wifiPassword;
+      }
+
+    } catch (e) {
+      console.error("Firebase veri yükleme hatası:", e);
+      categoriesData = defaultCategories;
+      allProducts = defaultProducts;
+    } finally {
+      // Yüklenme ekranını kaldır
+      const overlay = document.getElementById('loadingOverlay');
+      if(overlay) {
+        overlay.style.opacity = '0';
+        setTimeout(() => overlay.remove(), 500);
+      }
+      renderCategories();
+      renderProducts();
+    }
+  }
+
+  async function saveCategoriesToFirebase() {
+    try {
+      await window.dbTools.setDoc(window.dbTools.doc(window.db, "menu_data", "categories"), { list: categoriesData });
+    } catch (e) { console.error(e); }
+  }
+
+  async function saveProductsToFirebase() {
+    try {
+      await window.dbTools.setDoc(window.dbTools.doc(window.db, "menu_data", "products"), { list: allProducts });
+    } catch (e) { console.error(e); }
+  }
+
+  async function saveWifiToFirebase() {
+    try {
+      await window.dbTools.setDoc(window.dbTools.doc(window.db, "menu_data", "settings"), { wifi: wifiPassword });
+    } catch (e) { console.error(e); }
+  }
+
+  // --- ARAYÜZ VE YÖNETİCİ FONKSİYONLARI ---
   function toggleLoginBox() {
     if (isAdminMode) {
       isAdminMode = false;
@@ -468,24 +492,27 @@
     if (newWifi !== null && newWifi.trim() !== "") {
       wifiPassword = newWifi.trim();
       document.getElementById('wifiPassText').innerText = wifiPassword;
+      saveWifiToFirebase();
     }
   }
 
-  // --- KATEGORİ İŞLEMLERİ ---
   function editCurrentCategory() {
     if (currentCategory === 'Tümü') return;
     const catObj = categoriesData.find(c => c.name === currentCategory);
     if (!catObj) return;
 
     const newName = prompt("Yeni Kategori Adı:", catObj.name);
-    if (!newName) return;
+    if (!newName || newName.trim() === "") return;
 
     allProducts.forEach(p => {
-      if (p.category === catObj.name) p.category = newName;
+      if (p.category === catObj.name) p.category = newName.trim();
     });
 
-    catObj.name = newName;
-    currentCategory = newName;
+    catObj.name = newName.trim();
+    currentCategory = newName.trim();
+    
+    saveCategoriesToFirebase();
+    saveProductsToFirebase();
     renderCategories();
     renderProducts();
   }
@@ -503,6 +530,7 @@
       const reader = new FileReader();
       reader.onload = function(event) {
         catObj.img = event.target.result;
+        saveCategoriesToFirebase();
         renderCategories();
       };
       reader.readAsDataURL(file);
@@ -510,7 +538,6 @@
     fileInput.click();
   }
 
-  // --- ÜRÜN İÇİNDEYKEN HIZLI EKLEME ---
   function quickAddProductToCurrentCategory() {
     if (currentCategory === 'Tümü') return alert("Lütfen önce bir kategori seçin!");
     const name = document.getElementById('qAddName').value.trim();
@@ -535,15 +562,17 @@
     document.getElementById('qAddName').value = '';
     document.getElementById('qAddPrice').value = '';
     document.getElementById('qAddFile').value = '';
+    
+    saveProductsToFirebase();
     renderProducts();
-    alert("Ürün başarıyla eklendi!");
+    alert("Ürün başarıyla buluta eklendi!");
   }
 
-  // --- ÜRÜN DÜZENLEME VE SİLME ---
   function updateProductName(index, globalIdx) {
     const newName = prompt("Ürün Adını Düzenle:", allProducts[globalIdx].name);
     if (newName !== null && newName.trim() !== "") {
       allProducts[globalIdx].name = newName.trim();
+      saveProductsToFirebase();
       renderProducts();
     }
   }
@@ -552,6 +581,7 @@
     const newPrice = prompt("Fiyatı Düzenle (Örn: 200 TL):", allProducts[globalIdx].price);
     if (newPrice !== null && newPrice.trim() !== "") {
       allProducts[globalIdx].price = newPrice.trim();
+      saveProductsToFirebase();
       renderProducts();
     }
   }
@@ -565,6 +595,7 @@
       const reader = new FileReader();
       reader.onload = function(event) {
         allProducts[globalIdx].img = event.target.result;
+        saveProductsToFirebase();
         renderProducts();
       };
       reader.readAsDataURL(file);
@@ -575,11 +606,11 @@
   function deleteProduct(globalIdx) {
     if (confirm("Bu ürünü silmek istediğinize emin misiniz?")) {
       allProducts.splice(globalIdx, 1);
+      saveProductsToFirebase();
       renderProducts();
     }
   }
 
-  // --- RENDER FONKSİYONLARI ---
   function renderCategories() {
     const bar = document.getElementById('categoriesBar');
     bar.innerHTML = `
@@ -651,11 +682,6 @@
       `;
     });
   }
-
-  window.addEventListener('load', () => {
-    renderCategories();
-    renderProducts();
-  });
 </script>
 
 </body>
