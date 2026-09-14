@@ -40,8 +40,7 @@
     --text-color: #e5e5e5;
     --text-muted: #999;
     --danger: #e74c3c;
-    --sign-red: #ff3366; 
-    --sign-red-glow: rgba(255, 51, 102, 0.8);
+    --sign-red: #ff2a5f; 
   }
 
   html, body {
@@ -49,7 +48,6 @@
     margin: 0 !important;
     padding: 0 !important;
     background-color: var(--bg-color);
-    /* Tabelayı tutan direk üzerindeki deseni andıran zarif, koyu tonlu arka plan motifi */
     background-image: radial-gradient(circle at 50% 0%, #2d1815 0%, #1a0f0d 80%),
                       repeating-linear-gradient(45deg, rgba(212, 175, 55, 0.02) 0, rgba(212, 175, 55, 0.02) 2px, transparent 0, transparent 50px);
     color: var(--text-color);
@@ -57,7 +55,6 @@
     position: relative;
   }
 
-  /* Direk ve ahşap dokuyu andıran arka plan zarafeti için dekoratif motif katmanı */
   body::before {
     content: "";
     position: fixed;
@@ -101,9 +98,9 @@
     text-transform: uppercase;
     margin: 0;
     color: var(--sign-red);
-    text-shadow: 0 0 10px rgba(255, 51, 102, 0.8),
-                 0 0 20px rgba(255, 51, 102, 0.6),
-                 0 0 30px rgba(255, 51, 102, 0.4),
+    text-shadow: 0 0 10px rgba(255, 42, 95, 0.9),
+                 0 0 22px rgba(255, 42, 95, 0.7),
+                 0 0 35px rgba(255, 42, 95, 0.5),
                  2px 2px 5px rgba(0,0,0,0.9);
     cursor: pointer;
     user-select: none;
@@ -115,16 +112,16 @@
     display: inline-block;
   }
 
-  /* İ harfinin üzerindeki kalp ve AŞIRI YAVAŞ yanıp sönme efekti (6 saniye) */
+  /* İ harfinin üzerindeki sabit kalp ve AŞIRI YAVAŞ nefes alma animasyonu (6 saniye) */
   .custom-i .heart-dot {
     position: absolute;
-    top: -28px;
+    top: -26px;
     left: 50%;
     transform: translateX(-50%) rotate(-45deg);
-    width: 16px;
-    height: 16px;
+    width: 14px;
+    height: 14px;
     background-color: var(--sign-red);
-    box-shadow: 0 0 10px var(--sign-red), 0 0 20px var(--sign-red);
+    box-shadow: 0 0 8px var(--sign-red), 0 0 18px var(--sign-red);
     animation: ultraSlowBlink 6s infinite ease-in-out;
   }
 
@@ -132,32 +129,32 @@
   .custom-i .heart-dot::after {
     content: "";
     position: absolute;
-    width: 16px;
-    height: 16px;
+    width: 14px;
+    height: 14px;
     background-color: var(--sign-red);
     border-radius: 50%;
   }
 
   .custom-i .heart-dot::before {
-    top: -8px;
+    top: -7px;
     left: 0;
   }
 
   .custom-i .heart-dot::after {
-    left: 8px;
+    left: 7px;
     top: 0;
   }
 
   @keyframes ultraSlowBlink {
     0%, 100% {
-      opacity: 0.2;
-      transform: translateX(-50%) rotate(-45deg) scale(0.9);
-      box-shadow: 0 0 5px rgba(255, 51, 102, 0.2);
+      opacity: 0.35;
+      transform: translateX(-50%) rotate(-45deg) scale(0.92);
+      box-shadow: 0 0 4px rgba(255, 42, 95, 0.3);
     }
     50% {
       opacity: 1;
-      transform: translateX(-50%) rotate(-45deg) scale(1.15);
-      box-shadow: 0 0 20px rgba(255, 51, 102, 1), 0 0 35px rgba(255, 51, 102, 0.8);
+      transform: translateX(-50%) rotate(-45deg) scale(1.12);
+      box-shadow: 0 0 18px rgba(255, 42, 95, 1), 0 0 30px rgba(255, 42, 95, 0.8);
     }
   }
 
@@ -168,6 +165,7 @@
     margin-top: 10px; 
     text-transform: uppercase; 
     opacity: 0.9;
+    cursor: pointer;
   }
 
   .brand-social-bar {
