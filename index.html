@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Seyir Cafe - Dijital Menü</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;900&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<!-- Firebase SDK -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+  import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyCX7qg5a-d8LUa7Yqg7nJ26-zJUX0qT1Yg",
+    authDomain: "seyircafe-3eeb9.firebaseapp.com",
+    projectId: "seyircafe-3eeb9",
+    storageBucket: "seyircafe-3eeb9.firebasestorage.app",
+    messagingSenderId: "349937765089",
+    appId: "1:349937765089:web:b035c02fcbf5474c5a0",
+    measurementId: "G-C5RJ945450"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+
+  window.db = db;
+  window.dbTools = { collection, addDoc, getDocs, deleteDoc, doc, onSnapshot };
+</script>
+
+<style>
+  :root {
+    --bg-color: #0d0d0f;
+    --card-bg: rgba(22, 22, 26, 0.95);
+    --gold: #d4af37;
+    --gold-light: #f5e5c0;
+    --gold-glow: rgba(212, 175, 55, 0.4);
+    --text-color: #e0e0e0;
+    --text-muted: #a0a0a0;
+    --danger: #e74c3c;
+  }
+
+  html, body {
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    font-family: 'Montserrat', sans-serif;
+    background-image: radial-gradient(circle at 50% 0%, #1a150a 0%, #0d0d0f 75%);
+  }
+
+  * { box-sizing: border-box !important; }
+
+  .container { 
+    width: 100% !important;
+    padding: 15px 10px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+  }
+
+  .header { 
+    text-align: center; 
+    padding: 20px 0 15px 0; 
+    border-bottom: 1px solid rgba(212, 175, 55, 0.2); 
+    margin-bottom: 15px; 
+  }
+  .header h1 { 
+    font-family: 'Cinzel', serif; 
+    font-size: 2.8rem; 
+    font-weight: 900;
+    letter-spacing: 3px; 
+    text-transform: uppercase;
+    margin: 0;
+    text-shadow: 0 0 20px var(--gold-glow);
+    background: linear-gradient(180deg, #fff 0%, var(--gold) 60%, #997a15 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .header p { 
+    font-size: 0.8rem; 
+    letter-spacing: 2px; 
+    color: var(--gold-light); 
+    margin-top: 8px; 
+    text-transform: uppercase; 
+  }
+
+  .social-links { display: flex; justify-content: center; gap: 20px; margin-top: 15px; }
+  .social-icon {
+    width: 42px; height: 42px; border-radius: 50%; border: 2px solid var(--gold);
+    background: rgba(212, 175, 55, 0.1); color: var(--gold);
+    display: flex; align-items: center; justify-content: center; text-decoration: none; font-size: 1.2rem;
+    transition: all 0.3s;
+  }
+  .social-icon:hover { background: var(--gold); color: #000; transform: scale(1.1); }
+
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; margin-top: 20px; }
+  .menu-item { background: var(--card-bg); border: 1px solid rgba(212, 175, 55, 0.15); border-radius: 8px; overflow: hidden; display: flex; flex-direction: column; }
+  .item-img-wrapper { position: relative; width: 100%; height: 120px; }
+  .item-img { width: 100%; height: 100%; object-fit: cover; }
+  .item-badge { position: absolute; top: 6px; right: 6px; background: var(--gold); color: #000; font-size: 0.75rem; font-weight: 700; padding: 3px 6px; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.5); }
+  .item-content { padding: 10px; display: flex; flex-direction: column; flex-grow: 1; justify-content: center; }
+  .item-title { font-family: 'Cinzel', serif; font-size: 0.9rem; color: var(--gold-light); font-weight: 600; text-align: center; }
+
+  .footer { margin-top: auto; padding-top: 30px; text-align: center; border-top: 1px solid rgba(212, 175, 55, 0.1); display: flex; justify-content: space-between; align-items: center; }
+  .admin-toggle-btn-bottom { background: transparent; color: #444; border: none; cursor: pointer; font-size: 1rem; transition: color 0.3s; }
+  .admin-toggle-btn-bottom:hover { color: var(--gold); }
+
+  .login-box, .admin-panel { display: none; background: #151518; border: 1px solid var(--gold); padding: 15px; border-radius: 8px; margin-top: 15px; }
+  .login-box.open, .admin-panel.open { display: block; }
+  .admin-input { background: #0d0d0f; border: 1px solid #444; color: #fff; padding: 8px; border-radius: 4px; width: 100%; margin-bottom: 8px; font-size: 0.85rem; }
+  .btn { padding: 8px 16px; border-radius: 4px; border: none; cursor: pointer; font-size: 0.85rem; font-weight: 600; }
+  .btn-gold { background: var(--gold); color: #000; }
+  .btn-danger { background: var(--danger); color: #fff; }
+</style>
+</head>
+<body>
+
+<div class="container">
+  
+  <div class="header">
+    <h1>Seyir Cafe</h1>
+    <p>Lounge & Gourmet Experience</p>
+    
+    <div class="social-links">
+      <a href="https://www.instagram.com/seyircafe.21" target="_blank" class="social-icon" title="Instagram"><i class="fa-brands fa-instagram"></i></a>
+      <a href="https://www.tiktok.com/@seyircafe21" target="_blank" class="social-icon" title="TikTok"><i class="fa-brands fa-tiktok"></i></a>
+    </div>
+  </div>
+
+  <div id="menuGrid" class="grid"></div>
+
+  <!-- YÖNETİCİ GİRİŞİ -->
+  <div id="loginBox" class="login-box">
+    <input type="password" id="passInput" class="admin-input" placeholder="Yönetici Şifreniz">
+    <button class="btn btn-gold" id="loginBtn" onclick="checkPassword()">Giriş Yap</button>
+    <div id="loginError" style="color:var(--danger); font-size:0.8rem; display:none; margin-top:8px; font-weight:600;"></div>
+  </div>
+
+  <!-- YÖNETİCİ EKRANI -->
+  <div id="adminPanel" class="admin-panel">
+    <h3 style="color:var(--gold); font-family:'Cinzel', serif; margin-bottom:12px;">Ürün Yönetim Paneli</h3>
+
+    <div style="background:#202025; padding:10px; border-radius:6px; margin-bottom:15px;">
+      <h4 style="color:var(--gold-light); margin-bottom:8px;">Yeni Ürün Ekle</h4>
+      <input type="text" id="addProdName" class="admin-input" placeholder="Ürün Adı">
+      <input type="text" id="addProdPrice" class="admin-input" placeholder="Fiyat (Örn: 150 TL)">
+      <input type="file" id="addProdFile" class="admin-input" accept="image/*">
+      <button class="btn btn-gold" style="width:100%;" onclick="uploadAndAddProduct()">Fotoğrafla Kaydet</button>
+    </div>
+
+    <h4 style="color:#fff; margin-bottom:8px;">Mevcut Ürünler</h4>
+    <div id="adminProductList" style="max-height:200px; overflow-y:auto; margin-bottom:15px;"></div>
+    
+    <button class="btn btn-danger" style="width:100%;" onclick="closeAdmin()">Paneli Kapat</button>
+  </div>
+
+  <div class="footer">
+    <span style="font-size: 0.75rem; color: #666;">© Seyir Cafe Dijital Menü</span>
+    <button class="admin-toggle-btn-bottom" onclick="toggleLoginBox()" title="Yönetici Paneli"><i class="fa-solid fa-lock" id="lockIcon"></i></button>
+  </div>
+
+</div>
+
+<script>
+  const TARGET_PASS = "1171";
+  let failedAttempts = 0;
+
+  function toggleLoginBox() {
+    document.getElementById('loginBox').classList.toggle('open');
+  }
+
+  function checkPassword() {
+    const input = document.getElementById('passInput').value;
+    const errDiv = document.getElementById('loginError');
+
+    if (failedAttempts >= 5) {
+      errDiv.style.display = 'block';
+      errDiv.innerText = "ÜZEYİR MANAZ ile iletişime geçin";
+      return;
+    }
+
+    if (input === TARGET_PASS) {
+      failedAttempts = 0;
+      document.getElementById('loginBox').classList.remove('open');
+      document.getElementById('adminPanel').classList.add('open');
+      document.getElementById('lockIcon').className = "fa-solid fa-lock-open";
+      errDiv.style.display = 'none';
+      document.getElementById('passInput').value = '';
+      loadAdminProducts();
+    } else {
+      failedAttempts++;
+      errDiv.style.display = 'block';
+      errDiv.innerText = failedAttempts >= 5 ? "ÜZEYİR MANAZ ile iletişime geçin" : `Hatalı şifre! Kalan hakkınız: ${5 - failedAttempts}`;
+    }
+  }
+
+  function closeAdmin() {
+    document.getElementById('adminPanel').classList.remove('open');
+    document.getElementById('lockIcon').className = "fa-solid fa-lock";
+  }
+
+  async function uploadAndAddProduct() {
+    const name = document.getElementById('addProdName').value.trim();
+    const price = document.getElementById('addProdPrice').value.trim();
+    const fileInput = document.getElementById('addProdFile');
+
+    if (!name || !price) return alert("Lütfen ürün adını ve fiyatını yazın!");
+
+    let imgBase64 = "";
+    if (fileInput.files.length > 0) {
+      const file = fileInput.files[0];
+      const reader = new FileReader();
+      reader.onloadend = async function() {
+        imgBase64 = reader.result;
+        await saveToFirebase(name, price, imgBase64);
+      };
+      reader.readAsDataURL(file);
+    } else {
+      await saveToFirebase(name, price, "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400&q=80");
+    }
+  }
+
+  async function saveToFirebase(name, price, img) {
+    const { collection, addDoc } = window.dbTools;
+    await addDoc(collection(window.db, "products"), { name, price, img, createdAt: Date.now() });
+    alert("Ürün başarıyla eklendi!");
+    document.getElementById('addProdName').value = '';
+    document.getElementById('addProdPrice').value = '';
+    document.getElementById('addProdFile').value = '';
+    loadAdminProducts();
+  }
+
+  window.addEventListener('load', () => {
+    setTimeout(() => {
+      const { collection, onSnapshot } = window.dbTools;
+      onSnapshot(collection(window.db, "products"), (snapshot) => {
+        const grid = document.getElementById('menuGrid');
+        grid.innerHTML = '';
+        snapshot.forEach((doc) => {
+          const item = doc.data();
+          grid.innerHTML += `
+            <div class="menu-item">
+              <div class="item-img-wrapper">
+                <img src="${item.img}" class="item-img" alt="${item.name}">
+                <div class="item-badge">${item.price}</div>
+              </div>
+              <div class="item-content">
+                <div class="item-title">${item.name}</div>
+              </div>
+            </div>
+          `;
+        });
+      });
+    }, 1500);
+  });
+
+  async function loadAdminProducts() {
+    const { collection, getDocs } = window.dbTools;
+    const snapshot = await getDocs(collection(window.db, "products"));
+    const list = document.getElementById('adminProductList');
+    list.innerHTML = '';
+    snapshot.forEach((doc) => {
+      const data = doc.data();
+      list.innerHTML += `
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; background:#222; padding:8px; border-radius:4px;">
+          <span style="font-size:0.85rem;">${data.name} <b>(${data.price})</b></span>
+          <button class="btn btn-danger" onclick="deleteProduct('${doc.id}')">Sil</button>
+        </div>
+      `;
+    });
+  }
+
+  async function deleteProduct(id) {
+    const { deleteDoc, doc } = window.dbTools;
+    await deleteDoc(doc(window.db, "products", id));
+    loadAdminProducts();
+  }
+</script>
+
+</body>
+</html>
