@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Seyir Cafe - Dijital Menü</title>
-<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;900&family=Playfair+Display:ital,wght@0,700;1,700&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Playfair+Display:ital,wght@0,600;0,700;1,600&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
 <!-- Firebase SDK -->
@@ -40,7 +40,7 @@
     --text-color: #e5e5e5;
     --text-muted: #999;
     --danger: #e74c3c;
-    --blood-red: #ff1a1a; 
+    --blood-red: #ff2a2a; 
   }
 
   html, body {
@@ -48,7 +48,6 @@
     margin: 0 !important;
     padding: 0 !important;
     background-color: var(--bg-color);
-    /* Sade siyah zemin üzerinde ağır, samimi ve detaylı Osmanlı / Selçuklu tezhip-motif dokusu */
     background-image: 
       radial-gradient(circle at 50% 10%, rgba(50, 10, 10, 0.45) 0%, rgba(5, 3, 3, 0.97) 80%),
       url("data:image/svg+xml,%3Csvg width='160' height='160' viewBox='0 0 160 160' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23d4af37' fill-opacity='0.035'%3E%3Cpath d='M80 0 L95 30 L125 30 L100 50 L110 80 L80 60 L50 80 L60 50 L35 30 L65 30 Z'/%3E%3Cpath d='M0 80 L30 95 L30 125 L50 100 L80 110 L60 80 L80 50 L50 60 L30 35 L30 65 Z'/%3E%3Cpath d='M160 80 L130 95 L130 125 L110 100 L80 110 L100 80 L80 50 L110 60 L130 35 L130 65 Z'/%3E%3Cpath d='M80 160 L95 130 L125 130 L100 110 L110 80 L80 100 L50 80 L60 110 L35 130 L65 130 Z'/%3E%3Ccircle cx='80' cy='80' r='25' fill='none' stroke='%23d4af37' stroke-width='0.8' stroke-opacity='0.04'/%3E%3Ccircle cx='80' cy='80' r='45' fill='none' stroke='%23d4af37' stroke-width='0.5' stroke-opacity='0.03'/%3E%3C/g%3E%3C/svg%3E");
@@ -74,7 +73,7 @@
 
   .header { 
     text-align: center; 
-    padding: 20px 15px 15px 15px; 
+    padding: 20px 15px 10px 15px; 
     background: transparent;
     border: none;
     margin-bottom: 12px; 
@@ -87,7 +86,7 @@
     100% { opacity: 1; transform: scale(1) translateY(0); }
   }
 
-  /* Logodaki Harfler ve Tipografi Tam Uyumlu */
+  /* Daha samimi ve zarif logo tasarımı */
   .logo-wrapper {
     display: inline-block;
     cursor: pointer;
@@ -97,40 +96,25 @@
   }
 
   .logo-line-1 {
-    font-family: 'Playfair Display', serif;
-    font-size: 3.4rem;
-    font-weight: 700;
-    font-style: italic;
-    letter-spacing: 2px;
+    font-family: 'Great Vibes', cursive;
+    font-size: 3.8rem;
     color: var(--blood-red);
     line-height: 1.1;
     display: block;
-    animation: slowPulse 5s infinite ease-in-out;
+    text-shadow: 0 0 15px rgba(255, 42, 42, 0.35);
   }
 
   .logo-line-2 {
-    font-family: 'Cinzel', serif;
-    font-size: 2.3rem;
+    font-family: 'Playfair Display', serif;
+    font-size: 1.6rem;
     font-weight: 700;
-    letter-spacing: 7px;
+    letter-spacing: 8px;
     text-transform: uppercase;
     color: var(--blood-red);
     display: block;
-    margin-top: 2px;
-    margin-left: 5px;
-    animation: slowPulse 5s infinite ease-in-out;
-  }
-
-  /* Çok yavaş yanıp sönme (nefes alma) animasyonu */
-  @keyframes slowPulse {
-    0%, 100% {
-      opacity: 0.5;
-      text-shadow: 0 0 5px rgba(255, 26, 26, 0.3);
-    }
-    50% {
-      opacity: 1;
-      text-shadow: 0 0 15px rgba(255, 26, 26, 0.9), 0 0 25px rgba(255, 26, 26, 0.4);
-    }
+    margin-top: -5px;
+    margin-left: 6px;
+    text-shadow: 0 0 12px rgba(255, 42, 42, 0.3);
   }
 
   .custom-i {
@@ -138,53 +122,53 @@
     display: inline-block;
   }
 
-  /* İ harfinin üzerindeki nokta tamamen kaldırıldı, yerine kalp konuldu */
+  /* Sadece kalbin yanıp sönmesi (nefes alması) sağlanmıştır */
   .custom-i .heart-shape {
     position: absolute;
-    top: -32px;
+    top: -30px;
     left: 50%;
     transform: translateX(-50%) rotate(-45deg);
-    width: 13px;
-    height: 13px;
+    width: 12px;
+    height: 12px;
     background-color: transparent;
-    border-top: 3px solid var(--blood-red);
-    border-left: 3px solid var(--blood-red);
-    animation: slowHeartPulse 5s infinite ease-in-out;
+    border-top: 2.5px solid var(--blood-red);
+    border-left: 2.5px solid var(--blood-red);
+    animation: slowHeartPulse 3s infinite ease-in-out;
   }
 
   .custom-i .heart-shape::before,
   .custom-i .heart-shape::after {
     content: "";
     position: absolute;
-    width: 13px;
-    height: 13px;
+    width: 12px;
+    height: 12px;
     background-color: transparent;
     border-radius: 50%;
   }
 
   .custom-i .heart-shape::before {
-    top: -8px;
-    left: -3px;
-    border-top: 3px solid var(--blood-red);
-    border-left: 3px solid var(--blood-red);
-    border-right: 3px solid transparent;
-    border-bottom: 3px solid transparent;
+    top: -7px;
+    left: -2.5px;
+    border-top: 2.5px solid var(--blood-red);
+    border-left: 2.5px solid var(--blood-red);
+    border-right: 2.5px solid transparent;
+    border-bottom: 2.5px solid transparent;
   }
 
   .custom-i .heart-shape::after {
-    left: -3px;
-    top: -8px;
+    left: -2.5px;
+    top: -7px;
     transform: rotate(90deg);
   }
 
   @keyframes slowHeartPulse {
     0%, 100% {
-      opacity: 0.5;
-      filter: drop-shadow(0 0 2px rgba(255,26,26,0.3));
+      transform: translateX(-50%) rotate(-45deg) scale(0.85);
+      filter: drop-shadow(0 0 2px rgba(255,42,42,0.3));
     }
     50% {
-      opacity: 1;
-      filter: drop-shadow(0 0 10px rgba(255,26,26,0.9));
+      transform: translateX(-50%) rotate(-45deg) scale(1.2);
+      filter: drop-shadow(0 0 12px rgba(255,42,42,0.95));
     }
   }
 
@@ -192,7 +176,7 @@
     font-size: 0.75rem; 
     letter-spacing: 3px; 
     color: var(--gold-light); 
-    margin-top: 10px; 
+    margin-top: 8px; 
     text-transform: uppercase; 
     opacity: 0.85;
     cursor: pointer;
@@ -357,7 +341,7 @@
     padding-left: 10px;
   }
   .active-category-title {
-    font-family: 'Cinzel', serif;
+    font-family: 'Playfair Display', serif;
     font-size: 1.25rem;
     color: var(--gold);
     font-weight: 700;
@@ -396,7 +380,7 @@
     border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.5); 
   }
   .item-content { padding: 10px; display: flex; flex-direction: column; flex-grow: 1; justify-content: center; background: #131010; text-align: center; }
-  .item-title { font-family: 'Cinzel', serif; font-size: 0.85rem; color: var(--gold-light); font-weight: 600; }
+  .item-title { font-family: 'Playfair Display', serif; font-size: 0.85rem; color: var(--gold-light); font-weight: 600; }
 
   .admin-controls {
     display: none;
@@ -456,7 +440,7 @@
     position: fixed; top: 0; left: 0; width: 100%; height: 100%;
     background: rgba(5,3,3,0.95); z-index: 9999; display: flex;
     flex-direction: column; align-items: center; justify-content: center;
-    color: var(--gold); font-family: 'Cinzel', serif; font-size: 1.1rem;
+    color: var(--gold); font-family: 'Playfair Display', serif; font-size: 1.1rem;
     transition: opacity 0.5s ease;
   }
 </style>
@@ -472,7 +456,7 @@
   
   <div class="header">
     <div class="logo-wrapper" onclick="handleLogoClicks()" title="Yönetici Girişi İçin 3 Kez Tıklayın">
-      <span class="logo-line-1">SEY<span class="custom-i">İ<i class="heart-shape"></i></span>R</span>
+      <span class="logo-line-1">Sey<span class="custom-i">i<i class="heart-shape"></i></span>r</span>
       <span class="logo-line-2">CAFE</span>
     </div>
     <p id="headerSubtitle" onclick="editSubtitle()" title="Alt Yazıyı Değiştir">Lounge & Gourmet Experience</p>
@@ -513,7 +497,7 @@
   <div id="menuGrid" class="grid"></div>
 
   <div id="quickAddSection" class="quick-add-section">
-    <h4 style="color:var(--gold); margin-bottom:8px; font-family:'Cinzel', serif; font-size:0.95rem;" id="quickAddTitle">+ Kategoriye Ürün Ekle</h4>
+    <h4 style="color:var(--gold); margin-bottom:8px; font-family:'Playfair Display', serif; font-size:0.95rem;" id="quickAddTitle">+ Kategoriye Ürün Ekle</h4>
     <input type="text" id="qAddName" class="admin-input" placeholder="Ürün Adı">
     <input type="text" id="qAddPrice" class="admin-input" placeholder="Fiyat (Örn: 200 TL)">
     <input type="file" id="qAddFile" class="admin-input" accept="image/*">
