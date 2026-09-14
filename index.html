@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Seyir Cafe - Dijital Menü</title>
-<link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Playfair+Display:ital,wght@0,600;0,700;1,600&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,600&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
 <!-- Firebase SDK -->
@@ -86,7 +86,7 @@
     100% { opacity: 1; transform: scale(1) translateY(0); }
   }
 
-  /* Daha samimi ve zarif logo tasarımı */
+  /* Tek satır sade blok harf logo tasarımı */
   .logo-wrapper {
     display: inline-block;
     cursor: pointer;
@@ -95,80 +95,35 @@
     text-align: center;
   }
 
-  .logo-line-1 {
-    font-family: 'Great Vibes', cursive;
-    font-size: 3.8rem;
-    color: var(--blood-red);
-    line-height: 1.1;
-    display: block;
-    text-shadow: 0 0 15px rgba(255, 42, 42, 0.35);
-  }
-
-  .logo-line-2 {
+  .logo-text-single {
     font-family: 'Playfair Display', serif;
-    font-size: 1.6rem;
+    font-size: 2.6rem;
     font-weight: 700;
-    letter-spacing: 8px;
+    letter-spacing: 5px;
     text-transform: uppercase;
     color: var(--blood-red);
     display: block;
-    margin-top: -5px;
-    margin-left: 6px;
-    text-shadow: 0 0 12px rgba(255, 42, 42, 0.3);
+    text-shadow: 0 0 15px rgba(255, 42, 42, 0.4);
   }
 
-  .custom-i {
-    position: relative;
+  /* Çok yavaş yanıp sönen kalp efekti */
+  .header-heart {
     display: inline-block;
+    color: var(--blood-red);
+    margin: 0 6px;
+    animation: verySlowPulse 5s infinite ease-in-out;
   }
 
-  /* Sadece kalbin yanıp sönmesi (nefes alması) sağlanmıştır */
-  .custom-i .heart-shape {
-    position: absolute;
-    top: -30px;
-    left: 50%;
-    transform: translateX(-50%) rotate(-45deg);
-    width: 12px;
-    height: 12px;
-    background-color: transparent;
-    border-top: 2.5px solid var(--blood-red);
-    border-left: 2.5px solid var(--blood-red);
-    animation: slowHeartPulse 3s infinite ease-in-out;
-  }
-
-  .custom-i .heart-shape::before,
-  .custom-i .heart-shape::after {
-    content: "";
-    position: absolute;
-    width: 12px;
-    height: 12px;
-    background-color: transparent;
-    border-radius: 50%;
-  }
-
-  .custom-i .heart-shape::before {
-    top: -7px;
-    left: -2.5px;
-    border-top: 2.5px solid var(--blood-red);
-    border-left: 2.5px solid var(--blood-red);
-    border-right: 2.5px solid transparent;
-    border-bottom: 2.5px solid transparent;
-  }
-
-  .custom-i .heart-shape::after {
-    left: -2.5px;
-    top: -7px;
-    transform: rotate(90deg);
-  }
-
-  @keyframes slowHeartPulse {
+  @keyframes verySlowPulse {
     0%, 100% {
-      transform: translateX(-50%) rotate(-45deg) scale(0.85);
-      filter: drop-shadow(0 0 2px rgba(255,42,42,0.3));
+      opacity: 0.2;
+      transform: scale(0.9);
+      filter: drop-shadow(0 0 2px rgba(255,42,42,0.2));
     }
     50% {
-      transform: translateX(-50%) rotate(-45deg) scale(1.2);
-      filter: drop-shadow(0 0 12px rgba(255,42,42,0.95));
+      opacity: 1;
+      transform: scale(1.15);
+      filter: drop-shadow(0 0 12px rgba(255,42,42,0.8));
     }
   }
 
@@ -361,16 +316,6 @@
   }
   .menu-item:hover { transform: translateY(-3px); }
 
-  .anim-1 { animation: animSlideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-  .anim-2 { animation: animFadeScale 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-  .anim-3 { animation: animSlideRight 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-  .anim-4 { animation: animRotateIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-
-  @keyframes animSlideUp { from { opacity: 0; transform: translateY(35px); } to { opacity: 1; transform: translateY(0); } }
-  @keyframes animFadeScale { from { opacity: 0; transform: scale(0.8); } to { opacity: 1; transform: scale(1); } }
-  @keyframes animSlideRight { from { opacity: 0; transform: translateX(-35px); } to { opacity: 1; transform: translateX(0); } }
-  @keyframes animRotateIn { from { opacity: 0; transform: rotate(-4deg) scale(0.9); } to { opacity: 1; transform: rotate(0) scale(1); } }
-
   .item-img-wrapper { position: relative; width: 100%; height: 130px; background: #000; }
   .item-img { width: 100%; height: 100%; object-fit: cover; }
   .item-badge { 
@@ -456,8 +401,7 @@
   
   <div class="header">
     <div class="logo-wrapper" onclick="handleLogoClicks()" title="Yönetici Girişi İçin 3 Kez Tıklayın">
-      <span class="logo-line-1">Sey<span class="custom-i">i<i class="heart-shape"></i></span>r</span>
-      <span class="logo-line-2">CAFE</span>
+      <span class="logo-text-single">SEYİR <i class="fa-solid fa-heart header-heart"></i> CAFE</span>
     </div>
     <p id="headerSubtitle" onclick="editSubtitle()" title="Alt Yazıyı Değiştir">Lounge & Gourmet Experience</p>
     
@@ -905,54 +849,18 @@
       };
       reader.readAsDataURL(fileInput.files[0]);
     } else {
-      saveNewProduct(name, price, currentCategory, "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=500&q=80");
+      saveNewProduct(name, price, currentCategory, "https://images.unsplash.com/photo-1544787219-7f47ccb76574?w=500&q=80");
     }
   }
 
   function saveNewProduct(name, price, category, img) {
-    allProducts.unshift({ name, price, category, img });
+    allProducts.push({ name, price, category, img });
+    saveProductsToFirebase();
+    renderProducts();
     document.getElementById('qAddName').value = '';
     document.getElementById('qAddPrice').value = '';
     document.getElementById('qAddFile').value = '';
-    
-    saveProductsToFirebase();
-    renderProducts();
-    alert("Ürün başarıyla buluta eklendi!");
-  }
-
-  function updateProductName(globalIdx) {
-    const newName = prompt("Ürün Adını Düzenle:", allProducts[globalIdx].name);
-    if (newName !== null && newName.trim() !== "") {
-      allProducts[globalIdx].name = newName.trim();
-      saveProductsToFirebase();
-      renderProducts();
-    }
-  }
-
-  function updateProductPrice(globalIdx) {
-    const newPrice = prompt("Fiyatı Düzenle (Örn: 200 TL):", allProducts[globalIdx].price);
-    if (newPrice !== null && newPrice.trim() !== "") {
-      allProducts[globalIdx].price = newPrice.trim();
-      saveProductsToFirebase();
-      renderProducts();
-    }
-  }
-
-  function updateProductImage(globalIdx) {
-    const fileInput = document.createElement('input');
-    fileInput.type = 'file';
-    fileInput.accept = 'image/*';
-    fileInput.onchange = e => {
-      const file = e.target.files[0];
-      const reader = new FileReader();
-      reader.onload = function(event) {
-        allProducts[globalIdx].img = event.target.result;
-        saveProductsToFirebase();
-        renderProducts();
-      };
-      reader.readAsDataURL(file);
-    };
-    fileInput.click();
+    alert("Ürün başarıyla eklendi!");
   }
 
   function deleteProduct(globalIdx) {
@@ -963,105 +871,132 @@
     }
   }
 
-  function renderCategories() {
-    const bar = document.getElementById('categoriesBar');
-    let html = `
-      <div class="cat-card-wrapper">
-        <div class="cat-btn ${currentCategory === 'Tümü' ? 'active' : ''}" style="background-image:url('https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=500&q=80')" onclick="filterCategory('Tümü')">
-          <span>Tümü</span>
-        </div>
-      </div>
-    `;
-
-    categoriesData.forEach((cat, index) => {
-      html += `
-        <div class="cat-card-wrapper">
-          <div class="cat-btn ${currentCategory === cat.name ? 'active' : ''}" style="background-image:url('${cat.img}')" onclick="filterCategory('${cat.name}')">
-            <span>${cat.name}</span>
-          </div>
-          <div class="admin-cat-actions">
-            <button class="cat-order-btn" onclick="moveCategory(${index}, -1)"><i class="fa-solid fa-chevron-left"></i></button>
-            <button class="cat-order-btn" onclick="moveCategory(${index}, 1)"><i class="fa-solid fa-chevron-right"></i></button>
-          </div>
-        </div>
-      `;
-    });
-
-    html += `
-      <div class="add-cat-card" onclick="addNewCategory()">
-        <i class="fa-solid fa-plus" style="font-size:1.1rem; margin-bottom:3px;"></i>
-        <span>Kategori Ekle</span>
-      </div>
-    `;
-
-    bar.innerHTML = html;
+  function deleteCurrentCategory() {
+    if (currentCategory === 'Tümü') return;
+    if (confirm(`"${currentCategory}" kategorisini ve içindeki tüm ürünleri silmek istiyor musunuz?`)) {
+      allProducts = allProducts.filter(p => p.category !== currentCategory);
+      categoriesData = categoriesData.filter(c => c.name !== currentCategory);
+      currentCategory = 'Tümü';
+      saveCategoriesToFirebase();
+      saveProductsToFirebase();
+      renderCategories();
+      renderProducts();
+    }
   }
 
-  function filterCategory(catName) {
-    currentCategory = catName;
-    document.getElementById('activeCategoryTitle').innerText = catName;
-    
-    const editArea = document.getElementById('categoryEditArea');
-    const quickTitle = document.getElementById('quickAddTitle');
+  function renderCategories() {
+    const bar = document.getElementById('categoriesBar');
+    bar.innerHTML = '';
 
-    if (isAdminMode && catName !== 'Tümü') {
-      editArea.innerHTML = `
-        <button class="btn btn-gold" style="font-size:0.75rem; padding:4px 8px; margin-right:4px;" onclick="editCurrentCategory()"><i class="fa-solid fa-pen"></i> Adı Değiştir</button>
-        <button class="btn btn-gold" style="font-size:0.75rem; padding:4px 8px;" onclick="changeCategoryBgImg()"><i class="fa-solid fa-image"></i> Görseli Değiştir</button>
-      `;
-      quickTitle.innerText = `+ "${catName}" Kategorisine Ürün Ekle`;
-    } else {
-      editArea.innerHTML = '';
-      quickTitle.innerText = `+ Kategoriye Ürün Ekle`;
+    // "Tümü" Butonu
+    const allWrapper = document.createElement('div');
+    allWrapper.className = 'cat-card-wrapper';
+    const allBtn = document.createElement('div');
+    allBtn.className = `cat-btn ${currentCategory === 'Tümü' ? 'active' : ''}`;
+    allBtn.style.backgroundImage = `url('https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=500&q=80')`;
+    allBtn.innerHTML = `<span>Tümü</span>`;
+    allBtn.onclick = () => { currentCategory = 'Tümü'; renderCategories(); renderProducts(); };
+    allWrapper.appendChild(allBtn);
+    bar.appendChild(allWrapper);
+
+    categoriesData.forEach((cat, idx) => {
+      const wrapper = document.createElement('div');
+      wrapper.className = 'cat-card-wrapper';
+
+      const btn = document.createElement('div');
+      btn.className = `cat-btn ${currentCategory === cat.name ? 'active' : ''}`;
+      btn.style.backgroundImage = `url('${cat.img}')`;
+      btn.innerHTML = `<span>${cat.name}</span>`;
+      btn.onclick = () => { currentCategory = cat.name; renderCategories(); renderProducts(); };
+      wrapper.appendChild(btn);
+
+      if (isAdminMode) {
+        const actions = document.createElement('div');
+        actions.className = 'admin-cat-actions';
+        
+        const leftBtn = document.createElement('button');
+        leftBtn.className = 'cat-order-btn';
+        leftBtn.innerHTML = '<i class="fa-solid fa-chevron-left"></i>';
+        leftBtn.onclick = (e) => { e.stopPropagation(); moveCategory(idx, -1); };
+
+        const rightBtn = document.createElement('button');
+        rightBtn.className = 'cat-order-btn';
+        rightBtn.innerHTML = '<i class="fa-solid fa-chevron-right"></i>';
+        rightBtn.onclick = (e) => { e.stopPropagation(); moveCategory(idx, 1); };
+
+        actions.appendChild(leftBtn);
+        actions.appendChild(rightBtn);
+        wrapper.appendChild(actions);
+      }
+
+      bar.appendChild(wrapper);
+    });
+
+    if (isAdminMode) {
+      const addCard = document.createElement('div');
+      addCard.className = 'add-cat-card';
+      addCard.innerHTML = '<i class="fa-solid fa-plus" style="font-size:1.1rem; margin-bottom:3px;"></i><span>Kategori Ekle</span>';
+      addCard.onclick = addNewCategory;
+      bar.appendChild(addCard);
     }
 
-    renderCategories();
-    renderProducts();
+    const titleEl = document.getElementById('activeCategoryTitle');
+    titleEl.innerText = currentCategory;
+
+    const editArea = document.getElementById('categoryEditArea');
+    editArea.innerHTML = '';
+    if (isAdminMode && currentCategory !== 'Tümü') {
+      editArea.innerHTML = `
+        <div style="display:flex; gap:6px;">
+          <button class="btn btn-gold" style="padding:4px 8px; font-size:0.7rem;" onclick="editCurrentCategory()" title="Kategori Adını Düzenle"><i class="fa-solid fa-pen"></i></button>
+          <button class="btn btn-gold" style="padding:4px 8px; font-size:0.7rem;" onclick="changeCategoryBgImg()" title="Görseli Değiştir"><i class="fa-solid fa-image"></i></button>
+          <button class="btn" style="background:var(--danger); color:#fff; padding:4px 8px; font-size:0.7rem;" onclick="deleteCurrentCategory()" title="Kategoriyi Sil"><i class="fa-solid fa-trash"></i></button>
+        </div>
+      `;
+      document.getElementById('quickAddTitle').innerText = `+ "${currentCategory}" Kategorisine Ürün Ekle`;
+    }
   }
 
   function renderProducts() {
     const grid = document.getElementById('menuGrid');
-    let html = '';
+    grid.innerHTML = '';
 
     const filtered = currentCategory === 'Tümü' 
       ? allProducts 
       : allProducts.filter(p => p.category === currentCategory);
 
     if (filtered.length === 0) {
-      grid.innerHTML = `<div style="grid-column: 1/-1; text-align:center; padding:30px; color:#777;">Bu kategoride henüz ürün bulunmuyor.</div>`;
+      grid.innerHTML = `<div style="grid-column: 1 / -1; text-align:center; padding:30px; color:var(--text-muted); font-style:italic;">Bu kategoride henüz ürün bulunmuyor.</div>`;
       return;
     }
 
-    filtered.forEach((product, idx) => {
+    filtered.forEach((product, filteredIdx) => {
       const globalIdx = allProducts.indexOf(product);
-      const animClass = `anim-${(idx % 4) + 1}`;
+      const animClass = `anim-${(globalIdx % 4) + 1}`;
 
-      html += `
-        <div class="menu-item ${animClass}">
+      const card = document.createElement('div');
+      card.className = `menu-item ${animClass}`;
+
+      card.innerHTML = `
+        <div class="item-img-wrapper">
+          <img src="${product.img}" class="item-img" alt="${product.name}" loading="lazy">
+          <div class="item-badge">${product.price}</div>
+          
           <div class="admin-controls">
-            <div class="admin-btn-icon" onclick="updateProductName(${globalIdx})" title="Adı Düzenle"><i class="fa-solid fa-pen"></i></div>
-            <div class="admin-btn-icon" onclick="updateProductPrice(${globalIdx})" title="Fiyatı Düzenle"><i class="fa-solid fa-tag"></i></div>
-            <div class="admin-btn-icon" onclick="updateProductImage(${globalIdx})" title="Görseli Değiştir"><i class="fa-solid fa-image"></i></div>
             <div class="admin-btn-icon delete" onclick="deleteProduct(${globalIdx})" title="Ürünü Sil"><i class="fa-solid fa-trash"></i></div>
           </div>
-          
-          <div class="admin-product-order">
-            <div class="prod-order-btn" onclick="moveProduct(${globalIdx}, -1)"><i class="fa-solid fa-chevron-left"></i></div>
-            <div class="prod-order-btn" onclick="moveProduct(${globalIdx}, 1)"><i class="fa-solid fa-chevron-right"></i></div>
-          </div>
 
-          <div class="item-img-wrapper">
-            <img src="${product.img}" class="item-img" alt="${product.name}" loading="lazy">
-            <div class="item-badge">${product.price}</div>
-          </div>
-          <div class="item-content">
-            <div class="item-title">${product.name}</div>
+          <div class="admin-product-order">
+            <button class="prod-order-btn" onclick="moveProduct(${globalIdx}, -1)" title="Sola/Üste Taşı"><i class="fa-solid fa-chevron-left"></i></button>
+            <button class="prod-order-btn" onclick="moveProduct(${globalIdx}, 1)" title="Sağa/Alta Taşı"><i class="fa-solid fa-chevron-right"></i></button>
           </div>
         </div>
+        <div class="item-content">
+          <div class="item-title">${product.name}</div>
+        </div>
       `;
+      grid.appendChild(card);
     });
-
-    grid.innerHTML = html;
   }
 </script>
 </body>
