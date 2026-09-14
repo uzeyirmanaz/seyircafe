@@ -86,7 +86,6 @@
     100% { opacity: 1; transform: scale(1) translateY(0); }
   }
 
-  /* Tek satır sade blok harf logo tasarımı */
   .logo-wrapper {
     display: inline-block;
     cursor: pointer;
@@ -106,7 +105,6 @@
     text-shadow: 0 0 15px rgba(255, 42, 42, 0.4);
   }
 
-  /* Çok yavaş yanıp sönen kalp efekti */
   .header-heart {
     display: inline-block;
     color: var(--blood-red);
@@ -406,9 +404,10 @@
     <p id="headerSubtitle" onclick="editSubtitle()" title="Alt Yazıyı Değiştir">Lounge & Gourmet Experience</p>
     
     <div class="brand-social-bar">
-      <div id="instagramBtnWrapper" class="social-logo-btn" onclick="handleInstagramClick()" title="Instagram Hesabı">
+      <!-- Instagram Direkt Takip Butonu -->
+      <a href="https://www.instagram.com/seyircafe.21?igsh=MWJqbTZqZ2FmY3A2YQ==" target="_blank" id="instagramBtnWrapper" class="social-logo-btn" title="Instagram'da Takip Et">
         <i class="fa-brands fa-instagram"></i>
-      </div>
+      </a>
       
       <div class="wifi-logo-container">
         <div class="social-logo-btn" onclick="handleWifiClick()" title="Wi-Fi Şifresini Kopyala">
@@ -419,13 +418,15 @@
         </div>
       </div>
 
-      <div class="social-logo-btn" onclick="handleMapClick()" title="Google Maps Konumu">
+      <!-- Google Maps Doğrudan 5 Yıldız / Yorum Paneli -->
+      <a href="https://search.google.com/local/writereview?placeid=ChIJg8i4VfRGFBUROl168Lp13j8" target="_blank" class="social-logo-btn" title="Google Haritalar'da 5 Yıldız Ver">
         <i class="fa-solid fa-location-dot"></i>
-      </div>
+      </a>
 
-      <div id="tiktokBtnWrapper" class="social-logo-btn" onclick="handleTiktokClick()" title="TikTok Hesabı">
+      <!-- TikTok Direkt Takip Butonu -->
+      <a href="https://www.tiktok.com/@seyircafe21?_t=8n...&_r=1" target="_blank" id="tiktokBtnWrapper" class="social-logo-btn" title="TikTok'ta Takip Et">
         <i class="fa-brands fa-tiktok"></i>
-      </div>
+      </a>
     </div>
   </div>
 
@@ -466,9 +467,6 @@
   let allProducts = [];
   let wifiPassword = "Seyir2121";
   let subtitleText = "Lounge & Gourmet Experience";
-  let instagramUrl = "https://www.instagram.com/seyircafe.21";
-  let tiktokUrl = "https://www.tiktok.com/@seyircafe21";
-  let mapsUrl = "https://maps.app.goo.gl/NapPwzjDeeR3TDjE8";
 
   const TARGET_PASS = "1171";
   let failedAttempts = 0;
@@ -477,10 +475,6 @@
 
   let logoClickCount = 0;
   let logoClickTimer = null;
-  let igClickCount = 0;
-  let igClickTimer = null;
-  let tkClickCount = 0;
-  let tkClickTimer = null;
 
   const defaultCategories = [
     { name: "Sıcak İçecekler", img: "https://images.unsplash.com/photo-1544787219-7f47ccb76574?w=500&q=80" },
@@ -533,471 +527,4 @@
       }
 
       if (cloudData.settings) {
-        if (cloudData.settings.wifi) {
-          wifiPassword = cloudData.settings.wifi;
-          document.getElementById('wifiPassText').innerText = wifiPassword;
-        }
-        if (cloudData.settings.subtitle) {
-          subtitleText = cloudData.settings.subtitle;
-          document.getElementById('headerSubtitle').innerText = subtitleText;
-        }
-        if (cloudData.settings.instagram) {
-          instagramUrl = cloudData.settings.instagram;
-        }
-        if (cloudData.settings.tiktok) {
-          tiktokUrl = cloudData.settings.tiktok;
-        }
-        if (cloudData.settings.maps) {
-          mapsUrl = cloudData.settings.maps;
-        }
-      }
-
-    } catch (e) {
-      console.error("Firebase yükleme hatası:", e);
-      categoriesData = defaultCategories;
-      allProducts = defaultProducts;
-    } finally {
-      const overlay = document.getElementById('loadingOverlay');
-      if(overlay) {
-        overlay.style.opacity = '0';
-        setTimeout(() => overlay.remove(), 500);
-      }
-      renderCategories();
-      renderProducts();
-    }
-  }
-
-  async function saveCategoriesToFirebase() {
-    try {
-      await window.dbTools.setDoc(window.dbTools.doc(window.db, "menu_data", "categories"), { list: categoriesData });
-    } catch (e) { console.error(e); }
-  }
-
-  async function saveProductsToFirebase() {
-    try {
-      await window.dbTools.setDoc(window.dbTools.doc(window.db, "menu_data", "products"), { list: allProducts });
-    } catch (e) { console.error(e); }
-  }
-
-  async function saveSettingsToFirebase() {
-    try {
-      await window.dbTools.setDoc(window.dbTools.doc(window.db, "menu_data", "settings"), { 
-        wifi: wifiPassword, 
-        subtitle: subtitleText, 
-        instagram: instagramUrl, 
-        tiktok: tiktokUrl,
-        maps: mapsUrl
-      });
-    } catch (e) { console.error(e); }
-  }
-
-  function handleLogoClicks() {
-    logoClickCount++;
-    if (logoClickTimer) clearTimeout(logoClickTimer);
-
-    if (logoClickCount >= 3) {
-      logoClickCount = 0;
-      toggleLoginBox();
-      return;
-    }
-
-    logoClickTimer = setTimeout(() => {
-      logoClickCount = 0;
-    }, 600);
-  }
-
-  function toggleLoginBox() {
-    if (isAdminMode) {
-      isAdminMode = false;
-      document.getElementById('bodyTag').classList.remove('admin-mode');
-      document.getElementById('lockIcon').className = "fa-solid fa-lock";
-      alert("Yönetici modu kapatıldı.");
-      renderCategories();
-      renderProducts();
-      return;
-    }
-    document.getElementById('loginBox').classList.toggle('open');
-  }
-
-  function checkPassword() {
-    const input = document.getElementById('passInput').value;
-    const errDiv = document.getElementById('loginError');
-
-    if (failedAttempts >= 5) {
-      errDiv.style.display = 'block';
-      errDiv.innerText = "ÜZEYİR MANAZ ile iletişime geçin";
-      return;
-    }
-
-    if (input === TARGET_PASS) {
-      failedAttempts = 0;
-      isAdminMode = true;
-      document.getElementById('bodyTag').classList.add('admin-mode');
-      document.getElementById('loginBox').classList.remove('open');
-      document.getElementById('lockIcon').className = "fa-solid fa-lock-open";
-      errDiv.style.display = 'none';
-      document.getElementById('passInput').value = '';
-      renderCategories();
-      renderProducts();
-    } else {
-      failedAttempts++;
-      errDiv.style.display = 'block';
-      if (failedAttempts >= 5) {
-        errDiv.innerText = "ÜZEYİR MANAZ ile iletişime geçin";
-      } else {
-        errDiv.innerText = `Hatalı şifre! Kalan hak: ${5 - failedAttempts}`;
-      }
-    }
-  }
-
-  function handleWifiClick() {
-    if (isAdminMode) {
-      const newWifi = prompt("Yeni Wi-Fi Şifresini Girin:", wifiPassword);
-      if (newWifi !== null && newWifi.trim() !== "") {
-        wifiPassword = newWifi.trim();
-        document.getElementById('wifiPassText').innerText = wifiPassword;
-        saveSettingsToFirebase();
-        alert("Wi-Fi şifresi güncellendi!");
-      }
-    } else {
-      navigator.clipboard.writeText(wifiPassword).then(() => {
-        const popup = document.getElementById('wifiPopup');
-        document.getElementById('wifiPassText').innerText = wifiPassword + " (Kopyalandı!)";
-        popup.classList.add('open');
-        setTimeout(() => {
-          popup.classList.remove('open');
-          document.getElementById('wifiPassText').innerText = wifiPassword;
-        }, 2000);
-      }).catch(err => {
-        const popup = document.getElementById('wifiPopup');
-        popup.classList.add('open');
-        setTimeout(() => popup.classList.remove('open'), 2000);
-      });
-    }
-  }
-
-  function handleMapClick() {
-    if (isAdminMode) {
-      const newMap = prompt("Google Maps Konum Linkini Güncelle:", mapsUrl);
-      if (newMap !== null && newMap.trim() !== "") {
-        mapsUrl = newMap.trim();
-        saveSettingsToFirebase();
-        alert("Harita konumu güncellendi!");
-      }
-    } else {
-      window.open(mapsUrl, '_blank');
-    }
-  }
-
-  function handleInstagramClick() {
-    if (isAdminMode) {
-      igClickCount++;
-      if (igClickTimer) clearTimeout(igClickTimer);
-
-      if (igClickCount >= 5) {
-        igClickCount = 0;
-        const newIg = prompt("Instagram Linkini Güncelle:", instagramUrl);
-        if (newIg !== null && newIg.trim() !== "") {
-          instagramUrl = newIg.trim();
-          saveSettingsToFirebase();
-          alert("Instagram adresi güncellendi!");
-        }
-        return;
-      }
-
-      igClickTimer = setTimeout(() => {
-        igClickCount = 0;
-      }, 600);
-    } else {
-      window.open(instagramUrl, '_blank');
-    }
-  }
-
-  function handleTiktokClick() {
-    if (isAdminMode) {
-      tkClickCount++;
-      if (tkClickTimer) clearTimeout(tkClickTimer);
-
-      if (tkClickCount >= 5) {
-        tkClickCount = 0;
-        const newTk = prompt("TikTok Linkini Güncelle:", tiktokUrl);
-        if (newTk !== null && newTk.trim() !== "") {
-          tiktokUrl = newTk.trim();
-          saveSettingsToFirebase();
-          alert("TikTok adresi güncellendi!");
-        }
-        return;
-      }
-
-      tkClickTimer = setTimeout(() => {
-        tkClickCount = 0;
-      }, 600);
-    } else {
-      window.open(tiktokUrl, '_blank');
-    }
-  }
-
-  function editSubtitle() {
-    if (!isAdminMode) return;
-    const newSub = prompt("Logo Altındaki Yazıyı Düzenle:", subtitleText);
-    if (newSub !== null && newSub.trim() !== "") {
-      subtitleText = newSub.trim();
-      document.getElementById('headerSubtitle').innerText = subtitleText;
-      saveSettingsToFirebase();
-    }
-  }
-
-  function moveCategory(index, direction) {
-    const targetIdx = index + direction;
-    if (targetIdx < 0 || targetIdx >= categoriesData.length) return;
-    const temp = categoriesData[index];
-    categoriesData[index] = categoriesData[targetIdx];
-    categoriesData[targetIdx] = temp;
-    saveCategoriesToFirebase();
-    renderCategories();
-  }
-
-  function moveProduct(globalIdx, direction) {
-    const targetIdx = globalIdx + direction;
-    if (targetIdx < 0 || targetIdx >= allProducts.length) return;
-    const temp = allProducts[globalIdx];
-    allProducts[globalIdx] = allProducts[targetIdx];
-    allProducts[targetIdx] = temp;
-    saveProductsToFirebase();
-    renderProducts();
-  }
-
-  function addNewCategory() {
-    const catName = prompt("Yeni Kategori Adı (Örn: Tatlılar):");
-    if (!catName || catName.trim() === "") return;
-
-    if (categoriesData.some(c => c.name.toLowerCase() === catName.trim().toLowerCase())) {
-      return alert("Bu isimde bir kategori zaten mevcut!");
-    }
-
-    const fileInput = document.createElement('input');
-    fileInput.type = 'file';
-    fileInput.accept = 'image/*';
-    fileInput.onchange = e => {
-      const file = e.target.files[0];
-      const reader = new FileReader();
-      reader.onload = function(event) {
-        categoriesData.push({ name: catName.trim(), img: event.target.result });
-        saveCategoriesToFirebase();
-        renderCategories();
-        alert(`"${catName.trim()}" kategorisi başarıyla eklendi!`);
-      };
-      reader.readAsDataURL(file);
-    };
-    fileInput.click();
-  }
-
-  function editCurrentCategory() {
-    if (currentCategory === 'Tümü') return;
-    const catObj = categoriesData.find(c => c.name === currentCategory);
-    if (!catObj) return;
-
-    const newName = prompt("Yeni Kategori Adı:", catObj.name);
-    if (!newName || newName.trim() === "") return;
-
-    allProducts.forEach(p => {
-      if (p.category === catObj.name) p.category = newName.trim();
-    });
-
-    catObj.name = newName.trim();
-    currentCategory = newName.trim();
-    
-    saveCategoriesToFirebase();
-    saveProductsToFirebase();
-    renderCategories();
-    renderProducts();
-  }
-
-  function changeCategoryBgImg() {
-    if (currentCategory === 'Tümü') return;
-    const catObj = categoriesData.find(c => c.name === currentCategory);
-    if (!catObj) return;
-
-    const fileInput = document.createElement('input');
-    fileInput.type = 'file';
-    fileInput.accept = 'image/*';
-    fileInput.onchange = e => {
-      const file = e.target.files[0];
-      const reader = new FileReader();
-      reader.onload = function(event) {
-        catObj.img = event.target.result;
-        saveCategoriesToFirebase();
-        renderCategories();
-      };
-      reader.readAsDataURL(file);
-    };
-    fileInput.click();
-  }
-
-  function quickAddProductToCurrentCategory() {
-    if (currentCategory === 'Tümü') return alert("Lütfen ürün eklemek için bir kategori seçin!");
-    const name = document.getElementById('qAddName').value.trim();
-    const price = document.getElementById('qAddPrice').value.trim();
-    const fileInput = document.getElementById('qAddFile');
-
-    if (!name || !price) return alert("Ürün adı ve fiyatı zorunludur!");
-
-    if (fileInput.files.length > 0) {
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        saveNewProduct(name, price, currentCategory, e.target.result);
-      };
-      reader.readAsDataURL(fileInput.files[0]);
-    } else {
-      saveNewProduct(name, price, currentCategory, "https://images.unsplash.com/photo-1544787219-7f47ccb76574?w=500&q=80");
-    }
-  }
-
-  function saveNewProduct(name, price, category, img) {
-    allProducts.push({ name, price, category, img });
-    saveProductsToFirebase();
-    renderProducts();
-    document.getElementById('qAddName').value = '';
-    document.getElementById('qAddPrice').value = '';
-    document.getElementById('qAddFile').value = '';
-    alert("Ürün başarıyla eklendi!");
-  }
-
-  function deleteProduct(globalIdx) {
-    if (confirm("Bu ürünü silmek istediğinize emin misiniz?")) {
-      allProducts.splice(globalIdx, 1);
-      saveProductsToFirebase();
-      renderProducts();
-    }
-  }
-
-  function deleteCurrentCategory() {
-    if (currentCategory === 'Tümü') return;
-    if (confirm(`"${currentCategory}" kategorisini ve içindeki tüm ürünleri silmek istiyor musunuz?`)) {
-      allProducts = allProducts.filter(p => p.category !== currentCategory);
-      categoriesData = categoriesData.filter(c => c.name !== currentCategory);
-      currentCategory = 'Tümü';
-      saveCategoriesToFirebase();
-      saveProductsToFirebase();
-      renderCategories();
-      renderProducts();
-    }
-  }
-
-  function renderCategories() {
-    const bar = document.getElementById('categoriesBar');
-    bar.innerHTML = '';
-
-    // "Tümü" Butonu
-    const allWrapper = document.createElement('div');
-    allWrapper.className = 'cat-card-wrapper';
-    const allBtn = document.createElement('div');
-    allBtn.className = `cat-btn ${currentCategory === 'Tümü' ? 'active' : ''}`;
-    allBtn.style.backgroundImage = `url('https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=500&q=80')`;
-    allBtn.innerHTML = `<span>Tümü</span>`;
-    allBtn.onclick = () => { currentCategory = 'Tümü'; renderCategories(); renderProducts(); };
-    allWrapper.appendChild(allBtn);
-    bar.appendChild(allWrapper);
-
-    categoriesData.forEach((cat, idx) => {
-      const wrapper = document.createElement('div');
-      wrapper.className = 'cat-card-wrapper';
-
-      const btn = document.createElement('div');
-      btn.className = `cat-btn ${currentCategory === cat.name ? 'active' : ''}`;
-      btn.style.backgroundImage = `url('${cat.img}')`;
-      btn.innerHTML = `<span>${cat.name}</span>`;
-      btn.onclick = () => { currentCategory = cat.name; renderCategories(); renderProducts(); };
-      wrapper.appendChild(btn);
-
-      if (isAdminMode) {
-        const actions = document.createElement('div');
-        actions.className = 'admin-cat-actions';
-        
-        const leftBtn = document.createElement('button');
-        leftBtn.className = 'cat-order-btn';
-        leftBtn.innerHTML = '<i class="fa-solid fa-chevron-left"></i>';
-        leftBtn.onclick = (e) => { e.stopPropagation(); moveCategory(idx, -1); };
-
-        const rightBtn = document.createElement('button');
-        rightBtn.className = 'cat-order-btn';
-        rightBtn.innerHTML = '<i class="fa-solid fa-chevron-right"></i>';
-        rightBtn.onclick = (e) => { e.stopPropagation(); moveCategory(idx, 1); };
-
-        actions.appendChild(leftBtn);
-        actions.appendChild(rightBtn);
-        wrapper.appendChild(actions);
-      }
-
-      bar.appendChild(wrapper);
-    });
-
-    if (isAdminMode) {
-      const addCard = document.createElement('div');
-      addCard.className = 'add-cat-card';
-      addCard.innerHTML = '<i class="fa-solid fa-plus" style="font-size:1.1rem; margin-bottom:3px;"></i><span>Kategori Ekle</span>';
-      addCard.onclick = addNewCategory;
-      bar.appendChild(addCard);
-    }
-
-    const titleEl = document.getElementById('activeCategoryTitle');
-    titleEl.innerText = currentCategory;
-
-    const editArea = document.getElementById('categoryEditArea');
-    editArea.innerHTML = '';
-    if (isAdminMode && currentCategory !== 'Tümü') {
-      editArea.innerHTML = `
-        <div style="display:flex; gap:6px;">
-          <button class="btn btn-gold" style="padding:4px 8px; font-size:0.7rem;" onclick="editCurrentCategory()" title="Kategori Adını Düzenle"><i class="fa-solid fa-pen"></i></button>
-          <button class="btn btn-gold" style="padding:4px 8px; font-size:0.7rem;" onclick="changeCategoryBgImg()" title="Görseli Değiştir"><i class="fa-solid fa-image"></i></button>
-          <button class="btn" style="background:var(--danger); color:#fff; padding:4px 8px; font-size:0.7rem;" onclick="deleteCurrentCategory()" title="Kategoriyi Sil"><i class="fa-solid fa-trash"></i></button>
-        </div>
-      `;
-      document.getElementById('quickAddTitle').innerText = `+ "${currentCategory}" Kategorisine Ürün Ekle`;
-    }
-  }
-
-  function renderProducts() {
-    const grid = document.getElementById('menuGrid');
-    grid.innerHTML = '';
-
-    const filtered = currentCategory === 'Tümü' 
-      ? allProducts 
-      : allProducts.filter(p => p.category === currentCategory);
-
-    if (filtered.length === 0) {
-      grid.innerHTML = `<div style="grid-column: 1 / -1; text-align:center; padding:30px; color:var(--text-muted); font-style:italic;">Bu kategoride henüz ürün bulunmuyor.</div>`;
-      return;
-    }
-
-    filtered.forEach((product, filteredIdx) => {
-      const globalIdx = allProducts.indexOf(product);
-      const animClass = `anim-${(globalIdx % 4) + 1}`;
-
-      const card = document.createElement('div');
-      card.className = `menu-item ${animClass}`;
-
-      card.innerHTML = `
-        <div class="item-img-wrapper">
-          <img src="${product.img}" class="item-img" alt="${product.name}" loading="lazy">
-          <div class="item-badge">${product.price}</div>
-          
-          <div class="admin-controls">
-            <div class="admin-btn-icon delete" onclick="deleteProduct(${globalIdx})" title="Ürünü Sil"><i class="fa-solid fa-trash"></i></div>
-          </div>
-
-          <div class="admin-product-order">
-            <button class="prod-order-btn" onclick="moveProduct(${globalIdx}, -1)" title="Sola/Üste Taşı"><i class="fa-solid fa-chevron-left"></i></button>
-            <button class="prod-order-btn" onclick="moveProduct(${globalIdx}, 1)" title="Sağa/Alta Taşı"><i class="fa-solid fa-chevron-right"></i></button>
-          </div>
-        </div>
-        <div class="item-content">
-          <div class="item-title">${product.name}</div>
-        </div>
-      `;
-      grid.appendChild(card);
-    });
-  }
-</script>
-</body>
-</html>
+        if (cloudData.settings.wifi) wifiPassword 
