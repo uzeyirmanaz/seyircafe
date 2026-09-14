@@ -37,12 +37,11 @@
     --card-bg: rgba(22, 17, 24, 0.96);
     --gold: #d4af37;
     --gold-light: #fbeccb;
-    --gold-glow: rgba(212, 175, 55, 0.4);
     --text-color: #e5e5e5;
     --text-muted: #999;
     --danger: #e74c3c;
-    --sign-pink: #ff3385; /* Tabelanızdaki canlı pembe tonu */
-    --sign-pink-glow: rgba(255, 51, 133, 0.6);
+    --sign-red: #ff1a1a; /* Tabelanızdaki tam kırmızı tonu */
+    --sign-red-glow: rgba(255, 26, 26, 0.6);
   }
 
   html, body {
@@ -52,7 +51,7 @@
     background-color: var(--bg-color);
     color: var(--text-color);
     font-family: 'Montserrat', sans-serif;
-    background-image: radial-gradient(circle at 50% 0%, #2a0b18 0%, #0b090c 80%);
+    background-image: radial-gradient(circle at 50% 0%, #2a0b0b 0%, #0b090c 80%);
   }
 
   * { box-sizing: border-box !important; }
@@ -70,18 +69,13 @@
   /* Tabela Tarzı Özel Header Alanı */
   .header { 
     text-align: center; 
-    padding: 22px 15px 15px 15px; 
-    background: linear-gradient(135deg, rgba(20, 12, 18, 0.95), rgba(10, 7, 10, 0.98));
-    border: 2px solid rgba(255, 51, 133, 0.35); 
+    padding: 22px 15px 18px 15px; 
+    background: linear-gradient(135deg, rgba(20, 10, 10, 0.95), rgba(10, 7, 7, 0.98));
+    border: 2px solid rgba(255, 26, 26, 0.35); 
     border-radius: 16px;
     margin-bottom: 18px; 
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.6), inset 0 0 15px rgba(255, 51, 133, 0.1);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.6), inset 0 0 15px rgba(255, 26, 26, 0.1);
     position: relative;
-    animation: headerEntrance 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-  }
-  @keyframes headerEntrance {
-    0% { opacity: 0; transform: translateY(-30px) scale(0.95); filter: blur(5px); }
-    100% { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
   }
 
   .header h1 { 
@@ -91,8 +85,10 @@
     letter-spacing: 4px; 
     text-transform: uppercase;
     margin: 0;
-    color: var(--sign-pink);
-    text-shadow: 0 0 15px var(--sign-pink-glow), 0 0 30px rgba(255, 51, 133, 0.3);
+    color: var(--sign-red);
+    text-shadow: 0 0 15px var(--sign-red-glow), 0 0 30px rgba(255, 26, 26, 0.3);
+    cursor: pointer;
+    user-select: none;
   }
   
   .custom-i {
@@ -104,13 +100,13 @@
     top: -13px;
     left: 50%;
     transform: translateX(-50%);
-    color: var(--sign-pink);
+    color: var(--sign-red);
     font-size: 1.05rem;
     animation: pulseHeart 1.5s infinite alternate;
   }
   @keyframes pulseHeart {
-    0% { transform: translateX(-50%) scale(1); filter: drop-shadow(0 0 2px var(--sign-pink-glow)); }
-    100% { transform: translateX(-50%) scale(1.3); filter: drop-shadow(0 0 10px var(--sign-pink)); }
+    0% { transform: translateX(-50%) scale(1); filter: drop-shadow(0 0 2px var(--sign-red-glow)); }
+    100% { transform: translateX(-50%) scale(1.3); filter: drop-shadow(0 0 10px var(--sign-red)); }
   }
 
   .header p { 
@@ -122,46 +118,57 @@
     opacity: 0.9;
   }
 
-  /* Wi-Fi Widget */
-  .wifi-widget {
-    display: inline-flex;
-    flex-direction: column;
+  /* Logo Tarzında 3'lü Sosyal/Wi-Fi Barı (Wi-Fi Ortada) */
+  .brand-social-bar {
+    display: flex;
+    justify-content: center;
     align-items: center;
-    margin-top: 10px;
-    background: rgba(255, 51, 133, 0.08);
-    border: 1px solid rgba(255, 51, 133, 0.25);
-    border-radius: 12px;
-    padding: 6px 14px;
+    gap: 15px;
+    margin-top: 14px;
+  }
+
+  .social-logo-btn {
+    width: 42px; height: 42px;
+    border-radius: 50%;
+    border: 1.5px solid var(--sign-red);
+    background: rgba(255, 26, 26, 0.1);
+    color: var(--sign-red);
+    display: flex; align-items: center; justify-content: center;
+    text-decoration: none;
+    font-size: 1.1rem;
+    transition: all 0.3s;
     cursor: pointer;
-    transition: all 0.3s;
+    box-shadow: 0 0 10px rgba(255, 26, 26, 0.2);
   }
-  .wifi-widget:hover { background: rgba(255, 51, 133, 0.15); }
-  .wifi-icon-row { display: flex; align-items: center; gap: 8px; font-size: 0.8rem; color: var(--gold-light); }
-  .wifi-icon-row i { color: var(--sign-pink); font-size: 0.95rem; }
-  
-  .wifi-details {
-    max-height: 0;
-    overflow: hidden;
-    transition: max-height 0.3s ease-out, margin-top 0.3s ease-out;
-    font-size: 0.8rem;
+  .social-logo-btn:hover {
+    background: var(--sign-red);
     color: #fff;
-    text-align: center;
-  }
-  .wifi-widget.open .wifi-details {
-    max-height: 40px;
-    margin-top: 6px;
+    transform: scale(1.1);
   }
 
-  .social-links { display: flex; justify-content: center; gap: 12px; margin-top: 10px; }
-  .social-icon {
-    width: 34px; height: 34px; border-radius: 50%; border: 1.5px solid var(--sign-pink);
-    background: rgba(255, 51, 133, 0.1); color: var(--sign-pink);
-    display: flex; align-items: center; justify-content: center; text-decoration: none; font-size: 0.9rem;
-    transition: all 0.3s;
+  /* Wi-Fi Logosu ve Açılır Widget Kutusu */
+  .wifi-logo-container {
+    position: relative;
   }
-  .social-icon:hover { background: var(--sign-pink); color: #fff; transform: scale(1.1); }
+  .wifi-details-popup {
+    display: none;
+    position: absolute;
+    top: 50px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #181010;
+    border: 1px solid var(--sign-red);
+    padding: 10px 15px;
+    border-radius: 10px;
+    z-index: 100;
+    white-space: nowrap;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.8);
+    font-size: 0.85rem;
+    color: #fff;
+  }
+  .wifi-details-popup.open { display: block; }
 
-  /* Kategoriler Bölümü (Web ve Mobilde Akıcı Kaydırma) */
+  /* Kategoriler Bölümü */
   .categories-container { margin-bottom: 15px; width: 100%; }
   .categories-bar {
     display: flex;
@@ -171,10 +178,10 @@
     padding: 5px 2px 12px 2px;
     -webkit-overflow-scrolling: touch;
     scrollbar-width: thin;
-    scrollbar-color: var(--sign-pink) transparent;
+    scrollbar-color: var(--sign-red) transparent;
   }
   .categories-bar::-webkit-scrollbar { height: 5px; }
-  .categories-bar::-webkit-scrollbar-thumb { background: rgba(255, 51, 133, 0.4); border-radius: 10px; }
+  .categories-bar::-webkit-scrollbar-thumb { background: rgba(255, 26, 26, 0.4); border-radius: 10px; }
   
   .cat-card-wrapper {
     flex: 0 0 auto;
@@ -189,7 +196,7 @@
     height: 65px;
     background-size: cover;
     background-position: center;
-    border: 1.5px solid rgba(255, 51, 133, 0.3);
+    border: 1.5px solid rgba(255, 26, 26, 0.3);
     border-radius: 10px;
     cursor: pointer;
     overflow: hidden;
@@ -200,7 +207,7 @@
     content: '';
     position: absolute;
     top: 0; left: 0; width: 100%; height: 100%;
-    background: linear-gradient(180deg, rgba(0,0,0,0.3) 0%, rgba(15,10,15,0.85) 100%);
+    background: linear-gradient(180deg, rgba(0,0,0,0.3) 0%, rgba(15,10,10,0.85) 100%);
     z-index: 1;
   }
   .cat-btn span {
@@ -217,12 +224,11 @@
     overflow: hidden;
   }
   .cat-btn.active {
-    border-color: var(--sign-pink);
-    box-shadow: 0 0 12px var(--sign-pink-glow);
+    border-color: var(--sign-red);
+    box-shadow: 0 0 12px var(--sign-red-glow);
     transform: scale(1.04);
   }
 
-  /* Kategori Sıralama Okları (Yönetici Modu) */
   .admin-cat-actions {
     display: none;
     gap: 4px;
@@ -242,27 +248,25 @@
   }
   .cat-order-btn:hover { background: var(--gold); color: #000; }
 
-  /* Yeni Kategori Ekle Butonu Kartı */
   .add-cat-card {
     flex: 0 0 auto;
     width: 110px;
     height: 65px;
-    background: rgba(255, 51, 133, 0.1);
-    border: 1.5px dashed var(--sign-pink);
+    background: rgba(255, 26, 26, 0.1);
+    border: 1.5px dashed var(--sign-red);
     border-radius: 10px;
     display: none;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    color: var(--sign-pink);
+    color: var(--sign-red);
     cursor: pointer;
     font-size: 0.75rem;
     font-weight: 600;
     transition: all 0.3s;
-    margin-top: 0;
   }
   body.admin-mode .add-cat-card { display: flex; }
-  .add-cat-card:hover { background: var(--sign-pink); color: #fff; }
+  .add-cat-card:hover { background: var(--sign-red); color: #fff; }
 
   .active-category-header {
     display: flex;
@@ -270,20 +274,20 @@
     align-items: center;
     margin-bottom: 15px;
     padding: 0 4px;
-    border-left: 3px solid var(--sign-pink);
+    border-left: 3px solid var(--sign-red);
     padding-left: 10px;
   }
   .active-category-title {
     font-family: 'Cinzel', serif;
     font-size: 1.25rem;
-    color: var(--sign-pink);
+    color: var(--sign-red);
     font-weight: 700;
   }
 
   .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(155px, 1fr)); gap: 12px; }
   .menu-item { 
     background: var(--card-bg); 
-    border: 1px solid rgba(255, 51, 133, 0.2); 
+    border: 1px solid rgba(255, 26, 26, 0.2); 
     border-radius: 10px; 
     overflow: hidden; 
     display: flex; 
@@ -308,11 +312,11 @@
   .item-img { width: 100%; height: 100%; object-fit: cover; }
   .item-badge { 
     position: absolute; top: 6px; right: 6px; 
-    background: rgba(255, 51, 133, 0.92); color: #fff; 
+    background: rgba(255, 26, 26, 0.92); color: #fff; 
     font-size: 0.75rem; font-weight: 700; padding: 3px 8px; 
     border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.5); 
   }
-  .item-content { padding: 10px; display: flex; flex-direction: column; flex-grow: 1; justify-content: center; background: #131014; text-align: center; }
+  .item-content { padding: 10px; display: flex; flex-direction: column; flex-grow: 1; justify-content: center; background: #131010; text-align: center; }
   .item-title { font-family: 'Cinzel', serif; font-size: 0.85rem; color: var(--gold-light); font-weight: 600; }
 
   .admin-controls {
@@ -325,15 +329,14 @@
   body.admin-mode .admin-controls { display: flex; }
   .admin-btn-icon {
     width: 28px; height: 28px; border-radius: 50%;
-    background: rgba(0, 0, 0, 0.85); border: 1px solid var(--sign-pink);
-    color: var(--sign-pink); display: flex; align-items: center; justify-content: center;
+    background: rgba(0, 0, 0, 0.85); border: 1px solid var(--sign-red);
+    color: var(--sign-red); display: flex; align-items: center; justify-content: center;
     cursor: pointer; font-size: 0.75rem;
   }
-  .admin-btn-icon:hover { background: var(--sign-pink); color: #fff; }
+  .admin-btn-icon:hover { background: var(--sign-red); color: #fff; }
   .admin-btn-icon.delete { border-color: var(--danger); color: var(--danger); }
   .admin-btn-icon.delete:hover { background: var(--danger); color: #fff; }
 
-  /* Ürün Kartı İçerisinde Yer Değiştirme Okları (Yönetici) */
   .admin-product-order {
     display: none;
     position: absolute;
@@ -353,29 +356,29 @@
   .quick-add-section {
     display: none;
     margin-top: 15px;
-    background: #141014;
-    border: 1px dashed var(--sign-pink);
+    background: #141010;
+    border: 1px dashed var(--sign-red);
     padding: 12px;
     border-radius: 8px;
   }
   body.admin-mode .quick-add-section { display: block; }
 
-  .footer { margin-top: auto; padding-top: 30px; text-align: center; border-top: 1px solid rgba(255, 51, 133, 0.15); display: flex; justify-content: space-between; align-items: center; }
+  .footer { margin-top: auto; padding-top: 30px; text-align: center; border-top: 1px solid rgba(255, 26, 26, 0.15); display: flex; justify-content: space-between; align-items: center; }
   .admin-toggle-btn-bottom { background: transparent; color: #444; border: none; cursor: pointer; font-size: 1rem; transition: color 0.3s; }
-  .admin-toggle-btn-bottom:hover { color: var(--sign-pink); }
+  .admin-toggle-btn-bottom:hover { color: var(--sign-red); }
 
-  .login-box { display: none; background: #151015; border: 1px solid var(--sign-pink); padding: 15px; border-radius: 8px; margin-top: 15px; }
+  .login-box { display: none; background: #151010; border: 1px solid var(--sign-red); padding: 15px; border-radius: 8px; margin-top: 15px; }
   .login-box.open { display: block; }
   .admin-input { background: #0b090c; border: 1px solid #444; color: #fff; padding: 9px; border-radius: 5px; width: 100%; margin-bottom: 8px; font-size: 0.85rem; }
   .btn { padding: 9px 14px; border-radius: 5px; border: none; cursor: pointer; font-size: 0.85rem; font-weight: 600; }
-  .btn-gold { background: var(--sign-pink); color: #fff; }
+  .btn-gold { background: var(--sign-red); color: #fff; }
   .btn-danger { background: var(--danger); color: #fff; }
   
   #loadingOverlay {
     position: fixed; top: 0; left: 0; width: 100%; height: 100%;
     background: rgba(11,9,12,0.9); z-index: 9999; display: flex;
     flex-direction: column; align-items: center; justify-content: center;
-    color: var(--sign-pink); font-family: 'Cinzel', serif; font-size: 1.1rem;
+    color: var(--sign-red); font-family: 'Cinzel', serif; font-size: 1.1rem;
     transition: opacity 0.5s ease;
   }
 </style>
@@ -389,31 +392,37 @@
 
 <div class="container">
   
+  <!-- Tabela Başlığı (5 Kez Kesintisiz Tıklama ile Yönetici Modu) -->
   <div class="header">
-    <h1>Sey<span class="custom-i">İ<i class="fa-solid fa-heart heart-dot"></i></span>r Cafe</h1>
+    <h1 onclick="handleLogoClicks()" title="Yönetici Girişi İçin 5 Kez Tıklayın">Sey<span class="custom-i">İ<i class="fa-solid fa-heart heart-dot"></i></span>r Cafe</h1>
     <p id="headerSubtitle" onclick="editSubtitle()" title="Alt Yazıyı Değiştir">Lounge & Gourmet Experience</p>
     
-    <div class="wifi-widget" id="wifiWidget" onclick="toggleWifiBox()">
-      <div class="wifi-icon-row">
-        <i class="fa-solid fa-wifi"></i>
-        <span>Wi-Fi Bilgisi</span>
+    <!-- Üçlü Logo Barı (Instagram, Wi-Fi Ortada, TikTok) -->
+    <div class="brand-social-bar">
+      <!-- Instagram Logo Butonu -->
+      <a href="https://www.instagram.com/seyircafe.21" id="instagramLinkBtn" target="_blank" class="social-logo-btn" title="Instagram Hesabı">
+        <i class="fa-brands fa-instagram"></i>
+      </a>
+      
+      <!-- Wi-Fi Logo Butonu (Ortada - Tek Tıklama / Yönetici Tek Tıklama) -->
+      <div class="wifi-logo-container">
+        <div class="social-logo-btn" onclick="handleWifiClick()" title="Wi-Fi Bilgisi">
+          <i class="fa-solid fa-wifi"></i>
+        </div>
+        <div class="wifi-details-popup" id="wifiPopup">
+          Şifre: <b id="wifiPassText">Seyir2121</b>
+        </div>
       </div>
-      <div class="wifi-details">
-        Şifre: <b id="wifiPassText">Seyir2121</b>
-        <button id="wifiEditBtn" style="display:none; background:none; border:none; color:var(--sign-pink); cursor:pointer; margin-left:5px;" onclick="event.stopPropagation(); editWifiPassword()" title="Şifreyi Değiştir"><i class="fa-solid fa-pen"></i></button>
-      </div>
-    </div>
 
-    <div class="social-links">
-      <a href="https://www.instagram.com/seyircafe.21" target="_blank" class="social-icon" title="Instagram"><i class="fa-brands fa-instagram"></i></a>
-      <a href="https://www.tiktok.com/@seyircafe21" target="_blank" class="social-icon" title="TikTok"><i class="fa-brands fa-tiktok"></i></a>
+      <!-- TikTok Logo Butonu -->
+      <a href="https://www.tiktok.com/@seyircafe21" id="tiktokLinkBtn" target="_blank" class="social-logo-btn" title="TikTok Hesabı">
+        <i class="fa-brands fa-tiktok"></i>
+      </a>
     </div>
   </div>
 
   <div class="categories-container">
-    <div id="categoriesBar" class="categories-bar">
-      <!-- Kategoriler Dinamik Yüklenir -->
-    </div>
+    <div id="categoriesBar" class="categories-bar"></div>
   </div>
 
   <div class="active-category-header">
@@ -424,7 +433,7 @@
   <div id="menuGrid" class="grid"></div>
 
   <div id="quickAddSection" class="quick-add-section">
-    <h4 style="color:var(--sign-pink); margin-bottom:8px; font-family:'Cinzel', serif; font-size:0.95rem;" id="quickAddTitle">+ Kategoriye Ürün Ekle</h4>
+    <h4 style="color:var(--sign-red); margin-bottom:8px; font-family:'Cinzel', serif; font-size:0.95rem;" id="quickAddTitle">+ Kategoriye Ürün Ekle</h4>
     <input type="text" id="qAddName" class="admin-input" placeholder="Ürün Adı">
     <input type="text" id="qAddPrice" class="admin-input" placeholder="Fiyat (Örn: 200 TL)">
     <input type="file" id="qAddFile" class="admin-input" accept="image/*">
@@ -449,11 +458,15 @@
   let allProducts = [];
   let wifiPassword = "Seyir2121";
   let subtitleText = "Lounge & Gourmet Experience";
+  let instagramUrl = "https://www.instagram.com/seyircafe.21";
+  let tiktokUrl = "https://www.tiktok.com/@seyircafe21";
 
   const TARGET_PASS = "1171";
   let failedAttempts = 0;
   let currentCategory = 'Tümü';
   let isAdminMode = false;
+  let logoClickCount = 0;
+  let logoClickTimer = null;
 
   const defaultCategories = [
     { name: "Sıcak İçecekler", img: "https://images.unsplash.com/photo-1544787219-7f47ccb76574?w=500&q=80" },
@@ -514,6 +527,14 @@
           subtitleText = cloudData.settings.subtitle;
           document.getElementById('headerSubtitle').innerText = subtitleText;
         }
+        if (cloudData.settings.instagram) {
+          instagramUrl = cloudData.settings.instagram;
+          document.getElementById('instagramLinkBtn').href = instagramUrl;
+        }
+        if (cloudData.settings.tiktok) {
+          tiktokUrl = cloudData.settings.tiktok;
+          document.getElementById('tiktokLinkBtn').href = tiktokUrl;
+        }
       }
 
     } catch (e) {
@@ -545,8 +566,29 @@
 
   async function saveSettingsToFirebase() {
     try {
-      await window.dbTools.setDoc(window.dbTools.doc(window.db, "menu_data", "settings"), { wifi: wifiPassword, subtitle: subtitleText });
+      await window.dbTools.setDoc(window.dbTools.doc(window.db, "menu_data", "settings"), { 
+        wifi: wifiPassword, 
+        subtitle: subtitleText, 
+        instagram: instagramUrl, 
+        tiktok: tiktokUrl 
+      });
     } catch (e) { console.error(e); }
+  }
+
+  // Logoya 5 Kez Kesintisiz Tıklama Mekanizması
+  function handleLogoClicks() {
+    logoClickCount++;
+    if (logoClickTimer) clearTimeout(logoClickTimer);
+
+    if (logoClickCount >= 5) {
+      logoClickCount = 0;
+      toggleLoginBox();
+      return;
+    }
+
+    logoClickTimer = setTimeout(() => {
+      logoClickCount = 0;
+    }, 600);
   }
 
   function toggleLoginBox() {
@@ -554,7 +596,6 @@
       isAdminMode = false;
       document.getElementById('bodyTag').classList.remove('admin-mode');
       document.getElementById('lockIcon').className = "fa-solid fa-lock";
-      document.getElementById('wifiEditBtn').style.display = 'none';
       alert("Yönetici modu kapatıldı.");
       renderCategories();
       renderProducts();
@@ -579,7 +620,6 @@
       document.getElementById('bodyTag').classList.add('admin-mode');
       document.getElementById('loginBox').classList.remove('open');
       document.getElementById('lockIcon').className = "fa-solid fa-lock-open";
-      document.getElementById('wifiEditBtn').style.display = 'inline-block';
       errDiv.style.display = 'none';
       document.getElementById('passInput').value = '';
       renderCategories();
@@ -595,18 +635,49 @@
     }
   }
 
-  function toggleWifiBox() {
-    document.getElementById('wifiWidget').classList.toggle('open');
-  }
-
-  function editWifiPassword() {
-    const newWifi = prompt("Yeni Wi-Fi Şifresini Girin:", wifiPassword);
-    if (newWifi !== null && newWifi.trim() !== "") {
-      wifiPassword = newWifi.trim();
-      document.getElementById('wifiPassText').innerText = wifiPassword;
-      saveSettingsToFirebase();
+  // Wi-Fi Tıklama (Normal modda şifre gösterir, Yönetici modundaysa şifre değiştirme paneli açar)
+  function handleWifiClick() {
+    if (isAdminMode) {
+      const newWifi = prompt("Yeni Wi-Fi Şifresini Girin:", wifiPassword);
+      if (newWifi !== null && newWifi.trim() !== "") {
+        wifiPassword = newWifi.trim();
+        document.getElementById('wifiPassText').innerText = wifiPassword;
+        saveSettingsToFirebase();
+        alert("Wi-Fi şifresi güncellendi!");
+      }
+    } else {
+      document.getElementById('wifiPopup').classList.toggle('open');
     }
   }
+
+  // Yönetici modundayken Instagram veya TikTok linklerini düzenleme (Ayrıca sosyal medya butonlarına uzun basma veya yöneticide kolaylık)
+  window.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('instagramLinkBtn').addEventListener('click', function(e) {
+      if (isAdminMode) {
+        e.preventDefault();
+        const newIg = prompt("Instagram Linkini Güncelle:", instagramUrl);
+        if (newIg !== null && newIg.trim() !== "") {
+          instagramUrl = newIg.trim();
+          this.href = instagramUrl;
+          saveSettingsToFirebase();
+          alert("Instagram adresi güncellendi!");
+        }
+      }
+    });
+
+    document.getElementById('tiktokLinkBtn').addEventListener('click', function(e) {
+      if (isAdminMode) {
+        e.preventDefault();
+        const newTk = prompt("TikTok Linkini Güncelle:", tiktokUrl);
+        if (newTk !== null && newTk.trim() !== "") {
+          tiktokUrl = newTk.trim();
+          this.href = tiktokUrl;
+          saveSettingsToFirebase();
+          alert("TikTok adresi güncellendi!");
+        }
+      }
+    });
+  });
 
   function editSubtitle() {
     if (!isAdminMode) return;
@@ -618,7 +689,6 @@
     }
   }
 
-  // Kategori Yer Değiştirme (Sıralama)
   function moveCategory(index, direction) {
     const targetIdx = index + direction;
     if (targetIdx < 0 || targetIdx >= categoriesData.length) return;
@@ -629,7 +699,6 @@
     renderCategories();
   }
 
-  // Ürün Yer Değiştirme (Sıralama)
   function moveProduct(globalIdx, direction) {
     const targetIdx = globalIdx + direction;
     if (targetIdx < 0 || targetIdx >= allProducts.length) return;
@@ -862,7 +931,7 @@
             <div class="item-badge" onclick="${isAdminMode ? `updateProductPrice(${gIdx})` : ''}" style="${isAdminMode ? 'cursor:pointer; border:1px dashed #fff;' : ''}" title="Fiyatı Değiştir">${item.price}</div>
           </div>
           <div class="item-content">
-            <div class="item-title" onclick="${isAdminMode ? `updateProductName(${gIdx})` : ''}" style="${isAdminMode ? 'cursor:pointer; text-decoration:underline dashed var(--sign-pink);' : ''}" title="İsmi Değiştir">${item.name}</div>
+            <div class="item-title" onclick="${isAdminMode ? `updateProductName(${gIdx})` : ''}" style="${isAdminMode ? 'cursor:pointer; text-decoration:underline dashed var(--sign-red);' : ''}" title="İsmi Değiştir">${item.name}</div>
           </div>
         </div>
       `;
