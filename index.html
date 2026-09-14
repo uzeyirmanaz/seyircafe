@@ -40,7 +40,7 @@
     --text-color: #e5e5e5;
     --text-muted: #999;
     --danger: #e74c3c;
-    --sign-red: #ff1a1a; /* Tabelanızdaki tam kırmızı tonu */
+    --sign-red: #ff1a1a; 
     --sign-red-glow: rgba(255, 26, 26, 0.6);
   }
 
@@ -66,7 +66,6 @@
     min-height: 100vh;
   }
 
-  /* Tabela Tarzı Özel Header Alanı */
   .header { 
     text-align: center; 
     padding: 22px 15px 18px 15px; 
@@ -89,6 +88,7 @@
     text-shadow: 0 0 15px var(--sign-red-glow), 0 0 30px rgba(255, 26, 26, 0.3);
     cursor: pointer;
     user-select: none;
+    -webkit-tap-highlight-color: transparent;
   }
   
   .custom-i {
@@ -118,7 +118,6 @@
     opacity: 0.9;
   }
 
-  /* Logo Tarzında 3'lü Sosyal/Wi-Fi Barı (Wi-Fi Ortada) */
   .brand-social-bar {
     display: flex;
     justify-content: center;
@@ -139,6 +138,8 @@
     transition: all 0.3s;
     cursor: pointer;
     box-shadow: 0 0 10px rgba(255, 26, 26, 0.2);
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
   }
   .social-logo-btn:hover {
     background: var(--sign-red);
@@ -146,7 +147,6 @@
     transform: scale(1.1);
   }
 
-  /* Wi-Fi Logosu ve Açılır Widget Kutusu */
   .wifi-logo-container {
     position: relative;
   }
@@ -163,12 +163,11 @@
     z-index: 100;
     white-space: nowrap;
     box-shadow: 0 5px 15px rgba(0,0,0,0.8);
-    font-size: 0.85rem;
+    font-size: 0.82rem;
     color: #fff;
   }
   .wifi-details-popup.open { display: block; }
 
-  /* Kategoriler Bölümü */
   .categories-container { margin-bottom: 15px; width: 100%; }
   .categories-bar {
     display: flex;
@@ -372,7 +371,6 @@
   .admin-input { background: #0b090c; border: 1px solid #444; color: #fff; padding: 9px; border-radius: 5px; width: 100%; margin-bottom: 8px; font-size: 0.85rem; }
   .btn { padding: 9px 14px; border-radius: 5px; border: none; cursor: pointer; font-size: 0.85rem; font-weight: 600; }
   .btn-gold { background: var(--sign-red); color: #fff; }
-  .btn-danger { background: var(--danger); color: #fff; }
   
   #loadingOverlay {
     position: fixed; top: 0; left: 0; width: 100%; height: 100%;
@@ -392,32 +390,32 @@
 
 <div class="container">
   
-  <!-- Tabela Başlığı (5 Kez Kesintisiz Tıklama ile Yönetici Modu) -->
+  <!-- Tabela Başlığı (3 Kez Kesintisiz Tıklama ile Yönetici Paneli) -->
   <div class="header">
-    <h1 onclick="handleLogoClicks()" title="Yönetici Girişi İçin 5 Kez Tıklayın">Sey<span class="custom-i">İ<i class="fa-solid fa-heart heart-dot"></i></span>r Cafe</h1>
+    <h1 onclick="handleLogoClicks()" title="Yönetici Girişi İçin 3 Kez Tıklayın">Sey<span class="custom-i">İ<i class="fa-solid fa-heart heart-dot"></i></span>r Cafe</h1>
     <p id="headerSubtitle" onclick="editSubtitle()" title="Alt Yazıyı Değiştir">Lounge & Gourmet Experience</p>
     
     <!-- Üçlü Logo Barı (Instagram, Wi-Fi Ortada, TikTok) -->
     <div class="brand-social-bar">
-      <!-- Instagram Logo Butonu -->
-      <a href="https://www.instagram.com/seyircafe.21" id="instagramLinkBtn" target="_blank" class="social-logo-btn" title="Instagram Hesabı">
+      <!-- Instagram Logo Butonu (Yönetici Modunda 5 Kez Tıklama ile Değişir) -->
+      <div id="instagramBtnWrapper" class="social-logo-btn" onclick="handleInstagramClick()" title="Instagram Hesabı">
         <i class="fa-brands fa-instagram"></i>
-      </a>
+      </div>
       
-      <!-- Wi-Fi Logo Butonu (Ortada - Tek Tıklama / Yönetici Tek Tıklama) -->
+      <!-- Wi-Fi Logo Butonu (Ortada - Normal Modda Kopyalar, Yönetici Modunda Şifre Değiştirir) -->
       <div class="wifi-logo-container">
-        <div class="social-logo-btn" onclick="handleWifiClick()" title="Wi-Fi Bilgisi">
+        <div class="social-logo-btn" onclick="handleWifiClick()" title="Wi-Fi Şifresini Kopyala">
           <i class="fa-solid fa-wifi"></i>
         </div>
         <div class="wifi-details-popup" id="wifiPopup">
-          Şifre: <b id="wifiPassText">Seyir2121</b>
+          Şifre Kopyalandı: <b id="wifiPassText">Seyir2121</b>
         </div>
       </div>
 
-      <!-- TikTok Logo Butonu -->
-      <a href="https://www.tiktok.com/@seyircafe21" id="tiktokLinkBtn" target="_blank" class="social-logo-btn" title="TikTok Hesabı">
+      <!-- TikTok Logo Butonu (Yönetici Modunda 5 Kez Tıklama ile Değişir) -->
+      <div id="tiktokBtnWrapper" class="social-logo-btn" onclick="handleTiktokClick()" title="TikTok Hesabı">
         <i class="fa-brands fa-tiktok"></i>
-      </a>
+      </div>
     </div>
   </div>
 
@@ -465,8 +463,18 @@
   let failedAttempts = 0;
   let currentCategory = 'Tümü';
   let isAdminMode = false;
+
+  // Logoya 3 Tıklama Sayacı
   let logoClickCount = 0;
   let logoClickTimer = null;
+
+  // Instagram 5 Tıklama Sayacı
+  let igClickCount = 0;
+  let igClickTimer = null;
+
+  // TikTok 5 Tıklama Sayacı
+  let tkClickCount = 0;
+  let tkClickTimer = null;
 
   const defaultCategories = [
     { name: "Sıcak İçecekler", img: "https://images.unsplash.com/photo-1544787219-7f47ccb76574?w=500&q=80" },
@@ -529,11 +537,9 @@
         }
         if (cloudData.settings.instagram) {
           instagramUrl = cloudData.settings.instagram;
-          document.getElementById('instagramLinkBtn').href = instagramUrl;
         }
         if (cloudData.settings.tiktok) {
           tiktokUrl = cloudData.settings.tiktok;
-          document.getElementById('tiktokLinkBtn').href = tiktokUrl;
         }
       }
 
@@ -575,12 +581,12 @@
     } catch (e) { console.error(e); }
   }
 
-  // Logoya 5 Kez Kesintisiz Tıklama Mekanizması
+  // Logoya 3 Kez Kesintisiz Tıklama (Yönetici Girişi)
   function handleLogoClicks() {
     logoClickCount++;
     if (logoClickTimer) clearTimeout(logoClickTimer);
 
-    if (logoClickCount >= 5) {
+    if (logoClickCount >= 3) {
       logoClickCount = 0;
       toggleLoginBox();
       return;
@@ -635,7 +641,7 @@
     }
   }
 
-  // Wi-Fi Tıklama (Normal modda şifre gösterir, Yönetici modundaysa şifre değiştirme paneli açar)
+  // Wi-Fi Tıklama (Normal modda kopyalar ve popup açar, Yönetici modunda şifreyi değiştirir)
   function handleWifiClick() {
     if (isAdminMode) {
       const newWifi = prompt("Yeni Wi-Fi Şifresini Girin:", wifiPassword);
@@ -646,38 +652,73 @@
         alert("Wi-Fi şifresi güncellendi!");
       }
     } else {
-      document.getElementById('wifiPopup').classList.toggle('open');
+      // Panoya Kopyalama Özelliği
+      navigator.clipboard.writeText(wifiPassword).then(() => {
+        const popup = document.getElementById('wifiPopup');
+        document.getElementById('wifiPassText').innerText = wifiPassword + " (Kopyalandı!)";
+        popup.classList.add('open');
+        setTimeout(() => {
+          popup.classList.remove('open');
+          document.getElementById('wifiPassText').innerText = wifiPassword;
+        }, 2000);
+      }).catch(err => {
+        // Alternatif fallback
+        const popup = document.getElementById('wifiPopup');
+        popup.classList.add('open');
+        setTimeout(() => popup.classList.remove('open'), 2000);
+      });
     }
   }
 
-  // Yönetici modundayken Instagram veya TikTok linklerini düzenleme (Ayrıca sosyal medya butonlarına uzun basma veya yöneticide kolaylık)
-  window.addEventListener('DOMContentLoaded', () => {
-    document.getElementById('instagramLinkBtn').addEventListener('click', function(e) {
-      if (isAdminMode) {
-        e.preventDefault();
+  // Instagram Logo Tıklama (Normal modda profile gider, Yönetici modunda 5 kez kesintisiz tıklayınca link değiştirir)
+  function handleInstagramClick() {
+    if (isAdminMode) {
+      igClickCount++;
+      if (igClickTimer) clearTimeout(igClickTimer);
+
+      if (igClickCount >= 5) {
+        igClickCount = 0;
         const newIg = prompt("Instagram Linkini Güncelle:", instagramUrl);
         if (newIg !== null && newIg.trim() !== "") {
           instagramUrl = newIg.trim();
-          this.href = instagramUrl;
           saveSettingsToFirebase();
           alert("Instagram adresi güncellendi!");
         }
+        return;
       }
-    });
 
-    document.getElementById('tiktokLinkBtn').addEventListener('click', function(e) {
-      if (isAdminMode) {
-        e.preventDefault();
+      igClickTimer = setTimeout(() => {
+        igClickCount = 0;
+      }, 600);
+    } else {
+      window.open(instagramUrl, '_blank');
+    }
+  }
+
+  // TikTok Logo Tıklama (Normal modda profile gider, Yönetici modunda 5 kez kesintisiz tıklayınca link değiştirir)
+  function handleTiktokClick() {
+    if (isAdminMode) {
+      tkClickCount++;
+      if (tkClickTimer) clearTimeout(tkClickTimer);
+
+      if (tkClickCount >= 5) {
+        tkClickCount = 0;
         const newTk = prompt("TikTok Linkini Güncelle:", tiktokUrl);
         if (newTk !== null && newTk.trim() !== "") {
           tiktokUrl = newTk.trim();
-          this.href = tiktokUrl;
           saveSettingsToFirebase();
           alert("TikTok adresi güncellendi!");
         }
+        return;
       }
-    });
-  });
+
+      tkClickTimer = setTimeout(() => {
+        tkClickCount = 0;
+      }, 600);
+    } else {
+      window.open(tiktokUrl, '_blank');
+    }
+  }
 
   function editSubtitle() {
     if (!isAdminMode) return;
