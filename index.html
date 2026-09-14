@@ -33,7 +33,7 @@
 
 <style>
   :root {
-    --bg-color: #080505;
+    --bg-color: #050303;
     --card-bg: rgba(18, 14, 15, 0.96);
     --gold: #d4af37;
     --gold-light: #fbeccb;
@@ -48,10 +48,10 @@
     margin: 0 !important;
     padding: 0 !important;
     background-color: var(--bg-color);
-    /* Sade, samimi ve ağır Osmanlı / Selçuklu desenli arka plan motifi */
+    /* Sade siyah zemin üzerinde ağır, samimi ve detaylı Osmanlı / Selçuklu tezhip-motif dokusu */
     background-image: 
-      radial-gradient(circle at 50% 15%, rgba(45, 12, 10, 0.6) 0%, rgba(8, 5, 5, 0.98) 75%),
-      url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M50 0 L60 20 L80 20 L65 35 L70 55 L50 45 L30 55 L35 35 L20 20 L40 20 Z' fill='%23ffffff' fill-opacity='0.015'/%3E%3Ccircle cx='50' cy='50' r='35' stroke='%23d4af37' stroke-width='0.4' fill='none' stroke-opacity='0.03'/%3E%3Cpath d='M50 15 Q65 35 50 85 Q35 35 50 15 Z' fill='%23d4af37' fill-opacity='0.015'/%3E%3C/svg%3E");
+      radial-gradient(circle at 50% 10%, rgba(50, 10, 10, 0.45) 0%, rgba(5, 3, 3, 0.97) 80%),
+      url("data:image/svg+xml,%3Csvg width='160' height='160' viewBox='0 0 160 160' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23d4af37' fill-opacity='0.035'%3E%3Cpath d='M80 0 L95 30 L125 30 L100 50 L110 80 L80 60 L50 80 L60 50 L35 30 L65 30 Z'/%3E%3Cpath d='M0 80 L30 95 L30 125 L50 100 L80 110 L60 80 L80 50 L50 60 L30 35 L30 65 Z'/%3E%3Cpath d='M160 80 L130 95 L130 125 L110 100 L80 110 L100 80 L80 50 L110 60 L130 35 L130 65 Z'/%3E%3Cpath d='M80 160 L95 130 L125 130 L100 110 L110 80 L80 100 L50 80 L60 110 L35 130 L65 130 Z'/%3E%3Ccircle cx='80' cy='80' r='25' fill='none' stroke='%23d4af37' stroke-width='0.8' stroke-opacity='0.04'/%3E%3Ccircle cx='80' cy='80' r='45' fill='none' stroke='%23d4af37' stroke-width='0.5' stroke-opacity='0.03'/%3E%3C/g%3E%3C/svg%3E");
     background-repeat: repeat;
     color: var(--text-color);
     font-family: 'Montserrat', sans-serif;
@@ -454,7 +454,7 @@
   
   #loadingOverlay {
     position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(8,5,5,0.95); z-index: 9999; display: flex;
+    background: rgba(5,3,3,0.95); z-index: 9999; display: flex;
     flex-direction: column; align-items: center; justify-content: center;
     color: var(--gold); font-family: 'Cinzel', serif; font-size: 1.1rem;
     transition: opacity 0.5s ease;
@@ -470,7 +470,6 @@
 
 <div class="container">
   
-  <!-- Logoya Bire Bir Uyumlu Header Alanı -->
   <div class="header">
     <div class="logo-wrapper" onclick="handleLogoClicks()" title="Yönetici Girişi İçin 3 Kez Tıklayın">
       <span class="logo-line-1">SEY<span class="custom-i">İ<i class="heart-shape"></i></span>R</span>
@@ -478,7 +477,6 @@
     </div>
     <p id="headerSubtitle" onclick="editSubtitle()" title="Alt Yazıyı Değiştir">Lounge & Gourmet Experience</p>
     
-    <!-- Sosyal Medya ve Aktif Google Maps Konum Barı -->
     <div class="brand-social-bar">
       <div id="instagramBtnWrapper" class="social-logo-btn" onclick="handleInstagramClick()" title="Instagram Hesabı">
         <i class="fa-brands fa-instagram"></i>
