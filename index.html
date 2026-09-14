@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Seyir Cafe - Dijital Menü</title>
-<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;900&family=Playfair+Display:ital,wght@0,600;1,600&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;900&family=Playfair+Display:ital,wght@0,700;1,700&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
 <!-- Firebase SDK -->
@@ -33,14 +33,14 @@
 
 <style>
   :root {
-    --bg-color: #0b0605;
-    --card-bg: rgba(22, 17, 24, 0.96);
+    --bg-color: #080505;
+    --card-bg: rgba(18, 14, 15, 0.96);
     --gold: #d4af37;
     --gold-light: #fbeccb;
     --text-color: #e5e5e5;
     --text-muted: #999;
     --danger: #e74c3c;
-    --blood-red: #ff0000; 
+    --blood-red: #ff1a1a; 
   }
 
   html, body {
@@ -48,10 +48,11 @@
     margin: 0 !important;
     padding: 0 !important;
     background-color: var(--bg-color);
+    /* Sade, samimi ve ağır Osmanlı / Selçuklu desenli arka plan motifi */
     background-image: 
-      radial-gradient(circle at 50% 20%, #220b08 0%, #0b0605 70%),
-      repeating-linear-gradient(0deg, rgba(212, 175, 55, 0.02) 0px, rgba(212, 175, 55, 0.02) 1px, transparent 1px, transparent 40px),
-      repeating-linear-gradient(90deg, rgba(212, 175, 55, 0.02) 0px, rgba(212, 175, 55, 0.02) 1px, transparent 1px, transparent 40px);
+      radial-gradient(circle at 50% 15%, rgba(45, 12, 10, 0.6) 0%, rgba(8, 5, 5, 0.98) 75%),
+      url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M50 0 L60 20 L80 20 L65 35 L70 55 L50 45 L30 55 L35 35 L20 20 L40 20 Z' fill='%23ffffff' fill-opacity='0.015'/%3E%3Ccircle cx='50' cy='50' r='35' stroke='%23d4af37' stroke-width='0.4' fill='none' stroke-opacity='0.03'/%3E%3Cpath d='M50 15 Q65 35 50 85 Q35 35 50 15 Z' fill='%23d4af37' fill-opacity='0.015'/%3E%3C/svg%3E");
+    background-repeat: repeat;
     color: var(--text-color);
     font-family: 'Montserrat', sans-serif;
     position: relative;
@@ -86,7 +87,7 @@
     100% { opacity: 1; transform: scale(1) translateY(0); }
   }
 
-  /* Görseldeki Orijinal Logo Tasarımı: SEYİR CAFE (Üst üste iki satır) */
+  /* Logodaki Harfler ve Tipografi Tam Uyumlu */
   .logo-wrapper {
     display: inline-block;
     cursor: pointer;
@@ -96,13 +97,13 @@
   }
 
   .logo-line-1 {
-    font-family: 'Cinzel', serif;
-    font-size: 3.2rem;
-    font-weight: 900;
-    letter-spacing: 3px;
-    text-transform: uppercase;
+    font-family: 'Playfair Display', serif;
+    font-size: 3.4rem;
+    font-weight: 700;
+    font-style: italic;
+    letter-spacing: 2px;
     color: var(--blood-red);
-    line-height: 1;
+    line-height: 1.1;
     display: block;
     animation: slowPulse 5s infinite ease-in-out;
   }
@@ -111,24 +112,24 @@
     font-family: 'Cinzel', serif;
     font-size: 2.3rem;
     font-weight: 700;
-    letter-spacing: 8px;
+    letter-spacing: 7px;
     text-transform: uppercase;
     color: var(--blood-red);
     display: block;
-    margin-top: -2px;
-    margin-left: 6px;
+    margin-top: 2px;
+    margin-left: 5px;
     animation: slowPulse 5s infinite ease-in-out;
   }
 
   /* Çok yavaş yanıp sönme (nefes alma) animasyonu */
   @keyframes slowPulse {
     0%, 100% {
-      opacity: 0.45;
-      text-shadow: 0 0 4px rgba(255, 0, 0, 0.3);
+      opacity: 0.5;
+      text-shadow: 0 0 5px rgba(255, 26, 26, 0.3);
     }
     50% {
       opacity: 1;
-      text-shadow: 0 0 14px rgba(255, 0, 0, 0.9), 0 0 25px rgba(255, 0, 0, 0.5);
+      text-shadow: 0 0 15px rgba(255, 26, 26, 0.9), 0 0 25px rgba(255, 26, 26, 0.4);
     }
   }
 
@@ -137,14 +138,14 @@
     display: inline-block;
   }
 
-  /* Görseldeki Kalp Yapısı: Dışı kırmızı, içi boş (arka plan renginde), yavaşça yanıp sönen */
+  /* İ harfinin üzerindeki nokta tamamen kaldırıldı, yerine kalp konuldu */
   .custom-i .heart-shape {
     position: absolute;
-    top: -28px;
+    top: -32px;
     left: 50%;
     transform: translateX(-50%) rotate(-45deg);
-    width: 14px;
-    height: 14px;
+    width: 13px;
+    height: 13px;
     background-color: transparent;
     border-top: 3px solid var(--blood-red);
     border-left: 3px solid var(--blood-red);
@@ -155,14 +156,14 @@
   .custom-i .heart-shape::after {
     content: "";
     position: absolute;
-    width: 14px;
-    height: 14px;
+    width: 13px;
+    height: 13px;
     background-color: transparent;
     border-radius: 50%;
   }
 
   .custom-i .heart-shape::before {
-    top: -9px;
+    top: -8px;
     left: -3px;
     border-top: 3px solid var(--blood-red);
     border-left: 3px solid var(--blood-red);
@@ -172,19 +173,18 @@
 
   .custom-i .heart-shape::after {
     left: -3px;
-    top: -9px;
-    /* İçi boş kalması için konumlandırma */
+    top: -8px;
     transform: rotate(90deg);
   }
 
   @keyframes slowHeartPulse {
     0%, 100% {
-      opacity: 0.45;
-      filter: drop-shadow(0 0 2px rgba(255,0,0,0.3));
+      opacity: 0.5;
+      filter: drop-shadow(0 0 2px rgba(255,26,26,0.3));
     }
     50% {
       opacity: 1;
-      filter: drop-shadow(0 0 10px rgba(255,0,0,0.9));
+      filter: drop-shadow(0 0 10px rgba(255,26,26,0.9));
     }
   }
 
@@ -192,9 +192,9 @@
     font-size: 0.75rem; 
     letter-spacing: 3px; 
     color: var(--gold-light); 
-    margin-top: 12px; 
+    margin-top: 10px; 
     text-transform: uppercase; 
-    opacity: 0.9;
+    opacity: 0.85;
     cursor: pointer;
   }
 
@@ -454,7 +454,7 @@
   
   #loadingOverlay {
     position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(11,6,5,0.92); z-index: 9999; display: flex;
+    background: rgba(8,5,5,0.95); z-index: 9999; display: flex;
     flex-direction: column; align-items: center; justify-content: center;
     color: var(--gold); font-family: 'Cinzel', serif; font-size: 1.1rem;
     transition: opacity 0.5s ease;
@@ -470,7 +470,7 @@
 
 <div class="container">
   
-  <!-- Görselle Tam Uyumlu Logo Alanı -->
+  <!-- Logoya Bire Bir Uyumlu Header Alanı -->
   <div class="header">
     <div class="logo-wrapper" onclick="handleLogoClicks()" title="Yönetici Girişi İçin 3 Kez Tıklayın">
       <span class="logo-line-1">SEY<span class="custom-i">İ<i class="heart-shape"></i></span>R</span>
@@ -478,7 +478,7 @@
     </div>
     <p id="headerSubtitle" onclick="editSubtitle()" title="Alt Yazıyı Değiştir">Lounge & Gourmet Experience</p>
     
-    <!-- Sosyal Medya ve Güncellenmiş Google Maps Konum Barı -->
+    <!-- Sosyal Medya ve Aktif Google Maps Konum Barı -->
     <div class="brand-social-bar">
       <div id="instagramBtnWrapper" class="social-logo-btn" onclick="handleInstagramClick()" title="Instagram Hesabı">
         <i class="fa-brands fa-instagram"></i>
@@ -542,7 +542,7 @@
   let subtitleText = "Lounge & Gourmet Experience";
   let instagramUrl = "https://www.instagram.com/seyircafe.21";
   let tiktokUrl = "https://www.tiktok.com/@seyircafe21";
-  let mapsUrl = "https://maps.app.goo.gl/NapPwzjDeeR3TDjE8"; // Doğru ve aktif adresiniz
+  let mapsUrl = "https://maps.app.goo.gl/NapPwzjDeeR3TDjE8";
 
   const TARGET_PASS = "1171";
   let failedAttempts = 0;
