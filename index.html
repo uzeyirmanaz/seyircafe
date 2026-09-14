@@ -28,7 +28,6 @@
   window.db = db;
   window.dbTools = { collection, addDoc, getDocs, deleteDoc, doc, updateDoc, setDoc };
   
-  // Sayfa açıldığında Firebase'den verileri çek
   window.loadDataFromFirebase();
 </script>
 
@@ -42,6 +41,7 @@
     --text-color: #e5e5e5;
     --text-muted: #999;
     --danger: #e74c3c;
+    --brand-red: #e74c3c; /* Logonun kırmızı tonu */
   }
 
   html, body {
@@ -51,7 +51,7 @@
     background-color: var(--bg-color);
     color: var(--text-color);
     font-family: 'Montserrat', sans-serif;
-    background-image: radial-gradient(circle at 50% 0%, #1c1505 0%, #070709 85%);
+    background-image: radial-gradient(circle at 50% 0%, #1c0505 0%, #070709 85%);
   }
 
   * { box-sizing: border-box !important; }
@@ -66,11 +66,10 @@
     min-height: 100vh;
   }
 
-  /* Gösterişli Animasyonlu Başlık */
   .header { 
     text-align: center; 
     padding: 25px 0 15px 0; 
-    border-bottom: 1px solid rgba(212, 175, 55, 0.25); 
+    border-bottom: 1px solid rgba(231, 76, 60, 0.25); 
     margin-bottom: 15px; 
     animation: headerEntrance 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   }
@@ -79,6 +78,7 @@
     100% { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
   }
 
+  /* Logo Başlık ve Kalpli İ Harfi */
   .header h1 { 
     font-family: 'Cinzel', serif; 
     font-size: 2.8rem; 
@@ -86,14 +86,26 @@
     letter-spacing: 4px; 
     text-transform: uppercase;
     margin: 0;
-    background: linear-gradient(180deg, #ffffff 0%, var(--gold) 55%, #8b6b10 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    animation: goldGlowAnim 3s infinite alternate;
+    color: var(--brand-red);
+    text-shadow: 0 0 15px rgba(231, 76, 60, 0.4);
   }
-  @keyframes goldGlowAnim {
-    0% { filter: drop-shadow(0 0 5px rgba(212,175,55,0.3)); }
-    100% { filter: drop-shadow(0 0 18px rgba(212,175,55,0.8)); }
+  
+  .custom-i {
+    position: relative;
+    display: inline-block;
+  }
+  .custom-i .heart-dot {
+    position: absolute;
+    top: -12px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: var(--brand-red);
+    font-size: 1.1rem;
+    animation: pulseHeart 1.5s infinite alternate;
+  }
+  @keyframes pulseHeart {
+    0% { transform: translateX(-50%) scale(1); filter: drop-shadow(0 0 2px rgba(231,76,60,0.5)); }
+    100% { transform: translateX(-50%) scale(1.25); filter: drop-shadow(0 0 8px rgba(231,76,60,0.9)); }
   }
 
   .header p { 
@@ -104,32 +116,46 @@
     text-transform: uppercase; 
   }
 
-  /* Wi-Fi Şerit Alanı */
-  .wifi-bar {
-    display: flex;
+  /* Gizlenebilir/Açılabilir Wi-Fi Alanı */
+  .wifi-widget {
+    display: inline-flex;
+    flex-direction: column;
     align-items: center;
-    justify-content: center;
-    gap: 8px;
+    margin-top: 12px;
     background: rgba(212, 175, 55, 0.08);
     border: 1px solid rgba(212, 175, 55, 0.25);
-    padding: 8px 15px;
-    border-radius: 8px;
-    margin-top: 12px;
-    font-size: 0.85rem;
-    color: var(--gold-light);
+    border-radius: 12px;
+    padding: 6px 14px;
+    cursor: pointer;
+    transition: all 0.3s;
   }
-  .wifi-bar i { color: var(--gold); font-size: 1rem; }
+  .wifi-widget:hover { background: rgba(212, 175, 55, 0.15); }
+  .wifi-icon-row { display: flex; align-items: center; gap: 8px; font-size: 0.85rem; color: var(--gold-light); }
+  .wifi-icon-row i { color: var(--gold); font-size: 1rem; }
+  
+  .wifi-details {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease-out, margin-top 0.3s ease-out;
+    font-size: 0.8rem;
+    color: #fff;
+    text-align: center;
+  }
+  .wifi-widget.open .wifi-details {
+    max-height: 40px;
+    margin-top: 6px;
+  }
 
   .social-links { display: flex; justify-content: center; gap: 15px; margin-top: 12px; }
   .social-icon {
-    width: 38px; height: 38px; border-radius: 50%; border: 1.5px solid var(--gold);
-    background: rgba(212, 175, 55, 0.1); color: var(--gold);
+    width: 38px; height: 38px; border-radius: 50%; border: 1.5px solid var(--brand-red);
+    background: rgba(231, 76, 60, 0.1); color: var(--brand-red);
     display: flex; align-items: center; justify-content: center; text-decoration: none; font-size: 1rem;
     transition: all 0.3s;
   }
-  .social-icon:hover { background: var(--gold); color: #000; transform: scale(1.1); }
+  .social-icon:hover { background: var(--brand-red); color: #fff; transform: scale(1.1); }
 
-  /* Kategoriler */
+  /* Kategoriler ve Kategori Ekleme Butonu */
   .categories-container { margin-bottom: 15px; }
   .categories-bar {
     display: flex;
@@ -179,7 +205,27 @@
     transform: scale(1.05);
   }
 
-  /* Aktif Kategori Başlığı ve Düzenleme Butonları */
+  /* Yeni Kategori Ekle Butonu Kartı */
+  .add-cat-card {
+    flex: 0 0 auto;
+    width: 110px;
+    height: 65px;
+    background: rgba(231, 76, 60, 0.1);
+    border: 1.5px dashed var(--brand-red);
+    border-radius: 10px;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: var(--brand-red);
+    cursor: pointer;
+    font-size: 0.75rem;
+    font-weight: 600;
+    transition: all 0.3s;
+  }
+  body.admin-mode .add-cat-card { display: flex; }
+  .add-cat-card:hover { background: var(--brand-red); color: #fff; }
+
   .active-category-header {
     display: flex;
     justify-content: space-between;
@@ -196,7 +242,6 @@
     font-weight: 700;
   }
 
-  /* Ürün Izgarası ve Animasyonlar */
   .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(155px, 1fr)); gap: 12px; }
   .menu-item { 
     background: var(--card-bg); 
@@ -232,7 +277,6 @@
   .item-content { padding: 10px; display: flex; flex-direction: column; flex-grow: 1; justify-content: center; background: #131317; text-align: center; }
   .item-title { font-family: 'Cinzel', serif; font-size: 0.85rem; color: var(--gold-light); font-weight: 600; }
 
-  /* Yönetici Hızlı Araçlar */
   .admin-controls {
     display: none;
     position: absolute;
@@ -251,7 +295,6 @@
   .admin-btn-icon.delete { border-color: var(--danger); color: var(--danger); }
   .admin-btn-icon.delete:hover { background: var(--danger); color: #fff; }
 
-  /* Hızlı Ürün Ekleme Paneli */
   .quick-add-section {
     display: none;
     margin-top: 15px;
@@ -273,7 +316,6 @@
   .btn-gold { background: var(--gold); color: #000; }
   .btn-danger { background: var(--danger); color: #fff; }
   
-  /* Yükleniyor Göstergesi */
   #loadingOverlay {
     position: fixed; top: 0; left: 0; width: 100%; height: 100%;
     background: rgba(7,7,9,0.85); z-index: 9999; display: flex;
@@ -293,13 +335,19 @@
 <div class="container">
   
   <div class="header">
-    <h1>Seyir Cafe</h1>
-    <p>Lounge & Gourmet Experience</p>
+    <h1>Sey<span class="custom-i">İ<i class="fa-solid fa-heart heart-dot"></i></span>r Cafe</h1>
+    <p id="headerSubtitle" onclick="editSubtitle()" title="Alt Yazıyı Değiştir">Lounge & Gourmet Experience</p>
     
-    <div class="wifi-bar">
-      <i class="fa-solid fa-wifi"></i>
-      <span>Wi-Fi Şifresi: <b id="wifiPassText">Seyir2121</b></span>
-      <button id="wifiEditBtn" style="display:none; background:none; border:none; color:var(--gold); cursor:pointer; margin-left:5px;" onclick="editWifiPassword()" title="Şifreyi Değiştir"><i class="fa-solid fa-pen"></i></button>
+    <!-- Tıklanınca Açılan Gizli Wi-Fi Alanı -->
+    <div class="wifi-widget" id="wifiWidget" onclick="toggleWifiBox()">
+      <div class="wifi-icon-row">
+        <i class="fa-solid fa-wifi"></i>
+        <span>Wi-Fi Bilgisi</span>
+      </div>
+      <div class="wifi-details">
+        Şifre: <b id="wifiPassText">Seyir2121</b>
+        <button id="wifiEditBtn" style="display:none; background:none; border:none; color:var(--gold); cursor:pointer; margin-left:5px;" onclick="event.stopPropagation(); editWifiPassword()" title="Şifreyi Değiştir"><i class="fa-solid fa-pen"></i></button>
+      </div>
     </div>
 
     <div class="social-links">
@@ -309,7 +357,9 @@
   </div>
 
   <div class="categories-container">
-    <div id="categoriesBar" class="categories-bar"></div>
+    <div id="categoriesBar" class="categories-bar">
+      <!-- Kategoriler ve Kategori Ekle Butonu Dinamik Yüklenecek -->
+    </div>
   </div>
 
   <div class="active-category-header">
@@ -344,13 +394,13 @@
   let categoriesData = [];
   let allProducts = [];
   let wifiPassword = "Seyir2121";
+  let subtitleText = "Lounge & Gourmet Experience";
 
   const TARGET_PASS = "1171";
   let failedAttempts = 0;
   let currentCategory = 'Tümü';
   let isAdminMode = false;
 
-  // Varsayılan Başlangıç Verileri (Firebase boşsa yüklenecek)
   const defaultCategories = [
     { name: "Sıcak İçecekler", img: "https://images.unsplash.com/photo-1544787219-7f47ccb76574?w=500&q=80" },
     { name: "Yemek", img: "https://images.unsplash.com/photo-1598515214211-89d3c73ae83b?w=500&q=80" },
@@ -379,7 +429,6 @@
     { name: "Love 66 Nargile", price: "300 TL", category: "Nargile", img: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=500&q=80" }
   ];
 
-  // --- FIREBASE VERİ YÖNETİMİ ---
   window.loadDataFromFirebase = async function() {
     try {
       const querySnapshot = await window.dbTools.getDocs(window.dbTools.collection(window.db, "menu_data"));
@@ -402,17 +451,22 @@
         await window.dbTools.setDoc(window.dbTools.doc(window.db, "menu_data", "products"), { list: allProducts });
       }
 
-      if (cloudData.settings && cloudData.settings.wifi) {
-        wifiPassword = cloudData.settings.wifi;
-        document.getElementById('wifiPassText').innerText = wifiPassword;
+      if (cloudData.settings) {
+        if (cloudData.settings.wifi) {
+          wifiPassword = cloudData.settings.wifi;
+          document.getElementById('wifiPassText').innerText = wifiPassword;
+        }
+        if (cloudData.settings.subtitle) {
+          subtitleText = cloudData.settings.subtitle;
+          document.getElementById('headerSubtitle').innerText = subtitleText;
+        }
       }
 
     } catch (e) {
-      console.error("Firebase veri yükleme hatası:", e);
+      console.error("Firebase yükleme hatası:", e);
       categoriesData = defaultCategories;
       allProducts = defaultProducts;
     } finally {
-      // Yüklenme ekranını kaldır
       const overlay = document.getElementById('loadingOverlay');
       if(overlay) {
         overlay.style.opacity = '0';
@@ -435,13 +489,12 @@
     } catch (e) { console.error(e); }
   }
 
-  async function saveWifiToFirebase() {
+  async function saveSettingsToFirebase() {
     try {
-      await window.dbTools.setDoc(window.dbTools.doc(window.db, "menu_data", "settings"), { wifi: wifiPassword });
+      await window.dbTools.setDoc(window.dbTools.doc(window.db, "menu_data", "settings"), { wifi: wifiPassword, subtitle: subtitleText });
     } catch (e) { console.error(e); }
   }
 
-  // --- ARAYÜZ VE YÖNETİCİ FONKSİYONLARI ---
   function toggleLoginBox() {
     if (isAdminMode) {
       isAdminMode = false;
@@ -449,6 +502,7 @@
       document.getElementById('lockIcon').className = "fa-solid fa-lock";
       document.getElementById('wifiEditBtn').style.display = 'none';
       alert("Yönetici modu kapatıldı.");
+      renderCategories();
       renderProducts();
       return;
     }
@@ -487,13 +541,53 @@
     }
   }
 
+  function toggleWifiBox() {
+    document.getElementById('wifiWidget').classList.toggle('open');
+  }
+
   function editWifiPassword() {
     const newWifi = prompt("Yeni Wi-Fi Şifresini Girin:", wifiPassword);
     if (newWifi !== null && newWifi.trim() !== "") {
       wifiPassword = newWifi.trim();
       document.getElementById('wifiPassText').innerText = wifiPassword;
-      saveWifiToFirebase();
+      saveSettingsToFirebase();
     }
+  }
+
+  function editSubtitle() {
+    if (!isAdminMode) return;
+    const newSub = prompt("Logo Altındaki Yazıyı Düzenle:", subtitleText);
+    if (newSub !== null && newSub.trim() !== "") {
+      subtitleText = newSub.trim();
+      document.getElementById('headerSubtitle').innerText = subtitleText;
+      saveSettingsToFirebase();
+    }
+  }
+
+  // Yeni Kategori Ekleme Fonksiyonu
+  function addNewCategory() {
+    const catName = prompt("Yeni Kategori Adı (Örn: Tatlılar):");
+    if (!catName || catName.trim() === "") return;
+
+    if (categoriesData.some(c => c.name.toLowerCase() === catName.trim().toLowerCase())) {
+      return alert("Bu isimde bir kategori zaten mevcut!");
+    }
+
+    const fileInput = document.createElement('input');
+    fileInput.type = 'file';
+    fileInput.accept = 'image/*';
+    fileInput.onchange = e => {
+      const file = e.target.files[0];
+      const reader = new FileReader();
+      reader.onload = function(event) {
+        categoriesData.push({ name: catName.trim(), img: event.target.result });
+        saveCategoriesToFirebase();
+        renderCategories();
+        alert(`"${catName.trim()}" kategorisi başarıyla eklendi!`);
+      };
+      reader.readAsDataURL(file);
+    };
+    fileInput.click();
   }
 
   function editCurrentCategory() {
@@ -539,7 +633,7 @@
   }
 
   function quickAddProductToCurrentCategory() {
-    if (currentCategory === 'Tümü') return alert("Lütfen önce bir kategori seçin!");
+    if (currentCategory === 'Tümü') return alert("Lütfen ürün eklemek için bir kategori seçin!");
     const name = document.getElementById('qAddName').value.trim();
     const price = document.getElementById('qAddPrice').value.trim();
     const fileInput = document.getElementById('qAddFile');
@@ -617,6 +711,10 @@
       <button class="cat-btn ${currentCategory === 'Tümü' ? 'active' : ''}" style="background-image:url('https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=500&q=80')" onclick="filterCat('Tümü')">
         <span>Tümü</span>
       </button>
+      <div class="add-cat-card" onclick="addNewCategory()">
+        <i class="fa-solid fa-plus" style="font-size:1.2rem; margin-bottom:3px;"></i>
+        <span>Kategori Ekle</span>
+      </div>
     `;
 
     categoriesData.forEach(cat => {
@@ -635,7 +733,7 @@
     
     if (isAdminMode && currentCategory !== 'Tümü') {
       editArea.innerHTML = `
-        <button class="btn btn-gold" style="padding:4px 10px; font-size:0.75rem;" onclick="editCurrentCategory()"><i class="fa-solid fa-pen"></i> Adı Değiştir</button>
+        <button class="btn btn-gold" style="padding:4px 10px; font-size:0.75rem;" onclick="editCurrentCategory()"><i class="fa-solid fa-pen"></i> Düzenle</button>
         <button class="btn btn-gold" style="padding:4px 10px; font-size:0.75rem; margin-left:4px;" onclick="changeCategoryBgImg()"><i class="fa-solid fa-image"></i> Görsel</button>
       `;
       quickAddSec.style.display = 'block';
