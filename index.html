@@ -33,15 +33,16 @@
 
 <style>
   :root {
-    --bg-color: #070709;
-    --card-bg: rgba(18, 18, 23, 0.96);
+    --bg-color: #0b090c;
+    --card-bg: rgba(22, 17, 24, 0.96);
     --gold: #d4af37;
     --gold-light: #fbeccb;
-    --gold-glow: rgba(212, 175, 55, 0.5);
+    --gold-glow: rgba(212, 175, 55, 0.4);
     --text-color: #e5e5e5;
     --text-muted: #999;
     --danger: #e74c3c;
-    --brand-red: #e74c3c; /* Logonun kırmızı tonu */
+    --sign-pink: #ff3385; /* Tabelanızdaki canlı pembe tonu */
+    --sign-pink-glow: rgba(255, 51, 133, 0.6);
   }
 
   html, body {
@@ -51,7 +52,7 @@
     background-color: var(--bg-color);
     color: var(--text-color);
     font-family: 'Montserrat', sans-serif;
-    background-image: radial-gradient(circle at 50% 0%, #1c0505 0%, #070709 85%);
+    background-image: radial-gradient(circle at 50% 0%, #2a0b18 0%, #0b090c 80%);
   }
 
   * { box-sizing: border-box !important; }
@@ -66,11 +67,16 @@
     min-height: 100vh;
   }
 
+  /* Tabela Tarzı Özel Header Alanı */
   .header { 
     text-align: center; 
-    padding: 25px 0 15px 0; 
-    border-bottom: 1px solid rgba(231, 76, 60, 0.25); 
-    margin-bottom: 15px; 
+    padding: 22px 15px 15px 15px; 
+    background: linear-gradient(135deg, rgba(20, 12, 18, 0.95), rgba(10, 7, 10, 0.98));
+    border: 2px solid rgba(255, 51, 133, 0.35); 
+    border-radius: 16px;
+    margin-bottom: 18px; 
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.6), inset 0 0 15px rgba(255, 51, 133, 0.1);
+    position: relative;
     animation: headerEntrance 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   }
   @keyframes headerEntrance {
@@ -78,16 +84,15 @@
     100% { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
   }
 
-  /* Logo Başlık ve Kalpli İ Harfi */
   .header h1 { 
     font-family: 'Cinzel', serif; 
-    font-size: 2.8rem; 
+    font-size: 2.7rem; 
     font-weight: 900;
     letter-spacing: 4px; 
     text-transform: uppercase;
     margin: 0;
-    color: var(--brand-red);
-    text-shadow: 0 0 15px rgba(231, 76, 60, 0.4);
+    color: var(--sign-pink);
+    text-shadow: 0 0 15px var(--sign-pink-glow), 0 0 30px rgba(255, 51, 133, 0.3);
   }
   
   .custom-i {
@@ -96,42 +101,43 @@
   }
   .custom-i .heart-dot {
     position: absolute;
-    top: -12px;
+    top: -13px;
     left: 50%;
     transform: translateX(-50%);
-    color: var(--brand-red);
-    font-size: 1.1rem;
+    color: var(--sign-pink);
+    font-size: 1.05rem;
     animation: pulseHeart 1.5s infinite alternate;
   }
   @keyframes pulseHeart {
-    0% { transform: translateX(-50%) scale(1); filter: drop-shadow(0 0 2px rgba(231,76,60,0.5)); }
-    100% { transform: translateX(-50%) scale(1.25); filter: drop-shadow(0 0 8px rgba(231,76,60,0.9)); }
+    0% { transform: translateX(-50%) scale(1); filter: drop-shadow(0 0 2px var(--sign-pink-glow)); }
+    100% { transform: translateX(-50%) scale(1.3); filter: drop-shadow(0 0 10px var(--sign-pink)); }
   }
 
   .header p { 
-    font-size: 0.8rem; 
+    font-size: 0.75rem; 
     letter-spacing: 3px; 
     color: var(--gold-light); 
-    margin-top: 6px; 
+    margin-top: 8px; 
     text-transform: uppercase; 
+    opacity: 0.9;
   }
 
-  /* Gizlenebilir/Açılabilir Wi-Fi Alanı */
+  /* Wi-Fi Widget */
   .wifi-widget {
     display: inline-flex;
     flex-direction: column;
     align-items: center;
-    margin-top: 12px;
-    background: rgba(212, 175, 55, 0.08);
-    border: 1px solid rgba(212, 175, 55, 0.25);
+    margin-top: 10px;
+    background: rgba(255, 51, 133, 0.08);
+    border: 1px solid rgba(255, 51, 133, 0.25);
     border-radius: 12px;
     padding: 6px 14px;
     cursor: pointer;
     transition: all 0.3s;
   }
-  .wifi-widget:hover { background: rgba(212, 175, 55, 0.15); }
-  .wifi-icon-row { display: flex; align-items: center; gap: 8px; font-size: 0.85rem; color: var(--gold-light); }
-  .wifi-icon-row i { color: var(--gold); font-size: 1rem; }
+  .wifi-widget:hover { background: rgba(255, 51, 133, 0.15); }
+  .wifi-icon-row { display: flex; align-items: center; gap: 8px; font-size: 0.8rem; color: var(--gold-light); }
+  .wifi-icon-row i { color: var(--sign-pink); font-size: 0.95rem; }
   
   .wifi-details {
     max-height: 0;
@@ -146,44 +152,55 @@
     margin-top: 6px;
   }
 
-  .social-links { display: flex; justify-content: center; gap: 15px; margin-top: 12px; }
+  .social-links { display: flex; justify-content: center; gap: 12px; margin-top: 10px; }
   .social-icon {
-    width: 38px; height: 38px; border-radius: 50%; border: 1.5px solid var(--brand-red);
-    background: rgba(231, 76, 60, 0.1); color: var(--brand-red);
-    display: flex; align-items: center; justify-content: center; text-decoration: none; font-size: 1rem;
+    width: 34px; height: 34px; border-radius: 50%; border: 1.5px solid var(--sign-pink);
+    background: rgba(255, 51, 133, 0.1); color: var(--sign-pink);
+    display: flex; align-items: center; justify-content: center; text-decoration: none; font-size: 0.9rem;
     transition: all 0.3s;
   }
-  .social-icon:hover { background: var(--brand-red); color: #fff; transform: scale(1.1); }
+  .social-icon:hover { background: var(--sign-pink); color: #fff; transform: scale(1.1); }
 
-  /* Kategoriler ve Kategori Ekleme Butonu */
-  .categories-container { margin-bottom: 15px; }
+  /* Kategoriler Bölümü (Web ve Mobilde Akıcı Kaydırma) */
+  .categories-container { margin-bottom: 15px; width: 100%; }
   .categories-bar {
     display: flex;
     gap: 10px;
     overflow-x: auto;
+    overflow-y: hidden;
     padding: 5px 2px 12px 2px;
-    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    scrollbar-color: var(--sign-pink) transparent;
   }
-  .categories-bar::-webkit-scrollbar { display: none; }
+  .categories-bar::-webkit-scrollbar { height: 5px; }
+  .categories-bar::-webkit-scrollbar-thumb { background: rgba(255, 51, 133, 0.4); border-radius: 10px; }
   
-  .cat-btn {
+  .cat-card-wrapper {
     flex: 0 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     position: relative;
+  }
+
+  .cat-btn {
     width: 110px;
     height: 65px;
     background-size: cover;
     background-position: center;
-    border: 1.5px solid rgba(212, 175, 55, 0.3);
+    border: 1.5px solid rgba(255, 51, 133, 0.3);
     border-radius: 10px;
     cursor: pointer;
     overflow: hidden;
+    position: relative;
     transition: all 0.3s ease;
   }
   .cat-btn::before {
     content: '';
     position: absolute;
     top: 0; left: 0; width: 100%; height: 100%;
-    background: linear-gradient(180deg, rgba(0,0,0,0.4) 0%, rgba(10,10,14,0.85) 100%);
+    background: linear-gradient(180deg, rgba(0,0,0,0.3) 0%, rgba(15,10,15,0.85) 100%);
     z-index: 1;
   }
   .cat-btn span {
@@ -200,31 +217,52 @@
     overflow: hidden;
   }
   .cat-btn.active {
-    border-color: var(--gold);
-    box-shadow: 0 0 12px var(--gold-glow);
-    transform: scale(1.05);
+    border-color: var(--sign-pink);
+    box-shadow: 0 0 12px var(--sign-pink-glow);
+    transform: scale(1.04);
   }
+
+  /* Kategori Sıralama Okları (Yönetici Modu) */
+  .admin-cat-actions {
+    display: none;
+    gap: 4px;
+    margin-top: 4px;
+  }
+  body.admin-mode .admin-cat-actions { display: flex; }
+  .cat-order-btn {
+    background: #222;
+    color: var(--gold);
+    border: 1px solid var(--gold);
+    border-radius: 4px;
+    width: 24px;
+    height: 22px;
+    font-size: 0.7rem;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .cat-order-btn:hover { background: var(--gold); color: #000; }
 
   /* Yeni Kategori Ekle Butonu Kartı */
   .add-cat-card {
     flex: 0 0 auto;
     width: 110px;
     height: 65px;
-    background: rgba(231, 76, 60, 0.1);
-    border: 1.5px dashed var(--brand-red);
+    background: rgba(255, 51, 133, 0.1);
+    border: 1.5px dashed var(--sign-pink);
     border-radius: 10px;
     display: none;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    color: var(--brand-red);
+    color: var(--sign-pink);
     cursor: pointer;
     font-size: 0.75rem;
     font-weight: 600;
     transition: all 0.3s;
+    margin-top: 0;
   }
   body.admin-mode .add-cat-card { display: flex; }
-  .add-cat-card:hover { background: var(--brand-red); color: #fff; }
+  .add-cat-card:hover { background: var(--sign-pink); color: #fff; }
 
   .active-category-header {
     display: flex;
@@ -232,20 +270,20 @@
     align-items: center;
     margin-bottom: 15px;
     padding: 0 4px;
-    border-left: 3px solid var(--gold);
+    border-left: 3px solid var(--sign-pink);
     padding-left: 10px;
   }
   .active-category-title {
     font-family: 'Cinzel', serif;
     font-size: 1.25rem;
-    color: var(--gold);
+    color: var(--sign-pink);
     font-weight: 700;
   }
 
   .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(155px, 1fr)); gap: 12px; }
   .menu-item { 
     background: var(--card-bg); 
-    border: 1px solid rgba(212, 175, 55, 0.2); 
+    border: 1px solid rgba(255, 51, 133, 0.2); 
     border-radius: 10px; 
     overflow: hidden; 
     display: flex; 
@@ -270,57 +308,74 @@
   .item-img { width: 100%; height: 100%; object-fit: cover; }
   .item-badge { 
     position: absolute; top: 6px; right: 6px; 
-    background: rgba(192, 57, 43, 0.92); color: #fff; 
+    background: rgba(255, 51, 133, 0.92); color: #fff; 
     font-size: 0.75rem; font-weight: 700; padding: 3px 8px; 
     border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.5); 
   }
-  .item-content { padding: 10px; display: flex; flex-direction: column; flex-grow: 1; justify-content: center; background: #131317; text-align: center; }
+  .item-content { padding: 10px; display: flex; flex-direction: column; flex-grow: 1; justify-content: center; background: #131014; text-align: center; }
   .item-title { font-family: 'Cinzel', serif; font-size: 0.85rem; color: var(--gold-light); font-weight: 600; }
 
   .admin-controls {
     display: none;
     position: absolute;
     top: 6px; left: 6px;
-    gap: 5px;
+    gap: 4px;
     z-index: 10;
   }
   body.admin-mode .admin-controls { display: flex; }
   .admin-btn-icon {
-    width: 30px; height: 30px; border-radius: 50%;
-    background: rgba(0, 0, 0, 0.85); border: 1px solid var(--gold);
-    color: var(--gold); display: flex; align-items: center; justify-content: center;
-    cursor: pointer; font-size: 0.8rem;
+    width: 28px; height: 28px; border-radius: 50%;
+    background: rgba(0, 0, 0, 0.85); border: 1px solid var(--sign-pink);
+    color: var(--sign-pink); display: flex; align-items: center; justify-content: center;
+    cursor: pointer; font-size: 0.75rem;
   }
-  .admin-btn-icon:hover { background: var(--gold); color: #000; }
+  .admin-btn-icon:hover { background: var(--sign-pink); color: #fff; }
   .admin-btn-icon.delete { border-color: var(--danger); color: var(--danger); }
   .admin-btn-icon.delete:hover { background: var(--danger); color: #fff; }
+
+  /* Ürün Kartı İçerisinde Yer Değiştirme Okları (Yönetici) */
+  .admin-product-order {
+    display: none;
+    position: absolute;
+    bottom: 6px; right: 6px;
+    gap: 3px;
+    z-index: 10;
+  }
+  body.admin-mode .admin-product-order { display: flex; }
+  .prod-order-btn {
+    width: 26px; height: 26px; border-radius: 50%;
+    background: rgba(0, 0, 0, 0.85); border: 1px solid var(--gold);
+    color: var(--gold); display: flex; align-items: center; justify-content: center;
+    cursor: pointer; font-size: 0.7rem;
+  }
+  .prod-order-btn:hover { background: var(--gold); color: #000; }
 
   .quick-add-section {
     display: none;
     margin-top: 15px;
-    background: #14141a;
-    border: 1px dashed var(--gold);
+    background: #141014;
+    border: 1px dashed var(--sign-pink);
     padding: 12px;
     border-radius: 8px;
   }
   body.admin-mode .quick-add-section { display: block; }
 
-  .footer { margin-top: auto; padding-top: 30px; text-align: center; border-top: 1px solid rgba(212, 175, 55, 0.15); display: flex; justify-content: space-between; align-items: center; }
+  .footer { margin-top: auto; padding-top: 30px; text-align: center; border-top: 1px solid rgba(255, 51, 133, 0.15); display: flex; justify-content: space-between; align-items: center; }
   .admin-toggle-btn-bottom { background: transparent; color: #444; border: none; cursor: pointer; font-size: 1rem; transition: color 0.3s; }
-  .admin-toggle-btn-bottom:hover { color: var(--gold); }
+  .admin-toggle-btn-bottom:hover { color: var(--sign-pink); }
 
-  .login-box { display: none; background: #151518; border: 1px solid var(--gold); padding: 15px; border-radius: 8px; margin-top: 15px; }
+  .login-box { display: none; background: #151015; border: 1px solid var(--sign-pink); padding: 15px; border-radius: 8px; margin-top: 15px; }
   .login-box.open { display: block; }
-  .admin-input { background: #0b0b0e; border: 1px solid #444; color: #fff; padding: 9px; border-radius: 5px; width: 100%; margin-bottom: 8px; font-size: 0.85rem; }
+  .admin-input { background: #0b090c; border: 1px solid #444; color: #fff; padding: 9px; border-radius: 5px; width: 100%; margin-bottom: 8px; font-size: 0.85rem; }
   .btn { padding: 9px 14px; border-radius: 5px; border: none; cursor: pointer; font-size: 0.85rem; font-weight: 600; }
-  .btn-gold { background: var(--gold); color: #000; }
+  .btn-gold { background: var(--sign-pink); color: #fff; }
   .btn-danger { background: var(--danger); color: #fff; }
   
   #loadingOverlay {
     position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(7,7,9,0.85); z-index: 9999; display: flex;
+    background: rgba(11,9,12,0.9); z-index: 9999; display: flex;
     flex-direction: column; align-items: center; justify-content: center;
-    color: var(--gold); font-family: 'Cinzel', serif; font-size: 1.1rem;
+    color: var(--sign-pink); font-family: 'Cinzel', serif; font-size: 1.1rem;
     transition: opacity 0.5s ease;
   }
 </style>
@@ -338,7 +393,6 @@
     <h1>Sey<span class="custom-i">İ<i class="fa-solid fa-heart heart-dot"></i></span>r Cafe</h1>
     <p id="headerSubtitle" onclick="editSubtitle()" title="Alt Yazıyı Değiştir">Lounge & Gourmet Experience</p>
     
-    <!-- Tıklanınca Açılan Gizli Wi-Fi Alanı -->
     <div class="wifi-widget" id="wifiWidget" onclick="toggleWifiBox()">
       <div class="wifi-icon-row">
         <i class="fa-solid fa-wifi"></i>
@@ -346,7 +400,7 @@
       </div>
       <div class="wifi-details">
         Şifre: <b id="wifiPassText">Seyir2121</b>
-        <button id="wifiEditBtn" style="display:none; background:none; border:none; color:var(--gold); cursor:pointer; margin-left:5px;" onclick="event.stopPropagation(); editWifiPassword()" title="Şifreyi Değiştir"><i class="fa-solid fa-pen"></i></button>
+        <button id="wifiEditBtn" style="display:none; background:none; border:none; color:var(--sign-pink); cursor:pointer; margin-left:5px;" onclick="event.stopPropagation(); editWifiPassword()" title="Şifreyi Değiştir"><i class="fa-solid fa-pen"></i></button>
       </div>
     </div>
 
@@ -358,7 +412,7 @@
 
   <div class="categories-container">
     <div id="categoriesBar" class="categories-bar">
-      <!-- Kategoriler ve Kategori Ekle Butonu Dinamik Yüklenecek -->
+      <!-- Kategoriler Dinamik Yüklenir -->
     </div>
   </div>
 
@@ -370,7 +424,7 @@
   <div id="menuGrid" class="grid"></div>
 
   <div id="quickAddSection" class="quick-add-section">
-    <h4 style="color:var(--gold); margin-bottom:8px; font-family:'Cinzel', serif; font-size:0.95rem;" id="quickAddTitle">+ Kategoriye Ürün Ekle</h4>
+    <h4 style="color:var(--sign-pink); margin-bottom:8px; font-family:'Cinzel', serif; font-size:0.95rem;" id="quickAddTitle">+ Kategoriye Ürün Ekle</h4>
     <input type="text" id="qAddName" class="admin-input" placeholder="Ürün Adı">
     <input type="text" id="qAddPrice" class="admin-input" placeholder="Fiyat (Örn: 200 TL)">
     <input type="file" id="qAddFile" class="admin-input" accept="image/*">
@@ -564,7 +618,28 @@
     }
   }
 
-  // Yeni Kategori Ekleme Fonksiyonu
+  // Kategori Yer Değiştirme (Sıralama)
+  function moveCategory(index, direction) {
+    const targetIdx = index + direction;
+    if (targetIdx < 0 || targetIdx >= categoriesData.length) return;
+    const temp = categoriesData[index];
+    categoriesData[index] = categoriesData[targetIdx];
+    categoriesData[targetIdx] = temp;
+    saveCategoriesToFirebase();
+    renderCategories();
+  }
+
+  // Ürün Yer Değiştirme (Sıralama)
+  function moveProduct(globalIdx, direction) {
+    const targetIdx = globalIdx + direction;
+    if (targetIdx < 0 || targetIdx >= allProducts.length) return;
+    const temp = allProducts[globalIdx];
+    allProducts[globalIdx] = allProducts[targetIdx];
+    allProducts[targetIdx] = temp;
+    saveProductsToFirebase();
+    renderProducts();
+  }
+
   function addNewCategory() {
     const catName = prompt("Yeni Kategori Adı (Örn: Tatlılar):");
     if (!catName || catName.trim() === "") return;
@@ -662,7 +737,7 @@
     alert("Ürün başarıyla buluta eklendi!");
   }
 
-  function updateProductName(index, globalIdx) {
+  function updateProductName(globalIdx) {
     const newName = prompt("Ürün Adını Düzenle:", allProducts[globalIdx].name);
     if (newName !== null && newName.trim() !== "") {
       allProducts[globalIdx].name = newName.trim();
@@ -671,7 +746,7 @@
     }
   }
 
-  function updateProductPrice(index, globalIdx) {
+  function updateProductPrice(globalIdx) {
     const newPrice = prompt("Fiyatı Düzenle (Örn: 200 TL):", allProducts[globalIdx].price);
     if (newPrice !== null && newPrice.trim() !== "") {
       allProducts[globalIdx].price = newPrice.trim();
@@ -708,20 +783,28 @@
   function renderCategories() {
     const bar = document.getElementById('categoriesBar');
     bar.innerHTML = `
-      <button class="cat-btn ${currentCategory === 'Tümü' ? 'active' : ''}" style="background-image:url('https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=500&q=80')" onclick="filterCat('Tümü')">
-        <span>Tümü</span>
-      </button>
+      <div class="cat-card-wrapper">
+        <button class="cat-btn ${currentCategory === 'Tümü' ? 'active' : ''}" style="background-image:url('https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=500&q=80')" onclick="filterCat('Tümü')">
+          <span>Tümü</span>
+        </button>
+      </div>
       <div class="add-cat-card" onclick="addNewCategory()">
         <i class="fa-solid fa-plus" style="font-size:1.2rem; margin-bottom:3px;"></i>
         <span>Kategori Ekle</span>
       </div>
     `;
 
-    categoriesData.forEach(cat => {
+    categoriesData.forEach((cat, idx) => {
       bar.innerHTML += `
-        <button class="cat-btn ${currentCategory === cat.name ? 'active' : ''}" style="background-image:url('${cat.img}')" onclick="filterCat('${cat.name}')">
-          <span>${cat.name}</span>
-        </button>
+        <div class="cat-card-wrapper">
+          <button class="cat-btn ${currentCategory === cat.name ? 'active' : ''}" style="background-image:url('${cat.img}')" onclick="filterCat('${cat.name}')">
+            <span>${cat.name}</span>
+          </button>
+          <div class="admin-cat-actions">
+            <button class="cat-order-btn" onclick="moveCategory(${idx}, -1)" title="Sola Taşı"><i class="fa-solid fa-chevron-left"></i></button>
+            <button class="cat-order-btn" onclick="moveCategory(${idx}, 1)" title="Sağa Taşı"><i class="fa-solid fa-chevron-right"></i></button>
+          </div>
+        </div>
       `;
     });
 
@@ -755,11 +838,11 @@
     grid.innerHTML = '';
 
     const filtered = currentCategory === 'Tümü' 
-      ? allProducts 
+      ? allProducts.map((item, idx) => ({ ...item, originalIndex: idx }))
       : allProducts.map((item, idx) => ({ ...item, originalIndex: idx })).filter(p => p.category === currentCategory);
 
     filtered.forEach((item, index) => {
-      const gIdx = item.originalIndex !== undefined ? item.originalIndex : allProducts.indexOf(item);
+      const gIdx = item.originalIndex;
       const animClass = `anim-${(index % 4) + 1}`;
 
       grid.innerHTML += `
@@ -769,12 +852,17 @@
             <div class="admin-btn-icon delete" onclick="deleteProduct(${gIdx})" title="Ürünü Sil"><i class="fa-solid fa-trash"></i></div>
           </div>
 
+          <div class="admin-product-order">
+            <button class="prod-order-btn" onclick="moveProduct(${gIdx}, -1)" title="Yukarı/Sola Taşı"><i class="fa-solid fa-chevron-up"></i></button>
+            <button class="prod-order-btn" onclick="moveProduct(${gIdx}, 1)" title="Aşağı/Sağa Taşı"><i class="fa-solid fa-chevron-down"></i></button>
+          </div>
+
           <div class="item-img-wrapper">
             <img src="${item.img}" class="item-img" alt="${item.name}">
-            <div class="item-badge" onclick="${isAdminMode ? `updateProductPrice(${index}, ${gIdx})` : ''}" style="${isAdminMode ? 'cursor:pointer; border:1px dashed #fff;' : ''}" title="Fiyatı Değiştir">${item.price}</div>
+            <div class="item-badge" onclick="${isAdminMode ? `updateProductPrice(${gIdx})` : ''}" style="${isAdminMode ? 'cursor:pointer; border:1px dashed #fff;' : ''}" title="Fiyatı Değiştir">${item.price}</div>
           </div>
           <div class="item-content">
-            <div class="item-title" onclick="${isAdminMode ? `updateProductName(${index}, ${gIdx})` : ''}" style="${isAdminMode ? 'cursor:pointer; text-decoration:underline dashed var(--gold);' : ''}" title="İsmi Değiştir">${item.name}</div>
+            <div class="item-title" onclick="${isAdminMode ? `updateProductName(${gIdx})` : ''}" style="${isAdminMode ? 'cursor:pointer; text-decoration:underline dashed var(--sign-pink);' : ''}" title="İsmi Değiştir">${item.name}</div>
           </div>
         </div>
       `;
