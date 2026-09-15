@@ -164,9 +164,7 @@
     transform: scale(1.1);
   }
 
-  .wifi-logo-container {
-    position: relative;
-  }
+  .wifi-logo-container { position: relative; }
   .wifi-details-popup {
     display: none;
     position: absolute;
@@ -343,22 +341,6 @@
   .admin-btn-icon.delete { border-color: var(--danger); color: var(--danger); }
   .admin-btn-icon.delete:hover { background: var(--danger); color: #fff; }
 
-  .admin-product-order {
-    display: none;
-    position: absolute;
-    bottom: 6px; right: 6px;
-    gap: 3px;
-    z-index: 10;
-  }
-  body.admin-mode .admin-product-order { display: flex; }
-  .prod-order-btn {
-    width: 26px; height: 26px; border-radius: 50%;
-    background: rgba(0, 0, 0, 0.85); border: 1px solid var(--gold);
-    color: var(--gold); display: flex; align-items: center; justify-content: center;
-    cursor: pointer; font-size: 0.7rem;
-  }
-  .prod-order-btn:hover { background: var(--gold); color: #000; }
-
   .quick-add-section {
     display: none;
     margin-top: 15px;
@@ -404,8 +386,7 @@
     <p id="headerSubtitle" onclick="editSubtitle()" title="Alt Yazıyı Değiştir">Lounge & Gourmet Experience</p>
     
     <div class="brand-social-bar">
-      <!-- Instagram Direkt Takip Butonu -->
-      <a href="https://www.instagram.com/seyircafe.21?igsh=MWJqbTZqZ2FmY3A2YQ==" target="_blank" id="instagramBtnWrapper" class="social-logo-btn" title="Instagram'da Takip Et">
+      <a href="https://www.instagram.com/seyircafe.21?igsh=MWJqbTZqZ2FmY3A2YQ==" target="_blank" class="social-logo-btn" title="Instagram'da Takip Et">
         <i class="fa-brands fa-instagram"></i>
       </a>
       
@@ -418,13 +399,11 @@
         </div>
       </div>
 
-      <!-- Google Maps Doğrudan 5 Yıldız / Yorum Paneli -->
       <a href="https://search.google.com/local/writereview?placeid=ChIJg8i4VfRGFBUROl168Lp13j8" target="_blank" class="social-logo-btn" title="Google Haritalar'da 5 Yıldız Ver">
         <i class="fa-solid fa-location-dot"></i>
       </a>
 
-      <!-- TikTok Direkt Takip Butonu -->
-      <a href="https://www.tiktok.com/@seyircafe21?_t=8n...&_r=1" target="_blank" id="tiktokBtnWrapper" class="social-logo-btn" title="TikTok'ta Takip Et">
+      <a href="https://www.tiktok.com/@seyircafe21?_t=8n...&_r=1" target="_blank" class="social-logo-btn" title="TikTok'ta Takip Et">
         <i class="fa-brands fa-tiktok"></i>
       </a>
     </div>
@@ -459,3 +438,212 @@
     <span style="font-size: 0.75rem; color: #777;">© Seyir Cafe Dijital Menü</span>
     <button class="admin-toggle-btn-bottom" onclick="toggleLoginBox()" title="Yönetici Paneli"><i class="fa-solid fa-lock" id="lockIcon"></i></button>
   </div>
+</div>
+
+<script>
+  let categories = [];
+  let products = [];
+  let currentCategory = "Tümü";
+  let logoClickCount = 0;
+  let logoClickTimer = null;
+
+  async function loadDataFromFirebase() {
+    try {
+      const catSnapshot = await window.dbTools.getDocs(window.dbTools.collection(window.db, "categories"));
+      categories = catSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+      const prodSnapshot = await window.dbTools.getDocs(window.dbTools.collection(window.db, "products"));
+      products = prodSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+      renderCategories();
+      renderProducts();
+
+      const overlay = document.getElementById('loadingOverlay');
+      if (overlay) {
+        overlay.style.opacity = '0';
+        setTimeout(() => overlay.style.display = 'none', 500);
+      }
+    } catch (error) {
+      console.error("Firebase veri yükleme hatası:", error);
+      document.getElementById('loadingOverlay').innerHTML = "Veri Yüklenemedi! Lütfen Bağlantınızı veya Firebase Kurallarını Kontrol Edin.";
+    }
+  }
+
+  function renderCategories() {
+    const bar = document.getElementById('categoriesBar');
+    let html = `
+      <div class="cat-card-wrapper">
+        <div class="cat-btn ${currentCategory === 'Tümü' ? 'active' : ''}" onclick="selectCategory('Tümü')" style="background-image: url('https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=300&q=80');">
+          <span>Tümü</span>
+        </div>
+      </div>
+    `;
+
+    categories.forEach((cat) => {
+      html += `
+        <div class="cat-card-wrapper">
+          <div class="cat-btn ${currentCategory === cat.name ? 'active' : ''}" onclick="selectCategory('${cat.name}')" style="background-image: url('${cat.image || 'https://via.placeholder.com/150'}');">
+            <span>${cat.name}</span>
+          </div>
+          <div class="admin-cat-actions">
+            <button class="cat-order-btn" onclick="deleteCategory('${cat.id}')"><i class="fa-solid fa-trash"></i></button>
+          </div>
+        </div>
+      `;
+    });
+
+    html += `<div class="add-cat-card" onclick="addNewCategory()">+ Kategori</div>`;
+    bar.innerHTML = html;
+  }
+
+  function renderProducts() {
+    const grid = document.getElementById('menuGrid');
+    document.getElementById('activeCategoryTitle').innerText = currentCategory;
+    
+    let filteredProducts = currentCategory === "Tümü" 
+      ? products 
+      : products.filter(p => p.category === currentCategory);
+
+    if (filteredProducts.length === 0) {
+      grid.innerHTML = `<div style="grid-column: 1/-1; text-align:center; padding: 20px; color: #777;">Bu kategoride henüz ürün bulunmuyor.</div>`;
+      return;
+    }
+
+    let html = "";
+    filteredProducts.forEach(prod => {
+      html += `
+        <div class="menu-item">
+          <div class="admin-controls">
+            <button class="admin-btn-icon delete" onclick="deleteProduct('${prod.id}')"><i class="fa-solid fa-trash"></i></button>
+          </div>
+          <div class="item-img-wrapper">
+            <img class="item-img" src="${prod.image || 'https://via.placeholder.com/150'}" alt="${prod.name}">
+            <div class="item-badge">${prod.price}</div>
+          </div>
+          <div class="item-content">
+            <div class="item-title">${prod.name}</div>
+          </div>
+        </div>
+      `;
+    });
+    grid.innerHTML = html;
+  }
+
+  function selectCategory(catName) {
+    currentCategory = catName;
+    renderCategories();
+    renderProducts();
+  }
+
+  async function addNewCategory() {
+    const name = prompt("Kategori Adı:");
+    if (!name) return;
+    const image = prompt("Kategori Görsel URL:");
+    
+    try {
+      await window.dbTools.addDoc(window.dbTools.collection(window.db, "categories"), { name, image });
+      loadDataFromFirebase();
+    } catch (e) {
+      alert("Hata oluştu: " + e.message);
+    }
+  }
+
+  async function deleteCategory(id) {
+    if (confirm("Bu kategoriyi silmek istediğinizden emin misiniz?")) {
+      await window.dbTools.deleteDoc(window.dbTools.doc(window.db, "categories", id));
+      loadDataFromFirebase();
+    }
+  }
+
+  async function quickAddProductToCurrentCategory() {
+    if (currentCategory === "Tümü") {
+      alert("Lütfen önce ürün eklemek istediğiniz özel bir kategori seçin.");
+      return;
+    }
+    const name = document.getElementById('qAddName').value;
+    const price = document.getElementById('qAddPrice').value;
+    const fileInput = document.getElementById('qAddFile');
+
+    if (!name || !price) {
+      alert("Lütfen isim ve fiyat alanlarını doldurun.");
+      return;
+    }
+
+    let image = 'https://via.placeholder.com/150';
+    if (fileInput.files && fileInput.files[0]) {
+      const reader = new FileReader();
+      reader.onload = async function(e) {
+        image = e.target.result;
+        await saveProduct(name, price, image);
+      };
+      reader.readAsDataURL(fileInput.files[0]);
+    } else {
+      await saveProduct(name, price, image);
+    }
+  }
+
+  async function saveProduct(name, price, image) {
+    try {
+      await window.dbTools.addDoc(window.dbTools.collection(window.db, "products"), {
+        name,
+        price,
+        image,
+        category: currentCategory
+      });
+      document.getElementById('qAddName').value = '';
+      document.getElementById('qAddPrice').value = '';
+      document.getElementById('qAddFile').value = '';
+      loadDataFromFirebase();
+    } catch (e) {
+      alert("Ürün eklenirken hata: " + e.message);
+    }
+  }
+
+  async function deleteProduct(id) {
+    if (confirm("Bu ürünü silmek istediğinize emin misiniz?")) {
+      await window.dbTools.deleteDoc(window.dbTools.doc(window.db, "products", id));
+      loadDataFromFirebase();
+    }
+  }
+
+  function handleWifiClick() {
+    const pass = document.getElementById('wifiPassText').innerText;
+    navigator.clipboard.writeText(pass);
+    const popup = document.getElementById('wifiPopup');
+    popup.classList.add('open');
+    setTimeout(() => popup.classList.remove('open'), 2500);
+  }
+
+  function handleLogoClicks() {
+    logoClickCount++;
+    if (logoClickCount === 3) {
+      toggleLoginBox();
+      logoClickCount = 0;
+      clearTimeout(logoClickTimer);
+    } else {
+      clearTimeout(logoClickTimer);
+      logoClickTimer = setTimeout(() => logoClickCount = 0, 1000);
+    }
+  }
+
+  function toggleLoginBox() {
+    const box = document.getElementById('loginBox');
+    box.classList.toggle('open');
+  }
+
+  function checkPassword() {
+    const pass = document.getElementById('passInput').value;
+    if (pass === "1234") { // Yönetici şifreniz
+      document.body.classList.add('admin-mode');
+      document.getElementById('loginBox').classList.remove('open');
+      document.getElementById('lockIcon').className = "fa-solid fa-lock-open";
+      renderCategories();
+    } else {
+      const err = document.getElementById('loginError');
+      err.innerText = "Hatalı şifre!";
+      err.style.display = 'block';
+    }
+  }
+</script>
+</body>
+</html>
