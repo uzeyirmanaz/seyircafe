@@ -423,6 +423,8 @@ let ADMIN_TAB = 'menu';
 let CUR_CAT = null;
 let CUST_CAT = null;
 let MASALAR_ZONE = 'all';
+let RAPOR_START = null; // Rapor ekranı tarih filtresi (YYYY-MM-DD) — null = tüm zamanlar
+let RAPOR_END = null;
 let MODAL = null; // {type:'qr'|'closeBill'|'cariDetail'|'cariPay', ...}
 
 function getSession(){
@@ -607,6 +609,7 @@ boot();
 
 const PUBLIC_ROUTES = ['/login','/menu','/musteri'];
 
+let LAST_RENDER_PATH = null;
 function render(){
   if(!STATE.loaded) return;
   const {path, params} = parseHash();
@@ -634,8 +637,17 @@ function render(){
   else if(path === '/cari') html = shell(session,'/cari', renderCari());
   else { location.hash = session ? (ROLE_HOME[session.role]||'/masalar') : '/login'; return; }
 
+  // Sadece sayfa GERÇEKTEN değiştiyse (yeni bir menüye tıklandıysa) en üste
+  // kaydır. Arka planda gelen canlı veri güncellemeleri (Firestore'dan) veya
+  // kendi işlemleriniz (rol değiştirme, sipariş ilerletme vb.) sayfayı
+  // yeniden çizer ama kaydırma konumunuzu koruruz — artık "acele tıklama"
+  // sorunu yaşanmaz.
+  const isNavigation = (LAST_RENDER_PATH !== path);
+  const prevScrollY = window.scrollY;
   app.innerHTML = html + renderModalOverlay();
-  window.scrollTo(0,0);
+  if(isNavigation){ window.scrollTo(0,0); }
+  else{ window.scrollTo(0, prevScrollY); }
+  LAST_RENDER_PATH = path;
 }
 
 function shell(session, activePath, bodyHtml){
@@ -711,6 +723,8 @@ function doLogout(){ clearSession(); location.hash='/login'; }
 // ================= MASALAR (table grid) =================
 function renderMasalar(){
   const filtered = MASALAR_ZONE==='all' ? STATE.tables : STATE.tables.filter(t=>t.zone===MASALAR_ZONE);
+  const session = getSession();
+  const canQuickClose = session && (session.role==='kasiyer' || session.role==='yonetici');
   return `
     <div class="page-title">Masalar</div>
     <div class="page-sub">Bir masaya dokunarak sipariş girin veya adisyonu görüntüleyin.</div>
@@ -732,13 +746,14 @@ function renderMasalar(){
         const waiterId = STATE.assign[t.id];
         const waiter = waiterId ? findStaff(waiterId) : null;
         const stLabel = st==='bekliyor' ? 'Onay Bekliyor' : (st==='dolu' ? 'Dolu' : 'Boş');
-        return `<button class="table-card ${st==='dolu'?'dolu':''} ${st==='bekliyor'?'bekliyor':''}" onclick="location.hash='/masa?id=${t.id}'" style="cursor:pointer;">
+        return `<div class="table-card ${st==='dolu'?'dolu':''} ${st==='bekliyor'?'bekliyor':''}" onclick="location.hash='/masa?id=${t.id}'" style="cursor:pointer;">
           <div class="dot-indicator"></div>
           <h4>${esc(t.name)}</h4>
           <div class="status-txt">${stLabel} · ${esc(t.zone||'')}</div>
           ${total>0?`<div class="amt">${money(total)}</div>`:''}
           ${waiter?`<div class="waiter">Garson: ${esc(waiter.name)}</div>`:''}
-        </button>`;
+          ${(canQuickClose && st!=='bos')?`<button class="btn ghost sm" style="margin-top:8px;width:100%;" onclick="event.stopPropagation(); openModal({type:'closeBill',tableId:'${t.id}'})">Hesabı Kapat</button>`:''}
+        </div>`;
       }).join('')}
     </div>
   `;
@@ -948,6 +963,9 @@ function qrModalHtml(tableId){
     <p class="page-sub">Müşteriler bu kodu okutarak doğrudan sipariş verebilir.</p>
     <div style="text-align:center;margin:14px 0;">
       <img src="${qrSrc}" alt="QR" style="width:220px;height:220px;border-radius:10px;border:1px solid var(--line);">
+      <div style="margin-top:10px;">
+        <a href="${esc(link)}" target="_blank" style="font-size:12.5px;color:var(--blue);word-break:break-all;">${esc(link)}</a>
+      </div>
     </div>
     <div class="form-inline">
       <input readonly value="${esc(link)}" style="flex:1;min-width:180px;" onclick="this.select()">
@@ -998,37 +1016,89 @@ async function advanceOrder(orderId, nextStatus){
 }
 
 // ================= RAPOR =================
+function billsInRange(start, end){
+  return STATE.bills.filter(b=>{
+    const d = new Date(b.closedAt);
+    if(start){ const s = new Date(start+'T00:00:00'); if(d < s) return false; }
+    if(end){ const e = new Date(end+'T23:59:59'); if(d > e) return false; }
+    return true;
+  });
+}
+function setRaporRange(start,end){ RAPOR_START = start||null; RAPOR_END = end||null; render(); }
+function raporDatesChanged(){
+  const s = document.getElementById('rapor_start').value || null;
+  const e = document.getElementById('rapor_end').value || null;
+  setRaporRange(s,e);
+}
+function raporToday(){ const d=new Date().toISOString().slice(0,10); setRaporRange(d,d); }
+function raporThisMonth(){ const n=new Date(); const s=new Date(n.getFullYear(),n.getMonth(),1).toISOString().slice(0,10); setRaporRange(s, n.toISOString().slice(0,10)); }
+function raporAllTime(){ setRaporRange(null,null); }
+const PAYMENT_LABEL = {Nakit:'Nakit', Kart:'Kredi Kartı', Cari:'Açık Hesap (Cari)'};
+
 function renderRapor(){
-  const today = new Date().toDateString();
-  const todaysBills = STATE.bills.filter(b=>new Date(b.closedAt).toDateString()===today);
-  const todaysTotal = todaysBills.reduce((s,b)=>s+b.total,0);
-  const allTotal = STATE.bills.reduce((s,b)=>s+b.total,0);
+  const filtered = billsInRange(RAPOR_START, RAPOR_END);
+  const filteredTotal = filtered.reduce((s,b)=>s+b.total,0);
 
   const byDay = {};
-  STATE.bills.forEach(b=>{ const d=new Date(b.closedAt).toLocaleDateString('tr-TR'); byDay[d]=(byDay[d]||0)+b.total; });
+  filtered.forEach(b=>{ const d=new Date(b.closedAt).toLocaleDateString('tr-TR'); byDay[d]=(byDay[d]||0)+b.total; });
 
   const byItem = {};
-  STATE.bills.forEach(b=>b.orders.forEach(o=>o.items.forEach(it=>{ byItem[it.name]=(byItem[it.name]||0)+it.qty; })));
+  filtered.forEach(b=>b.orders.forEach(o=>o.items.forEach(it=>{ byItem[it.name]=(byItem[it.name]||0)+it.qty; })));
   const topItems = Object.entries(byItem).sort((a,b)=>b[1]-a[1]).slice(0,6);
 
   const byStaff = {};
-  STATE.bills.forEach(b=>b.orders.forEach(o=>{
+  filtered.forEach(b=>b.orders.forEach(o=>{
     const nm = o.staffId ? (findStaff(o.staffId)?.name || 'Bilinmiyor') : 'Müşteri (QR)';
     const sum = o.items.reduce((s,it)=>s+it.price*it.qty,0);
     byStaff[nm] = (byStaff[nm]||0)+sum;
   }));
 
+  const byMethod = {};
+  filtered.forEach(b=>{ const lbl = PAYMENT_LABEL[b.method]||b.method||'Diğer'; byMethod[lbl]=(byMethod[lbl]||0)+b.total; });
+
+  // ---- Aktif masalar: şu an açık olan (henüz kapanmamış) adisyonların anlık cirosu ----
+  const openTables = STATE.tables.filter(t=>tableOrders(t.id).length>0);
+  const openTotal = openTables.reduce((s,t)=>s+tableTotal(t.id),0);
+
+  // ---- Canlı stok durumu: stok takibi açık olan ürünler ----
+  const stockItems = allItems().filter(it=>it.trackStock).sort((a,b)=>a.stock-b.stock);
+
+  const rangeLabel = (RAPOR_START||RAPOR_END) ? `${RAPOR_START?new Date(RAPOR_START).toLocaleDateString('tr-TR'):'başlangıç'} → ${RAPOR_END?new Date(RAPOR_END).toLocaleDateString('tr-TR'):'bugün'}` : 'Tüm zamanlar';
+
   return `
     <div class="page-title">Raporlar</div>
-    <div class="page-sub">Kapanan adisyonlara göre.</div>
-    <div class="stat-grid">
-      <div class="stat-card"><div class="num">${money(todaysTotal)}</div><div class="lbl">Bugünkü Ciro</div></div>
-      <div class="stat-card"><div class="num">${todaysBills.length}</div><div class="lbl">Bugün Kapanan Adisyon</div></div>
-      <div class="stat-card"><div class="num">${money(allTotal)}</div><div class="lbl">Toplam Ciro</div></div>
+    <div class="page-sub">Kapanan adisyonlara göre. Aşağıdan tarih aralığı seçebilirsiniz.</div>
+
+    <div class="section-label">Tarih Aralığı</div>
+    <div class="form-inline">
+      <input type="date" id="rapor_start" value="${RAPOR_START||''}" onchange="raporDatesChanged()">
+      <span style="color:var(--ink-faint);">—</span>
+      <input type="date" id="rapor_end" value="${RAPOR_END||''}" onchange="raporDatesChanged()">
+      <button class="btn ghost sm" onclick="raporToday()">Bugün</button>
+      <button class="btn ghost sm" onclick="raporThisMonth()">Bu Ay</button>
+      <button class="btn ghost sm" onclick="raporAllTime()">Tümü</button>
     </div>
+    <p class="page-sub" style="margin-top:-6px;">Gösterilen aralık: <b>${rangeLabel}</b></p>
+
+    <div class="stat-grid">
+      <div class="stat-card"><div class="num">${money(filteredTotal)}</div><div class="lbl">Ciro (seçili aralık)</div></div>
+      <div class="stat-card"><div class="num">${filtered.length}</div><div class="lbl">Kapanan Adisyon</div></div>
+      <div class="stat-card"><div class="num">${money(openTotal)}</div><div class="lbl">Aktif Masalarda Bekleyen Ciro</div></div>
+    </div>
+
+    <div class="section-label">Aktif Masalar — Anlık Ciro</div>
+    <div class="table-list">
+      ${openTables.length? openTables.map(t=>`<div class="r"><span>${esc(t.name)} <span style="color:var(--ink-faint);">· ${esc(t.zone||'')}</span></span><b>${money(tableTotal(t.id))}</b></div>`).join('') : '<div class="r"><span>Şu anda açık masa yok</span></div>'}
+    </div>
+
+    <div class="section-label">Ödeme Türüne Göre Ciro</div>
+    <div class="table-list">
+      ${Object.keys(byMethod).length? Object.entries(byMethod).sort((a,b)=>b[1]-a[1]).map(([m,t])=>`<div class="r"><span>${esc(m)}</span><b>${money(t)}</b></div>`).join('') : '<div class="r"><span>Veri yok</span></div>'}
+    </div>
+
     <div class="section-label">Günlere Göre Ciro</div>
     <div class="table-list">
-      ${Object.keys(byDay).length? Object.entries(byDay).reverse().map(([d,t])=>`<div class="r"><span>${d}</span><b>${money(t)}</b></div>`).join('') : '<div class="r"><span>Henüz veri yok</span></div>'}
+      ${Object.keys(byDay).length? Object.entries(byDay).reverse().map(([d,t])=>`<div class="r"><span>${d}</span><b>${money(t)}</b></div>`).join('') : '<div class="r"><span>Bu aralıkta veri yok</span></div>'}
     </div>
     <div class="section-label">En Çok Satan Ürünler</div>
     <div class="table-list">
@@ -1037,6 +1107,17 @@ function renderRapor(){
     <div class="section-label">Garson Bazlı Ciro</div>
     <div class="table-list">
       ${Object.keys(byStaff).length? Object.entries(byStaff).sort((a,b)=>b[1]-a[1]).map(([n,t])=>`<div class="r"><span>${esc(n)}</span><b>${money(t)}</b></div>`).join('') : '<div class="r"><span>Veri yok</span></div>'}
+    </div>
+
+    <div class="section-label">Canlı Stok Durumu</div>
+    <div class="table-list">
+      ${stockItems.length? stockItems.map(it=>{
+        const soldOut = it.stock<=0;
+        const low = !soldOut && it.stock<=3;
+        const color = soldOut? 'var(--danger)' : (low? 'var(--warn)' : 'var(--ink)');
+        const txt = soldOut? 'Tükendi' : (it.stock+' adet');
+        return `<div class="r"><span>${esc(it.name)} <span style="color:var(--ink-faint);">· ${esc(it.catName)}</span></span><b style="color:${color};">${txt}</b></div>`;
+      }).join('') : '<div class="r"><span>Stok takibi açık ürün yok (Yönetim → Menü kısmından açabilirsiniz)</span></div>'}
     </div>
   `;
 }
