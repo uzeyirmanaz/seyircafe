@@ -361,15 +361,16 @@ const CAFE_NAME = "SEYİR CAFE";
 // (tarayıcı hafızası); doldurunca TÜM CİHAZLAR (yönetici, mutfak,
 // müşterilerin telefonları) anlık olarak birbiriyle senkronize olur.
 const firebaseConfig = {
-  apiKey: "BURAYA_YAPISTIR",
-  authDomain: "BURAYA_YAPISTIR",
-  projectId: "BURAYA_YAPISTIR",
-  storageBucket: "BURAYA_YAPISTIR",
-  messagingSenderId: "BURAYA_YAPISTIR",
-  appId: "BURAYA_YAPISTIR"
+  apiKey: "AIzaSyBTVUxlLmky-2tbrqaT9VmGz9RjwgdTCOg",
+  authDomain: "seyircafe-ae32e.firebaseapp.com",
+  projectId: "seyircafe-ae32e",
+  storageBucket: "seyircafe-ae32e.firebasestorage.app",
+  messagingSenderId: "688638443353",
+  appId: "1:688638443353:web:c11fd37023d95810ca9648"
 };
 let FIREBASE_DB = null;
 let FIREBASE_READY = false;
+let FIRESTORE_PERM_WARNED = false; // "Rules" izin hatası uyarısını sadece bir kez göster
 try{
   if(firebaseConfig.apiKey && firebaseConfig.apiKey !== "BURAYA_YAPISTIR" && typeof firebase !== 'undefined'){
     firebase.initializeApp(firebaseConfig);
@@ -410,7 +411,13 @@ async function sGet(key, fallback){
     const raw = localStorage.getItem(key);
     if(raw===null || raw===undefined) return fallback;
     return JSON.parse(raw);
-  }catch(e){ return fallback; }
+  }catch(e){
+    if(e && (e.code==='permission-denied' || /permission/i.test(e.message||'')) && !FIRESTORE_PERM_WARNED){
+      FIRESTORE_PERM_WARNED = true;
+      showToast('⚠️ Firestore erişimi reddedildi — Firebase Console > Firestore > Rules bölümünü kontrol edin.');
+    }
+    return fallback;
+  }
 }
 async function sSet(key, value){
   PENDING_WRITE_KEYS.add(key);
@@ -426,7 +433,11 @@ async function sSet(key, value){
     localStorage.setItem(key, JSON.stringify(value));
   }catch(e){
     console.error('storage set failed', key, e);
-    showToast('Kaydetme sırasında bir hata oluştu, tekrar deneyin.');
+    if(e && (e.code==='permission-denied' || /permission/i.test(e.message||''))){
+      if(!FIRESTORE_PERM_WARNED){ FIRESTORE_PERM_WARNED = true; showToast('⚠️ Firestore erişimi reddedildi — Firebase Console > Firestore > Rules bölümünü kontrol edin.'); }
+    }else{
+      showToast('Kaydetme sırasında bir hata oluştu, tekrar deneyin.');
+    }
   }finally{
     // Yazma bitti; olası bir sonraki poll'un artık güncel veriyi görmesi için
     // kısa bir tampondan sonra "beklemede" işaretini kaldır.
@@ -786,7 +797,17 @@ function setupRealtimeSync(){
         LAST_STATE_SNAPSHOT = snapshotState();
         if(STATE.loaded && !isTypingInApp()) render();
       }catch(e){ console.error('senkronizasyon hatası', key, e); }
-    }, err => console.error('Firestore dinleyici hatası', key, err));
+    }, err => {
+      console.error('Firestore dinleyici hatası', key, err);
+      // En sık karşılaşılan gerçek dünya hatası: Firestore "test modu" kuralları
+      // 30 gün sonra otomatik olarak tüm okuma/yazmayı reddeder ("permission-denied").
+      // Sessizce loglamak yerine personeli/yöneticiyi görünür şekilde uyarıyoruz,
+      // aksi halde "senkron çalışmıyor" şikayeti sebepsiz gibi görünür.
+      if(err && (err.code==='permission-denied' || /permission/i.test(err.message||'')) && !FIRESTORE_PERM_WARNED){
+        FIRESTORE_PERM_WARNED = true;
+        showToast('⚠️ Firestore erişimi reddedildi — Firebase Console > Firestore > Rules bölümünü kontrol edin.');
+      }
+    });
   });
 }
 
@@ -831,11 +852,26 @@ function isTypingInApp(){
   return !!(app && app.contains(ae));
 }
 // Herhangi bir input/textarea odağını kaybettiğinde (kullanıcı yazmayı bitirdiğinde)
-// kısa bir gecikmeyle ekranı güncel veriyle tazele.
+// kısa bir gecikmeyle ekranı güncel veriyle tazele. NOT: mobil tarayıcılarda
+// (özellikle iOS/Android) klavye AÇILIRKEN veya kapanırken tarayıcı bazen
+// input'u anlık olarak blur/focus yapar (gerçek bir "yazmayı bitirdi" durumu
+// değildir) — bu yüzden gecikme SONUNDA kullanıcı hâlâ (aynı veya başka)
+// bir input/textarea'daysa tazelemeyi İPTAL ediyoruz; aksi halde tam o anda
+// render() DOM'u yeniden kurup klavyeyi kapatıyor ve odağı/az önce yazılanı
+// siliyordu. Ayrıca render() artık odaklı input'un DOM değerini de koruduğu
+// için (bkz. captureFocusState/restoreFocusState), bu tazeleme tetiklense
+// bile artık kullanıcının yazdığı metin asla kaybolmaz — sadece gereksiz
+// yeniden çizimi engelliyoruz.
+let FOCUSOUT_RENDER_TIMER = null;
 document.addEventListener('focusout', function(e){
   const t = e.target;
   if(t && (t.tagName==='INPUT' || t.tagName==='TEXTAREA')){
-    setTimeout(render, 80);
+    if(FOCUSOUT_RENDER_TIMER) clearTimeout(FOCUSOUT_RENDER_TIMER);
+    FOCUSOUT_RENDER_TIMER = setTimeout(function(){
+      FOCUSOUT_RENDER_TIMER = null;
+      if(isTypingInApp()) return; // kullanıcı hâlâ bir alanda yazıyor — dokunma
+      render();
+    }, 150);
   }
 }, true);
 
@@ -906,12 +942,26 @@ function render(){
   const isNavigation = (LAST_RENDER_PATH !== path);
   const prevScrollY = window.scrollY;
 
-  // Odak koruma: yeniden çizmeden önce hangi input'ta olduğumuzu ve imleç
-  // konumunu hatırla, çizimden sonra aynı input'a (varsa) odağı geri ver.
+  // Odak koruma: yeniden çizmeden önce hangi input'ta olduğumuzu, İMLEÇ
+  // KONUMUNU ve — en kritiği — o an ekranda GÖRÜNEN HAM DEĞERİ hatırla.
+  // Önceden sadece odak ve imleç geri veriliyordu; DEĞER geri verilmiyordu.
+  // Menüdeki birçok alan (Wi-Fi/Instagram/TikTok/Harita ayarları, ürün adı/
+  // fiyatı gibi "Kaydet" ile onaylanan alanlar) her tuş vuruşunda ayrı bir
+  // state nesnesine yazılmıyor — sadece "Kaydet"e basılınca okunuyor. Bu
+  // yüzden kullanıcı bir alana yazarken (henüz Kaydet'e basmadan) araya giren
+  // HERHANGİ bir render() çağrısı (arka plan senkronizasyonu, başka bir alanın
+  // focusout'u, vb.) DOM'u state'teki ESKİ değerle yeniden kuruyor ve az önce
+  // yazılan harf/rakamlar sıfırlanıyordu — odak/imleç aynı kalsa bile metin
+  // uçuyordu. Artık DOM'daki güncel değeri de saklayıp yeniden çizimden sonra
+  // aynen geri basıyoruz; hangi render tetiklenirse tetiklensin kullanıcının
+  // o ana kadar yazdığı hiçbir şey kaybolmaz.
   const ae = document.activeElement;
   let focusInfo = null;
   if(ae && ae.id && app.contains(ae) && (ae.tagName==='INPUT'||ae.tagName==='TEXTAREA'||ae.tagName==='SELECT')){
-    focusInfo = { id: ae.id, selStart: (typeof ae.selectionStart==='number'?ae.selectionStart:null), selEnd: (typeof ae.selectionEnd==='number'?ae.selectionEnd:null) };
+    let selStart=null, selEnd=null;
+    try{ selStart = (typeof ae.selectionStart==='number'?ae.selectionStart:null); selEnd = (typeof ae.selectionEnd==='number'?ae.selectionEnd:null); }
+    catch(e){ /* number/email/date gibi bazı input tipleri seçim API'sini desteklemez, sorun değil */ }
+    focusInfo = { id: ae.id, tag: ae.tagName, value: ae.value, checked: ae.checked, selStart, selEnd };
   }
 
   app.innerHTML = html + renderModalOverlay();
@@ -921,10 +971,18 @@ function render(){
 
   if(focusInfo){
     const el = document.getElementById(focusInfo.id);
-    if(el){
+    if(el && el.tagName===focusInfo.tag){
+      // Kullanıcının o an ekranda yazmakta olduğu ham değeri her zaman koru —
+      // yeni DOM'un state'ten bastığı (henüz kaydedilmemiş olabilecek) eski
+      // değerin üzerine yaz.
+      if(focusInfo.tag==='INPUT' && (el.type==='checkbox'||el.type==='radio')){
+        el.checked = focusInfo.checked;
+      }else if(typeof focusInfo.value==='string' && el.value!==focusInfo.value){
+        el.value = focusInfo.value;
+      }
       el.focus();
       if(focusInfo.selStart!=null && typeof el.setSelectionRange==='function'){
-        try{ el.setSelectionRange(focusInfo.selStart, focusInfo.selEnd); }catch(e){}
+        try{ el.setSelectionRange(focusInfo.selStart, focusInfo.selEnd); }catch(e){ /* number vb. tiplerde desteklenmiyor, önemli değil */ }
       }
     }
   }
@@ -2166,6 +2224,21 @@ async function collectCariPayment(cariId){
 }
 
 // ================= ADMIN =================
+// Cihazlar arası ANLIK senkronizasyon (Firestore) ya da Claude Artifacts'in
+// kendi bulut deposu (window.storage) aktif değilse, veriler sadece BU
+// TARAYICIDA (localStorage) tutulur — başka bir cihaz/gizli sekme/farklı
+// tarayıcı bunu GÖREMEZ. Bu, "cihazlar arası senkron çalışmıyor" şikayetinin
+// gerçek kaynağıdır ve tek çözümü firebaseConfig'e (dosyanın en üstünde)
+// kendi ücretsiz Firebase projenizin bilgilerini girmektir — bunu koddan
+// otomatik olarak yapamayız, bu yüzden yönetici panelinde açıkça uyarıyoruz.
+function syncStatusBannerHtml(){
+  if(HAS_CLOUD_STORAGE || FIREBASE_READY) return '';
+  return `<div style="background:var(--warn-soft);border:1.5px solid var(--warn);color:#7a4a00;border-radius:10px;padding:12px 14px;margin-bottom:14px;font-size:12.5px;font-weight:600;line-height:1.5;">
+    ⚠️ Cihazlar arası ANLIK SENKRONİZASYON şu anda KAPALI — veriler yalnızca bu tarayıcıda saklanıyor, başka bir cihaz veya gizli sekme bu verileri göremez.
+    Tüm cihazların (yönetici, mutfak, garson, müşteri) aynı veriyi anlık görmesi için dosyanın en üstündeki <code>firebaseConfig</code> alanına
+    kendi ücretsiz Firebase projenizin bilgilerini girmeniz gerekir (console.firebase.google.com → Proje Ayarları → Web uygulaması).
+  </div>`;
+}
 function renderAdmin(){
   const tabs = [['menu','Menü'],['tables','Masalar'],['stations','İstasyonlar'],['staff','Personel'],['cari','Cari Hesaplar'],['settings','Ayarlar']];
   let body = ADMIN_TAB==='menu' ? renderAdminMenu()
@@ -2176,6 +2249,7 @@ function renderAdmin(){
     : renderAdminSettings();
   return `
     <div class="page-title">Yönetim</div>
+    ${syncStatusBannerHtml()}
     <div class="admin-tabs">${tabs.map(([id,l])=>`<button class="${ADMIN_TAB===id?'active':''}" onclick="setAdminTab('${id}')">${l}</button>`).join('')}</div>
     ${body}
   `;
