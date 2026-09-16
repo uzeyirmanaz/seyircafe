@@ -140,8 +140,13 @@
   .table-card .waiter{ font-size:11px; color:var(--ink-faint); margin-top:2px; }
   .table-card.dolu{ border-color:var(--brand); background:var(--brand-soft); }
   .table-card.dolu .amt{ color:var(--brand-deep); }
+  .table-card.bekliyor{ border-color:var(--danger); background:var(--danger-soft); animation:table-pulse 1.4s ease-in-out infinite; }
+  .table-card.bekliyor .amt{ color:var(--danger); }
+  .table-card.bekliyor .status-txt{ color:var(--danger); font-weight:800; }
+  @keyframes table-pulse{ 0%,100%{ box-shadow:0 0 0 0 rgba(220,61,67,.35); } 50%{ box-shadow:0 0 0 6px rgba(220,61,67,0); } }
   .table-card .dot-indicator{ position:absolute; top:12px; right:12px; width:9px;height:9px;border-radius:50%; background:var(--ink-faint); }
   .table-card.dolu .dot-indicator{ background:var(--brand); }
+  .table-card.bekliyor .dot-indicator{ background:var(--danger); }
 
   /* ---------- Order entry screen ---------- */
   .order-header{ display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; flex-wrap:wrap; gap:8px; }
@@ -268,19 +273,76 @@
 <body>
 <div id="app"><div class="empty-note">Yükleniyor…</div></div>
 
+<!-- Firebase (ücretsiz Spark plan) — cihazlar arası anlık veri senkronizasyonu için -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
 <script>
 /* ============================================================
    SEYİR CAFE — Adisyon Sistemi (personel PIN girişli, tek dosya)
    ============================================================ */
 const CAFE_NAME = "SEYİR CAFE";
 
+// ======================= FIREBASE AYARLARI =======================
+// Firebase Console (console.firebase.google.com) → Proje Ayarları (dişli ikon)
+// → Genel sekmesi → "Uygulamalarınız" → Web uygulaması (</> ikonu) →
+// orada çıkan firebaseConfig objesindeki 6 değeri aşağıya aynen yapıştırın.
+// Doldurmadan önce sistem otomatik olarak sadece bu tarayıcıda çalışır
+// (tarayıcı hafızası); doldurunca TÜM CİHAZLAR (yönetici, mutfak,
+// müşterilerin telefonları) anlık olarak birbiriyle senkronize olur.
+const firebaseConfig = {
+  apiKey: "BURAYA_YAPISTIR",
+  authDomain: "BURAYA_YAPISTIR",
+  projectId: "BURAYA_YAPISTIR",
+  storageBucket: "BURAYA_YAPISTIR",
+  messagingSenderId: "BURAYA_YAPISTIR",
+  appId: "BURAYA_YAPISTIR"
+};
+let FIREBASE_DB = null;
+let FIREBASE_READY = false;
+try{
+  if(firebaseConfig.apiKey && firebaseConfig.apiKey !== "BURAYA_YAPISTIR" && typeof firebase !== 'undefined'){
+    firebase.initializeApp(firebaseConfig);
+    FIREBASE_DB = firebase.firestore();
+    FIREBASE_READY = true;
+  }
+}catch(e){ console.error('Firebase başlatılamadı, tarayıcı hafızasına geçiliyor:', e); FIREBASE_READY = false; }
+
 // ---------- storage helpers ----------
+// Öncelik sırası: 1) window.storage (Claude Artifacts içinde çalışıyorsa)
+// 2) Firebase Firestore (firebaseConfig doldurulduysa — cihazlar arası çalışır)
+// 3) localStorage (hiçbiri yoksa — sadece bu tarayıcıda kalıcı olur, ama en
+//    azından "sayfa yenileyince sıfırlanma" hatası bir daha yaşanmaz).
+const HAS_CLOUD_STORAGE = (typeof window!=='undefined' && window.storage && typeof window.storage.get==='function' && typeof window.storage.set==='function');
 async function sGet(key, fallback){
-  try{ const res = await window.storage.get(key, true); if(!res) return fallback; return JSON.parse(res.value); }
-  catch(e){ return fallback; }
+  try{
+    if(HAS_CLOUD_STORAGE){
+      const res = await window.storage.get(key, true);
+      if(!res) return fallback;
+      return JSON.parse(res.value);
+    }
+    if(FIREBASE_READY){
+      const snap = await FIREBASE_DB.collection('seyir_data').doc(key).get();
+      if(!snap.exists) return fallback;
+      return JSON.parse(snap.data().v);
+    }
+    const raw = localStorage.getItem(key);
+    if(raw===null || raw===undefined) return fallback;
+    return JSON.parse(raw);
+  }catch(e){ return fallback; }
 }
 async function sSet(key, value){
-  try{ await window.storage.set(key, JSON.stringify(value), true); }catch(e){ console.error('storage set failed', key, e); }
+  try{
+    if(HAS_CLOUD_STORAGE){
+      await window.storage.set(key, JSON.stringify(value), true);
+      return;
+    }
+    if(FIREBASE_READY){
+      await FIREBASE_DB.collection('seyir_data').doc(key).set({ v: JSON.stringify(value) });
+      return;
+    }
+    localStorage.setItem(key, JSON.stringify(value));
+  }catch(e){ console.error('storage set failed', key, e); }
 }
 function genId(p){ return p + '_' + Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
 function money(n){ return (Math.round(n*100)/100).toLocaleString('tr-TR',{minimumFractionDigits:2, maximumFractionDigits:2}) + ' ₺'; }
@@ -406,7 +468,12 @@ function findTable(id){ return STATE.tables.find(t=>t.id===id); }
 function findStaff(id){ return STATE.staff.find(s=>s.id===id); }
 function tableOrders(tableId){ return STATE.orders.filter(o=>o.tableId===tableId); }
 function tableTotal(tableId){ let s=0; tableOrders(tableId).forEach(o=>o.items.forEach(it=>s+=it.price*it.qty)); return s; }
-function tableStatus(tableId){ return tableOrders(tableId).length ? 'dolu' : 'bos'; }
+function tableStatus(tableId){
+  const orders = tableOrders(tableId);
+  if(!orders.length) return 'bos';
+  if(orders.some(o=>o.status==='yeni')) return 'bekliyor'; // en az bir sipariş henüz onaylanmadı (mutfağa/hazırlığa geçmedi)
+  return 'dolu';
+}
 function statusLabel(s){ return {yeni:'Alındı',hazirlaniyor:'Hazırlanıyor',hazir:'Hazır',servis:'Servis Edildi'}[s]||s; }
 function orderStaffLabel(o){ return o.staffId ? esc(findStaff(o.staffId)?.name||'') : 'Müşteri (QR)'; }
 
@@ -506,10 +573,35 @@ async function removePhoto(catId, itemId){
 function parseHash(){ const raw=location.hash.slice(1)||'/'; const [path,qs]=raw.split('?'); return {path:path||'/', params:new URLSearchParams(qs||'')}; }
 window.addEventListener('hashchange', render);
 
+// Firestore kullanılıyorsa her belge için anlık dinleyici kur — herhangi bir
+// cihazda (yönetici, mutfak, müşteri telefonu) veri değiştiği an, diğer tüm
+// açık ekranlar 2 saniye beklemeden anında güncellenir.
+const SYNC_KEY_TO_FIELD = {
+  'seyir:menu':'menu', 'seyir:tables':'tables', 'seyir:orders':'orders', 'seyir:bills':'bills',
+  'seyir:assign':'assign', 'seyir:staff':'staff', 'seyir:zones':'zones', 'seyir:cari':'cari', 'seyir:settings':'settings',
+};
+function setupRealtimeSync(){
+  if(!FIREBASE_READY) return;
+  Object.keys(SYNC_KEY_TO_FIELD).forEach(key=>{
+    FIREBASE_DB.collection('seyir_data').doc(key).onSnapshot(snap=>{
+      if(!snap.exists || !snap.data()) return;
+      try{
+        const val = JSON.parse(snap.data().v);
+        STATE[SYNC_KEY_TO_FIELD[key]] = val;
+        if(STATE.loaded) render();
+      }catch(e){ console.error('senkronizasyon hatası', key, e); }
+    }, err => console.error('Firestore dinleyici hatası', key, err));
+  });
+}
+
 async function boot(){
   await loadState();
   render();
-  setInterval(async ()=>{ await loadState(); render(); }, 2000);
+  if(FIREBASE_READY){
+    setupRealtimeSync();       // Firebase varsa: anlık, sunucu-push tabanlı senkronizasyon
+  }else{
+    setInterval(async ()=>{ await loadState(); render(); }, 2000); // Firebase yoksa: 2 sn'de bir yoklama
+  }
 }
 boot();
 
@@ -626,6 +718,7 @@ function renderMasalar(){
       <div class="legend">
         <span><i style="background:var(--ink-faint)"></i> Boş</span>
         <span><i style="background:var(--brand)"></i> Dolu</span>
+        <span><i style="background:var(--danger)"></i> Onay Bekliyor</span>
       </div>
     </div>
     <div class="cat-tabs">
@@ -638,10 +731,11 @@ function renderMasalar(){
         const total = tableTotal(t.id);
         const waiterId = STATE.assign[t.id];
         const waiter = waiterId ? findStaff(waiterId) : null;
-        return `<button class="table-card ${st==='dolu'?'dolu':''}" onclick="location.hash='/masa?id=${t.id}'" style="cursor:pointer;">
+        const stLabel = st==='bekliyor' ? 'Onay Bekliyor' : (st==='dolu' ? 'Dolu' : 'Boş');
+        return `<button class="table-card ${st==='dolu'?'dolu':''} ${st==='bekliyor'?'bekliyor':''}" onclick="location.hash='/masa?id=${t.id}'" style="cursor:pointer;">
           <div class="dot-indicator"></div>
           <h4>${esc(t.name)}</h4>
-          <div class="status-txt">${st==='dolu'?'Dolu':'Boş'} · ${esc(t.zone||'')}</div>
+          <div class="status-txt">${stLabel} · ${esc(t.zone||'')}</div>
           ${total>0?`<div class="amt">${money(total)}</div>`:''}
           ${waiter?`<div class="waiter">Garson: ${esc(waiter.name)}</div>`:''}
         </button>`;
