@@ -501,6 +501,8 @@ const DEFAULT_SETTINGS = {
   mapsUrl: 'https://maps.app.goo.gl/oAsHzkYzVyex5WN77',
   showStock: true, // yönetici kapatırsa stok adetleri personel/müşteri ekranlarında gizlenir
   stationPin: '9999', // istasyon personeli (mutfak/bar/nargile vb.) için ortak giriş şifresi
+  taxRate: 10, // KDV oranı (%)
+  taxIncluded: true, // true: menü fiyatlarına KDV dahildir (sadece ayrıştırılıp gösterilir); false: KDV toplam üzerine eklenir
 };
 // 5 sabit, yönetici tarafından yeniden isimlendirilebilen / aktif-pasif yapılabilen istasyon alanı
 const DEFAULT_STATIONS = [
@@ -621,6 +623,36 @@ function findTable(id){ return STATE.tables.find(t=>t.id===id); }
 function findStaff(id){ return STATE.staff.find(s=>s.id===id); }
 function tableOrders(tableId){ return STATE.orders.filter(o=>o.tableId===tableId); }
 function tableTotal(tableId){ let s=0; tableOrders(tableId).forEach(o=>o.items.forEach(it=>s+=it.price*it.qty)); return s; }
+
+// ---------- indirim / KDV yardımcıları (adisyon kapatma ve fiş için ortak) ----------
+function billDiscountAmount(subtotal, discountType, discountValue){
+  if(!discountType || !discountValue) return 0;
+  if(discountType==='percent') return Math.round(Math.min(subtotal, subtotal*discountValue/100)*100)/100;
+  if(discountType==='amount') return Math.round(Math.min(subtotal, discountValue)*100)/100;
+  return 0;
+}
+// Ödenecek tutar üzerinden KDV ayrıştırması. "taxIncluded" açıksa fiyatlar zaten KDV dahildir
+// (Türkiye'de yaygın uygulama) — toplam değişmez, sadece KDV payı hesaplanıp gösterilir.
+// Kapalıysa KDV toplam tutarın üzerine eklenir (ödenecek tutar artar).
+function taxBreakdown(amountAfterDiscount){
+  const rate = (STATE.settings.taxRate||0)/100;
+  if(STATE.settings.taxIncluded){
+    const base = rate>0 ? amountAfterDiscount/(1+rate) : amountAfterDiscount;
+    return { base: Math.round(base*100)/100, tax: Math.round((amountAfterDiscount-base)*100)/100, gross: Math.round(amountAfterDiscount*100)/100 };
+  } else {
+    const tax = amountAfterDiscount*rate;
+    return { base: Math.round(amountAfterDiscount*100)/100, tax: Math.round(tax*100)/100, gross: Math.round((amountAfterDiscount+tax)*100)/100 };
+  }
+}
+// Eski (bu güncellemeden önce kapanmış) fişlerde yeni alanlar olmayabilir — geriye dönük uyumluluk için varsayılan üretir.
+function billFinancials(b){
+  const subtotal = b.subtotal!=null ? b.subtotal : b.total;
+  const discountAmount = b.discountAmount || 0;
+  const total = b.total;
+  const taxRate = b.taxRate!=null ? b.taxRate : (STATE.settings.taxRate||0);
+  const tb = (b.taxBase!=null && b.taxAmount!=null) ? {base:b.taxBase, tax:b.taxAmount} : taxBreakdown(total);
+  return { subtotal, discountAmount, total, taxRate, taxBase: tb.base, taxAmount: tb.tax };
+}
 function tableStatus(tableId){
   const orders = tableOrders(tableId);
   if(!orders.length) return 'bos';
@@ -1081,6 +1113,7 @@ function renderModalOverlay(){
   let inner = '';
   if(MODAL.type==='qr') inner = qrModalHtml(MODAL.tableId);
   else if(MODAL.type==='closeBill') inner = closeBillModalHtml(MODAL.tableId);
+  else if(MODAL.type==='billClosed') inner = billClosedModalHtml(MODAL.billId);
   else if(MODAL.type==='cariDetail') inner = cariDetailModalHtml(MODAL.cariId);
   else if(MODAL.type==='cariPay') inner = cariPayModalHtml(MODAL.cariId);
   else if(MODAL.type==='moveItem') inner = moveItemModalHtml(MODAL.orderId, MODAL.itemIdx);
@@ -1442,19 +1475,57 @@ async function sendOrder(tableId){
   render();
 }
 
-// ---------- close bill / payment modal (Nakit / Kart / Cari) ----------
+// ---------- close bill / payment modal (Nakit / Kart / Cari / Bölünmüş) ----------
 function closeBillModalHtml(tableId){
   const table = findTable(tableId);
-  const total = tableTotal(tableId);
+  const subtotal = tableTotal(tableId);
   const mode = MODAL.mode || '';
+  const discountType = MODAL.discountType || '';
+  const discountValue = MODAL.discountValue || 0;
+  const discountAmount = billDiscountAmount(subtotal, discountType, discountValue);
+  const afterDiscount = Math.max(0, subtotal - discountAmount);
+  const tb = taxBreakdown(afterDiscount);
+
+  if(mode==='split') return splitBillModalHtml(tableId, tb.gross);
+
   return `
     <span class="close-x" onclick="closeModal()">✕</span>
     <h3>Adisyonu Kapat</h3>
-    <p class="page-sub">${esc(table?table.name:'')} · Toplam: <b>${money(total)}</b></p>
+    <p class="page-sub">${esc(table?table.name:'')}</p>
+
+    <div class="section-label">İndirim (opsiyonel)</div>
+    <div class="form-inline" style="margin-bottom:12px;">
+      <select id="discType" onchange="setDiscountType(this.value)">
+        <option value="" ${!discountType?'selected':''}>İndirim yok</option>
+        <option value="percent" ${discountType==='percent'?'selected':''}>Yüzde (%)</option>
+        <option value="amount" ${discountType==='amount'?'selected':''}>Tutar (₺)</option>
+      </select>
+      ${discountType?`<input id="discVal" type="number" min="0" placeholder="${discountType==='percent'?'Örn. 10':'Örn. 50'}" value="${discountValue||''}" onchange="setDiscountValue(this.value)" style="width:100px;">`:''}
+    </div>
+
+    <div class="grand-total-bar" style="flex-direction:column;align-items:stretch;gap:5px;padding:12px 14px;">
+      <div style="display:flex;justify-content:space-between;font-weight:600;font-size:12.5px;color:var(--ink-soft);">
+        <span>Ara Toplam</span><span>${money(subtotal)}</span>
+      </div>
+      ${discountAmount>0?`<div style="display:flex;justify-content:space-between;font-weight:600;font-size:12.5px;color:var(--danger);">
+        <span>İndirim</span><span>−${money(discountAmount)}</span>
+      </div>`:''}
+      <div style="display:flex;justify-content:space-between;font-size:11.5px;color:var(--ink-faint);">
+        <span>KDV Hariç Tutar</span><span>${money(tb.base)}</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:11.5px;color:var(--ink-faint);">
+        <span>KDV (%${STATE.settings.taxRate||0})</span><span>${money(tb.tax)}</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:17px;font-weight:800;border-top:1px solid var(--line);padding-top:7px;margin-top:2px;">
+        <span>Genel Toplam</span><span>${money(tb.gross)}</span>
+      </div>
+    </div>
+
     <div style="display:flex;gap:8px;flex-wrap:wrap;margin:14px 0;">
       <button class="btn ghost sm" onclick="finalizeCloseBill('${tableId}','Nakit')">Nakit</button>
       <button class="btn ghost sm" onclick="finalizeCloseBill('${tableId}','Kart')">Kart</button>
       <button class="btn ghost sm" onclick="setCloseBillMode('cari')">Cari</button>
+      <button class="btn ghost sm" onclick="setCloseBillMode('split')">Hesabı Böl</button>
     </div>
     ${mode==='cari' ? `
       <div class="section-label">Cari Hesap Seçin</div>
@@ -1473,6 +1544,63 @@ function closeBillModalHtml(tableId){
   `;
 }
 function setCloseBillMode(mode){ MODAL.mode = mode; render(); }
+function setDiscountType(val){ MODAL.discountType = val || ''; MODAL.discountValue = 0; render(); }
+function setDiscountValue(val){ MODAL.discountValue = parseFloat(val)||0; render(); }
+
+// ---------- hesap bölme (split bill) ----------
+function splitBillModalHtml(tableId, payableTotal){
+  const n = MODAL.splitCount || 2;
+  if(!MODAL.splitPayments || MODAL.splitPayments.length !== n){
+    const share = Math.round((payableTotal/n)*100)/100;
+    MODAL.splitPayments = Array.from({length:n}, ()=>({amount: share, method:null}));
+    const sum = MODAL.splitPayments.reduce((s,r)=>s+r.amount,0);
+    const diff = Math.round((payableTotal - sum)*100)/100;
+    MODAL.splitPayments[n-1].amount = Math.round((MODAL.splitPayments[n-1].amount + diff)*100)/100;
+    MODAL.splitCount = n;
+  }
+  const sumAssigned = Math.round(MODAL.splitPayments.reduce((s,r)=>s+r.amount,0)*100)/100;
+  const balanced = Math.abs(sumAssigned - payableTotal) < 0.02;
+  const allPaid = MODAL.splitPayments.every(r=>r.method);
+  return `
+    <span class="close-x" onclick="closeModal()">✕</span>
+    <h3>Hesabı Böl</h3>
+    <p class="page-sub">Genel Toplam: <b>${money(payableTotal)}</b> — kaç kişiye bölünecek?</p>
+    <div class="form-inline" style="margin-bottom:12px;">
+      <input id="splitCountInput" type="number" min="2" max="20" value="${n}" style="width:80px;">
+      <button class="btn ghost sm" onclick="setSplitCount()">Böl</button>
+    </div>
+    <div class="adisyon-list">
+      ${MODAL.splitPayments.map((r,i)=>`
+        <div class="adisyon-row" style="flex-wrap:wrap;">
+          <div class="nm">${i+1}. Kişi</div>
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+            <input type="number" value="${r.amount}" style="width:80px;padding:6px 8px;border-radius:7px;border:1px solid var(--line);" onchange="setSplitAmount(${i}, this.value)">
+            <button class="btn sm" style="${r.method==='Nakit'?'':'background:var(--surface);color:var(--ink);border:1px solid var(--line);'}" onclick="setSplitMethod(${i},'Nakit')">Nakit</button>
+            <button class="btn sm" style="${r.method==='Kart'?'background:var(--blue);':'background:var(--surface);color:var(--ink);border:1px solid var(--line);'}" onclick="setSplitMethod(${i},'Kart')">Kart</button>
+          </div>
+        </div>
+      `).join('')}
+    </div>
+    ${!balanced?`<p class="page-sub" style="color:var(--danger);font-weight:700;">Paylaşımların toplamı ${money(sumAssigned)} — genel toplama (${money(payableTotal)}) eşit olmalı.</p>`:''}
+    <div style="display:flex;gap:10px;margin-top:12px;">
+      <button class="btn ghost block" onclick="setCloseBillMode('')">← Geri</button>
+      <button class="btn danger block" ${(allPaid&&balanced)?'':'disabled'} onclick="finalizeSplitBill('${tableId}')">Kapat ve Öde</button>
+    </div>
+  `;
+}
+function setSplitCount(){
+  const v = parseInt(document.getElementById('splitCountInput').value)||2;
+  MODAL.splitCount = Math.max(2, Math.min(20, v));
+  MODAL.splitPayments = null;
+  render();
+}
+function setSplitAmount(i,val){ MODAL.splitPayments[i].amount = parseFloat(val)||0; render(); }
+function setSplitMethod(i,method){ MODAL.splitPayments[i].method = method; render(); }
+async function finalizeSplitBill(tableId){
+  const session = getSession();
+  if(!(session.role==='kasiyer'||session.role==='yonetici')) return;
+  await finalizeCloseBill(tableId, 'Bölünmüş', null, MODAL.splitPayments.slice());
+}
 async function quickAddCari(tableId){
   const el = document.getElementById('quickcariname');
   const name = el.value.trim();
@@ -1491,13 +1619,24 @@ async function confirmCariClose(tableId){
   if(!cariId){ alert('Lütfen bir cari hesap seçin. İsimsiz cariye adisyon yazılamaz.'); return; }
   await finalizeCloseBill(tableId, 'Cari', cariId);
 }
-async function finalizeCloseBill(tableId, method, cariId){
+async function finalizeCloseBill(tableId, method, cariId, splitInfo){
   const session = getSession();
   if(!(session.role==='kasiyer'||session.role==='yonetici')) return;
   const orders = tableOrders(tableId);
   if(!orders.length) return;
-  const total = tableTotal(tableId);
-  const bill = { id:genId('b'), tableId, tableName:findTable(tableId).name, orders, total, method, cariId: cariId||null, closedAt: Date.now() };
+  const subtotal = tableTotal(tableId);
+  const discountType = (MODAL && MODAL.discountType) || '';
+  const discountValue = (MODAL && MODAL.discountValue) || 0;
+  const discountAmount = billDiscountAmount(subtotal, discountType, discountValue);
+  const afterDiscount = Math.max(0, subtotal - discountAmount);
+  const tb = taxBreakdown(afterDiscount);
+  const total = tb.gross; // fiilen tahsil edilen tutar (KDV hariçse üzerine eklenmiş halde)
+  const bill = {
+    id:genId('b'), tableId, tableName:findTable(tableId).name, orders,
+    subtotal, discountType: discountType||null, discountValue: discountType?discountValue:0, discountAmount,
+    taxRate: STATE.settings.taxRate||0, taxIncluded: !!STATE.settings.taxIncluded, taxBase: tb.base, taxAmount: tb.tax,
+    total, method, cariId: cariId||null, splits: splitInfo||null, closedAt: Date.now()
+  };
   STATE.bills.push(bill);
   STATE.orders = STATE.orders.filter(o=>o.tableId!==tableId);
   delete STATE.assign[tableId];
@@ -1513,10 +1652,23 @@ async function finalizeCloseBill(tableId, method, cariId){
     }
   }
   await Promise.all(promises);
-  closeModal();
   showToast('Adisyon kapatıldı ✓');
-  location.hash = '/masalar';
+  openModal({type:'billClosed', billId: bill.id});
 }
+// ---------- kapanış sonrası özet + fiş yazdırma teklifi ----------
+function billClosedModalHtml(billId){
+  const b = STATE.bills.find(x=>x.id===billId);
+  return `
+    <span class="close-x" onclick="closeBillClosedModal()">✕</span>
+    <h3>✅ Adisyon Kapatıldı</h3>
+    <p class="page-sub">${esc(b?b.tableName:'')} · Toplam: <b>${money(b?b.total:0)}</b> · ${esc(PAYMENT_LABEL[b&&b.method]||(b?b.method:''))}</p>
+    <div style="display:flex;gap:10px;margin-top:14px;">
+      <button class="btn ghost block" onclick="closeBillClosedModal()">Tamam</button>
+      <button class="btn block" onclick="printReceipt('${billId}')">🖨️ Fişi Yazdır</button>
+    </div>
+  `;
+}
+function closeBillClosedModal(){ closeModal(); location.hash = '/masalar'; }
 
 // ---------- QR modal ----------
 function qrModalHtml(tableId){
@@ -1798,6 +1950,7 @@ function billDetailModalHtml(billId){
   const b = STATE.bills.find(x=>x.id===billId);
   if(!b) return `<p>Fiş bulunamadı.</p>`;
   const cariAcc = b.cariId ? STATE.cari.find(c=>c.id===b.cariId) : null;
+  const f = billFinancials(b);
   return `
     <span class="close-x" onclick="closeModal()">✕</span>
     <h3>Fiş Detayı — ${esc(b.tableName)}</h3>
@@ -1808,8 +1961,64 @@ function billDetailModalHtml(billId){
           <span>${money(it.price*it.qty)}</span>
         </div>`).join('')).join('')}
     </div>
-    <div class="grand-total-bar"><span>Toplam</span><span>${money(b.total)}</span></div>
+    <div class="grand-total-bar" style="flex-direction:column;align-items:stretch;gap:5px;">
+      <div style="display:flex;justify-content:space-between;font-size:12px;font-weight:600;color:var(--ink-soft);"><span>Ara Toplam</span><span>${money(f.subtotal)}</span></div>
+      ${f.discountAmount>0?`<div style="display:flex;justify-content:space-between;font-size:12px;font-weight:600;color:var(--danger);"><span>İndirim${b.discountType==='percent'?(' (%'+b.discountValue+')'):''}</span><span>−${money(f.discountAmount)}</span></div>`:''}
+      <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--ink-faint);"><span>KDV (%${f.taxRate})</span><span>${money(f.taxAmount)}</span></div>
+      <div style="display:flex;justify-content:space-between;font-weight:800;font-size:16px;border-top:1px solid var(--line);padding-top:7px;"><span>Genel Toplam</span><span>${money(f.total)}</span></div>
+    </div>
+    ${b.splits?`
+      <div class="section-label">Bölünmüş Ödeme</div>
+      <div class="table-list">
+        ${b.splits.map((s,i)=>`<div class="r"><span>${i+1}. Kişi · ${esc(PAYMENT_LABEL[s.method]||s.method)}</span><b>${money(s.amount)}</b></div>`).join('')}
+      </div>
+    `:''}
+    <button class="btn block" style="margin-top:14px;" onclick="printReceipt('${b.id}')">🖨️ Fişi Yazdır</button>
   `;
+}
+// ---------- fiş yazdırma (yeni pencerede, tarayıcının yazdır diyaloğu ile — fiziksel yazıcı veya PDF olarak kaydetme) ----------
+function receiptHtml(b){
+  const f = billFinancials(b);
+  const cariAcc = b.cariId ? STATE.cari.find(c=>c.id===b.cariId) : null;
+  const itemsHtml = b.orders.map(o=>o.items.map(it=>`<div class="rc-row"><span>${it.qty}× ${esc(it.name)}</span><span>${money(it.price*it.qty)}</span></div>`).join('')).join('');
+  const discountLine = f.discountAmount>0 ? `<div class="rc-row"><span>İndirim${b.discountType==='percent'?(' (%'+b.discountValue+')'):''}</span><span>−${money(f.discountAmount)}</span></div>` : '';
+  const splitLines = b.splits ? `<div class="rc-sep"></div>${b.splits.map((s,i)=>`<div class="rc-row"><span>${i+1}. Kişi (${esc(PAYMENT_LABEL[s.method]||s.method)})</span><span>${money(s.amount)}</span></div>`).join('')}` : '';
+  return `<!DOCTYPE html><html lang="tr"><head><meta charset="UTF-8"><title>Fiş — ${esc(b.tableName)}</title>
+  <style>
+    body{ font-family:'Courier New',monospace; width:280px; margin:0 auto; padding:16px; color:#000; font-size:12.5px; }
+    h2{ text-align:center; margin:0 0 2px; font-size:16px; letter-spacing:.5px; }
+    .rc-sub{ text-align:center; font-size:11px; color:#333; margin-bottom:8px; }
+    .rc-row{ display:flex; justify-content:space-between; gap:10px; padding:2px 0; }
+    .rc-sep{ border-top:1px dashed #000; margin:6px 0; }
+    .rc-total{ display:flex; justify-content:space-between; font-weight:bold; font-size:14.5px; border-top:1px dashed #000; padding-top:6px; margin-top:6px; }
+    .rc-tax{ font-size:10.5px; color:#333; }
+    .rc-footer{ text-align:center; margin-top:16px; font-size:10.5px; color:#333; }
+    @media print{ body{ width:auto; } }
+  </style></head><body>
+  <h2>${esc(CAFE_NAME)}</h2>
+  <div class="rc-sub">${esc(b.tableName)} · ${new Date(b.closedAt).toLocaleString('tr-TR')}</div>
+  <div class="rc-sep"></div>
+  ${itemsHtml}
+  <div class="rc-sep"></div>
+  <div class="rc-row"><span>Ara Toplam</span><span>${money(f.subtotal)}</span></div>
+  ${discountLine}
+  <div class="rc-row rc-tax"><span>KDV Hariç Tutar</span><span>${money(f.taxBase)}</span></div>
+  <div class="rc-row rc-tax"><span>KDV (%${f.taxRate})</span><span>${money(f.taxAmount)}</span></div>
+  <div class="rc-total"><span>GENEL TOPLAM</span><span>${money(f.total)}</span></div>
+  ${splitLines}
+  <div class="rc-footer">Ödeme: ${esc(PAYMENT_LABEL[b.method]||b.method)}${cariAcc?(' · Cari: '+esc(cariAcc.name)):''}<br>Bizi tercih ettiğiniz için teşekkür ederiz.</div>
+  </body></html>`;
+}
+function printReceipt(billId){
+  const b = STATE.bills.find(x=>x.id===billId);
+  if(!b) return;
+  const w = window.open('', '_blank', 'width=340,height=640');
+  if(!w){ showToast('Yazdırma penceresi açılamadı — pop-up engelleyiciyi kontrol edin'); return; }
+  w.document.write(receiptHtml(b));
+  w.document.close();
+  const doPrint = () => { try{ w.focus(); w.print(); }catch(e){} };
+  w.onload = doPrint;
+  setTimeout(doPrint, 350); // bazı tarayıcılarda onload güvenilir tetiklenmeyebilir
 }
 
 // ---------- masa birleştirme / masayı olduğu gibi başka masaya taşıma (kasiyer / yönetici) ----------
@@ -1846,6 +2055,36 @@ function ymd(ts){
   const y = d.getFullYear(), m = String(d.getMonth()+1).padStart(2,'0'), day = String(d.getDate()).padStart(2,'0');
   return `${y}-${m}-${day}`;
 }
+// ---------- CSV dışa aktarma / yedekleme (seçili tarih aralığındaki fişler) ----------
+function csvEscape(v){
+  const s = String(v==null?'':v);
+  return /[",;\n]/.test(s) ? '"'+s.replace(/"/g,'""')+'"' : s;
+}
+function exportBillsCsv(){
+  const rows = billsInRange(RAPOR_START, RAPOR_END);
+  if(!rows.length){ showToast('Bu aralıkta dışa aktarılacak fiş yok'); return; }
+  const header = ['Tarih','Saat','Masa','Odeme Yontemi','Ara Toplam','Indirim','KDV Orani(%)','KDV Tutari','Genel Toplam','Urunler'];
+  const lines = [header.map(csvEscape).join(';')];
+  rows.forEach(b=>{
+    const f = billFinancials(b);
+    const d = new Date(b.closedAt);
+    const itemsStr = b.orders.map(o=>o.items.map(it=>it.qty+'x '+it.name).join(', ')).join(', ');
+    lines.push([
+      d.toLocaleDateString('tr-TR'), d.toLocaleTimeString('tr-TR'), b.tableName,
+      PAYMENT_LABEL[b.method]||b.method, f.subtotal.toFixed(2), f.discountAmount.toFixed(2),
+      f.taxRate, f.taxAmount.toFixed(2), f.total.toFixed(2), itemsStr
+    ].map(csvEscape).join(';'));
+  });
+  const csv = '\uFEFF' + lines.join('\r\n'); // BOM: Excel'de Türkçe karakterler bozulmasın
+  const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  const rangeLabel = (RAPOR_START||'tumu') + '_' + (RAPOR_END||'tumu');
+  a.href = url; a.download = 'seyir-fisler_'+rangeLabel+'.csv';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  setTimeout(()=>URL.revokeObjectURL(url), 2000);
+  showToast('CSV indirildi ✓ ('+rows.length+' fiş)');
+}
 function billsInRange(start, end){
   // Tarihleri Date nesnesi yerine düz "YYYY-MM-DD" metin olarak karşılaştırıyoruz;
   // böylece saat dilimi / gün sonu ayrıştırma kaynaklı hatalı ciro filtreleme sorunu oluşmaz.
@@ -1861,7 +2100,7 @@ function raporToday(){ const d=new Date().toISOString().slice(0,10); setRaporRan
 function raporThisMonth(){ const n=new Date(); const s=new Date(n.getFullYear(),n.getMonth(),1).toISOString().slice(0,10); setRaporRange(s, n.toISOString().slice(0,10)); }
 function raporAllTime(){ setRaporRange(null,null); }
 function setRaporBestCat(cid){ RAPOR_BESTCAT = cid; render(); }
-const PAYMENT_LABEL = {Nakit:'Nakit', Kart:'Kredi Kartı', Cari:'Açık Hesap (Cari)'};
+const PAYMENT_LABEL = {Nakit:'Nakit', Kart:'Kredi Kartı', Cari:'Açık Hesap (Cari)', 'Bölünmüş':'Bölünmüş Ödeme'};
 const RAPOR_MONTH_NAMES = ['Ocak','Şubat','Mart','Nisan','Mayıs','Haziran','Temmuz','Ağustos','Eylül','Ekim','Kasım','Aralık'];
 function monthRevenue(year, month){
   const start = `${year}-${String(month+1).padStart(2,'0')}-01`;
@@ -2080,8 +2319,11 @@ function renderRapor(){
     </div>
     `:''}
 
-    <div class="section-label">Fiş Arşivi (Geçmiş Adisyonlar)</div>
-    <div class="page-sub" style="margin-top:-6px;">Sistem hiçbir geçmiş fişi silmez. Cariye yazılan fişler de dahil, tüm fişler her an detaylıca incelenebilir (müşteri itirazlarında kullanılabilir).</div>
+    <div class="section-label" style="display:flex;justify-content:space-between;align-items:center;">
+      <span>Fiş Arşivi (Geçmiş Adisyonlar)</span>
+      <button class="btn ghost sm" onclick="exportBillsCsv()">⬇ CSV Dışa Aktar</button>
+    </div>
+    <div class="page-sub" style="margin-top:-6px;">Sistem hiçbir geçmiş fişi silmez. Cariye yazılan fişler de dahil, tüm fişler her an detaylıca incelenebilir (müşteri itirazlarında kullanılabilir). CSV, seçili tarih aralığındaki fişleri indirir — Excel/Google E-Tablolar ile açılabilir, yedek olarak da kullanılabilir.</div>
     <div class="table-list">
       ${filtered.length? filtered.slice().reverse().slice(0,200).map(b=>`
         <div class="r" style="cursor:pointer;" onclick="openModal({type:'billDetail',billId:'${b.id}'})">
@@ -2469,7 +2711,26 @@ function renderAdminSettings(){
       <button class="btn sm" onclick="saveMapsSettings()">Kaydet</button>
     </div>
     <p class="page-sub">Bu bilgiler müşteri sipariş sayfasındaki (QR) ikonlarda kullanılır.</p>
+
+    <div class="section-label">KDV / Vergi</div>
+    <div class="form-inline">
+      <input id="set_taxrate" type="number" min="0" max="100" step="0.1" placeholder="KDV oranı (%)" value="${s.taxRate}" style="width:130px;">
+      <label class="toggle" style="font-size:13px;">
+        <input type="checkbox" id="set_taxincluded" ${s.taxIncluded?'checked':''}> Fiyatlara KDV dahil
+      </label>
+      <button class="btn sm" onclick="saveTaxSettings()">Kaydet</button>
+    </div>
+    <p class="page-sub">Fişlerde ve adisyon kapatma ekranında KDV tutarı ayrıştırılarak gösterilir. "Fiyatlara KDV dahil" açıkken menü fiyatları değişmez, sadece içindeki KDV payı hesaplanır; kapatırsanız KDV, toplamın üzerine eklenerek tahsil edilir.</p>
   `;
+}
+async function saveTaxSettings(){
+  const rateEl = document.getElementById('set_taxrate');
+  const rate = parseFloat(rateEl.value);
+  STATE.settings.taxRate = isNaN(rate) ? 0 : Math.max(0, Math.min(100, rate));
+  STATE.settings.taxIncluded = document.getElementById('set_taxincluded').checked;
+  await sSet('seyir:settings', STATE.settings);
+  showToast('KDV ayarları kaydedildi ✓');
+  render();
 }
 async function toggleShowStock(){
   STATE.settings.showStock = !STATE.settings.showStock;
