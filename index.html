@@ -444,6 +444,8 @@
   .admin-toggle-btn-bottom:hover { color: var(--gold); }
   .admin-badge { font-size: 0.7rem; color: var(--gold); border: 1px solid var(--gold); border-radius: 20px; padding: 3px 10px; display: none; }
   body.admin-mode .admin-badge { display: inline-block; }
+  .admin-only-btn { display: none !important; }
+  body.admin-mode .admin-only-btn { display: inline-block !important; }
 
   .login-box { display: none; background: #151010; border: 1px solid var(--gold); padding: 15px; border-radius: 8px; margin-top: 15px; }
   .login-box.open { display: block; }
@@ -555,7 +557,7 @@
 
   <div class="active-category-header">
     <div>
-      <span id="activeCategoryTitle" class="active-category-title">Tümü</span>
+      <span id="activeCategoryTitle" class="active-category-title">Menü</span>
       <span id="activeCategoryCount" class="active-category-count"></span>
     </div>
     <button class="add-product-btn" onclick="addNewProduct()"><i class="fa-solid fa-plus"></i> Ürün Ekle</button>
@@ -571,7 +573,10 @@
 
   <div class="footer">
     <span style="font-size: 0.75rem; color: #777;">© Seyir Cafe Dijital Menü <span class="admin-badge">Yönetici Modu</span></span>
-    <button class="admin-toggle-btn-bottom" onclick="toggleLoginBox()" title="Yönetici Paneli"><i class="fa-solid fa-lock" id="lockIcon"></i></button>
+    <div style="display:flex; align-items:center; gap:14px;">
+      <button class="admin-toggle-btn-bottom admin-only-btn" onclick="changeAdminPassword()" title="Şifreyi Değiştir"><i class="fa-solid fa-key"></i></button>
+      <button class="admin-toggle-btn-bottom" onclick="toggleLoginBox()" title="Yönetici Paneli"><i class="fa-solid fa-lock" id="lockIcon"></i></button>
+    </div>
   </div>
 </div>
 
@@ -583,8 +588,8 @@
 <script>
   let categories = [];
   let products = [];
-  let settings = { subtitle: "Lounge & Gourmet Experience", wifiPassword: "Seyir2121" };
-  let currentCategory = "Tümü";
+  let settings = { subtitle: "Lounge & Gourmet Experience", wifiPassword: "Seyir2121", adminPassword: "1234" };
+  let currentCategory = "";
   let searchTerm = "";
   let logoClickCount = 0;
   let logoClickTimer = null;
@@ -720,6 +725,10 @@
         await fetchData();
       }
 
+      if (currentCategory === "Tümü" || !categories.some(c => c.name === currentCategory)) {
+        currentCategory = categories[0]?.name || "";
+      }
+
       renderCategories();
       renderProducts();
 
@@ -793,13 +802,7 @@
   // ---------- Categories ----------
   function renderCategories() {
     const bar = document.getElementById('categoriesBar');
-    let html = `
-      <div class="cat-card-wrapper">
-        <div class="cat-btn ${currentCategory === 'Tümü' ? 'active' : ''}" onclick="selectCategory('Tümü')" style="background-image: url('https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=300&q=80');">
-          <span>Tümü</span>
-        </div>
-      </div>
-    `;
+    let html = "";
 
     categories.forEach((cat, idx) => {
       const nameField = isAdmin()
@@ -892,7 +895,9 @@
     await Promise.all(products.filter(p => p.category === cat?.name).map(p =>
       window.dbTools.deleteDoc(window.dbTools.doc(window.db, "products", p.id))
     ));
-    if (currentCategory === cat?.name) currentCategory = "Tümü";
+    if (currentCategory === cat?.name) {
+      currentCategory = categories.find(c => c.id !== id)?.name || "";
+    }
     await fetchAndRender();
   }
 
@@ -904,7 +909,7 @@
 
   // ---------- Products ----------
   function getFilteredProducts() {
-    let list = currentCategory === "Tümü" ? [...products] : products.filter(p => p.category === currentCategory);
+    let list = searchTerm.trim() ? [...products] : products.filter(p => p.category === currentCategory);
     if (searchTerm.trim()) {
       const t = searchTerm.trim().toLocaleLowerCase('tr');
       list = list.filter(p => (p.name || '').toLocaleLowerCase('tr').includes(t));
@@ -929,7 +934,7 @@
       return;
     }
 
-    const sameCatList = currentCategory !== "Tümü" ? filteredProducts : null;
+    const sameCatList = !searchTerm.trim() ? filteredProducts : null;
 
     let html = "";
     filteredProducts.forEach((prod, i) => {
@@ -998,7 +1003,7 @@
   }
 
   async function addNewProduct() {
-    if (currentCategory === "Tümü") { alert("Lütfen önce ürün eklemek istediğiniz kategoriyi seçin."); return; }
+    if (!currentCategory) { alert("Lütfen önce en az bir kategori oluşturun."); return; }
     const maxOrder = products.filter(p => p.category === currentCategory).reduce((m, p) => Math.max(m, p.order ?? 0), -1);
     const docRef = await window.dbTools.addDoc(window.dbTools.collection(window.db, "products"), {
       name: "Yeni Ürün", price: "0 TL", category: currentCategory, image: '', order: maxOrder + 1
@@ -1083,6 +1088,19 @@
     saveSettings();
   }
 
+  function changeAdminPassword() {
+    if (!isAdmin()) return;
+    const val = prompt("Yeni yönetici şifresini girin:");
+    if (val === null) return;
+    const trimmed = val.trim();
+    if (!trimmed) { alert("Şifre boş olamaz."); return; }
+    const confirmVal = prompt("Yeni şifreyi doğrulamak için tekrar girin:");
+    if (confirmVal !== trimmed) { alert("Şifreler eşleşmedi. Tekrar deneyin."); return; }
+    settings.adminPassword = trimmed;
+    saveSettings();
+    alert("Yönetici şifresi güncellendi.");
+  }
+
   function editWifiPassword() {
     if (!isAdmin()) return;
     const val = prompt("Wi-Fi şifresini düzenle:", settings.wifiPassword);
@@ -1128,7 +1146,7 @@
 
   function checkPassword() {
     const pass = document.getElementById('passInput').value;
-    if (pass === "1234") { // Yönetici şifreniz
+    if (pass === settings.adminPassword) {
       document.body.classList.add('admin-mode');
       document.getElementById('loginBox').classList.remove('open');
       document.getElementById('passInput').value = '';
