@@ -25,6 +25,7 @@
     --danger-soft:#FBE3E4;
     --blue:#2F6FED;
     --blue-soft:#E7EEFE;
+    --logo-red:#E11D2E;
     --radius:12px;
     --shadow:0 2px 10px rgba(21,36,49,.06);
     --shadow-lg:0 16px 40px rgba(21,36,49,.22);
@@ -54,6 +55,17 @@
     display:flex;align-items:center;justify-content:center; font-weight:800; font-size:15px;
   }
   .appbar .brand .txt{ font-weight:700; font-size:15.5px; letter-spacing:.2px; }
+  .appbar .brand .mark, .login-card .mark{ background:var(--logo-red); color:#fff; }
+  .brand-logo{ color:var(--logo-red); font-weight:800; }
+  .idot{ position:relative; display:inline-block; }
+  .idot .heart{
+    position:absolute; left:50%; top:-8px; transform:translateX(-50%); font-size:8px; line-height:1;
+    animation: idot-heartbeat 2.6s ease-in-out infinite;
+  }
+  @keyframes idot-heartbeat{
+    0%,100%{ opacity:.28; transform:translateX(-50%) scale(.78); }
+    50%{ opacity:1; transform:translateX(-50%) scale(1.15); }
+  }
   .appbar .staff{ display:flex; align-items:center; gap:10px; }
   .appbar .staff .who{ text-align:right; }
   .appbar .staff .nm{ font-size:13px; font-weight:700; }
@@ -150,6 +162,9 @@
   .item-tile:active{ background:var(--brand-soft); }
   .item-tile .nm{ font-weight:700; font-size:13.5px; line-height:1.3; }
   .item-tile .pr{ font-size:12.5px; color:var(--ink-soft); margin-top:6px; font-weight:600; }
+  .item-tile .tile-photo{ width:100%; height:72px; border-radius:8px; background-size:cover; background-position:center; background-color:var(--bg); margin-bottom:8px; }
+  .item-tile .stock-tag{ font-size:10px; font-weight:700; color:var(--ink-faint); margin-top:3px; }
+  .item-tile .stock-tag.low{ color:var(--danger); }
   .item-tile .badge-qty{
     position:absolute; top:-7px; right:-7px; background:var(--brand); color:#fff; font-size:12px; font-weight:800;
     width:22px;height:22px;border-radius:50%; display:flex; align-items:center; justify-content:center;
@@ -187,7 +202,7 @@
   .modal-bg{ position:fixed; inset:0; background:rgba(21,36,49,.55); display:flex; align-items:center; justify-content:center; z-index:100; padding:16px; }
   .modal{ background:var(--surface); width:100%; max-width:400px; border-radius:16px; padding:22px 20px; max-height:88vh; overflow-y:auto; }
   .modal h3{ margin-bottom:4px; }
-  .modal .close-x{ float:right; font-size:18px; color:var(--ink-soft); }
+  .modal .close-x{ float:right; font-size:18px; color:var(--ink-soft); cursor:pointer; }
 
   /* ---------- Kitchen ---------- */
   .kitchen-cols{ display:grid; grid-template-columns:1fr; gap:14px; }
@@ -217,23 +232,37 @@
   .admin-tabs button{ background:var(--surface); border:1px solid var(--line); border-radius:20px; padding:8px 15px; font-size:13px; font-weight:700; color:var(--ink-soft); }
   .admin-tabs button.active{ background:var(--navy); color:#fff; border-color:var(--navy); }
 
-  .form-inline{ display:flex; gap:8px; flex-wrap:wrap; margin:10px 0; }
+  .form-inline{ display:flex; gap:8px; flex-wrap:wrap; margin:10px 0; align-items:center; }
   .form-inline input, .form-inline select{ padding:9px 10px; border-radius:8px; border:1px solid var(--line); font-size:13.5px; }
 
   .item-row{ display:flex; align-items:center; gap:10px; background:var(--surface); border:1px solid var(--line); border-radius:10px; padding:10px 12px; margin-bottom:8px; flex-wrap:wrap; }
   .item-row .nm{ font-weight:700; flex:1; min-width:110px; font-size:13.5px; }
   .item-row .pr{ width:76px; padding:6px 8px; border-radius:6px; border:1px solid var(--line); }
-  .toggle{ display:flex; align-items:center; gap:5px; font-size:12px; color:var(--ink-soft); }
+  .item-thumb{ width:36px;height:36px;border-radius:6px;object-fit:cover;border:1px solid var(--line); flex:0 0 auto; }
+  .toggle{ display:flex; align-items:center; gap:5px; font-size:12px; color:var(--ink-soft); white-space:nowrap; }
+
+  .zone-chip{ display:inline-flex; align-items:center; gap:6px; background:var(--surface); border:1px solid var(--line); border-radius:20px; padding:6px 12px; font-size:12.5px; font-weight:700; color:var(--ink); }
+  .zone-chip button{ color:var(--ink-faint); font-weight:800; font-size:14px; }
 
   .empty-note{ text-align:center; padding:36px 20px; color:var(--ink-faint); font-size:13.5px; }
   .toast{ position:fixed; bottom:24px; left:50%; transform:translateX(-50%); background:var(--navy); color:#fff; padding:12px 20px; border-radius:30px; font-size:13.5px; box-shadow:var(--shadow-lg); z-index:200; font-weight:600; }
 
   .public-menu{ max-width:640px; margin:0 auto; }
   .public-cat h3{ font-size:15px; margin:22px 0 10px; }
-  .public-item{ display:flex; justify-content:space-between; gap:12px; padding:11px 0; border-bottom:1px solid var(--line); }
+  .public-item{ display:flex; align-items:center; justify-content:space-between; gap:12px; padding:11px 0; border-bottom:1px solid var(--line); }
   .public-item .nm{ font-weight:700; font-size:14.5px; }
   .public-item .ds{ font-size:12px; color:var(--ink-soft); margin-top:2px; }
   .public-item .pr{ font-weight:700; color:var(--brand-deep); white-space:nowrap; }
+
+  /* ---------- Icon row (wifi / instagram / tiktok / maps) ---------- */
+  .icon-row{ display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin:4px 0 22px; }
+  .icon-btn{ display:flex; flex-direction:column; align-items:center; gap:5px; background:var(--surface); border:1px solid var(--line); border-radius:13px; padding:11px 16px; font-size:11px; font-weight:700; color:var(--ink-soft); min-width:66px; box-shadow:var(--shadow); }
+  .icon-btn:active{ background:var(--bg); }
+  .icon-btn svg{ width:22px; height:22px; }
+  .icon-btn.wifi svg{ color:var(--blue); }
+  .icon-btn.ig svg{ color:#C22A6E; }
+  .icon-btn.tt svg{ color:#1B2530; }
+  .icon-btn.maps svg{ color:var(--danger); }
 </style>
 </head>
 <body>
@@ -285,32 +314,54 @@ const DEFAULT_MENU = [
     {id:'i16', name:'Kruvasan', price:110, desc:'', available:true},
   ]},
 ];
+DEFAULT_MENU.forEach(cat=>cat.items.forEach(it=>{ it.photo=''; it.trackStock=false; it.stock=0; }));
+
 const DEFAULT_TABLES = [
   {id:'t1',name:'Masa 1'},{id:'t2',name:'Masa 2'},{id:'t3',name:'Masa 3'},
   {id:'t4',name:'Masa 4'},{id:'t5',name:'Masa 5'},{id:'t6',name:'Masa 6'},
   {id:'t7',name:'Teras 1'},{id:'t8',name:'Teras 2'},
 ];
+DEFAULT_TABLES.forEach((t,i)=>{ t.zone = i<6 ? 'Salon' : 'Teras'; });
+
+const DEFAULT_ZONES = ['Salon','Teras'];
+
 const DEFAULT_STAFF = [
   {id:'s1', name:'Yönetici', role:'yonetici', pin:'0000'},
   {id:'s2', name:'Kasiyer', role:'kasiyer', pin:'1111'},
   {id:'s3', name:'Garson', role:'garson', pin:'2222'},
   {id:'s4', name:'Mutfak', role:'mutfak', pin:'3333'},
 ];
+const DEFAULT_SETTINGS = {
+  wifiSsid: 'SEYIR CAFE',
+  wifiPassword: 'seyir1907',
+  instagramUsername: '',
+  tiktokUsername: '',
+  mapsUrl: 'https://maps.app.goo.gl/oAsHzkYzVyex5WN77',
+};
 const ROLE_LABEL = {yonetici:'Yönetici', kasiyer:'Kasiyer', garson:'Garson', mutfak:'Mutfak'};
 const ROLE_HOME = {yonetici:'/masalar', kasiyer:'/masalar', garson:'/masalar', mutfak:'/mutfak'};
 const NAV_ITEMS = [
   {path:'/masalar', label:'Masalar', roles:['yonetici','kasiyer','garson']},
   {path:'/mutfak', label:'Mutfak', roles:['yonetici','mutfak']},
+  {path:'/cari', label:'Cari', roles:['yonetici','kasiyer']},
   {path:'/rapor', label:'Rapor', roles:['yonetici','kasiyer']},
   {path:'/admin', label:'Yönetim', roles:['yonetici']},
 ];
 
 // ---------- global state ----------
-let STATE = { menu:[], tables:[], orders:[], bills:[], assign:{}, staff:[], loaded:false };
-let CART = {};       // itemId -> qty (order-entry screen, local)
+let STATE = { menu:[], tables:[], zones:[], orders:[], bills:[], assign:{}, staff:[], cari:[], settings:{}, loaded:false };
+let CART = {};        // itemId -> qty (staff order-entry screen)
+let CART_TABLE_ID = null;
+let CUST_CART = {};   // itemId -> qty (customer QR ordering screen)
+let CUST_CART_TABLE = null;
+let CUST_SUBMITTED = false;
 let PIN_BUF = '';
 let LOGIN_ERR = '';
 let ADMIN_TAB = 'menu';
+let CUR_CAT = null;
+let CUST_CAT = null;
+let MASALAR_ZONE = 'all';
+let MODAL = null; // {type:'qr'|'closeBill'|'cariDetail'|'cariPay', ...}
 
 function getSession(){
   try{ return JSON.parse(sessionStorage.getItem('seyir_session')||'null'); }catch(e){ return null; }
@@ -319,19 +370,34 @@ function setSession(s){ sessionStorage.setItem('seyir_session', JSON.stringify(s
 function clearSession(){ sessionStorage.removeItem('seyir_session'); }
 
 async function loadState(){
-  const [menu, tables, orders, bills, assign, staff] = await Promise.all([
+  const [menu, tables, orders, bills, assign, staff, zones, cari, settings] = await Promise.all([
     sGet('seyir:menu', null), sGet('seyir:tables', null), sGet('seyir:orders', []),
     sGet('seyir:bills', []), sGet('seyir:assign', {}), sGet('seyir:staff', null),
+    sGet('seyir:zones', null), sGet('seyir:cari', []), sGet('seyir:settings', null),
   ]);
-  let seed = false;
-  STATE.menu = menu; if(!STATE.menu){ STATE.menu = DEFAULT_MENU; seed = true; }
-  STATE.tables = tables; if(!STATE.tables){ STATE.tables = DEFAULT_TABLES; seed = true; }
-  STATE.staff = staff; if(!STATE.staff){ STATE.staff = DEFAULT_STAFF; seed = true; }
+  const writes = [];
+  STATE.menu = menu; if(!STATE.menu){ STATE.menu = DEFAULT_MENU; writes.push(sSet('seyir:menu',STATE.menu)); }
+  STATE.tables = tables; if(!STATE.tables){ STATE.tables = DEFAULT_TABLES; writes.push(sSet('seyir:tables',STATE.tables)); }
+  STATE.staff = staff; if(!STATE.staff){ STATE.staff = DEFAULT_STAFF; writes.push(sSet('seyir:staff',STATE.staff)); }
+  STATE.zones = (zones && zones.length) ? zones : DEFAULT_ZONES.slice();
+  if(!zones || !zones.length){ writes.push(sSet('seyir:zones', STATE.zones)); }
   STATE.orders = orders || [];
   STATE.bills = bills || [];
   STATE.assign = assign || {};
+  STATE.cari = cari || [];
+  STATE.settings = Object.assign({}, DEFAULT_SETTINGS, settings || {});
+  if(!settings){ writes.push(sSet('seyir:settings', STATE.settings)); }
+
+  // normalize records coming from older saved data so new fields always exist
+  STATE.menu.forEach(cat=>cat.items.forEach(it=>{
+    if(it.photo===undefined) it.photo='';
+    if(it.trackStock===undefined) it.trackStock=false;
+    if(it.stock===undefined) it.stock=0;
+  }));
+  STATE.tables.forEach(t=>{ if(!t.zone) t.zone = STATE.zones[0] || 'Genel'; });
+
   STATE.loaded = true;
-  if(seed){ await Promise.all([sSet('seyir:menu',STATE.menu), sSet('seyir:tables',STATE.tables), sSet('seyir:staff',STATE.staff)]); }
+  if(writes.length){ await Promise.all(writes); }
 }
 
 function allItems(){ const out=[]; STATE.menu.forEach(c=>c.items.forEach(it=>out.push(Object.assign({catName:c.cat,catId:c.id}, it)))); return out; }
@@ -342,8 +408,99 @@ function tableOrders(tableId){ return STATE.orders.filter(o=>o.tableId===tableId
 function tableTotal(tableId){ let s=0; tableOrders(tableId).forEach(o=>o.items.forEach(it=>s+=it.price*it.qty)); return s; }
 function tableStatus(tableId){ return tableOrders(tableId).length ? 'dolu' : 'bos'; }
 function statusLabel(s){ return {yeni:'Alındı',hazirlaniyor:'Hazırlanıyor',hazir:'Hazır',servis:'Servis Edildi'}[s]||s; }
+function orderStaffLabel(o){ return o.staffId ? esc(findStaff(o.staffId)?.name||'') : 'Müşteri (QR)'; }
 
 function showToast(msg){ const t=document.createElement('div'); t.className='toast'; t.textContent=msg; document.body.appendChild(t); setTimeout(()=>t.remove(),2200); }
+
+// ---------- brand / logo ----------
+function brandTextHtml(){
+  return '<span class="brand-logo">SEY<span class="idot">I<span class="heart">&#10084;</span></span>R CAFE</span>';
+}
+function brandMarkHtml(){
+  return '<div class="mark">S</div><div class="txt">' + brandTextHtml() + '</div>';
+}
+
+// ---------- customer-facing icon row (wifi / instagram / tiktok / maps) ----------
+function iconRowHtml(){
+  return `<div class="icon-row">
+    <button class="icon-btn wifi" onclick="copyWifiPassword()" title="Wi-Fi şifresini kopyala">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M2 8.5a16 16 0 0 1 20 0"/><path d="M5 12.5a11 11 0 0 1 14 0"/><path d="M8.5 16.5a6 6 0 0 1 7 0"/><circle cx="12" cy="20" r="1" fill="currentColor" stroke="none"/></svg>
+      <span>Wi-Fi</span>
+    </button>
+    <button class="icon-btn ig" onclick="openInstagram()" title="Instagram">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>
+      <span>Instagram</span>
+    </button>
+    <button class="icon-btn tt" onclick="openTiktok()" title="TikTok">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l9-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="15" cy="16" r="3"/></svg>
+      <span>TikTok</span>
+    </button>
+    <button class="icon-btn maps" onclick="openMaps()" title="Yol Tarifi">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.5 7-12a7 7 0 1 0-14 0c0 5.5 7 12 7 12z"/><circle cx="12" cy="9" r="2.5"/></svg>
+      <span>Harita</span>
+    </button>
+  </div>`;
+}
+async function copyWifiPassword(){
+  const pw = STATE.settings.wifiPassword || '';
+  if(!pw){ showToast('Wi-Fi şifresi tanımlı değil'); return; }
+  try{ await navigator.clipboard.writeText(pw); showToast('Wi-Fi şifresi kopyalandı ✓'); }
+  catch(e){ prompt('Şifreyi kopyalayın:', pw); }
+}
+function openInstagram(){
+  const u = (STATE.settings.instagramUsername||'').trim();
+  if(!u){ showToast('Instagram hesabı tanımlı değil'); return; }
+  window.open('https://instagram.com/'+u.replace(/^@/,''), '_blank');
+}
+function openTiktok(){
+  const u = (STATE.settings.tiktokUsername||'').trim();
+  if(!u){ showToast('TikTok hesabı tanımlı değil'); return; }
+  window.open('https://www.tiktok.com/@'+u.replace(/^@/,''), '_blank');
+}
+function openMaps(){
+  window.open(STATE.settings.mapsUrl || 'https://maps.app.goo.gl/oAsHzkYzVyex5WN77', '_blank');
+}
+
+// ---------- photo upload (compressed client-side) ----------
+function compressImageFile(file, maxDim, quality){
+  maxDim = maxDim || 420; quality = quality || 0.68;
+  return new Promise((resolve,reject)=>{
+    const reader = new FileReader();
+    reader.onload = e => {
+      const img = new Image();
+      img.onload = () => {
+        let width = img.width, height = img.height;
+        if(width>height){ if(width>maxDim){ height = Math.round(height*maxDim/width); width = maxDim; } }
+        else{ if(height>maxDim){ width = Math.round(width*maxDim/height); height = maxDim; } }
+        const canvas = document.createElement('canvas');
+        canvas.width = width; canvas.height = height;
+        canvas.getContext('2d').drawImage(img,0,0,width,height);
+        resolve(canvas.toDataURL('image/jpeg', quality));
+      };
+      img.onerror = reject;
+      img.src = e.target.result;
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+async function handlePhotoUpload(catId, itemId, inputEl){
+  const file = inputEl.files && inputEl.files[0];
+  if(!file) return;
+  try{
+    const dataUrl = await compressImageFile(file);
+    const cat = STATE.menu.find(c=>c.id===catId); const it = cat.items.find(i=>i.id===itemId);
+    it.photo = dataUrl;
+    await sSet('seyir:menu', STATE.menu);
+    render();
+  }catch(e){ alert('Fotoğraf yüklenemedi, tekrar deneyin.'); }
+}
+async function removePhoto(catId, itemId){
+  const cat = STATE.menu.find(c=>c.id===catId); const it = cat.items.find(i=>i.id===itemId);
+  it.photo = '';
+  await sSet('seyir:menu', STATE.menu);
+  render();
+}
 
 // ---------- routing ----------
 function parseHash(){ const raw=location.hash.slice(1)||'/'; const [path,qs]=raw.split('?'); return {path:path||'/', params:new URLSearchParams(qs||'')}; }
@@ -356,7 +513,7 @@ async function boot(){
 }
 boot();
 
-const PUBLIC_ROUTES = ['/login','/menu'];
+const PUBLIC_ROUTES = ['/login','/menu','/musteri'];
 
 function render(){
   if(!STATE.loaded) return;
@@ -366,7 +523,7 @@ function render(){
 
   if(!PUBLIC_ROUTES.includes(path) && !session){ location.hash = '/login'; return; }
   if(session){
-    const navAllowed = ['/masalar','/mutfak','/rapor','/admin'];
+    const navAllowed = ['/masalar','/mutfak','/rapor','/admin','/cari'];
     if(navAllowed.includes(path)){
       const item = NAV_ITEMS.find(n=>n.path===path);
       if(item && !item.roles.includes(session.role)){ location.hash = ROLE_HOME[session.role]||'/masalar'; return; }
@@ -376,14 +533,16 @@ function render(){
   let html = '';
   if(path === '/login') html = renderLogin();
   else if(path === '/menu') html = renderPublicMenu();
+  else if(path === '/musteri') html = renderMusteriSiparis(params);
   else if(path === '/masalar') html = shell(session,'/masalar', renderMasalar());
   else if(path === '/masa') html = shell(session,'/masalar', renderOrderEntry(params));
   else if(path === '/mutfak') html = shell(session,'/mutfak', renderMutfak());
   else if(path === '/rapor') html = shell(session,'/rapor', renderRapor());
   else if(path === '/admin') html = shell(session,'/admin', renderAdmin());
+  else if(path === '/cari') html = shell(session,'/cari', renderCari());
   else { location.hash = session ? (ROLE_HOME[session.role]||'/masalar') : '/login'; return; }
 
-  app.innerHTML = html;
+  app.innerHTML = html + renderModalOverlay();
   window.scrollTo(0,0);
 }
 
@@ -391,7 +550,7 @@ function shell(session, activePath, bodyHtml){
   const nav = NAV_ITEMS.filter(n=>n.roles.includes(session.role));
   return `
   <div class="appbar">
-    <div class="brand"><div class="mark">S</div><div class="txt">${CAFE_NAME}</div></div>
+    <div class="brand">${brandMarkHtml()}</div>
     <div class="staff">
       <div class="who"><div class="nm">${esc(session.name)}</div><div class="rl">${ROLE_LABEL[session.role]}</div></div>
       <div class="avatar">${initials(session.name)}</div>
@@ -405,12 +564,25 @@ function shell(session, activePath, bodyHtml){
   `;
 }
 
+// ---------- generic modal overlay ----------
+function openModal(m){ MODAL = m; render(); }
+function closeModal(){ MODAL = null; render(); }
+function renderModalOverlay(){
+  if(!MODAL) return '';
+  let inner = '';
+  if(MODAL.type==='qr') inner = qrModalHtml(MODAL.tableId);
+  else if(MODAL.type==='closeBill') inner = closeBillModalHtml(MODAL.tableId);
+  else if(MODAL.type==='cariDetail') inner = cariDetailModalHtml(MODAL.cariId);
+  else if(MODAL.type==='cariPay') inner = cariPayModalHtml(MODAL.cariId);
+  return `<div class="modal-bg" onclick="if(event.target===this) closeModal()"><div class="modal">${inner}</div></div>`;
+}
+
 // ================= LOGIN =================
 function renderLogin(){
   const dots = [0,1,2,3].map(i=>`<div class="dot ${i<PIN_BUF.length?'filled':''}"></div>`).join('');
   return `<div class="login-wrap"><div class="login-card">
     <div class="mark">S</div>
-    <h2>${CAFE_NAME}</h2>
+    <h2>${brandTextHtml()}</h2>
     <p>Devam etmek için personel PIN kodunuzu girin</p>
     <div class="pin-dots">${dots}</div>
     <div class="login-error">${LOGIN_ERR}</div>
@@ -446,6 +618,7 @@ function doLogout(){ clearSession(); location.hash='/login'; }
 
 // ================= MASALAR (table grid) =================
 function renderMasalar(){
+  const filtered = MASALAR_ZONE==='all' ? STATE.tables : STATE.tables.filter(t=>t.zone===MASALAR_ZONE);
   return `
     <div class="page-title">Masalar</div>
     <div class="page-sub">Bir masaya dokunarak sipariş girin veya adisyonu görüntüleyin.</div>
@@ -455,8 +628,12 @@ function renderMasalar(){
         <span><i style="background:var(--brand)"></i> Dolu</span>
       </div>
     </div>
+    <div class="cat-tabs">
+      <button class="${MASALAR_ZONE==='all'?'active':''}" onclick="setMasalarZone('all')">Tümü</button>
+      ${STATE.zones.map(z=>`<button class="${MASALAR_ZONE===z?'active':''}" onclick="setMasalarZone('${esc(z)}')">${esc(z)}</button>`).join('')}
+    </div>
     <div class="tables-grid">
-      ${STATE.tables.map(t=>{
+      ${filtered.map(t=>{
         const st = tableStatus(t.id);
         const total = tableTotal(t.id);
         const waiterId = STATE.assign[t.id];
@@ -464,7 +641,7 @@ function renderMasalar(){
         return `<button class="table-card ${st==='dolu'?'dolu':''}" onclick="location.hash='/masa?id=${t.id}'" style="cursor:pointer;">
           <div class="dot-indicator"></div>
           <h4>${esc(t.name)}</h4>
-          <div class="status-txt">${st==='dolu'?'Dolu':'Boş'}</div>
+          <div class="status-txt">${st==='dolu'?'Dolu':'Boş'} · ${esc(t.zone||'')}</div>
           ${total>0?`<div class="amt">${money(total)}</div>`:''}
           ${waiter?`<div class="waiter">Garson: ${esc(waiter.name)}</div>`:''}
         </button>`;
@@ -472,13 +649,22 @@ function renderMasalar(){
     </div>
   `;
 }
+function setMasalarZone(z){ MASALAR_ZONE=z; render(); }
 
-// ================= ORDER ENTRY (per table) =================
-let CUR_CAT = null;
+// ================= ORDER ENTRY (per table, staff) =================
+function cartKey(tableId){ return 'seyir_cart_'+tableId; }
+function ensureCartLoaded(tableId){
+  if(CART_TABLE_ID===tableId) return;
+  CART_TABLE_ID = tableId;
+  try{ CART = JSON.parse(sessionStorage.getItem(cartKey(tableId))||'{}'); }catch(e){ CART = {}; }
+}
+function saveCart(){ if(!CART_TABLE_ID) return; try{ sessionStorage.setItem(cartKey(CART_TABLE_ID), JSON.stringify(CART)); }catch(e){} }
+
 function renderOrderEntry(params){
   const tableId = params.get('id');
   const table = findTable(tableId);
   if(!table) return `<p class="empty-note">Masa bulunamadı.</p>`;
+  ensureCartLoaded(tableId);
   const session = getSession();
   const canClose = session.role==='kasiyer' || session.role==='yonetici';
 
@@ -498,17 +684,20 @@ function renderOrderEntry(params){
     </div>
 
     <div class="cat-tabs">
-      ${STATE.menu.map(c=>`<button class="${c.id===activeCat.id?'active':''}" onclick="setCat('${c.id}')">${esc(c.cat)}</button>`).join('')}
+      ${STATE.menu.map(c=>`<button class="${activeCat && c.id===activeCat.id?'active':''}" onclick="setCat('${c.id}')">${esc(c.cat)}</button>`).join('')}
     </div>
     <div class="item-grid">
-      ${activeCat.items.map(it=>{
+      ${activeCat ? activeCat.items.map(it=>{
         const qty = CART[it.id]||0;
-        return `<button class="item-tile ${it.available?'':'sold-out'}" ${it.available?`onclick="cartAdd('${it.id}')"`:'disabled'}>
+        const soldOut = !it.available || (it.trackStock && it.stock<=0);
+        return `<button class="item-tile ${soldOut?'sold-out':''}" ${soldOut?'disabled':`onclick="cartAdd('${it.id}')"`}>
           ${qty>0?`<div class="badge-qty">${qty}</div>`:''}
+          ${it.photo?`<div class="tile-photo" style="background-image:url('${it.photo}')"></div>`:''}
           <div class="nm">${esc(it.name)}</div>
           <div class="pr">${money(it.price)}</div>
+          ${it.trackStock?`<div class="stock-tag ${it.stock<=3?'low':''}">${it.stock<=0?'Tükendi':'Stok: '+it.stock}</div>`:''}
         </button>`;
-      }).join('')}
+      }).join('') : ''}
     </div>
 
     ${cartCount>0 ? `
@@ -532,16 +721,16 @@ function renderOrderEntry(params){
       <div class="section-label">Bu Masadaki Adisyon</div>
       <div class="adisyon-list">
         ${existing.map(o=>o.items.map(it=>`<div class="adisyon-row">
-            <div><div class="nm">${it.qty}× ${esc(it.name)}</div><div class="meta">${esc(findStaff(o.staffId)?.name||'')} · <span class="status-pill status-${o.status}">${statusLabel(o.status)}</span></div></div>
+            <div><div class="nm">${it.qty}× ${esc(it.name)}</div><div class="meta">${orderStaffLabel(o)} · <span class="status-pill status-${o.status}">${statusLabel(o.status)}</span></div></div>
             <div>${money(it.price*it.qty)}</div>
           </div>`).join('')).join('')}
       </div>
       <div class="grand-total-bar"><span>Toplam</span><span>${money(total)}</span></div>
       <div style="display:flex; gap:10px;">
         <button class="btn ghost block" onclick="location.hash='/masalar'">Masalara Dön</button>
-        <button class="btn danger block" ${canClose?'':'disabled'} onclick="closeBill('${tableId}')">Adisyonu Kapat</button>
-        ${canClose?'':'<div class="page-sub" style="margin-top:6px;">Adisyonu sadece kasiyer veya yönetici kapatabilir.</div>'}
+        <button class="btn danger block" ${canClose?'':'disabled'} onclick="openModal({type:'closeBill',tableId:'${tableId}'})">Adisyonu Kapat</button>
       </div>
+      ${canClose?'':'<div class="page-sub" style="margin-top:6px;">Adisyonu sadece kasiyer veya yönetici kapatabilir.</div>'}
     ` : (cartCount===0 ? `<p class="empty-note">Bu masada henüz sipariş yok. Ürünlere dokunarak sepete ekleyin.</p>` : '')}
 
     ${cartCount>0 ? `<div class="cart-dock">
@@ -553,37 +742,128 @@ function renderOrderEntry(params){
 function setCat(id){ CUR_CAT=id; render(); }
 function cartAdd(itemId, delta){
   delta = delta===undefined ? 1 : delta;
+  const it = findItem(itemId);
   const cur = CART[itemId]||0;
-  const next = Math.max(0, cur+delta);
+  let next = Math.max(0, cur+delta);
+  if(it && it.trackStock && delta>0 && next>it.stock){
+    showToast(it.stock>0 ? ('Stokta sadece '+it.stock+' adet var') : 'Bu üründen stok kalmadı');
+    next = cur;
+  }
   if(next===0) delete CART[itemId]; else CART[itemId]=next;
+  saveCart();
   render();
 }
 async function sendOrder(tableId){
   const session = getSession();
   const items = Object.entries(CART).map(([id,qty])=>{ const it=findItem(id); return {id,name:it.name,price:it.price,qty}; });
   if(!items.length) return;
-  const order = { id:genId('o'), tableId, items, status:'yeni', staffId:session.staffId, createdAt:Date.now() };
+  items.forEach(oi=>{ const it=findItem(oi.id); if(it && it.trackStock){ it.stock = Math.max(0, it.stock-oi.qty); } });
+  const order = { id:genId('o'), tableId, items, status:'yeni', staffId:session.staffId, source:'staff', createdAt:Date.now() };
   STATE.orders.push(order);
   if(!STATE.assign[tableId]) STATE.assign[tableId] = session.staffId;
-  await Promise.all([ sSet('seyir:orders', STATE.orders), sSet('seyir:assign', STATE.assign) ]);
+  await Promise.all([ sSet('seyir:orders', STATE.orders), sSet('seyir:assign', STATE.assign), sSet('seyir:menu', STATE.menu) ]);
   CART = {};
+  saveCart();
   showToast('Sipariş mutfağa gönderildi ✓');
   render();
 }
-async function closeBill(tableId){
+
+// ---------- close bill / payment modal (Nakit / Kart / Cari) ----------
+function closeBillModalHtml(tableId){
+  const table = findTable(tableId);
+  const total = tableTotal(tableId);
+  const mode = MODAL.mode || '';
+  return `
+    <span class="close-x" onclick="closeModal()">✕</span>
+    <h3>Adisyonu Kapat</h3>
+    <p class="page-sub">${esc(table?table.name:'')} · Toplam: <b>${money(total)}</b></p>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin:14px 0;">
+      <button class="btn ghost sm" onclick="finalizeCloseBill('${tableId}','Nakit')">Nakit</button>
+      <button class="btn ghost sm" onclick="finalizeCloseBill('${tableId}','Kart')">Kart</button>
+      <button class="btn ghost sm" onclick="setCloseBillMode('cari')">Cari</button>
+    </div>
+    ${mode==='cari' ? `
+      <div class="section-label">Cari Hesap Seçin</div>
+      ${STATE.cari.length ? `
+        <select id="cariselect">
+          <option value="">— Hesap seçin —</option>
+          ${STATE.cari.map(c=>`<option value="${c.id}">${esc(c.name)} (${money(c.balance)})</option>`).join('')}
+        </select>
+        <button class="btn sm" style="margin-top:10px;" onclick="confirmCariClose('${tableId}')">Cariye Yaz</button>
+      ` : '<p class="page-sub">Kayıtlı cari hesap yok. Aşağıdan yeni bir cari hesap ekleyin.</p>'}
+      <div class="form-inline" style="margin-top:10px;border-top:1px solid var(--line);padding-top:10px;">
+        <input id="quickcariname" placeholder="Yeni cari adı (zorunlu)">
+        <button class="btn ghost sm" onclick="quickAddCari('${tableId}')">+ Yeni Cari Ekle</button>
+      </div>
+    ` : ''}
+  `;
+}
+function setCloseBillMode(mode){ MODAL.mode = mode; render(); }
+async function quickAddCari(tableId){
+  const el = document.getElementById('quickcariname');
+  const name = el.value.trim();
+  if(!name){ alert('Cari hesap için isim girilmesi zorunludur.'); return; }
+  const acc = { id:genId('cr'), name, phone:'', balance:0, transactions:[] };
+  STATE.cari.push(acc);
+  await sSet('seyir:cari', STATE.cari);
+  MODAL.mode = 'cari';
+  render();
+  const sel = document.getElementById('cariselect');
+  if(sel) sel.value = acc.id;
+}
+async function confirmCariClose(tableId){
+  const sel = document.getElementById('cariselect');
+  const cariId = sel ? sel.value : '';
+  if(!cariId){ alert('Lütfen bir cari hesap seçin. İsimsiz cariye adisyon yazılamaz.'); return; }
+  await finalizeCloseBill(tableId, 'Cari', cariId);
+}
+async function finalizeCloseBill(tableId, method, cariId){
   const session = getSession();
   if(!(session.role==='kasiyer'||session.role==='yonetici')) return;
   const orders = tableOrders(tableId);
   if(!orders.length) return;
-  const method = prompt('Ödeme yöntemi: Nakit / Kart', 'Kart');
-  if(method===null) return;
-  const bill = { id:genId('b'), tableId, tableName:findTable(tableId).name, orders, total:tableTotal(tableId), method: method||'Belirtilmedi', closedAt: Date.now() };
+  const total = tableTotal(tableId);
+  const bill = { id:genId('b'), tableId, tableName:findTable(tableId).name, orders, total, method, cariId: cariId||null, closedAt: Date.now() };
   STATE.bills.push(bill);
   STATE.orders = STATE.orders.filter(o=>o.tableId!==tableId);
   delete STATE.assign[tableId];
-  await Promise.all([ sSet('seyir:bills', STATE.bills), sSet('seyir:orders', STATE.orders), sSet('seyir:assign', STATE.assign) ]);
+  const promises = [ sSet('seyir:bills', STATE.bills), sSet('seyir:orders', STATE.orders), sSet('seyir:assign', STATE.assign) ];
+  if(method==='Cari' && cariId){
+    const acc = STATE.cari.find(c=>c.id===cariId);
+    if(acc){
+      acc.balance += total;
+      acc.transactions.push({id:genId('tx'), type:'borc', amount:total, tableName:bill.tableName, date:Date.now()});
+      promises.push(sSet('seyir:cari', STATE.cari));
+    }
+  }
+  await Promise.all(promises);
+  closeModal();
   showToast('Adisyon kapatıldı ✓');
   location.hash = '/masalar';
+}
+
+// ---------- QR modal ----------
+function qrModalHtml(tableId){
+  const table = findTable(tableId);
+  if(!table) return `<p>Masa bulunamadı.</p>`;
+  const link = location.origin + location.pathname + '#/musteri?masa=' + tableId;
+  const qrSrc = 'https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=' + encodeURIComponent(link);
+  return `
+    <span class="close-x" onclick="closeModal()">✕</span>
+    <h3>${esc(table.name)} — QR Kod</h3>
+    <p class="page-sub">Müşteriler bu kodu okutarak doğrudan sipariş verebilir.</p>
+    <div style="text-align:center;margin:14px 0;">
+      <img src="${qrSrc}" alt="QR" style="width:220px;height:220px;border-radius:10px;border:1px solid var(--line);">
+    </div>
+    <div class="form-inline">
+      <input readonly value="${esc(link)}" style="flex:1;min-width:180px;" onclick="this.select()">
+      <button class="btn ghost sm" onclick="copyTableLink('${link.replace(/'/g,"\\'")}')">Kopyala</button>
+    </div>
+  `;
+}
+async function copyTableLink(link){
+  try{ await navigator.clipboard.writeText(link); showToast('Link kopyalandı ✓'); }
+  catch(e){ prompt('Linki kopyalayın:', link); }
 }
 
 // ================= MUTFAK (kitchen) =================
@@ -593,10 +873,9 @@ function renderMutfak(){
   const rdy = STATE.orders.filter(o=>o.status==='hazir').sort((a,b)=>a.createdAt-b.createdAt);
   function ticket(o, cls, nextStatus, nextLabel){
     const mins = Math.max(0, Math.round((Date.now()-o.createdAt)/60000));
-    const staff = findStaff(o.staffId);
     return `<div class="ticket ${cls}">
       <div class="head"><span class="tname">${esc(findTable(o.tableId)?.name||o.tableId)}</span><span class="time">${mins} dk</span></div>
-      ${staff?`<div class="waiter">${esc(staff.name)}</div>`:''}
+      <div class="waiter">${orderStaffLabel(o)}</div>
       <ul>${o.items.map(it=>`<li>${it.qty}× ${esc(it.name)}</li>`).join('')}</ul>
       ${nextStatus?`<button class="btn sm" onclick="advanceOrder('${o.id}','${nextStatus}')">${nextLabel}</button>`:''}
     </div>`;
@@ -640,7 +919,7 @@ function renderRapor(){
 
   const byStaff = {};
   STATE.bills.forEach(b=>b.orders.forEach(o=>{
-    const nm = findStaff(o.staffId)?.name || 'Bilinmiyor';
+    const nm = o.staffId ? (findStaff(o.staffId)?.name || 'Bilinmiyor') : 'Müşteri (QR)';
     const sum = o.items.reduce((s,it)=>s+it.price*it.qty,0);
     byStaff[nm] = (byStaff[nm]||0)+sum;
   }));
@@ -668,10 +947,95 @@ function renderRapor(){
   `;
 }
 
+// ================= CARİ (running tab / account) =================
+function renderCari(){
+  const list = STATE.cari;
+  return `
+    <div class="page-title">Cari Hesaplar</div>
+    <div class="page-sub">Adisyonu cariye yazdığınızda buradan takip edebilirsiniz. İsimsiz cari hesap açılamaz.</div>
+    <div class="form-inline">
+      <input id="newcariname" placeholder="Müşteri / Firma adı (zorunlu)">
+      <input id="newcariphone" placeholder="Telefon (opsiyonel)">
+      <button class="btn sm" onclick="addCariAccount()">+ Cari Ekle</button>
+    </div>
+    <div class="table-list">
+      ${list.length? list.map(c=>`
+        <div class="r">
+          <span><b>${esc(c.name)}</b>${c.phone?` · ${esc(c.phone)}`:''}</span>
+          <span style="display:flex;align-items:center;gap:8px;">
+            <b style="color:${c.balance>0?'var(--danger)':'var(--brand-deep)'};">${money(c.balance)}</b>
+            <button class="btn ghost sm" onclick="openModal({type:'cariDetail',cariId:'${c.id}'})">Detay</button>
+            ${c.balance>0?`<button class="btn ghost sm" onclick="openModal({type:'cariPay',cariId:'${c.id}'})">Ödeme Al</button>`:''}
+            <button class="btn ghost sm" onclick="deleteCariAccount('${c.id}')">Sil</button>
+          </span>
+        </div>
+      `).join('') : '<div class="r"><span>Henüz cari hesap yok</span></div>'}
+    </div>
+  `;
+}
+async function addCariAccount(){
+  const n = document.getElementById('newcariname'), p = document.getElementById('newcariphone');
+  const name = n.value.trim();
+  if(!name){ alert('Cari hesap için isim girilmesi zorunludur.'); return; }
+  STATE.cari.push({ id:genId('cr'), name, phone:p.value.trim(), balance:0, transactions:[] });
+  await sSet('seyir:cari', STATE.cari);
+  render();
+}
+async function deleteCariAccount(id){
+  const c = STATE.cari.find(x=>x.id===id);
+  if(c && c.balance>0){ alert('Bakiyesi olan bir cari hesap silinemez. Önce ödeme alın.'); return; }
+  STATE.cari = STATE.cari.filter(x=>x.id!==id);
+  await sSet('seyir:cari', STATE.cari);
+  render();
+}
+function cariDetailModalHtml(cariId){
+  const c = STATE.cari.find(x=>x.id===cariId);
+  if(!c) return `<p>Hesap bulunamadı.</p>`;
+  return `
+    <span class="close-x" onclick="closeModal()">✕</span>
+    <h3>${esc(c.name)}</h3>
+    <p class="page-sub">Güncel Bakiye: <b>${money(c.balance)}</b></p>
+    <div class="table-list" style="margin-top:10px;">
+      ${c.transactions.length? c.transactions.slice().reverse().map(t=>`
+        <div class="r"><span>${new Date(t.date).toLocaleString('tr-TR')}${t.tableName?` · ${esc(t.tableName)}`:''}</span>
+        <b style="color:${t.type==='borc'?'var(--danger)':'var(--brand-deep)'};">${t.type==='borc'?'+':'-'}${money(Math.abs(t.amount))}</b></div>
+      `).join('') : '<div class="r"><span>Hareket yok</span></div>'}
+    </div>
+  `;
+}
+function cariPayModalHtml(cariId){
+  const c = STATE.cari.find(x=>x.id===cariId);
+  if(!c) return `<p>Hesap bulunamadı.</p>`;
+  return `
+    <span class="close-x" onclick="closeModal()">✕</span>
+    <h3>${esc(c.name)} — Ödeme Al</h3>
+    <p class="page-sub">Güncel Bakiye: <b>${money(c.balance)}</b></p>
+    <div class="form-inline">
+      <input id="caripayamt" type="number" value="${c.balance}">
+      <button class="btn sm" onclick="collectCariPayment('${c.id}')">Ödemeyi Kaydet</button>
+    </div>
+  `;
+}
+async function collectCariPayment(cariId){
+  const c = STATE.cari.find(x=>x.id===cariId); if(!c) return;
+  const el = document.getElementById('caripayamt');
+  let amt = parseFloat(el.value)||0;
+  if(amt<=0){ alert('Geçerli bir tutar girin.'); return; }
+  if(amt>c.balance) amt = c.balance;
+  c.balance -= amt;
+  c.transactions.push({id:genId('tx'), type:'odeme', amount:amt, date:Date.now()});
+  await sSet('seyir:cari', STATE.cari);
+  closeModal();
+  showToast('Ödeme kaydedildi ✓');
+}
+
 // ================= ADMIN =================
 function renderAdmin(){
-  const tabs = [['menu','Menü'],['tables','Masalar'],['staff','Personel']];
-  let body = ADMIN_TAB==='menu' ? renderAdminMenu() : ADMIN_TAB==='tables' ? renderAdminTables() : renderAdminStaff();
+  const tabs = [['menu','Menü'],['tables','Masalar'],['staff','Personel'],['settings','Ayarlar']];
+  let body = ADMIN_TAB==='menu' ? renderAdminMenu()
+    : ADMIN_TAB==='tables' ? renderAdminTables()
+    : ADMIN_TAB==='staff' ? renderAdminStaff()
+    : renderAdminSettings();
   return `
     <div class="page-title">Yönetim</div>
     <div class="admin-tabs">${tabs.map(([id,l])=>`<button class="${ADMIN_TAB===id?'active':''}" onclick="setAdminTab('${id}')">${l}</button>`).join('')}</div>
@@ -689,9 +1053,16 @@ function renderAdminMenu(){
       </div>
       ${cat.items.map(it=>`
         <div class="item-row">
+          ${it.photo?`<img src="${it.photo}" class="item-thumb">`:''}
           <div class="nm">${esc(it.name)}</div>
           <input class="pr" type="number" value="${it.price}" onchange="updateItemPrice('${cat.id}','${it.id}',this.value)">
           <label class="toggle"><input type="checkbox" ${it.available?'checked':''} onchange="toggleAvailable('${cat.id}','${it.id}')"> Mevcut</label>
+          <label class="toggle"><input type="checkbox" ${it.trackStock?'checked':''} onchange="toggleStockTracking('${cat.id}','${it.id}')"> Stok Takibi</label>
+          ${it.trackStock?`<input class="pr" type="number" value="${it.stock||0}" title="Stok adedi" onchange="updateItemStock('${cat.id}','${it.id}',this.value)">`:''}
+          <label class="btn ghost sm" style="cursor:pointer;">${it.photo?'Foto Değiştir':'Foto Ekle'}
+            <input type="file" accept="image/*" style="display:none;" onchange="handlePhotoUpload('${cat.id}','${it.id}',this)">
+          </label>
+          ${it.photo?`<button class="btn ghost sm" onclick="removePhoto('${cat.id}','${it.id}')">Foto Sil</button>`:''}
           <button class="btn ghost sm" onclick="deleteItem('${cat.id}','${it.id}')">Sil</button>
         </div>
       `).join('')}
@@ -710,11 +1081,13 @@ function renderAdminMenu(){
 }
 async function updateItemPrice(catId,itemId,val){ const cat=STATE.menu.find(c=>c.id===catId); const it=cat.items.find(i=>i.id===itemId); it.price=parseFloat(val)||0; await sSet('seyir:menu',STATE.menu); render(); }
 async function toggleAvailable(catId,itemId){ const cat=STATE.menu.find(c=>c.id===catId); const it=cat.items.find(i=>i.id===itemId); it.available=!it.available; await sSet('seyir:menu',STATE.menu); render(); }
+async function toggleStockTracking(catId,itemId){ const cat=STATE.menu.find(c=>c.id===catId); const it=cat.items.find(i=>i.id===itemId); it.trackStock=!it.trackStock; if(it.trackStock && !it.stock) it.stock=0; await sSet('seyir:menu',STATE.menu); render(); }
+async function updateItemStock(catId,itemId,val){ const cat=STATE.menu.find(c=>c.id===catId); const it=cat.items.find(i=>i.id===itemId); it.stock=Math.max(0, parseInt(val)||0); await sSet('seyir:menu',STATE.menu); render(); }
 async function deleteItem(catId,itemId){ const cat=STATE.menu.find(c=>c.id===catId); cat.items=cat.items.filter(i=>i.id!==itemId); await sSet('seyir:menu',STATE.menu); render(); }
 async function addItem(catId){
   const n=document.getElementById('nn_'+catId), p=document.getElementById('np_'+catId);
   const name=n.value.trim(); if(!name) return;
-  STATE.menu.find(c=>c.id===catId).items.push({id:genId('i'), name, price:parseFloat(p.value)||0, desc:'', available:true});
+  STATE.menu.find(c=>c.id===catId).items.push({id:genId('i'), name, price:parseFloat(p.value)||0, desc:'', available:true, photo:'', trackStock:false, stock:0});
   await sSet('seyir:menu',STATE.menu); render();
 }
 async function deleteCategory(catId){ STATE.menu=STATE.menu.filter(c=>c.id!==catId); await sSet('seyir:menu',STATE.menu); render(); }
@@ -725,20 +1098,49 @@ async function addCategory(){
 
 function renderAdminTables(){
   return `
+    <div class="section-label">Bölgeler (Kategoriler)</div>
+    <div class="form-inline">
+      ${STATE.zones.map(z=>`<span class="zone-chip">${esc(z)} <button onclick="deleteZone('${esc(z).replace(/'/g,"\\'")}')">&times;</button></span>`).join('')}
+    </div>
+    <div class="form-inline">
+      <input id="newzonename" placeholder="Yeni bölge adı (örn. Bahçe)">
+      <button class="btn ghost sm" onclick="addZone()">+ Bölge Ekle</button>
+    </div>
+    <div class="section-label">Masalar</div>
     ${STATE.tables.map(t=>`
       <div class="item-row">
         <div class="nm">${esc(t.name)}</div>
-        <div style="font-size:11.5px;color:var(--ink-soft);">masa=${t.id}</div>
+        <select onchange="updateTableZone('${t.id}',this.value)">
+          ${STATE.zones.map(z=>`<option value="${esc(z)}" ${t.zone===z?'selected':''}>${esc(z)}</option>`).join('')}
+        </select>
+        <button class="btn ghost sm" onclick="openModal({type:'qr',tableId:'${t.id}'})">QR Kodu</button>
         <button class="btn ghost sm" onclick="deleteTable('${t.id}')">Sil</button>
       </div>
     `).join('')}
     <div class="form-inline">
       <input id="newtablename" placeholder="Yeni masa / bölge adı">
+      <select id="newtablezone">${STATE.zones.map(z=>`<option value="${esc(z)}">${esc(z)}</option>`).join('')}</select>
       <button class="btn sm" onclick="addTable()">+ Masa Ekle</button>
     </div>
   `;
 }
-async function addTable(){ const el=document.getElementById('newtablename'); const name=el.value.trim(); if(!name) return; STATE.tables.push({id:genId('t'),name}); await sSet('seyir:tables',STATE.tables); render(); }
+async function addZone(){
+  const el=document.getElementById('newzonename'); const name=el.value.trim(); if(!name) return;
+  if(STATE.zones.includes(name)){ alert('Bu bölge zaten var.'); return; }
+  STATE.zones.push(name); await sSet('seyir:zones', STATE.zones); render();
+}
+async function deleteZone(name){
+  if(STATE.tables.some(t=>t.zone===name)){ alert('Bu bölgede masalar var, önce onları başka bölgeye taşıyın.'); return; }
+  if(STATE.zones.length<=1){ alert('En az bir bölge kalmalı.'); return; }
+  STATE.zones = STATE.zones.filter(z=>z!==name); await sSet('seyir:zones', STATE.zones); render();
+}
+async function updateTableZone(id, zone){ findTable(id).zone = zone; await sSet('seyir:tables', STATE.tables); render(); }
+async function addTable(){
+  const el=document.getElementById('newtablename'); const zEl=document.getElementById('newtablezone');
+  const name=el.value.trim(); if(!name) return;
+  STATE.tables.push({id:genId('t'),name, zone: zEl.value || STATE.zones[0]});
+  await sSet('seyir:tables',STATE.tables); render();
+}
 async function deleteTable(id){ if(tableOrders(id).length){ alert('Bu masada açık sipariş var, önce kapatın.'); return; } STATE.tables=STATE.tables.filter(t=>t.id!==id); await sSet('seyir:tables',STATE.tables); render(); }
 
 function renderAdminStaff(){
@@ -773,24 +1175,161 @@ async function addStaff(){
   await sSet('seyir:staff',STATE.staff); render();
 }
 
+function renderAdminSettings(){
+  const s = STATE.settings;
+  return `
+    <div class="section-label">Wi-Fi</div>
+    <div class="form-inline">
+      <input id="set_wifissid" placeholder="Wi-Fi Adı" value="${esc(s.wifiSsid)}">
+      <input id="set_wifipass" placeholder="Wi-Fi Şifresi" value="${esc(s.wifiPassword)}">
+      <button class="btn sm" onclick="saveWifiSettings()">Kaydet</button>
+    </div>
+    <div class="section-label">Sosyal Medya</div>
+    <div class="form-inline">
+      <input id="set_ig" placeholder="Instagram kullanıcı adı (@ olmadan)" value="${esc(s.instagramUsername)}">
+      <input id="set_tt" placeholder="TikTok kullanıcı adı (@ olmadan)" value="${esc(s.tiktokUsername)}">
+      <button class="btn sm" onclick="saveSocialSettings()">Kaydet</button>
+    </div>
+    <div class="section-label">Harita</div>
+    <div class="form-inline">
+      <input id="set_maps" placeholder="Google Maps linki" value="${esc(s.mapsUrl)}" style="min-width:260px;flex:1;">
+      <button class="btn sm" onclick="saveMapsSettings()">Kaydet</button>
+    </div>
+    <p class="page-sub">Bu bilgiler müşteri sipariş sayfasındaki (QR) ikonlarda kullanılır.</p>
+  `;
+}
+async function saveWifiSettings(){
+  STATE.settings.wifiSsid = document.getElementById('set_wifissid').value.trim();
+  STATE.settings.wifiPassword = document.getElementById('set_wifipass').value.trim();
+  await sSet('seyir:settings',STATE.settings); showToast('Wi-Fi bilgileri kaydedildi ✓'); render();
+}
+async function saveSocialSettings(){
+  STATE.settings.instagramUsername = document.getElementById('set_ig').value.trim().replace(/^@/,'');
+  STATE.settings.tiktokUsername = document.getElementById('set_tt').value.trim().replace(/^@/,'');
+  await sSet('seyir:settings',STATE.settings); showToast('Sosyal medya bilgileri kaydedildi ✓'); render();
+}
+async function saveMapsSettings(){
+  STATE.settings.mapsUrl = document.getElementById('set_maps').value.trim();
+  await sSet('seyir:settings',STATE.settings); showToast('Harita linki kaydedildi ✓'); render();
+}
+
 // ================= PUBLIC MENU (view-only, no login) =================
 function renderPublicMenu(){
-  return `<div class="appbar"><div class="brand"><div class="mark">S</div><div class="txt">${CAFE_NAME}</div></div></div>
+  return `<div class="appbar"><div class="brand">${brandMarkHtml()}</div></div>
   <div class="content"><div class="public-menu">
     <div class="page-title">Menü</div>
-    <div class="page-sub">Siparişinizi masanıza gelen personelimize iletebilirsiniz.</div>
+    <div class="page-sub">Siparişinizi masanıza gelen personelimize iletebilir ya da masanızdaki QR kodu okutarak doğrudan sipariş verebilirsiniz.</div>
+    ${iconRowHtml()}
     ${STATE.menu.map(cat=>`
       <div class="public-cat">
         <h3>${esc(cat.cat)}</h3>
         ${cat.items.filter(i=>i.available).map(it=>`
           <div class="public-item">
-            <div><div class="nm">${esc(it.name)}</div>${it.desc?`<div class="ds">${esc(it.desc)}</div>`:''}</div>
+            ${it.photo?`<img src="${it.photo}" class="item-thumb">`:''}
+            <div style="flex:1;"><div class="nm">${esc(it.name)}</div>${it.desc?`<div class="ds">${esc(it.desc)}</div>`:''}</div>
             <div class="pr">${money(it.price)}</div>
           </div>
         `).join('')}
       </div>
     `).join('')}
   </div></div>`;
+}
+
+// ================= MÜŞTERİ SİPARİŞ (QR ordering, no login) =================
+function custCartKey(tableId){ return 'seyir_musteri_cart_'+tableId; }
+function ensureCustCartLoaded(tableId){
+  if(CUST_CART_TABLE===tableId) return;
+  CUST_CART_TABLE = tableId;
+  try{ CUST_CART = JSON.parse(sessionStorage.getItem(custCartKey(tableId))||'{}'); }catch(e){ CUST_CART = {}; }
+  CUST_SUBMITTED = false;
+}
+function saveCustCart(){ if(!CUST_CART_TABLE) return; try{ sessionStorage.setItem(custCartKey(CUST_CART_TABLE), JSON.stringify(CUST_CART)); }catch(e){} }
+
+function renderMusteriSiparis(params){
+  const tableId = params.get('masa');
+  const table = findTable(tableId);
+  if(!table) return `<div class="content"><div class="appbar"><div class="brand">${brandMarkHtml()}</div></div><p class="empty-note">Masa bulunamadı. Lütfen QR kodu tekrar okutun.</p></div>`;
+  ensureCustCartLoaded(tableId);
+
+  if(CUST_CAT===null || !STATE.menu.find(c=>c.id===CUST_CAT)) CUST_CAT = STATE.menu[0] ? STATE.menu[0].id : null;
+  const activeCat = STATE.menu.find(c=>c.id===CUST_CAT) || STATE.menu[0];
+  const cartCount = Object.values(CUST_CART).reduce((a,b)=>a+b,0);
+  const cartTotal = Object.entries(CUST_CART).reduce((s,[id,qty])=>{ const it=findItem(id); return s+(it?it.price*qty:0); },0);
+
+  return `
+  <div class="appbar"><div class="brand">${brandMarkHtml()}</div></div>
+  <div class="content public-menu">
+    <div class="page-title">${esc(table.name)}</div>
+    <div class="page-sub">Menüden seçim yapıp doğrudan sipariş gönderebilirsiniz.</div>
+    ${iconRowHtml()}
+    ${CUST_SUBMITTED ? `
+      <div class="empty-note">✅ Siparişiniz alındı, teşekkür ederiz!<br>
+        <button class="btn sm" style="margin-top:12px;" onclick="CUST_SUBMITTED=false; render();">Yeni Sipariş Ekle</button>
+      </div>
+    ` : `
+      <div class="cat-tabs">
+        ${STATE.menu.map(c=>`<button class="${activeCat && c.id===activeCat.id?'active':''}" onclick="setCustCat('${c.id}')">${esc(c.cat)}</button>`).join('')}
+      </div>
+      <div class="item-grid">
+        ${activeCat ? activeCat.items.map(it=>{
+          const soldOut = !it.available || (it.trackStock && it.stock<=0);
+          const qty = CUST_CART[it.id]||0;
+          return `<button class="item-tile ${soldOut?'sold-out':''}" ${soldOut?'disabled':`onclick="custCartAdd('${it.id}')"`}>
+            ${qty>0?`<div class="badge-qty">${qty}</div>`:''}
+            ${it.photo?`<div class="tile-photo" style="background-image:url('${it.photo}')"></div>`:''}
+            <div class="nm">${esc(it.name)}</div>
+            <div class="pr">${money(it.price)}</div>
+          </button>`;
+        }).join('') : ''}
+      </div>
+      ${cartCount>0 ? `
+        <div class="section-label">Sepetiniz</div>
+        <div class="adisyon-list">
+          ${Object.entries(CUST_CART).map(([id,qty])=>{
+            const it = findItem(id);
+            return `<div class="adisyon-row">
+              <div><div class="nm">${esc(it.name)}</div><div class="meta">${money(it.price)}</div></div>
+              <div style="display:flex;align-items:center;gap:10px;">
+                <button class="btn ghost sm" onclick="custCartAdd('${id}',-1)">−</button><b>${qty}</b>
+                <button class="btn ghost sm" onclick="custCartAdd('${id}',1)">+</button>
+              </div>
+            </div>`;
+          }).join('')}
+        </div>
+      ` : `<p class="empty-note">Sepetiniz boş, ürünlere dokunarak ekleyin.</p>`}
+    `}
+  </div>
+  ${(!CUST_SUBMITTED && cartCount>0) ? `<div class="cart-dock">
+    <div><div class="total">${money(cartTotal)}</div><div class="sub">${cartCount} ürün</div></div>
+    <button class="btn" style="background:#fff;color:var(--navy);" onclick="submitCustomerOrder('${tableId}')">Siparişi Gönder</button>
+  </div>` : ''}
+  `;
+}
+function setCustCat(id){ CUST_CAT=id; render(); }
+function custCartAdd(itemId, delta){
+  delta = delta===undefined ? 1 : delta;
+  const it = findItem(itemId);
+  const cur = CUST_CART[itemId]||0;
+  let next = Math.max(0, cur+delta);
+  if(it && it.trackStock && delta>0 && next>it.stock){
+    showToast(it.stock>0 ? ('Stokta sadece '+it.stock+' adet var') : 'Bu ürün tükendi');
+    next = cur;
+  }
+  if(next===0) delete CUST_CART[itemId]; else CUST_CART[itemId]=next;
+  saveCustCart();
+  render();
+}
+async function submitCustomerOrder(tableId){
+  const items = Object.entries(CUST_CART).map(([id,qty])=>{ const it=findItem(id); return {id,name:it.name,price:it.price,qty}; });
+  if(!items.length) return;
+  items.forEach(oi=>{ const it=findItem(oi.id); if(it && it.trackStock){ it.stock = Math.max(0, it.stock-oi.qty); } });
+  const order = { id:genId('o'), tableId, items, status:'yeni', staffId:null, source:'musteri', createdAt:Date.now() };
+  STATE.orders.push(order);
+  await Promise.all([ sSet('seyir:orders', STATE.orders), sSet('seyir:menu', STATE.menu) ]);
+  CUST_CART = {};
+  saveCustCart();
+  CUST_SUBMITTED = true;
+  render();
 }
 </script>
 </body>
