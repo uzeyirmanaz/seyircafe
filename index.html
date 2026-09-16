@@ -3,229 +3,237 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>SEYİR CAFE — Sipariş & Yönetim</title>
+<title>SEYİR CAFE — Adisyon Sistemi</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,500&family=Inter:wght@400;500;600;700;800&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
   :root{
-    --cream:#F6F1E7;
-    --paper:#FBF8F2;
-    --ink:#241F19;
-    --ink-soft:#6B6255;
-    --navy:#1F3A3D;
-    --navy-deep:#122325;
-    --amber:#E1A94C;
-    --amber-deep:#C98A2E;
-    --rust:#B85C38;
-    --rust-deep:#93472A;
-    --sage:#6E8266;
-    --line:#E1D5B8;
-    --white:#FFFFFF;
-    --radius:14px;
-    --shadow:0 6px 20px rgba(18,35,37,0.10);
-    --shadow-lg:0 14px 40px rgba(18,35,37,0.18);
+    --bg:#F1F3F5;
+    --surface:#FFFFFF;
+    --ink:#1B2530;
+    --ink-soft:#69737E;
+    --ink-faint:#9AA3AC;
+    --line:#E4E7EC;
+    --navy:#152431;
+    --navy-soft:#233544;
+    --brand:#0E8F5C;
+    --brand-deep:#0B7249;
+    --brand-soft:#E4F6ED;
+    --warn:#E58A00;
+    --warn-soft:#FDF0DA;
+    --danger:#DC3D43;
+    --danger-soft:#FBE3E4;
+    --blue:#2F6FED;
+    --blue-soft:#E7EEFE;
+    --radius:12px;
+    --shadow:0 2px 10px rgba(21,36,49,.06);
+    --shadow-lg:0 16px 40px rgba(21,36,49,.22);
   }
   *{box-sizing:border-box;}
   html,body{margin:0;padding:0;}
   body{
     font-family:'Inter',system-ui,sans-serif;
-    background:var(--cream);
+    background:var(--bg);
     color:var(--ink);
     -webkit-font-smoothing:antialiased;
+    font-size:14.5px;
   }
-  h1,h2,h3,.serif{ font-family:'Fraunces',serif; }
-  button{ font-family:inherit; cursor:pointer; border:none; }
-  input,select,textarea{ font-family:inherit; }
-  a{ color:inherit; }
-  #app{ min-height:100vh; }
+  button{ font-family:inherit; cursor:pointer; border:none; background:none; color:inherit; }
+  input,select{ font-family:inherit; }
+  a{ color:inherit; text-decoration:none; }
+  #app{ min-height:100vh; display:flex; flex-direction:column; }
 
-  /* ---------- Top bar ---------- */
-  .topbar{
-    display:flex; align-items:center; justify-content:space-between;
-    padding:14px 18px; background:var(--navy); color:var(--cream);
-    position:sticky; top:0; z-index:40;
+  /* ---------- App chrome ---------- */
+  .appbar{
+    background:var(--navy); color:#fff; padding:12px 18px;
+    display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; z-index:50;
   }
-  .topbar .brand{ display:flex; align-items:center; gap:10px; }
-  .topbar .brand .mark{
-    width:34px;height:34px;border-radius:50%;
-    background:var(--amber); color:var(--navy-deep);
-    display:flex;align-items:center;justify-content:center;
-    font-family:'Fraunces',serif; font-weight:600; font-size:16px;
+  .appbar .brand{ display:flex; align-items:center; gap:10px; }
+  .appbar .brand .mark{
+    width:32px;height:32px;border-radius:8px; background:var(--brand);
+    display:flex;align-items:center;justify-content:center; font-weight:800; font-size:15px;
   }
-  .topbar .brand .name{ font-family:'Fraunces',serif; font-size:19px; letter-spacing:.2px; }
-  .topbar .brand .sub{ font-size:11px; color:#C9DAD6; margin-top:-2px; }
-  .topbar .home-link{
-    font-size:13px; color:var(--cream); opacity:.85; text-decoration:none;
-    padding:8px 12px; border:1px solid rgba(255,255,255,.25); border-radius:20px;
+  .appbar .brand .txt{ font-weight:700; font-size:15.5px; letter-spacing:.2px; }
+  .appbar .staff{ display:flex; align-items:center; gap:10px; }
+  .appbar .staff .who{ text-align:right; }
+  .appbar .staff .nm{ font-size:13px; font-weight:700; }
+  .appbar .staff .rl{ font-size:11px; color:#9FB3BE; }
+  .appbar .staff .avatar{
+    width:30px;height:30px;border-radius:50%; background:var(--navy-soft); border:1px solid #34495a;
+    display:flex;align-items:center;justify-content:center; font-size:12px; font-weight:700;
   }
-  .topbar .home-link:hover{ opacity:1; }
+  .appbar .logout{ font-size:12px; color:#C9D3DA; border:1px solid #34495a; padding:6px 10px; border-radius:8px; }
 
-  .wrap{ max-width:1100px; margin:0 auto; padding:20px 16px 60px; }
+  .tabstrip{
+    background:var(--surface); border-bottom:1px solid var(--line); display:flex; gap:4px;
+    padding:0 12px; overflow-x:auto; position:sticky; top:53px; z-index:49;
+  }
+  .tabstrip a{
+    padding:12px 14px; font-size:13.5px; font-weight:600; color:var(--ink-soft); white-space:nowrap;
+    border-bottom:3px solid transparent;
+  }
+  .tabstrip a.active{ color:var(--brand-deep); border-bottom-color:var(--brand); }
 
-  /* ---------- Home / role select ---------- */
-  .home-hero{
-    text-align:center; padding:64px 20px 40px;
-    background: radial-gradient(120% 100% at 50% -10%, #2C4C4F 0%, var(--navy) 55%, var(--navy-deep) 100%);
-    color:var(--cream);
-  }
-  .home-hero .eyebrow{ color:var(--amber); font-size:14px; letter-spacing:.03em; margin-bottom:10px; }
-  .home-hero h1{
-    font-size:clamp(40px,7vw,64px); margin:0 0 12px; font-weight:600; font-style:italic;
-  }
-  .home-hero p{ color:#D7E3DF; max-width:480px; margin:0 auto; font-size:16px; line-height:1.6; }
+  .content{ flex:1; padding:18px 16px 90px; max-width:1200px; width:100%; margin:0 auto; }
 
-  .role-grid{
-    display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
-    gap:16px; padding:28px 16px 8px; max-width:960px; margin:-40px auto 0;
-  }
-  .role-card{
-    background:var(--paper); border-radius:var(--radius); padding:26px 22px;
-    box-shadow:var(--shadow-lg); text-align:left; border:1px solid var(--line);
-    display:flex; flex-direction:column; gap:6px; min-height:150px;
-    transition:transform .15s ease;
-  }
-  .role-card:hover{ transform:translateY(-3px); }
-  .role-card .ico{ font-size:26px; margin-bottom:4px; }
-  .role-card h3{ margin:0; font-size:20px; }
-  .role-card p{ margin:0; font-size:13.5px; color:var(--ink-soft); line-height:1.5; }
-  .role-card.kasa{ border-top:4px solid var(--navy); }
-  .role-card.mutfak{ border-top:4px solid var(--rust); }
-  .role-card.musteri{ border-top:4px solid var(--amber); }
-  .role-card.admin{ border-top:4px solid var(--sage); }
-
-  .home-footer{ text-align:center; padding:30px 16px 10px; color:var(--ink-soft); font-size:12.5px; }
+  h1,h2,h3{ margin:0 0 4px; }
+  .page-title{ font-size:19px; font-weight:800; margin-bottom:2px; }
+  .page-sub{ font-size:12.5px; color:var(--ink-soft); margin-bottom:16px; }
 
   /* ---------- Buttons ---------- */
   .btn{
     display:inline-flex; align-items:center; justify-content:center; gap:6px;
-    padding:10px 16px; border-radius:10px; font-weight:600; font-size:14px;
-    background:var(--navy); color:var(--cream);
+    padding:11px 16px; border-radius:9px; font-weight:700; font-size:14px;
+    background:var(--brand); color:#fff;
   }
-  .btn.amber{ background:var(--amber); color:var(--navy-deep); }
-  .btn.rust{ background:var(--rust); color:#fff; }
-  .btn.ghost{ background:transparent; color:var(--ink); border:1px solid var(--line); }
-  .btn.sm{ padding:6px 12px; font-size:13px; }
-  .btn:disabled{ opacity:.4; cursor:not-allowed; }
+  .btn.blue{ background:var(--blue); }
+  .btn.danger{ background:var(--danger); }
+  .btn.ghost{ background:var(--surface); color:var(--ink); border:1px solid var(--line); }
+  .btn.sm{ padding:7px 12px; font-size:13px; border-radius:7px; }
+  .btn:disabled{ opacity:.38; cursor:not-allowed; }
   .btn.block{ width:100%; }
 
-  /* ---------- Customer menu ---------- */
-  .table-pick{ display:flex; flex-wrap:wrap; gap:10px; justify-content:center; padding:10px 0 30px; }
-  .table-pick button{
-    background:var(--paper); border:1px solid var(--line); border-radius:10px;
-    padding:14px 18px; font-weight:600; font-size:14px; color:var(--ink);
-  }
-  .table-pick button:hover{ border-color:var(--amber-deep); }
+  /* ---------- Login ---------- */
+  .login-wrap{ min-height:100vh; display:flex; align-items:center; justify-content:center; background:var(--navy); padding:20px; }
+  .login-card{ background:var(--surface); border-radius:18px; padding:32px 26px; width:100%; max-width:360px; box-shadow:var(--shadow-lg); text-align:center; }
+  .login-card .mark{ width:52px;height:52px;border-radius:14px; background:var(--brand); color:#fff; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:22px; margin:0 auto 14px; }
+  .login-card h2{ font-size:19px; margin-bottom:2px; }
+  .login-card p{ color:var(--ink-soft); font-size:13px; margin:0 0 20px; }
+  .pin-dots{ display:flex; gap:12px; justify-content:center; margin-bottom:20px; }
+  .pin-dots .dot{ width:14px;height:14px;border-radius:50%; border:2px solid var(--line); }
+  .pin-dots .dot.filled{ background:var(--brand); border-color:var(--brand); }
+  .pinpad{ display:grid; grid-template-columns:repeat(3,1fr); gap:10px; }
+  .pinpad button{ background:var(--bg); border-radius:12px; padding:16px 0; font-size:19px; font-weight:700; }
+  .pinpad button:active{ background:var(--brand-soft); }
+  .pinpad .wide{ font-size:13px; font-weight:700; color:var(--ink-soft); }
+  .login-error{ color:var(--danger); font-size:12.5px; margin-bottom:10px; min-height:16px; font-weight:600; }
+  .staff-quickpick{ display:flex; flex-wrap:wrap; gap:8px; justify-content:center; margin-bottom:18px; }
+  .staff-quickpick button{ background:var(--bg); border-radius:20px; padding:7px 14px; font-size:12.5px; font-weight:600; color:var(--ink-soft); }
+  .staff-quickpick button.sel{ background:var(--navy); color:#fff; }
 
-  .cat-tabs{ display:flex; gap:8px; overflow-x:auto; padding:4px 0 16px; -webkit-overflow-scrolling:touch; }
-  .cat-tabs button{
-    flex:0 0 auto; background:var(--paper); border:1px solid var(--line); border-radius:20px;
-    padding:8px 16px; font-size:13.5px; font-weight:600; color:var(--ink-soft); white-space:nowrap;
-  }
-  .cat-tabs button.active{ background:var(--navy); color:var(--cream); border-color:var(--navy); }
+  /* ---------- Tables grid ---------- */
+  .tables-toolbar{ display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; flex-wrap:wrap; gap:10px; }
+  .legend{ display:flex; gap:14px; font-size:12px; color:var(--ink-soft); flex-wrap:wrap; }
+  .legend span{ display:inline-flex; align-items:center; gap:5px; }
+  .legend i{ width:10px;height:10px;border-radius:3px; display:inline-block; }
 
-  .menu-list{ display:flex; flex-direction:column; gap:12px; }
-  .menu-item{
-    display:flex; justify-content:space-between; gap:14px; align-items:center;
-    background:var(--paper); border:1px solid var(--line); border-radius:12px; padding:14px 16px;
-  }
-  .menu-item .info h4{ margin:0 0 3px; font-size:16.5px; }
-  .menu-item .info p{ margin:0; font-size:12.5px; color:var(--ink-soft); max-width:340px; line-height:1.4; }
-  .menu-item .price{ font-weight:700; color:var(--rust-deep); font-size:14px; margin-top:4px; }
-  .qty-ctrl{ display:flex; align-items:center; gap:8px; flex:0 0 auto; }
-  .qty-ctrl button{
-    width:30px;height:30px;border-radius:50%; background:var(--cream); border:1px solid var(--line);
-    font-size:16px; font-weight:700; color:var(--navy);
-  }
-  .qty-ctrl .n{ min-width:18px; text-align:center; font-weight:700; }
-  .unavailable-tag{ font-size:11px; color:var(--rust-deep); font-weight:700; }
-
-  .cart-bar{
-    position:sticky; bottom:0; background:var(--navy); color:var(--cream);
-    padding:14px 18px; display:flex; align-items:center; justify-content:space-between;
-    border-radius:16px 16px 0 0; margin-top:20px; box-shadow:0 -6px 20px rgba(0,0,0,.2);
-  }
-  .cart-bar .total{ font-family:'Fraunces',serif; font-size:20px; }
-  .cart-bar .sub{ font-size:11.5px; color:#C9DAD6; }
-
-  .order-history{ margin-top:26px; }
-  .order-history h3{ font-size:15px; margin-bottom:10px; }
-  .order-ticket{
-    background:var(--paper); border:1px dashed var(--line); border-radius:12px; padding:12px 14px; margin-bottom:10px;
-  }
-  .order-ticket .row{ display:flex; justify-content:space-between; font-size:13.5px; padding:2px 0; }
-  .status-pill{ font-size:11px; font-weight:700; padding:3px 9px; border-radius:20px; }
-  .status-yeni{ background:#EFE0C7; color:var(--amber-deep); }
-  .status-hazirlaniyor{ background:#F3D9C9; color:var(--rust-deep); }
-  .status-hazir{ background:#DCEBD8; color:var(--sage); }
-  .status-servis{ background:#D9E4E2; color:var(--navy); }
-
-  /* ---------- Kasa (cashier) ---------- */
-  .tables-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(140px,1fr)); gap:14px; }
+  .tables-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(148px,1fr)); gap:12px; }
   .table-card{
-    background:var(--paper); border:2px solid var(--line); border-radius:14px; padding:16px 14px;
-    text-align:center; position:relative;
+    background:var(--surface); border:1.5px solid var(--line); border-radius:var(--radius); padding:16px 14px;
+    text-align:left; box-shadow:var(--shadow); position:relative; min-height:96px;
   }
-  .table-card h4{ margin:0 0 4px; font-size:17px; }
-  .table-card .status-txt{ font-size:12px; color:var(--ink-soft); }
-  .table-card.bos{ opacity:.75; }
-  .table-card.dolu{ border-color:var(--amber-deep); background:#FBF2E0; }
-  .table-card.istek{ border-color:var(--rust); background:#FBE6DE; animation:pulse 1.6s infinite; }
-  @keyframes pulse{ 0%{box-shadow:0 0 0 0 rgba(184,92,56,.4);} 70%{box-shadow:0 0 0 8px rgba(184,92,56,0);} 100%{box-shadow:0 0 0 0 rgba(184,92,56,0);} }
-  .table-card .amt{ font-weight:700; margin-top:6px; font-size:14px; }
+  .table-card h4{ font-size:16px; margin:0 0 4px; }
+  .table-card .status-txt{ font-size:11.5px; color:var(--ink-soft); font-weight:600; }
+  .table-card .amt{ font-weight:800; margin-top:8px; font-size:15px; }
+  .table-card .waiter{ font-size:11px; color:var(--ink-faint); margin-top:2px; }
+  .table-card.dolu{ border-color:var(--brand); background:var(--brand-soft); }
+  .table-card.dolu .amt{ color:var(--brand-deep); }
+  .table-card .dot-indicator{ position:absolute; top:12px; right:12px; width:9px;height:9px;border-radius:50%; background:var(--ink-faint); }
+  .table-card.dolu .dot-indicator{ background:var(--brand); }
 
-  .modal-bg{
-    position:fixed; inset:0; background:rgba(18,35,37,.55); display:flex; align-items:flex-end;
-    justify-content:center; z-index:100; padding:0;
+  /* ---------- Order entry screen ---------- */
+  .order-header{ display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; flex-wrap:wrap; gap:8px; }
+  .order-header .back{ font-size:13px; font-weight:700; color:var(--ink-soft); display:inline-flex; align-items:center; gap:4px; }
+
+  .cat-tabs{ display:flex; gap:8px; overflow-x:auto; padding:2px 0 14px; -webkit-overflow-scrolling:touch; }
+  .cat-tabs button{
+    flex:0 0 auto; background:var(--surface); border:1px solid var(--line); border-radius:20px;
+    padding:8px 15px; font-size:13px; font-weight:700; color:var(--ink-soft);
   }
-  .modal{
-    background:var(--paper); width:100%; max-width:560px; max-height:88vh; overflow-y:auto;
-    border-radius:20px 20px 0 0; padding:22px 20px 26px;
+  .cat-tabs button.active{ background:var(--navy); color:#fff; border-color:var(--navy); }
+
+  .item-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(140px,1fr)); gap:10px; margin-bottom:20px; }
+  .item-tile{
+    background:var(--surface); border:1px solid var(--line); border-radius:11px; padding:12px 12px; text-align:left;
+    position:relative; min-height:76px; display:flex; flex-direction:column; justify-content:space-between;
   }
-  @media(min-width:640px){ .modal-bg{ align-items:center; } .modal{ border-radius:18px; } }
-  .modal h3{ margin:0 0 4px; }
-  .modal .close-x{ position:absolute; top:16px; right:20px; background:none; font-size:20px; color:var(--ink-soft); }
-  .bill-line{ display:flex; justify-content:space-between; font-size:14px; padding:6px 0; border-bottom:1px solid var(--line); }
-  .bill-total{ display:flex; justify-content:space-between; font-size:19px; font-weight:700; padding:12px 0 4px; font-family:'Fraunces',serif; }
+  .item-tile:active{ background:var(--brand-soft); }
+  .item-tile .nm{ font-weight:700; font-size:13.5px; line-height:1.3; }
+  .item-tile .pr{ font-size:12.5px; color:var(--ink-soft); margin-top:6px; font-weight:600; }
+  .item-tile .badge-qty{
+    position:absolute; top:-7px; right:-7px; background:var(--brand); color:#fff; font-size:12px; font-weight:800;
+    width:22px;height:22px;border-radius:50%; display:flex; align-items:center; justify-content:center;
+  }
+  .item-tile.sold-out{ opacity:.42; }
+  .item-tile.sold-out::after{ content:'Tükendi'; position:absolute; bottom:10px; right:10px; font-size:10.5px; color:var(--danger); font-weight:800; }
 
-  .add-item-row{ display:flex; gap:8px; align-items:center; padding:8px 0; border-bottom:1px solid var(--line); }
-  .add-item-row select{ flex:1; padding:8px; border-radius:8px; border:1px solid var(--line); }
+  .section-label{ font-size:12.5px; font-weight:800; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.03em; margin:18px 0 8px; }
 
-  .reports-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:14px; margin-bottom:24px; }
-  .stat-card{ background:var(--paper); border:1px solid var(--line); border-radius:12px; padding:16px; }
-  .stat-card .num{ font-family:'Fraunces',serif; font-size:26px; color:var(--navy); }
-  .stat-card .lbl{ font-size:12.5px; color:var(--ink-soft); }
+  .adisyon-list{ background:var(--surface); border:1px solid var(--line); border-radius:11px; overflow:hidden; margin-bottom:14px; }
+  .adisyon-row{ display:flex; justify-content:space-between; align-items:center; padding:11px 14px; border-bottom:1px solid var(--line); gap:8px; }
+  .adisyon-row:last-child{ border-bottom:none; }
+  .adisyon-row .nm{ font-weight:600; font-size:13.5px; }
+  .adisyon-row .meta{ font-size:11px; color:var(--ink-faint); }
+  .status-pill{ font-size:10.5px; font-weight:800; padding:3px 9px; border-radius:20px; white-space:nowrap; }
+  .status-yeni{ background:var(--blue-soft); color:var(--blue); }
+  .status-hazirlaniyor{ background:var(--warn-soft); color:var(--warn); }
+  .status-hazir{ background:var(--brand-soft); color:var(--brand-deep); }
+  .status-servis{ background:#EDEFF2; color:var(--ink-soft); }
 
-  /* ---------- Mutfak (kitchen) ---------- */
-  .kitchen-wrap{ background:var(--navy-deep); min-height:100vh; color:var(--cream); }
-  .kitchen-cols{ display:grid; grid-template-columns:1fr; gap:16px; padding:6px 0; }
+  .cart-dock{
+    position:fixed; left:0; right:0; bottom:0; background:var(--navy); color:#fff;
+    padding:13px 18px; display:flex; align-items:center; justify-content:space-between; z-index:60;
+    box-shadow:0 -8px 24px rgba(0,0,0,.25);
+  }
+  .cart-dock .total{ font-size:18px; font-weight:800; }
+  .cart-dock .sub{ font-size:11px; color:#9FB3BE; }
+
+  .grand-total-bar{
+    display:flex; justify-content:space-between; align-items:center; background:var(--navy); color:#fff;
+    border-radius:11px; padding:14px 16px; margin:16px 0; font-weight:800; font-size:16px;
+  }
+
+  /* ---------- Modals ---------- */
+  .modal-bg{ position:fixed; inset:0; background:rgba(21,36,49,.55); display:flex; align-items:center; justify-content:center; z-index:100; padding:16px; }
+  .modal{ background:var(--surface); width:100%; max-width:400px; border-radius:16px; padding:22px 20px; max-height:88vh; overflow-y:auto; }
+  .modal h3{ margin-bottom:4px; }
+  .modal .close-x{ float:right; font-size:18px; color:var(--ink-soft); }
+
+  /* ---------- Kitchen ---------- */
+  .kitchen-cols{ display:grid; grid-template-columns:1fr; gap:14px; }
   @media(min-width:820px){ .kitchen-cols{ grid-template-columns:1fr 1fr 1fr; } }
-  .kcol h3{ color:var(--amber); font-size:15px; margin:0 0 10px; text-transform:none; }
-  .ticket{
-    background:#1B3436; border:1px solid #2C4C4F; border-radius:12px; padding:14px 16px; margin-bottom:12px;
-  }
-  .ticket .head{ display:flex; justify-content:space-between; align-items:baseline; margin-bottom:8px; }
-  .ticket .head .tname{ font-family:'Fraunces',serif; font-size:18px; }
-  .ticket .head .time{ font-size:12px; color:#9FC2BC; }
-  .ticket ul{ margin:0 0 10px; padding-left:18px; font-size:14px; line-height:1.6; }
-  .ticket .note{ font-size:12px; color:#E1A94C; margin:-4px 0 8px; }
+  .kcol .kcol-head{ display:flex; align-items:center; gap:8px; margin-bottom:10px; }
+  .kcol .kcol-head .count{ background:var(--navy); color:#fff; font-size:11px; font-weight:800; padding:2px 8px; border-radius:12px; }
+  .ticket{ background:var(--surface); border:1px solid var(--line); border-left:4px solid var(--blue); border-radius:10px; padding:13px 15px; margin-bottom:11px; box-shadow:var(--shadow); }
+  .ticket.warn{ border-left-color:var(--warn); }
+  .ticket.ready{ border-left-color:var(--brand); }
+  .ticket .head{ display:flex; justify-content:space-between; align-items:baseline; margin-bottom:6px; }
+  .ticket .head .tname{ font-weight:800; font-size:15px; }
+  .ticket .head .time{ font-size:11.5px; color:var(--ink-faint); font-weight:700; }
+  .ticket .waiter{ font-size:11px; color:var(--ink-faint); margin-bottom:6px; }
+  .ticket ul{ margin:0 0 10px; padding-left:16px; font-size:13.5px; line-height:1.6; }
 
-  /* ---------- Admin ---------- */
-  .admin-tabs{ display:flex; gap:8px; margin-bottom:20px; flex-wrap:wrap; }
-  .admin-tabs button{ background:var(--paper); border:1px solid var(--line); border-radius:20px; padding:8px 16px; font-size:13.5px; font-weight:600; color:var(--ink-soft); }
-  .admin-tabs button.active{ background:var(--sage); color:#fff; border-color:var(--sage); }
-  .form-row{ display:flex; gap:8px; flex-wrap:wrap; margin-bottom:10px; }
-  .form-row input, .form-row select{ padding:9px 10px; border-radius:8px; border:1px solid var(--line); font-size:14px; }
-  .item-row{ display:flex; align-items:center; gap:10px; background:var(--paper); border:1px solid var(--line); border-radius:10px; padding:10px 12px; margin-bottom:8px; flex-wrap:wrap; }
-  .item-row .nm{ font-weight:600; flex:1; min-width:120px; }
-  .item-row .pr{ width:80px; padding:6px 8px; border-radius:6px; border:1px solid var(--line); }
+  /* ---------- Reports / Admin ---------- */
+  .stat-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:12px; margin-bottom:22px; }
+  .stat-card{ background:var(--surface); border:1px solid var(--line); border-radius:11px; padding:15px; }
+  .stat-card .num{ font-size:22px; font-weight:800; }
+  .stat-card .lbl{ font-size:12px; color:var(--ink-soft); margin-top:2px; }
+
+  .table-list{ background:var(--surface); border:1px solid var(--line); border-radius:11px; overflow:hidden; }
+  .table-list .r{ display:flex; justify-content:space-between; padding:11px 14px; border-bottom:1px solid var(--line); font-size:13.5px; align-items:center; gap:8px; flex-wrap:wrap; }
+  .table-list .r:last-child{ border-bottom:none; }
+
+  .admin-tabs{ display:flex; gap:8px; margin-bottom:18px; flex-wrap:wrap; }
+  .admin-tabs button{ background:var(--surface); border:1px solid var(--line); border-radius:20px; padding:8px 15px; font-size:13px; font-weight:700; color:var(--ink-soft); }
+  .admin-tabs button.active{ background:var(--navy); color:#fff; border-color:var(--navy); }
+
+  .form-inline{ display:flex; gap:8px; flex-wrap:wrap; margin:10px 0; }
+  .form-inline input, .form-inline select{ padding:9px 10px; border-radius:8px; border:1px solid var(--line); font-size:13.5px; }
+
+  .item-row{ display:flex; align-items:center; gap:10px; background:var(--surface); border:1px solid var(--line); border-radius:10px; padding:10px 12px; margin-bottom:8px; flex-wrap:wrap; }
+  .item-row .nm{ font-weight:700; flex:1; min-width:110px; font-size:13.5px; }
+  .item-row .pr{ width:76px; padding:6px 8px; border-radius:6px; border:1px solid var(--line); }
   .toggle{ display:flex; align-items:center; gap:5px; font-size:12px; color:var(--ink-soft); }
 
-  .empty-note{ text-align:center; padding:40px 20px; color:var(--ink-soft); font-size:14px; }
-  .toast{
-    position:fixed; bottom:24px; left:50%; transform:translateX(-50%);
-    background:var(--navy); color:var(--cream); padding:12px 20px; border-radius:30px;
-    font-size:14px; box-shadow:var(--shadow-lg); z-index:200;
-  }
+  .empty-note{ text-align:center; padding:36px 20px; color:var(--ink-faint); font-size:13.5px; }
+  .toast{ position:fixed; bottom:24px; left:50%; transform:translateX(-50%); background:var(--navy); color:#fff; padding:12px 20px; border-radius:30px; font-size:13.5px; box-shadow:var(--shadow-lg); z-index:200; font-weight:600; }
+
+  .public-menu{ max-width:640px; margin:0 auto; }
+  .public-cat h3{ font-size:15px; margin:22px 0 10px; }
+  .public-item{ display:flex; justify-content:space-between; gap:12px; padding:11px 0; border-bottom:1px solid var(--line); }
+  .public-item .nm{ font-weight:700; font-size:14.5px; }
+  .public-item .ds{ font-size:12px; color:var(--ink-soft); margin-top:2px; }
+  .public-item .pr{ font-weight:700; color:var(--brand-deep); white-space:nowrap; }
 </style>
 </head>
 <body>
@@ -233,567 +241,556 @@
 
 <script>
 /* ============================================================
-   SEYİR CAFE — tek dosyalık sipariş / kasa / mutfak / yönetim
+   SEYİR CAFE — Adisyon Sistemi (personel PIN girişli, tek dosya)
    ============================================================ */
-
 const CAFE_NAME = "SEYİR CAFE";
 
 // ---------- storage helpers ----------
 async function sGet(key, fallback){
-  try{
-    const res = await window.storage.get(key, true);
-    if(!res) return fallback;
-    return JSON.parse(res.value);
-  }catch(e){ return fallback; }
+  try{ const res = await window.storage.get(key, true); if(!res) return fallback; return JSON.parse(res.value); }
+  catch(e){ return fallback; }
 }
 async function sSet(key, value){
   try{ await window.storage.set(key, JSON.stringify(value), true); }catch(e){ console.error('storage set failed', key, e); }
 }
-function genId(prefix){ return prefix + '_' + Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
+function genId(p){ return p + '_' + Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
 function money(n){ return (Math.round(n*100)/100).toLocaleString('tr-TR',{minimumFractionDigits:2, maximumFractionDigits:2}) + ' ₺'; }
-function escapeHtml(s){ return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function initials(name){ return (name||'?').trim().split(/\s+/).map(w=>w[0]).slice(0,2).join('').toUpperCase(); }
 
 // ---------- default seed data ----------
 const DEFAULT_MENU = [
   {id:'c1', cat:'Sıcak İçecekler', items:[
-    {id:'i1', name:'Türk Kahvesi', price:90, desc:'Bakır cezvede, közde pişer', available:true},
-    {id:'i2', name:'Filtre Kahve', price:110, desc:'Günün çekirdeğiyle', available:true},
+    {id:'i1', name:'Türk Kahvesi', price:90, desc:'Bakır cezvede', available:true},
+    {id:'i2', name:'Filtre Kahve', price:110, desc:'Günün çekirdeği', available:true},
     {id:'i3', name:'Cappuccino', price:130, desc:'Bol köpüklü', available:true},
-    {id:'i4', name:'Latte', price:130, desc:'Yumuşak ve dengeli', available:true},
-    {id:'i5', name:'Sahlep', price:120, desc:'Tarçınlı, kışlık', available:true},
-    {id:'i6', name:'Bitki Çayı', price:80, desc:'Ihlamur / Adaçayı / Nane-Limon', available:true},
+    {id:'i4', name:'Latte', price:130, desc:'', available:true},
+    {id:'i5', name:'Sahlep', price:120, desc:'Tarçınlı', available:true},
+    {id:'i6', name:'Bitki Çayı', price:80, desc:'', available:true},
   ]},
   {id:'c2', cat:'Soğuk İçecekler', items:[
-    {id:'i7', name:'Ice Latte', price:140, desc:'Soğuk süt, çift shot', available:true},
-    {id:'i8', name:'Limonata', price:110, desc:'Taze sıkım, nane', available:true},
-    {id:'i9', name:'Soğuk Çay', price:90, desc:'Şeftali / Limon', available:true},
-    {id:'i10', name:'Frozen Çilek', price:150, desc:'Buzlu, kremalı', available:true},
+    {id:'i7', name:'Ice Latte', price:140, desc:'', available:true},
+    {id:'i8', name:'Limonata', price:110, desc:'Taze sıkım', available:true},
+    {id:'i9', name:'Soğuk Çay', price:90, desc:'', available:true},
+    {id:'i10', name:'Frozen Çilek', price:150, desc:'', available:true},
   ]},
   {id:'c3', cat:'Tatlılar', items:[
-    {id:'i11', name:'Cheesecake', price:160, desc:'Kırmızı meyveli sos', available:true},
-    {id:'i12', name:'Brownie', price:140, desc:'Sıcak servis, dondurmalı', available:true},
-    {id:'i13', name:'Sufle', price:150, desc:'Akışkan çikolata', available:true},
+    {id:'i11', name:'Cheesecake', price:160, desc:'', available:true},
+    {id:'i12', name:'Brownie', price:140, desc:'', available:true},
+    {id:'i13', name:'Sufle', price:150, desc:'', available:true},
   ]},
   {id:'c4', cat:'Atıştırmalıklar', items:[
     {id:'i14', name:'Tost', price:130, desc:'Kaşarlı / Karışık', available:true},
-    {id:'i15', name:'Sandviç', price:150, desc:'Tavuklu, közlenmiş biber', available:true},
-    {id:'i16', name:'Kruvasan', price:110, desc:'Tereyağlı, günlük', available:true},
+    {id:'i15', name:'Sandviç', price:150, desc:'', available:true},
+    {id:'i16', name:'Kruvasan', price:110, desc:'', available:true},
   ]},
 ];
 const DEFAULT_TABLES = [
-  {id:'t1', name:'Masa 1'}, {id:'t2', name:'Masa 2'}, {id:'t3', name:'Masa 3'},
-  {id:'t4', name:'Masa 4'}, {id:'t5', name:'Masa 5'}, {id:'t6', name:'Masa 6'},
-  {id:'t7', name:'Teras 1'}, {id:'t8', name:'Teras 2'},
+  {id:'t1',name:'Masa 1'},{id:'t2',name:'Masa 2'},{id:'t3',name:'Masa 3'},
+  {id:'t4',name:'Masa 4'},{id:'t5',name:'Masa 5'},{id:'t6',name:'Masa 6'},
+  {id:'t7',name:'Teras 1'},{id:'t8',name:'Teras 2'},
+];
+const DEFAULT_STAFF = [
+  {id:'s1', name:'Yönetici', role:'yonetici', pin:'0000'},
+  {id:'s2', name:'Kasiyer', role:'kasiyer', pin:'1111'},
+  {id:'s3', name:'Garson', role:'garson', pin:'2222'},
+  {id:'s4', name:'Mutfak', role:'mutfak', pin:'3333'},
+];
+const ROLE_LABEL = {yonetici:'Yönetici', kasiyer:'Kasiyer', garson:'Garson', mutfak:'Mutfak'};
+const ROLE_HOME = {yonetici:'/masalar', kasiyer:'/masalar', garson:'/masalar', mutfak:'/mutfak'};
+const NAV_ITEMS = [
+  {path:'/masalar', label:'Masalar', roles:['yonetici','kasiyer','garson']},
+  {path:'/mutfak', label:'Mutfak', roles:['yonetici','mutfak']},
+  {path:'/rapor', label:'Rapor', roles:['yonetici','kasiyer']},
+  {path:'/admin', label:'Yönetim', roles:['yonetici']},
 ];
 
 // ---------- global state ----------
-let STATE = { menu:[], tables:[], orders:[], bills:[], requests:{}, loaded:false };
-let CART = {}; // itemId -> qty, customer-local only
+let STATE = { menu:[], tables:[], orders:[], bills:[], assign:{}, staff:[], loaded:false };
+let CART = {};       // itemId -> qty (order-entry screen, local)
+let PIN_BUF = '';
+let LOGIN_ERR = '';
+let ADMIN_TAB = 'menu';
+
+function getSession(){
+  try{ return JSON.parse(sessionStorage.getItem('seyir_session')||'null'); }catch(e){ return null; }
+}
+function setSession(s){ sessionStorage.setItem('seyir_session', JSON.stringify(s)); }
+function clearSession(){ sessionStorage.removeItem('seyir_session'); }
 
 async function loadState(){
-  const [menu, tables, orders, bills, requests] = await Promise.all([
-    sGet('seyir:menu', null),
-    sGet('seyir:tables', null),
-    sGet('seyir:orders', []),
-    sGet('seyir:bills', []),
-    sGet('seyir:requests', {}),
+  const [menu, tables, orders, bills, assign, staff] = await Promise.all([
+    sGet('seyir:menu', null), sGet('seyir:tables', null), sGet('seyir:orders', []),
+    sGet('seyir:bills', []), sGet('seyir:assign', {}), sGet('seyir:staff', null),
   ]);
-  let needSeed = false;
-  STATE.menu = menu; if(!STATE.menu){ STATE.menu = DEFAULT_MENU; needSeed = true; }
-  STATE.tables = tables; if(!STATE.tables){ STATE.tables = DEFAULT_TABLES; needSeed = true; }
+  let seed = false;
+  STATE.menu = menu; if(!STATE.menu){ STATE.menu = DEFAULT_MENU; seed = true; }
+  STATE.tables = tables; if(!STATE.tables){ STATE.tables = DEFAULT_TABLES; seed = true; }
+  STATE.staff = staff; if(!STATE.staff){ STATE.staff = DEFAULT_STAFF; seed = true; }
   STATE.orders = orders || [];
   STATE.bills = bills || [];
-  STATE.requests = requests || {};
+  STATE.assign = assign || {};
   STATE.loaded = true;
-  if(needSeed){
-    await sSet('seyir:menu', STATE.menu);
-    await sSet('seyir:tables', STATE.tables);
-  }
+  if(seed){ await Promise.all([sSet('seyir:menu',STATE.menu), sSet('seyir:tables',STATE.tables), sSet('seyir:staff',STATE.staff)]); }
 }
 
-function allItems(){
-  const out = [];
-  STATE.menu.forEach(cat => cat.items.forEach(it => out.push(Object.assign({catName:cat.cat, catId:cat.id}, it))));
-  return out;
-}
+function allItems(){ const out=[]; STATE.menu.forEach(c=>c.items.forEach(it=>out.push(Object.assign({catName:c.cat,catId:c.id}, it)))); return out; }
 function findItem(id){ return allItems().find(i=>i.id===id); }
 function findTable(id){ return STATE.tables.find(t=>t.id===id); }
-function tableOpenOrders(tableId){ return STATE.orders.filter(o=>o.tableId===tableId); }
-function tableTotal(tableId){
-  let sum = 0;
-  tableOpenOrders(tableId).forEach(o=> o.items.forEach(it => sum += it.price*it.qty));
-  return sum;
-}
-function tableStatus(tableId){
-  if(STATE.requests[tableId]) return 'istek';
-  return tableOpenOrders(tableId).length ? 'dolu' : 'bos';
-}
+function findStaff(id){ return STATE.staff.find(s=>s.id===id); }
+function tableOrders(tableId){ return STATE.orders.filter(o=>o.tableId===tableId); }
+function tableTotal(tableId){ let s=0; tableOrders(tableId).forEach(o=>o.items.forEach(it=>s+=it.price*it.qty)); return s; }
+function tableStatus(tableId){ return tableOrders(tableId).length ? 'dolu' : 'bos'; }
+function statusLabel(s){ return {yeni:'Alındı',hazirlaniyor:'Hazırlanıyor',hazir:'Hazır',servis:'Servis Edildi'}[s]||s; }
 
-function showToast(msg){
-  const t = document.createElement('div');
-  t.className = 'toast'; t.textContent = msg;
-  document.body.appendChild(t);
-  setTimeout(()=>t.remove(), 2200);
-}
+function showToast(msg){ const t=document.createElement('div'); t.className='toast'; t.textContent=msg; document.body.appendChild(t); setTimeout(()=>t.remove(),2200); }
 
 // ---------- routing ----------
-function parseHash(){
-  const raw = location.hash.slice(1) || '/';
-  const [path, qs] = raw.split('?');
-  const params = new URLSearchParams(qs||'');
-  return { path: path || '/', params };
-}
+function parseHash(){ const raw=location.hash.slice(1)||'/'; const [path,qs]=raw.split('?'); return {path:path||'/', params:new URLSearchParams(qs||'')}; }
 window.addEventListener('hashchange', render);
 
 async function boot(){
   await loadState();
   render();
-  setInterval(async ()=>{ await loadState(); render(); }, 4000);
+  setInterval(async ()=>{ await loadState(); render(); }, 2000);
 }
 boot();
+
+const PUBLIC_ROUTES = ['/login','/menu'];
 
 function render(){
   if(!STATE.loaded) return;
   const {path, params} = parseHash();
   const app = document.getElementById('app');
-  if(path === '/' ) app.innerHTML = renderHome();
-  else if(path === '/menu') app.innerHTML = renderCustomer(params);
-  else if(path === '/kasa') app.innerHTML = renderKasa();
-  else if(path === '/mutfak') app.innerHTML = renderMutfak();
-  else if(path === '/admin') app.innerHTML = renderAdmin(params);
-  else app.innerHTML = renderHome();
+  const session = getSession();
+
+  if(!PUBLIC_ROUTES.includes(path) && !session){ location.hash = '/login'; return; }
+  if(session){
+    const navAllowed = ['/masalar','/mutfak','/rapor','/admin'];
+    if(navAllowed.includes(path)){
+      const item = NAV_ITEMS.find(n=>n.path===path);
+      if(item && !item.roles.includes(session.role)){ location.hash = ROLE_HOME[session.role]||'/masalar'; return; }
+    }
+  }
+
+  let html = '';
+  if(path === '/login') html = renderLogin();
+  else if(path === '/menu') html = renderPublicMenu();
+  else if(path === '/masalar') html = shell(session,'/masalar', renderMasalar());
+  else if(path === '/masa') html = shell(session,'/masalar', renderOrderEntry(params));
+  else if(path === '/mutfak') html = shell(session,'/mutfak', renderMutfak());
+  else if(path === '/rapor') html = shell(session,'/rapor', renderRapor());
+  else if(path === '/admin') html = shell(session,'/admin', renderAdmin());
+  else { location.hash = session ? (ROLE_HOME[session.role]||'/masalar') : '/login'; return; }
+
+  app.innerHTML = html;
   window.scrollTo(0,0);
 }
 
-function topbar(subtitle, homeHref){
-  return `<div class="topbar">
-    <div class="brand">
-      <div class="mark">S</div>
-      <div><div class="name">${CAFE_NAME}</div><div class="sub">${subtitle}</div></div>
-    </div>
-    <a class="home-link" href="${homeHref||'#/'}">Ana Ekran</a>
-  </div>`;
-}
-
-// ================= HOME =================
-function renderHome(){
+function shell(session, activePath, bodyHtml){
+  const nav = NAV_ITEMS.filter(n=>n.roles.includes(session.role));
   return `
-  <div class="home-hero">
-    <div class="eyebrow serif" style="font-style:italic;">manzaralı bir mola</div>
-    <h1>${CAFE_NAME}</h1>
-    <p>Sipariş, mutfak ve kasa akışını tek yerden yönetin — her cihazdan senkron.</p>
+  <div class="appbar">
+    <div class="brand"><div class="mark">S</div><div class="txt">${CAFE_NAME}</div></div>
+    <div class="staff">
+      <div class="who"><div class="nm">${esc(session.name)}</div><div class="rl">${ROLE_LABEL[session.role]}</div></div>
+      <div class="avatar">${initials(session.name)}</div>
+      <button class="logout" onclick="doLogout()">Çıkış</button>
+    </div>
   </div>
-  <div class="role-grid">
-    <a href="#/menu" style="text-decoration:none;color:inherit;">
-      <div class="role-card musteri">
-        <div class="ico">📱</div>
-        <h3>Müşteri QR Menü</h3>
-        <p>Masadan tarayıp menüye bakma ve sipariş gönderme ekranı.</p>
-      </div>
-    </a>
-    <a href="#/kasa" style="text-decoration:none;color:inherit;">
-      <div class="role-card kasa">
-        <div class="ico">🧾</div>
-        <h3>Kasa</h3>
-        <p>Masaları görün, adisyon kapatın, günlük satışları takip edin.</p>
-      </div>
-    </a>
-    <a href="#/mutfak" style="text-decoration:none;color:inherit;">
-      <div class="role-card mutfak">
-        <div class="ico">🔥</div>
-        <h3>Mutfak Ekranı</h3>
-        <p>Gelen siparişleri sıraya alın, hazırlanıyor / hazır olarak işaretleyin.</p>
-      </div>
-    </a>
-    <a href="#/admin" style="text-decoration:none;color:inherit;">
-      <div class="role-card admin">
-        <div class="ico">⚙️</div>
-        <h3>Yönetim</h3>
-        <p>Menü, fiyat ve masaları düzenleyin, satış raporlarına bakın.</p>
-      </div>
-    </a>
+  <div class="tabstrip">
+    ${nav.map(n=>`<a class="${n.path===activePath?'active':''}" href="#${n.path}">${n.label}</a>`).join('')}
   </div>
-  <div class="home-footer">Veriler bulutta saklanır; kasa, mutfak ve müşteri ekranları birbiriyle otomatik senkronize olur.</div>
+  <div class="content">${bodyHtml}</div>
   `;
 }
 
-// ================= CUSTOMER (QR menu) =================
-let CUR_CAT = null;
-function renderCustomer(params){
-  const masa = params.get('masa');
-  if(!masa){
-    return topbar('Müşteri Menüsü') + `<div class="wrap">
-      <h2 class="serif" style="text-align:center;">Hangi masadasınız?</h2>
-      <div class="table-pick">
-        ${STATE.tables.map(t=>`<button onclick="location.hash='/menu?masa=${t.id}'">${escapeHtml(t.name)}</button>`).join('')}
-      </div>
-    </div>`;
-  }
-  const table = findTable(masa);
-  if(!table){
-    return topbar('Müşteri Menüsü') + `<div class="wrap"><p class="empty-note">Masa bulunamadı.</p></div>`;
-  }
-  if(CUR_CAT === null) CUR_CAT = STATE.menu[0] ? STATE.menu[0].id : null;
-
-  const cats = STATE.menu;
-  const activeCat = cats.find(c=>c.id===CUR_CAT) || cats[0];
-  const cartCount = Object.values(CART).reduce((a,b)=>a+b,0);
-  const cartTotal = Object.entries(CART).reduce((sum,[id,qty])=>{ const it=findItem(id); return sum + (it?it.price*qty:0); },0);
-
-  const openOrders = tableOpenOrders(table.id);
-  const billRequested = !!STATE.requests[table.id];
-
-  return topbar(escapeHtml(table.name)) + `<div class="wrap">
-    <div class="cat-tabs">
-      ${cats.map(c=>`<button class="${c.id===activeCat.id?'active':''}" onclick="setCat('${c.id}')">${escapeHtml(c.cat)}</button>`).join('')}
+// ================= LOGIN =================
+function renderLogin(){
+  const dots = [0,1,2,3].map(i=>`<div class="dot ${i<PIN_BUF.length?'filled':''}"></div>`).join('');
+  return `<div class="login-wrap"><div class="login-card">
+    <div class="mark">S</div>
+    <h2>${CAFE_NAME}</h2>
+    <p>Devam etmek için personel PIN kodunuzu girin</p>
+    <div class="pin-dots">${dots}</div>
+    <div class="login-error">${LOGIN_ERR}</div>
+    <div class="pinpad">
+      ${[1,2,3,4,5,6,7,8,9].map(n=>`<button onclick="pinPress('${n}')">${n}</button>`).join('')}
+      <button class="wide" onclick="pinClear()">Temizle</button>
+      <button onclick="pinPress('0')">0</button>
+      <button class="wide" onclick="pinBack()">⌫</button>
     </div>
-    <div class="menu-list">
+  </div></div>`;
+}
+function pinPress(d){
+  if(PIN_BUF.length>=4) return;
+  PIN_BUF += d; LOGIN_ERR='';
+  if(PIN_BUF.length===4) tryLogin();
+  render();
+}
+function pinBack(){ PIN_BUF = PIN_BUF.slice(0,-1); render(); }
+function pinClear(){ PIN_BUF=''; LOGIN_ERR=''; render(); }
+function tryLogin(){
+  const staff = STATE.staff.find(s=>s.pin===PIN_BUF);
+  if(staff){
+    setSession({staffId:staff.id, name:staff.name, role:staff.role});
+    PIN_BUF=''; LOGIN_ERR='';
+    location.hash = ROLE_HOME[staff.role]||'/masalar';
+  }else{
+    LOGIN_ERR = 'Hatalı PIN, tekrar deneyin';
+    PIN_BUF='';
+    setTimeout(render, 60);
+  }
+}
+function doLogout(){ clearSession(); location.hash='/login'; }
+
+// ================= MASALAR (table grid) =================
+function renderMasalar(){
+  return `
+    <div class="page-title">Masalar</div>
+    <div class="page-sub">Bir masaya dokunarak sipariş girin veya adisyonu görüntüleyin.</div>
+    <div class="tables-toolbar">
+      <div class="legend">
+        <span><i style="background:var(--ink-faint)"></i> Boş</span>
+        <span><i style="background:var(--brand)"></i> Dolu</span>
+      </div>
+    </div>
+    <div class="tables-grid">
+      ${STATE.tables.map(t=>{
+        const st = tableStatus(t.id);
+        const total = tableTotal(t.id);
+        const waiterId = STATE.assign[t.id];
+        const waiter = waiterId ? findStaff(waiterId) : null;
+        return `<button class="table-card ${st==='dolu'?'dolu':''}" onclick="location.hash='/masa?id=${t.id}'" style="cursor:pointer;">
+          <div class="dot-indicator"></div>
+          <h4>${esc(t.name)}</h4>
+          <div class="status-txt">${st==='dolu'?'Dolu':'Boş'}</div>
+          ${total>0?`<div class="amt">${money(total)}</div>`:''}
+          ${waiter?`<div class="waiter">Garson: ${esc(waiter.name)}</div>`:''}
+        </button>`;
+      }).join('')}
+    </div>
+  `;
+}
+
+// ================= ORDER ENTRY (per table) =================
+let CUR_CAT = null;
+function renderOrderEntry(params){
+  const tableId = params.get('id');
+  const table = findTable(tableId);
+  if(!table) return `<p class="empty-note">Masa bulunamadı.</p>`;
+  const session = getSession();
+  const canClose = session.role==='kasiyer' || session.role==='yonetici';
+
+  if(CUR_CAT===null || !STATE.menu.find(c=>c.id===CUR_CAT)) CUR_CAT = STATE.menu[0] ? STATE.menu[0].id : null;
+  const activeCat = STATE.menu.find(c=>c.id===CUR_CAT) || STATE.menu[0];
+
+  const existing = tableOrders(tableId);
+  const cartCount = Object.values(CART).reduce((a,b)=>a+b,0);
+  const cartTotal = Object.entries(CART).reduce((s,[id,qty])=>{ const it=findItem(id); return s+(it?it.price*qty:0); },0);
+  const total = tableTotal(tableId);
+
+  return `
+    <div class="order-header">
+      <a class="back" href="#/masalar">← Masalar</a>
+      <div class="page-title" style="margin:0;">${esc(table.name)}</div>
+      <div style="width:70px;"></div>
+    </div>
+
+    <div class="cat-tabs">
+      ${STATE.menu.map(c=>`<button class="${c.id===activeCat.id?'active':''}" onclick="setCat('${c.id}')">${esc(c.cat)}</button>`).join('')}
+    </div>
+    <div class="item-grid">
       ${activeCat.items.map(it=>{
         const qty = CART[it.id]||0;
-        return `<div class="menu-item">
-          <div class="info">
-            <h4>${escapeHtml(it.name)}</h4>
-            <p>${escapeHtml(it.desc||'')}</p>
-            <div class="price">${money(it.price)}</div>
-            ${!it.available?'<div class="unavailable-tag">Tükendi</div>':''}
-          </div>
-          ${it.available ? `<div class="qty-ctrl">
-            <button onclick="cartChange('${it.id}',-1)">−</button>
-            <div class="n">${qty}</div>
-            <button onclick="cartChange('${it.id}',1)">+</button>
-          </div>` : ''}
-        </div>`;
+        return `<button class="item-tile ${it.available?'':'sold-out'}" ${it.available?`onclick="cartAdd('${it.id}')"`:'disabled'}>
+          ${qty>0?`<div class="badge-qty">${qty}</div>`:''}
+          <div class="nm">${esc(it.name)}</div>
+          <div class="pr">${money(it.price)}</div>
+        </button>`;
       }).join('')}
     </div>
 
-    ${openOrders.length ? `<div class="order-history">
-      <h3>Masanızdaki Siparişler</h3>
-      ${openOrders.map(o=>`<div class="order-ticket">
-        ${o.items.map(it=>`<div class="row"><span>${it.qty}× ${escapeHtml(it.name)}</span><span>${money(it.price*it.qty)}</span></div>`).join('')}
-        <div style="margin-top:6px;"><span class="status-pill status-${o.status}">${statusLabel(o.status)}</span></div>
-      </div>`).join('')}
-      <div style="text-align:right;font-weight:700;padding-top:4px;">Toplam: ${money(tableTotal(table.id))}</div>
-      <button class="btn ghost block" style="margin-top:10px;" ${billRequested?'disabled':''} onclick="requestBill('${table.id}')">
-        ${billRequested ? 'Hesap isteğiniz iletildi ✓' : 'Hesabı İstiyorum'}
-      </button>
-    </div>` : ''}
-  </div>
+    ${cartCount>0 ? `
+      <div class="section-label">Sepet (gönderilmedi)</div>
+      <div class="adisyon-list">
+        ${Object.entries(CART).map(([id,qty])=>{
+          const it = findItem(id);
+          return `<div class="adisyon-row">
+            <div><div class="nm">${esc(it.name)}</div><div class="meta">${money(it.price)} adet</div></div>
+            <div style="display:flex;align-items:center;gap:10px;">
+              <button class="btn ghost sm" onclick="cartAdd('${id}',-1)">−</button>
+              <b>${qty}</b>
+              <button class="btn ghost sm" onclick="cartAdd('${id}',1)">+</button>
+            </div>
+          </div>`;
+        }).join('')}
+      </div>
+    ` : ''}
 
-  ${cartCount>0 ? `<div class="cart-bar">
-    <div><div class="total serif">${money(cartTotal)}</div><div class="sub">${cartCount} ürün sepette</div></div>
-    <button class="btn amber" onclick="submitOrder('${table.id}')">Siparişi Gönder</button>
-  </div>` : ''}
+    ${existing.length ? `
+      <div class="section-label">Bu Masadaki Adisyon</div>
+      <div class="adisyon-list">
+        ${existing.map(o=>o.items.map(it=>`<div class="adisyon-row">
+            <div><div class="nm">${it.qty}× ${esc(it.name)}</div><div class="meta">${esc(findStaff(o.staffId)?.name||'')} · <span class="status-pill status-${o.status}">${statusLabel(o.status)}</span></div></div>
+            <div>${money(it.price*it.qty)}</div>
+          </div>`).join('')).join('')}
+      </div>
+      <div class="grand-total-bar"><span>Toplam</span><span>${money(total)}</span></div>
+      <div style="display:flex; gap:10px;">
+        <button class="btn ghost block" onclick="location.hash='/masalar'">Masalara Dön</button>
+        <button class="btn danger block" ${canClose?'':'disabled'} onclick="closeBill('${tableId}')">Adisyonu Kapat</button>
+        ${canClose?'':'<div class="page-sub" style="margin-top:6px;">Adisyonu sadece kasiyer veya yönetici kapatabilir.</div>'}
+      </div>
+    ` : (cartCount===0 ? `<p class="empty-note">Bu masada henüz sipariş yok. Ürünlere dokunarak sepete ekleyin.</p>` : '')}
+
+    ${cartCount>0 ? `<div class="cart-dock">
+      <div><div class="total">${money(cartTotal)}</div><div class="sub">${cartCount} ürün</div></div>
+      <button class="btn" style="background:#fff;color:var(--navy);" onclick="sendOrder('${tableId}')">Mutfağa Gönder</button>
+    </div>` : ''}
   `;
 }
-function statusLabel(s){
-  return {yeni:'Alındı', hazirlaniyor:'Hazırlanıyor', hazir:'Hazır', servis:'Servis Edildi'}[s] || s;
-}
-function setCat(id){ CUR_CAT = id; render(); }
-function cartChange(itemId, delta){
+function setCat(id){ CUR_CAT=id; render(); }
+function cartAdd(itemId, delta){
+  delta = delta===undefined ? 1 : delta;
   const cur = CART[itemId]||0;
   const next = Math.max(0, cur+delta);
   if(next===0) delete CART[itemId]; else CART[itemId]=next;
   render();
 }
-async function submitOrder(tableId){
-  const items = Object.entries(CART).map(([id,qty])=>{
-    const it = findItem(id);
-    return {id, name:it.name, price:it.price, qty};
-  });
+async function sendOrder(tableId){
+  const session = getSession();
+  const items = Object.entries(CART).map(([id,qty])=>{ const it=findItem(id); return {id,name:it.name,price:it.price,qty}; });
   if(!items.length) return;
-  const order = { id:genId('o'), tableId, items, status:'yeni', createdAt:Date.now() };
+  const order = { id:genId('o'), tableId, items, status:'yeni', staffId:session.staffId, createdAt:Date.now() };
   STATE.orders.push(order);
-  await sSet('seyir:orders', STATE.orders);
+  if(!STATE.assign[tableId]) STATE.assign[tableId] = session.staffId;
+  await Promise.all([ sSet('seyir:orders', STATE.orders), sSet('seyir:assign', STATE.assign) ]);
   CART = {};
-  showToast('Siparişiniz mutfağa iletildi ✓');
-  render();
-}
-async function requestBill(tableId){
-  STATE.requests[tableId] = true;
-  await sSet('seyir:requests', STATE.requests);
-  showToast('Kasaya bildirildi, birazdan gelinecek.');
-  render();
-}
-
-// ================= KASA (cashier) =================
-let KASA_OPEN_TABLE = null;
-function renderKasa(){
-  const today = new Date().toDateString();
-  const todaysBills = STATE.bills.filter(b=> new Date(b.closedAt).toDateString()===today);
-  const todaysTotal = todaysBills.reduce((s,b)=>s+b.total,0);
-
-  const body = `<div class="wrap">
-    <div class="reports-grid">
-      <div class="stat-card"><div class="num">${money(todaysTotal)}</div><div class="lbl">Bugünkü Ciro</div></div>
-      <div class="stat-card"><div class="num">${todaysBills.length}</div><div class="lbl">Kapanan Adisyon</div></div>
-      <div class="stat-card"><div class="num">${STATE.tables.filter(t=>tableStatus(t.id)!=='bos').length}</div><div class="lbl">Dolu Masa</div></div>
-    </div>
-    <h2 class="serif" style="margin-bottom:14px;">Masalar</h2>
-    <div class="tables-grid">
-      ${STATE.tables.map(t=>{
-        const st = tableStatus(t.id);
-        const total = tableTotal(t.id);
-        return `<div class="table-card ${st==='bos'?'bos':st==='istek'?'istek':'dolu'}" onclick="openTable('${t.id}')">
-          <h4>${escapeHtml(t.name)}</h4>
-          <div class="status-txt">${st==='bos'?'Boş':st==='istek'?'Hesap istendi':'Dolu'}</div>
-          ${total>0?`<div class="amt">${money(total)}</div>`:''}
-        </div>`;
-      }).join('')}
-    </div>
-  </div>`;
-
-  const modal = KASA_OPEN_TABLE ? renderKasaModal(KASA_OPEN_TABLE) : '';
-  return topbar('Kasa') + body + modal;
-}
-function openTable(id){ KASA_OPEN_TABLE = id; render(); }
-function closeModal(){ KASA_OPEN_TABLE = null; render(); }
-function renderKasaModal(tableId){
-  const table = findTable(tableId);
-  const orders = tableOpenOrders(tableId);
-  const total = tableTotal(tableId);
-  const items = allItems();
-  return `<div class="modal-bg" onclick="if(event.target===this) closeModal()">
-    <div class="modal">
-      <button class="close-x" onclick="closeModal()">✕</button>
-      <h3>${escapeHtml(table.name)}</h3>
-      <div style="font-size:12.5px;color:var(--ink-soft);margin-bottom:14px;">${STATE.requests[tableId]?'Hesap talep edildi':'Adisyon açık'}</div>
-
-      ${orders.length ? orders.map(o=>`
-        <div style="margin-bottom:6px;">
-          ${o.items.map(it=>`<div class="bill-line"><span>${it.qty}× ${escapeHtml(it.name)}</span><span>${money(it.price*it.qty)}</span></div>`).join('')}
-        </div>
-      `).join('') : '<p class="empty-note">Henüz sipariş yok.</p>'}
-
-      <div class="bill-total"><span>Toplam</span><span>${money(total)}</span></div>
-
-      <div style="margin:14px 0;">
-        <div class="add-item-row">
-          <select id="manualItemSel">
-            ${items.filter(i=>i.available).map(i=>`<option value="${i.id}">${escapeHtml(i.catName)} — ${escapeHtml(i.name)} (${money(i.price)})</option>`).join('')}
-          </select>
-          <button class="btn sm ghost" onclick="manualAdd('${tableId}')">+ Ekle</button>
-        </div>
-      </div>
-
-      <div style="display:flex; gap:10px; margin-top:16px;">
-        <button class="btn ghost" style="flex:1" onclick="clearRequest('${tableId}')" ${STATE.requests[tableId]?'':'disabled'}>İsteği Temizle</button>
-        <button class="btn rust" style="flex:1" onclick="closeBill('${tableId}')" ${orders.length?'':'disabled'}>Ödeme Al & Kapat</button>
-      </div>
-    </div>
-  </div>`;
-}
-async function manualAdd(tableId){
-  const sel = document.getElementById('manualItemSel');
-  const it = findItem(sel.value);
-  if(!it) return;
-  const order = { id:genId('o'), tableId, items:[{id:it.id,name:it.name,price:it.price,qty:1}], status:'servis', createdAt:Date.now() };
-  STATE.orders.push(order);
-  await sSet('seyir:orders', STATE.orders);
-  render();
-}
-async function clearRequest(tableId){
-  delete STATE.requests[tableId];
-  await sSet('seyir:requests', STATE.requests);
+  showToast('Sipariş mutfağa gönderildi ✓');
   render();
 }
 async function closeBill(tableId){
-  const orders = tableOpenOrders(tableId);
+  const session = getSession();
+  if(!(session.role==='kasiyer'||session.role==='yonetici')) return;
+  const orders = tableOrders(tableId);
   if(!orders.length) return;
-  const method = prompt('Ödeme yöntemi: Nakit / Kart yazın', 'Kart');
+  const method = prompt('Ödeme yöntemi: Nakit / Kart', 'Kart');
   if(method===null) return;
-  const allBillItems = [];
-  orders.forEach(o=>o.items.forEach(it=>allBillItems.push(it)));
-  const bill = { id:genId('b'), tableId, tableName:findTable(tableId).name, items:allBillItems, total:tableTotal(tableId), method: method||'Belirtilmedi', closedAt: Date.now() };
+  const bill = { id:genId('b'), tableId, tableName:findTable(tableId).name, orders, total:tableTotal(tableId), method: method||'Belirtilmedi', closedAt: Date.now() };
   STATE.bills.push(bill);
   STATE.orders = STATE.orders.filter(o=>o.tableId!==tableId);
-  delete STATE.requests[tableId];
-  await Promise.all([ sSet('seyir:bills', STATE.bills), sSet('seyir:orders', STATE.orders), sSet('seyir:requests', STATE.requests) ]);
+  delete STATE.assign[tableId];
+  await Promise.all([ sSet('seyir:bills', STATE.bills), sSet('seyir:orders', STATE.orders), sSet('seyir:assign', STATE.assign) ]);
   showToast('Adisyon kapatıldı ✓');
-  KASA_OPEN_TABLE = null;
-  render();
+  location.hash = '/masalar';
 }
 
 // ================= MUTFAK (kitchen) =================
 function renderMutfak(){
   const yeni = STATE.orders.filter(o=>o.status==='yeni').sort((a,b)=>a.createdAt-b.createdAt);
-  const hazirlaniyor = STATE.orders.filter(o=>o.status==='hazirlaniyor').sort((a,b)=>a.createdAt-b.createdAt);
-  const hazir = STATE.orders.filter(o=>o.status==='hazir').sort((a,b)=>a.createdAt-b.createdAt);
-
-  function ticket(o, nextStatus, nextLabel){
+  const haz = STATE.orders.filter(o=>o.status==='hazirlaniyor').sort((a,b)=>a.createdAt-b.createdAt);
+  const rdy = STATE.orders.filter(o=>o.status==='hazir').sort((a,b)=>a.createdAt-b.createdAt);
+  function ticket(o, cls, nextStatus, nextLabel){
     const mins = Math.max(0, Math.round((Date.now()-o.createdAt)/60000));
-    return `<div class="ticket">
-      <div class="head"><span class="tname">${escapeHtml(findTable(o.tableId)?.name || o.tableId)}</span><span class="time">${mins} dk</span></div>
-      <ul>${o.items.map(it=>`<li>${it.qty}× ${escapeHtml(it.name)}</li>`).join('')}</ul>
-      ${nextStatus ? `<button class="btn sm amber" onclick="advanceOrder('${o.id}','${nextStatus}')">${nextLabel}</button>` : ''}
+    const staff = findStaff(o.staffId);
+    return `<div class="ticket ${cls}">
+      <div class="head"><span class="tname">${esc(findTable(o.tableId)?.name||o.tableId)}</span><span class="time">${mins} dk</span></div>
+      ${staff?`<div class="waiter">${esc(staff.name)}</div>`:''}
+      <ul>${o.items.map(it=>`<li>${it.qty}× ${esc(it.name)}</li>`).join('')}</ul>
+      ${nextStatus?`<button class="btn sm" onclick="advanceOrder('${o.id}','${nextStatus}')">${nextLabel}</button>`:''}
     </div>`;
   }
-
-  return `<div class="kitchen-wrap">
-    ${topbar('Mutfak Ekranı')}
-    <div class="wrap">
-      <div class="kitchen-cols">
-        <div class="kcol"><h3>Yeni Siparişler (${yeni.length})</h3>
-          ${yeni.length? yeni.map(o=>ticket(o,'hazirlaniyor','Hazırlanıyor →')).join('') : '<p class="empty-note" style="color:#9FC2BC;">Bekleyen yok</p>'}
-        </div>
-        <div class="kcol"><h3>Hazırlanıyor (${hazirlaniyor.length})</h3>
-          ${hazirlaniyor.length? hazirlaniyor.map(o=>ticket(o,'hazir','Hazır →')).join('') : '<p class="empty-note" style="color:#9FC2BC;">Yok</p>'}
-        </div>
-        <div class="kcol"><h3>Hazır — Servis Bekliyor (${hazir.length})</h3>
-          ${hazir.length? hazir.map(o=>ticket(o,'servis','Servis Edildi ✓')).join('') : '<p class="empty-note" style="color:#9FC2BC;">Yok</p>'}
-        </div>
+  return `
+    <div class="page-title">Mutfak Ekranı</div>
+    <div class="page-sub">Siparişler otomatik olarak günceller.</div>
+    <div class="kitchen-cols">
+      <div class="kcol"><div class="kcol-head"><b>Yeni</b><span class="count">${yeni.length}</span></div>
+        ${yeni.length?yeni.map(o=>ticket(o,'','hazirlaniyor','Hazırlanıyor →')).join(''):'<p class="empty-note">Bekleyen yok</p>'}
+      </div>
+      <div class="kcol"><div class="kcol-head"><b>Hazırlanıyor</b><span class="count">${haz.length}</span></div>
+        ${haz.length?haz.map(o=>ticket(o,'warn','hazir','Hazır →')).join(''):'<p class="empty-note">Yok</p>'}
+      </div>
+      <div class="kcol"><div class="kcol-head"><b>Hazır</b><span class="count">${rdy.length}</span></div>
+        ${rdy.length?rdy.map(o=>ticket(o,'ready','servis','Servis Edildi ✓')).join(''):'<p class="empty-note">Yok</p>'}
       </div>
     </div>
-  </div>`;
+  `;
 }
 async function advanceOrder(orderId, nextStatus){
-  const o = STATE.orders.find(x=>x.id===orderId);
-  if(!o) return;
+  const o = STATE.orders.find(x=>x.id===orderId); if(!o) return;
   o.status = nextStatus;
   await sSet('seyir:orders', STATE.orders);
   render();
 }
 
-// ================= ADMIN =================
-let ADMIN_TAB = 'menu';
-function renderAdmin(){
-  const tabs = [['menu','Menü'],['tables','Masalar'],['reports','Raporlar']];
-  let body = '';
-  if(ADMIN_TAB==='menu') body = renderAdminMenu();
-  else if(ADMIN_TAB==='tables') body = renderAdminTables();
-  else body = renderAdminReports();
+// ================= RAPOR =================
+function renderRapor(){
+  const today = new Date().toDateString();
+  const todaysBills = STATE.bills.filter(b=>new Date(b.closedAt).toDateString()===today);
+  const todaysTotal = todaysBills.reduce((s,b)=>s+b.total,0);
+  const allTotal = STATE.bills.reduce((s,b)=>s+b.total,0);
 
-  return topbar('Yönetim Paneli') + `<div class="wrap">
-    <div class="admin-tabs">
-      ${tabs.map(([id,lbl])=>`<button class="${ADMIN_TAB===id?'active':''}" onclick="setAdminTab('${id}')">${lbl}</button>`).join('')}
+  const byDay = {};
+  STATE.bills.forEach(b=>{ const d=new Date(b.closedAt).toLocaleDateString('tr-TR'); byDay[d]=(byDay[d]||0)+b.total; });
+
+  const byItem = {};
+  STATE.bills.forEach(b=>b.orders.forEach(o=>o.items.forEach(it=>{ byItem[it.name]=(byItem[it.name]||0)+it.qty; })));
+  const topItems = Object.entries(byItem).sort((a,b)=>b[1]-a[1]).slice(0,6);
+
+  const byStaff = {};
+  STATE.bills.forEach(b=>b.orders.forEach(o=>{
+    const nm = findStaff(o.staffId)?.name || 'Bilinmiyor';
+    const sum = o.items.reduce((s,it)=>s+it.price*it.qty,0);
+    byStaff[nm] = (byStaff[nm]||0)+sum;
+  }));
+
+  return `
+    <div class="page-title">Raporlar</div>
+    <div class="page-sub">Kapanan adisyonlara göre.</div>
+    <div class="stat-grid">
+      <div class="stat-card"><div class="num">${money(todaysTotal)}</div><div class="lbl">Bugünkü Ciro</div></div>
+      <div class="stat-card"><div class="num">${todaysBills.length}</div><div class="lbl">Bugün Kapanan Adisyon</div></div>
+      <div class="stat-card"><div class="num">${money(allTotal)}</div><div class="lbl">Toplam Ciro</div></div>
     </div>
-    ${body}
-  </div>`;
+    <div class="section-label">Günlere Göre Ciro</div>
+    <div class="table-list">
+      ${Object.keys(byDay).length? Object.entries(byDay).reverse().map(([d,t])=>`<div class="r"><span>${d}</span><b>${money(t)}</b></div>`).join('') : '<div class="r"><span>Henüz veri yok</span></div>'}
+    </div>
+    <div class="section-label">En Çok Satan Ürünler</div>
+    <div class="table-list">
+      ${topItems.length? topItems.map(([n,q])=>`<div class="r"><span>${esc(n)}</span><b>${q} adet</b></div>`).join('') : '<div class="r"><span>Veri yok</span></div>'}
+    </div>
+    <div class="section-label">Garson Bazlı Ciro</div>
+    <div class="table-list">
+      ${Object.keys(byStaff).length? Object.entries(byStaff).sort((a,b)=>b[1]-a[1]).map(([n,t])=>`<div class="r"><span>${esc(n)}</span><b>${money(t)}</b></div>`).join('') : '<div class="r"><span>Veri yok</span></div>'}
+    </div>
+  `;
 }
-function setAdminTab(id){ ADMIN_TAB = id; render(); }
+
+// ================= ADMIN =================
+function renderAdmin(){
+  const tabs = [['menu','Menü'],['tables','Masalar'],['staff','Personel']];
+  let body = ADMIN_TAB==='menu' ? renderAdminMenu() : ADMIN_TAB==='tables' ? renderAdminTables() : renderAdminStaff();
+  return `
+    <div class="page-title">Yönetim</div>
+    <div class="admin-tabs">${tabs.map(([id,l])=>`<button class="${ADMIN_TAB===id?'active':''}" onclick="setAdminTab('${id}')">${l}</button>`).join('')}</div>
+    ${body}
+  `;
+}
+function setAdminTab(id){ ADMIN_TAB=id; render(); }
 
 function renderAdminMenu(){
   return STATE.menu.map(cat=>`
     <div style="margin-bottom:22px;">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
-        <h3 style="margin:0;">${escapeHtml(cat.cat)}</h3>
-        <button class="btn sm ghost" onclick="deleteCategory('${cat.id}')">Kategoriyi Sil</button>
+        <h3 style="margin:0;font-size:15px;">${esc(cat.cat)}</h3>
+        <button class="btn ghost sm" onclick="deleteCategory('${cat.id}')">Kategoriyi Sil</button>
       </div>
       ${cat.items.map(it=>`
         <div class="item-row">
-          <div class="nm">${escapeHtml(it.name)}</div>
+          <div class="nm">${esc(it.name)}</div>
           <input class="pr" type="number" value="${it.price}" onchange="updateItemPrice('${cat.id}','${it.id}',this.value)">
           <label class="toggle"><input type="checkbox" ${it.available?'checked':''} onchange="toggleAvailable('${cat.id}','${it.id}')"> Mevcut</label>
-          <button class="btn sm ghost" onclick="deleteItem('${cat.id}','${it.id}')">Sil</button>
+          <button class="btn ghost sm" onclick="deleteItem('${cat.id}','${it.id}')">Sil</button>
         </div>
       `).join('')}
-      <div class="form-row" style="margin-top:8px;">
-        <input id="newname_${cat.id}" placeholder="Ürün adı">
-        <input id="newprice_${cat.id}" type="number" placeholder="Fiyat">
-        <input id="newdesc_${cat.id}" placeholder="Açıklama (opsiyonel)">
-        <button class="btn sm amber" onclick="addItem('${cat.id}')">+ Ürün Ekle</button>
+      <div class="form-inline">
+        <input id="nn_${cat.id}" placeholder="Ürün adı">
+        <input id="np_${cat.id}" type="number" placeholder="Fiyat">
+        <button class="btn sm" onclick="addItem('${cat.id}')">+ Ürün Ekle</button>
       </div>
     </div>
   `).join('') + `
-    <div class="form-row" style="margin-top:20px;border-top:1px solid var(--line);padding-top:16px;">
+    <div class="form-inline" style="border-top:1px solid var(--line);padding-top:16px;">
       <input id="newcatname" placeholder="Yeni kategori adı">
-      <button class="btn sm ghost" onclick="addCategory()">+ Kategori Ekle</button>
+      <button class="btn ghost sm" onclick="addCategory()">+ Kategori Ekle</button>
     </div>
   `;
 }
-async function updateItemPrice(catId,itemId,val){
-  const cat = STATE.menu.find(c=>c.id===catId); const it = cat.items.find(i=>i.id===itemId);
-  it.price = parseFloat(val)||0;
-  await sSet('seyir:menu', STATE.menu); render();
-}
-async function toggleAvailable(catId,itemId){
-  const cat = STATE.menu.find(c=>c.id===catId); const it = cat.items.find(i=>i.id===itemId);
-  it.available = !it.available;
-  await sSet('seyir:menu', STATE.menu); render();
-}
-async function deleteItem(catId,itemId){
-  const cat = STATE.menu.find(c=>c.id===catId);
-  cat.items = cat.items.filter(i=>i.id!==itemId);
-  await sSet('seyir:menu', STATE.menu); render();
-}
+async function updateItemPrice(catId,itemId,val){ const cat=STATE.menu.find(c=>c.id===catId); const it=cat.items.find(i=>i.id===itemId); it.price=parseFloat(val)||0; await sSet('seyir:menu',STATE.menu); render(); }
+async function toggleAvailable(catId,itemId){ const cat=STATE.menu.find(c=>c.id===catId); const it=cat.items.find(i=>i.id===itemId); it.available=!it.available; await sSet('seyir:menu',STATE.menu); render(); }
+async function deleteItem(catId,itemId){ const cat=STATE.menu.find(c=>c.id===catId); cat.items=cat.items.filter(i=>i.id!==itemId); await sSet('seyir:menu',STATE.menu); render(); }
 async function addItem(catId){
-  const nameEl = document.getElementById('newname_'+catId);
-  const priceEl = document.getElementById('newprice_'+catId);
-  const descEl = document.getElementById('newdesc_'+catId);
-  const name = nameEl.value.trim();
-  if(!name) return;
-  const cat = STATE.menu.find(c=>c.id===catId);
-  cat.items.push({id:genId('i'), name, price: parseFloat(priceEl.value)||0, desc: descEl.value.trim(), available:true});
-  await sSet('seyir:menu', STATE.menu); render();
+  const n=document.getElementById('nn_'+catId), p=document.getElementById('np_'+catId);
+  const name=n.value.trim(); if(!name) return;
+  STATE.menu.find(c=>c.id===catId).items.push({id:genId('i'), name, price:parseFloat(p.value)||0, desc:'', available:true});
+  await sSet('seyir:menu',STATE.menu); render();
 }
-async function deleteCategory(catId){
-  STATE.menu = STATE.menu.filter(c=>c.id!==catId);
-  await sSet('seyir:menu', STATE.menu); render();
-}
+async function deleteCategory(catId){ STATE.menu=STATE.menu.filter(c=>c.id!==catId); await sSet('seyir:menu',STATE.menu); render(); }
 async function addCategory(){
-  const el = document.getElementById('newcatname');
-  const name = el.value.trim();
-  if(!name) return;
-  STATE.menu.push({id:genId('c'), cat:name, items:[]});
-  await sSet('seyir:menu', STATE.menu); render();
+  const el=document.getElementById('newcatname'); const name=el.value.trim(); if(!name) return;
+  STATE.menu.push({id:genId('c'), cat:name, items:[]}); await sSet('seyir:menu',STATE.menu); render();
 }
 
 function renderAdminTables(){
   return `
     ${STATE.tables.map(t=>`
       <div class="item-row">
-        <div class="nm">${escapeHtml(t.name)}</div>
-        <div style="font-size:12px;color:var(--ink-soft);">Link: #/menu?masa=${t.id}</div>
-        <button class="btn sm ghost" onclick="deleteTable('${t.id}')">Sil</button>
+        <div class="nm">${esc(t.name)}</div>
+        <div style="font-size:11.5px;color:var(--ink-soft);">masa=${t.id}</div>
+        <button class="btn ghost sm" onclick="deleteTable('${t.id}')">Sil</button>
       </div>
     `).join('')}
-    <div class="form-row" style="margin-top:14px;">
+    <div class="form-inline">
       <input id="newtablename" placeholder="Yeni masa / bölge adı">
-      <button class="btn sm amber" onclick="addTable()">+ Masa Ekle</button>
+      <button class="btn sm" onclick="addTable()">+ Masa Ekle</button>
     </div>
-    <p style="font-size:12.5px;color:var(--ink-soft);margin-top:16px;">
-      Bu uygulamayı kendi web adresinizde (veya sabit bir linkte) yayınlarsanız, her masanın linkinden
-      (örn. sizin-adresiniz.com/#/menu?masa=t1) bir QR kod oluşturup masaya yapıştırabilirsiniz.
-    </p>
   `;
 }
-async function addTable(){
-  const el = document.getElementById('newtablename');
-  const name = el.value.trim();
-  if(!name) return;
-  STATE.tables.push({id:genId('t'), name});
-  await sSet('seyir:tables', STATE.tables); render();
-}
-async function deleteTable(id){
-  if(tableOpenOrders(id).length){ alert('Bu masada açık sipariş var, önce kasadan kapatın.'); return; }
-  STATE.tables = STATE.tables.filter(t=>t.id!==id);
-  await sSet('seyir:tables', STATE.tables); render();
-}
+async function addTable(){ const el=document.getElementById('newtablename'); const name=el.value.trim(); if(!name) return; STATE.tables.push({id:genId('t'),name}); await sSet('seyir:tables',STATE.tables); render(); }
+async function deleteTable(id){ if(tableOrders(id).length){ alert('Bu masada açık sipariş var, önce kapatın.'); return; } STATE.tables=STATE.tables.filter(t=>t.id!==id); await sSet('seyir:tables',STATE.tables); render(); }
 
-function renderAdminReports(){
-  const byDay = {};
-  STATE.bills.forEach(b=>{
-    const d = new Date(b.closedAt).toLocaleDateString('tr-TR');
-    byDay[d] = (byDay[d]||0) + b.total;
-  });
-  const itemCounts = {};
-  STATE.bills.forEach(b=> b.items.forEach(it=>{ itemCounts[it.name] = (itemCounts[it.name]||0) + it.qty; }));
-  const topItems = Object.entries(itemCounts).sort((a,b)=>b[1]-a[1]).slice(0,6);
-  const totalAllTime = STATE.bills.reduce((s,b)=>s+b.total,0);
-
+function renderAdminStaff(){
   return `
-    <div class="reports-grid">
-      <div class="stat-card"><div class="num">${money(totalAllTime)}</div><div class="lbl">Toplam Ciro</div></div>
-      <div class="stat-card"><div class="num">${STATE.bills.length}</div><div class="lbl">Kapanan Adisyon</div></div>
+    ${STATE.staff.map(s=>`
+      <div class="item-row">
+        <div class="nm">${esc(s.name)}</div>
+        <select onchange="updateStaffRole('${s.id}',this.value)">
+          ${['yonetici','kasiyer','garson','mutfak'].map(r=>`<option value="${r}" ${s.role===r?'selected':''}>${ROLE_LABEL[r]}</option>`).join('')}
+        </select>
+        <input class="pr" style="width:64px;" value="${esc(s.pin)}" maxlength="4" onchange="updateStaffPin('${s.id}',this.value)">
+        <button class="btn ghost sm" onclick="deleteStaff('${s.id}')">Sil</button>
+      </div>
+    `).join('')}
+    <div class="form-inline">
+      <input id="newstaffname" placeholder="Ad Soyad">
+      <select id="newstaffrole">${['yonetici','kasiyer','garson','mutfak'].map(r=>`<option value="${r}">${ROLE_LABEL[r]}</option>`).join('')}</select>
+      <input id="newstaffpin" placeholder="4 haneli PIN" maxlength="4">
+      <button class="btn sm" onclick="addStaff()">+ Personel Ekle</button>
     </div>
-    <h3>Günlere Göre Ciro</h3>
-    ${Object.keys(byDay).length ? Object.entries(byDay).reverse().map(([d,total])=>`
-      <div class="bill-line"><span>${d}</span><span>${money(total)}</span></div>
-    `).join('') : '<p class="empty-note">Henüz kapanan adisyon yok.</p>'}
-    <h3 style="margin-top:24px;">En Çok Satan Ürünler</h3>
-    ${topItems.length ? topItems.map(([name,qty])=>`
-      <div class="bill-line"><span>${escapeHtml(name)}</span><span>${qty} adet</span></div>
-    `).join('') : '<p class="empty-note">Veri yok.</p>'}
   `;
+}
+async function updateStaffRole(id,role){ findStaff(id).role=role; await sSet('seyir:staff',STATE.staff); render(); }
+async function updateStaffPin(id,pin){ findStaff(id).pin=pin.trim(); await sSet('seyir:staff',STATE.staff); render(); }
+async function deleteStaff(id){ if(STATE.staff.length<=1) return; STATE.staff=STATE.staff.filter(s=>s.id!==id); await sSet('seyir:staff',STATE.staff); render(); }
+async function addStaff(){
+  const n=document.getElementById('newstaffname'), r=document.getElementById('newstaffrole'), p=document.getElementById('newstaffpin');
+  const name=n.value.trim(); const pin=p.value.trim();
+  if(!name || pin.length!==4){ alert('Ad ve 4 haneli PIN girin.'); return; }
+  if(STATE.staff.some(s=>s.pin===pin)){ alert('Bu PIN başka bir personelde kullanılıyor.'); return; }
+  STATE.staff.push({id:genId('s'), name, role:r.value, pin});
+  await sSet('seyir:staff',STATE.staff); render();
+}
+
+// ================= PUBLIC MENU (view-only, no login) =================
+function renderPublicMenu(){
+  return `<div class="appbar"><div class="brand"><div class="mark">S</div><div class="txt">${CAFE_NAME}</div></div></div>
+  <div class="content"><div class="public-menu">
+    <div class="page-title">Menü</div>
+    <div class="page-sub">Siparişinizi masanıza gelen personelimize iletebilirsiniz.</div>
+    ${STATE.menu.map(cat=>`
+      <div class="public-cat">
+        <h3>${esc(cat.cat)}</h3>
+        ${cat.items.filter(i=>i.available).map(it=>`
+          <div class="public-item">
+            <div><div class="nm">${esc(it.name)}</div>${it.desc?`<div class="ds">${esc(it.desc)}</div>`:''}</div>
+            <div class="pr">${money(it.price)}</div>
+          </div>
+        `).join('')}
+      </div>
+    `).join('')}
+  </div></div>`;
 }
 </script>
 </body>
