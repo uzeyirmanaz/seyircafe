@@ -384,6 +384,17 @@ try{
 // 3) localStorage (hiçbiri yoksa — sadece bu tarayıcıda kalıcı olur, ama en
 //    azından "sayfa yenileyince sıfırlanma" hatası bir daha yaşanmaz).
 const HAS_CLOUD_STORAGE = (typeof window!=='undefined' && window.storage && typeof window.storage.get==='function' && typeof window.storage.set==='function');
+// ---------- yazma-yarışı (write race) koruması ----------
+// Sorun: 2 sn'de bir çalışan yoklama (poll) döngüsü, tam bir "Kaydet" işlemiyle
+// aynı ana denk gelirse, henüz depoya işlenmekte olan ESKİ veriyi okuyup az önce
+// kaydedilen YENİ veriyi (örn. Wi-Fi şifresi, sosyal medya kullanıcı adı) ekrandan
+// ve state'ten SİLEREK üzerine yazabiliyordu — "kaydettim ama yenileyince eski
+// haline döndü" hatasının gerçek kaynağı buydu. Çözüm: bir anahtar için yazma
+// işlemi sürerken, o anahtarı yoklama sonucu ile GÜNCELLEMİYORUZ (mevcut,
+// güncel state korunuyor); yazma tamamlanıp bir sonraki yoklama turuna kadar
+// güvenli bir tampon süre geçtikten sonra tekrar dış kaynaktan senkronize oluyoruz.
+const PENDING_WRITE_KEYS = new Set();
+function isKeyPending(key){ return PENDING_WRITE_KEYS.has(key); }
 async function sGet(key, fallback){
   try{
     if(HAS_CLOUD_STORAGE){
@@ -402,6 +413,7 @@ async function sGet(key, fallback){
   }catch(e){ return fallback; }
 }
 async function sSet(key, value){
+  PENDING_WRITE_KEYS.add(key);
   try{
     if(HAS_CLOUD_STORAGE){
       await window.storage.set(key, JSON.stringify(value), true);
@@ -412,7 +424,14 @@ async function sSet(key, value){
       return;
     }
     localStorage.setItem(key, JSON.stringify(value));
-  }catch(e){ console.error('storage set failed', key, e); }
+  }catch(e){
+    console.error('storage set failed', key, e);
+    showToast('Kaydetme sırasında bir hata oluştu, tekrar deneyin.');
+  }finally{
+    // Yazma bitti; olası bir sonraki poll'un artık güncel veriyi görmesi için
+    // kısa bir tampondan sonra "beklemede" işaretini kaldır.
+    setTimeout(()=>PENDING_WRITE_KEYS.delete(key), 2500);
+  }
 }
 function genId(p){ return p + '_' + Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
 function money(n){ return (Math.round(n*100)/100).toLocaleString('tr-TR',{minimumFractionDigits:2, maximumFractionDigits:2}) + ' ₺'; }
@@ -511,6 +530,13 @@ let CUST_CAT = null;
 let MASALAR_ZONE = 'all';
 let RAPOR_START = null; // Rapor ekranı tarih filtresi (YYYY-MM-DD) — null = tüm zamanlar
 let RAPOR_END = null;
+// Giderler formu: girilen değerler artık sadece DOM'da değil, bu nesnede de
+// tutuluyor. Önceden inputlar "kontrolsüz" (uncontrolled) olduğu için, tutar
+// alanına geçerken tetiklenen arka plan render()'ı (bkz. focusout dinleyicisi
+// ve periyodik senkronizasyon) açıklama alanını BOŞ olarak yeniden çiziyor ve
+// kullanıcının yazdığı metin siliniyordu. Artık her tuş vuruşu bu state'e
+// yazılıyor ve render() bu state'ten okuyup input'ları dolu basıyor.
+let EXPENSE_FORM = { desc:'', amount:'' };
 let RAPOR_YEAR = null; // Rapor > Tarih Seç modalında gösterilen yıl
 let MODAL = null; // {type:'qr'|'closeBill'|'cariDetail'|'cariPay'|'moveItem'|'moveTable'|'approveOrder'|'activeTables'|'raporFilter', ...}
 
@@ -529,25 +555,42 @@ async function loadState(){
     sGet('seyir:readyAlerts', []), sGet('seyir:tableCustomLabels', {}), sGet('seyir:kasa', null),
   ]);
   const writes = [];
-  STATE.menu = menu; if(!STATE.menu){ STATE.menu = DEFAULT_MENU; writes.push(sSet('seyir:menu',STATE.menu)); }
-  STATE.tables = tables; if(!STATE.tables){ STATE.tables = DEFAULT_TABLES; writes.push(sSet('seyir:tables',STATE.tables)); }
-  STATE.staff = staff; if(!STATE.staff){ STATE.staff = DEFAULT_STAFF; writes.push(sSet('seyir:staff',STATE.staff)); }
-  STATE.zones = (zones && zones.length) ? zones : DEFAULT_ZONES.slice();
-  if(!zones || !zones.length){ writes.push(sSet('seyir:zones', STATE.zones)); }
-  STATE.orders = orders || [];
-  STATE.bills = bills || [];
-  STATE.assign = assign || {};
-  STATE.cari = cari || [];
-  STATE.settings = Object.assign({}, DEFAULT_SETTINGS, settings || {});
-  if(!settings){ writes.push(sSet('seyir:settings', STATE.settings)); }
-  STATE.stations = (stations && stations.length) ? stations : DEFAULT_STATIONS.map(s=>Object.assign({},s));
-  if(!stations || !stations.length){ writes.push(sSet('seyir:stations', STATE.stations)); }
-  STATE.catStation = catStation || {};
-  STATE.expenses = expenses || [];
-  STATE.readyAlerts = readyAlerts || [];
-  STATE.tableCustomLabels = tableCustomLabels || {};
-  STATE.kasa = kasa || { manualCloseAt: null };
-  if(!kasa){ writes.push(sSet('seyir:kasa', STATE.kasa)); }
+  // NOT: bir anahtar için o an bir yazma (Kaydet) işlemi sürüyorsa, bu yoklamadan
+  // gelen (henüz eski olabilecek) veriyle STATE'i EZMİYORUZ — aksi halde az önce
+  // kaydedilen değişiklik (örn. şifre/sosyal medya) anında sıfırlanabilirdi.
+  if(!isKeyPending('seyir:menu')){
+    STATE.menu = menu; if(!STATE.menu){ STATE.menu = DEFAULT_MENU; writes.push(sSet('seyir:menu',STATE.menu)); }
+  }
+  if(!isKeyPending('seyir:tables')){
+    STATE.tables = tables; if(!STATE.tables){ STATE.tables = DEFAULT_TABLES; writes.push(sSet('seyir:tables',STATE.tables)); }
+  }
+  if(!isKeyPending('seyir:staff')){
+    STATE.staff = staff; if(!STATE.staff){ STATE.staff = DEFAULT_STAFF; writes.push(sSet('seyir:staff',STATE.staff)); }
+  }
+  if(!isKeyPending('seyir:zones')){
+    STATE.zones = (zones && zones.length) ? zones : DEFAULT_ZONES.slice();
+    if(!zones || !zones.length){ writes.push(sSet('seyir:zones', STATE.zones)); }
+  }
+  if(!isKeyPending('seyir:orders')) STATE.orders = orders || [];
+  if(!isKeyPending('seyir:bills')) STATE.bills = bills || [];
+  if(!isKeyPending('seyir:assign')) STATE.assign = assign || {};
+  if(!isKeyPending('seyir:cari')) STATE.cari = cari || [];
+  if(!isKeyPending('seyir:settings')){
+    STATE.settings = Object.assign({}, DEFAULT_SETTINGS, settings || {});
+    if(!settings){ writes.push(sSet('seyir:settings', STATE.settings)); }
+  }
+  if(!isKeyPending('seyir:stations')){
+    STATE.stations = (stations && stations.length) ? stations : DEFAULT_STATIONS.map(s=>Object.assign({},s));
+    if(!stations || !stations.length){ writes.push(sSet('seyir:stations', STATE.stations)); }
+  }
+  if(!isKeyPending('seyir:catStation')) STATE.catStation = catStation || {};
+  if(!isKeyPending('seyir:expenses')) STATE.expenses = expenses || [];
+  if(!isKeyPending('seyir:readyAlerts')) STATE.readyAlerts = readyAlerts || [];
+  if(!isKeyPending('seyir:tableCustomLabels')) STATE.tableCustomLabels = tableCustomLabels || {};
+  if(!isKeyPending('seyir:kasa')){
+    STATE.kasa = kasa || { manualCloseAt: null };
+    if(!kasa){ writes.push(sSet('seyir:kasa', STATE.kasa)); }
+  }
 
   // normalize records coming from older saved data so new fields always exist
   STATE.menu.forEach(cat=>cat.items.forEach(it=>{
@@ -733,7 +776,9 @@ const SYNC_KEY_TO_FIELD = {
 function setupRealtimeSync(){
   if(!FIREBASE_READY) return;
   Object.keys(SYNC_KEY_TO_FIELD).forEach(key=>{
+    if(isKeyPending(key)) return; // az önce biz yazdıysak, dinleyicinin geri döndürdüğü eski önbellek anlık görüntüsüyle ezme
     FIREBASE_DB.collection('seyir_data').doc(key).onSnapshot(snap=>{
+      if(isKeyPending(key)) return;
       if(!snap.exists || !snap.data()) return;
       try{
         const val = JSON.parse(snap.data().v);
@@ -744,6 +789,35 @@ function setupRealtimeSync(){
     }, err => console.error('Firestore dinleyici hatası', key, err));
   });
 }
+
+// ---------- her cihaz/rol (garson/kasa/mutfak/yönetici) canlı kalsın ----------
+// Mobil tarayıcılar (özellikle iOS Safari) ekran kilitlenince veya sekme arka
+// plana alınınca setInterval'i YAVAŞLATIR/DURDURUR — bu yüzden "garson sipariş
+// gönderdi ama mutfak ekranı görmedi" şikayetlerinin gerçek sebebi genelde
+// mutfak tabletinin ekranı kararmış/arka planda kalmış olmasıdır. Ekran/sekme
+// tekrar öne geldiği, cihaz internete yeniden bağlandığı veya pencere odağı
+// geri geldiği ANDA (2 sn'lik döngüyü beklemeden) zorla bir senkronizasyon
+// turu tetikleyerek bu rolü/cihazı anında güncel veriyle hizalıyoruz.
+async function forceSyncNow(){
+  if(!STATE.loaded) return;
+  try{
+    await loadState();
+    const snap = snapshotState();
+    if(snap!==LAST_STATE_SNAPSHOT){
+      LAST_STATE_SNAPSHOT = snap;
+      if(!isTypingInApp()) render();
+    }
+  }catch(e){ console.error('zorla senkronizasyon hatası', e); }
+}
+document.addEventListener('visibilitychange', function(){ if(document.visibilityState==='visible') forceSyncNow(); });
+window.addEventListener('focus', forceSyncNow);
+window.addEventListener('online', forceSyncNow);
+// Aynı cihaz/tarayıcıda birden fazla sekme açıksa (örn. kasiyer bilgisayarında
+// yönetim + masalar aynı anda açık), localStorage moduna düşülmüş olsa bile
+// diğer sekmedeki değişiklik 'storage' olayıyla ANINDA yansır (2 sn beklemeden).
+window.addEventListener('storage', function(e){
+  if(e.key && e.key.indexOf('seyir:')===0) forceSyncNow();
+});
 
 // ---------- odak (focus) koruma: arka planda gelen veri yenilemeleri klavyeyi kapatmasın ----------
 function isTypingInApp(){
@@ -788,7 +862,7 @@ async function boot(){
       LAST_STATE_SNAPSHOT = snap;
       if(isTypingInApp()) return; // yazma bitince focusout dinleyicisi zaten tazeleyecek
       render();
-    }, 2000);
+    }, 1200);
   }
 }
 boot();
@@ -854,6 +928,7 @@ function render(){
       }
     }
   }
+  if(path==='/login'){ focusPinInputIfPresent(); }
 }
 
 function shell(session, activePath, bodyHtml){
@@ -970,6 +1045,21 @@ function renderLogin(){
     <p>Devam etmek için personel PIN kodunuzu girin</p>
     <div class="pin-dots">${dots}</div>
     <div class="login-error">${LOGIN_ERR}</div>
+    <!-- Görsel olarak gizli ama gerçek/odaklanabilir şifre alanı: autofocus
+         sayesinde ekran açılır açılmaz mobil cihazın sayısal klavyesi otomatik
+         tetiklenir; kullanıcı isterse fiziksel/mobil klavyeyle, isterse aşağıdaki
+         dokunmatik tuş takımıyla PIN girebilir. -->
+    <input
+      id="pinHiddenInput"
+      type="password"
+      inputmode="numeric"
+      pattern="[0-9]*"
+      autocomplete="off"
+      maxlength="4"
+      value="${esc(PIN_BUF)}"
+      autofocus
+      oninput="handlePinTyped(this)"
+      style="position:absolute;opacity:0;height:1px;width:1px;padding:0;margin:0;border:0;pointer-events:none;">
     <div class="pinpad">
       ${[1,2,3,4,5,6,7,8,9].map(n=>`<button onclick="pinPress('${n}')">${n}</button>`).join('')}
       <button class="wide" onclick="pinClear()">Temizle</button>
@@ -977,6 +1067,21 @@ function renderLogin(){
       <button class="wide" onclick="pinBack()">⌫</button>
     </div>
   </div></div>`;
+}
+// Şifre (PIN) alanına her render sonrası odağı geri ver — böylece klavye açık
+// kalır ve ekran her güncellendiğinde (örn. yanlış PIN sonrası) tekrar tetiklenir.
+function focusPinInputIfPresent(){
+  const el = document.getElementById('pinHiddenInput');
+  if(el && document.activeElement!==el){
+    try{ el.focus({preventScroll:true}); }catch(e){ el.focus(); }
+  }
+}
+function handlePinTyped(el){
+  const digits = (el.value||'').replace(/\D/g,'').slice(0,4);
+  el.value = digits;
+  PIN_BUF = digits; LOGIN_ERR='';
+  if(PIN_BUF.length===4){ tryLogin(); return; }
+  render();
 }
 function pinPress(d){
   if(PIN_BUF.length>=4) return;
@@ -1262,10 +1367,12 @@ async function sendOrder(tableId){
   if(!items.length) return;
   let wentNegative = false;
   items.forEach(oi=>{ const it=findItem(oi.id); if(it && it.trackStock){ it.stock = it.stock - oi.qty; if(it.stock<0) wentNegative = true; } });
-  // Garsonun girdiği sipariş de, müşteri QR siparişi gibi, doğrudan mutfağa düşmez —
-  // önce saha ekibi (kasiyer/yönetici/garson) onaylamalıdır (bkz. approveOrderModalHtml).
-  // Böylece siparişin gerçekten hazırlanacağı teyit edilmiş olur.
-  const order = { id:genId('o'), tableId, items, status:'yeni', staffId:session.staffId, source:'staff', createdAt:Date.now() };
+  // Personelin (garson/kasiyer/yönetici) girdiği sipariş artık saha onayı
+  // beklemiyor — direkt "hazirlaniyor" statüsüyle oluşturulup anında mutfağa
+  // düşer (otomatik onaylanmış sayılır). Onay adımı sadece müşteri QR
+  // siparişlerinde (bkz. renderMusteriSiparis / source:'musteri') kalmaya
+  // devam ediyor.
+  const order = { id:genId('o'), tableId, items, status:'hazirlaniyor', staffId:session.staffId, source:'staff', createdAt:Date.now() };
   STATE.orders.push(order);
   if(!STATE.assign[tableId]) STATE.assign[tableId] = session.staffId;
   await Promise.all([ sSet('seyir:orders', STATE.orders), sSet('seyir:assign', STATE.assign), sSet('seyir:menu', STATE.menu) ]);
@@ -1273,7 +1380,7 @@ async function sendOrder(tableId){
   CART_NOTES = {};
   saveCart();
   saveCartNotes();
-  showToast(wentNegative ? 'Sipariş gönderildi (onay bekliyor) — bazı ürünler stokta eksiye düştü' : 'Sipariş gönderildi, saha onayı bekleniyor ✓');
+  showToast(wentNegative ? 'Sipariş mutfağa gönderildi (bazı ürünler stokta eksiye düştü)' : 'Sipariş mutfağa gönderildi ✓');
   render();
 }
 
@@ -1735,7 +1842,26 @@ function raporFilterModalHtml(){
       <button class="btn ghost sm" onclick="raporToday(); closeModal();">Bugün</button>
       <button class="btn ghost sm" onclick="raporAllTime(); closeModal();">Tüm Zamanlar</button>
     </div>
+
+    <div class="section-label" style="margin-top:20px;">Tarih Aralığı Seçimi</div>
+    <p class="page-sub" style="margin-top:-6px;">Başlangıç ve bitiş tarihini birebir seçerek özel bir aralık uygulayın.</p>
+    <div class="form-inline" style="align-items:center;">
+      <input type="date" id="rapor_range_start" value="${esc(RAPOR_START||'')}">
+      <span style="color:var(--ink-faint);">—</span>
+      <input type="date" id="rapor_range_end" value="${esc(RAPOR_END||'')}">
+      <button class="btn sm" onclick="applyRaporCustomRange()">Uygula</button>
+    </div>
   `;
+}
+function applyRaporCustomRange(){
+  const sEl = document.getElementById('rapor_range_start');
+  const eEl = document.getElementById('rapor_range_end');
+  const start = sEl.value || null;
+  const end = eEl.value || null;
+  if(!start && !end){ alert('Lütfen en az bir tarih seçin.'); return; }
+  if(start && end && start>end){ alert('Başlangıç tarihi, bitiş tarihinden sonra olamaz.'); return; }
+  setRaporRange(start, end);
+  closeModal();
 }
 
 function expensesInRange(start,end){
@@ -1920,8 +2046,8 @@ function renderGiderler(){
     <div class="page-title">Giderler</div>
     <div class="page-sub">Gün içinde yapılan harcamaları buradan girin. Girilen tutarlar Rapor ekranında ciro tutarından düşülerek gösterilir.</div>
     <div class="form-inline">
-      <input id="newexpdesc" placeholder="Açıklama (örn. Su faturası)">
-      <input id="newexpamt" type="number" placeholder="Tutar">
+      <input id="newexpdesc" placeholder="Açıklama (örn. Su faturası)" value="${esc(EXPENSE_FORM.desc)}" oninput="EXPENSE_FORM.desc=this.value">
+      <input id="newexpamt" type="number" placeholder="Tutar" value="${esc(EXPENSE_FORM.amount)}" oninput="EXPENSE_FORM.amount=this.value">
       <button class="btn sm" onclick="addExpense()">+ Gider Ekle</button>
     </div>
     <div class="table-list">
@@ -1939,12 +2065,13 @@ function renderGiderler(){
 }
 async function addExpense(){
   const session = getSession();
-  const d = document.getElementById('newexpdesc'), a = document.getElementById('newexpamt');
-  const desc = d.value.trim(); const amount = parseFloat(a.value)||0;
+  const desc = (EXPENSE_FORM.desc||'').trim();
+  const amount = parseFloat(EXPENSE_FORM.amount)||0;
   if(!desc || amount<=0){ alert('Açıklama ve geçerli bir tutar girin.'); return; }
   STATE.expenses = STATE.expenses||[];
   STATE.expenses.push({ id:genId('ex'), desc, amount, staffId:session.staffId, createdAt:Date.now() });
   await sSet('seyir:expenses', STATE.expenses);
+  EXPENSE_FORM = { desc:'', amount:'' };
   showToast('Gider kaydedildi ✓');
   render();
 }
