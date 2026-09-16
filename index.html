@@ -150,6 +150,17 @@
   .table-card .dot-indicator{ position:absolute; top:12px; right:12px; width:9px;height:9px;border-radius:50%; background:var(--ink-faint); }
   .table-card.dolu .dot-indicator{ background:var(--brand); }
   .table-card.bekliyor .dot-indicator{ background:var(--danger); }
+  .table-card.hazirlaniyor{ border-color:var(--danger); background:var(--brand-soft); }
+  .table-card.hazirlaniyor .amt{ color:var(--brand-deep); }
+  .table-card.hazirlaniyor .dot-indicator{ background:var(--danger); }
+  .table-card.hazirbildirim{ border-color:var(--brand); animation:table-ready-blink 1s ease-in-out infinite; }
+  .table-card.hazirbildirim .amt{ color:var(--brand-deep); }
+  .table-card.hazirbildirim .dot-indicator{ background:var(--brand); }
+  @keyframes table-ready-blink{
+    0%,100%{ background:var(--brand-soft); box-shadow:0 0 0 0 rgba(14,143,92,.5); }
+    50%{ background:#7EE3B4; box-shadow:0 0 0 10px rgba(14,143,92,0); }
+  }
+  .custom-label{ font-size:11px; color:var(--blue); font-weight:700; margin-top:2px; }
 
   /* ---------- Order entry screen ---------- */
   .order-header{ display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; flex-wrap:wrap; gap:8px; }
@@ -301,6 +312,31 @@
   .month-grid button .mv{ font-size:11px; color:var(--ink-soft); }
   .year-switch{ display:flex; align-items:center; justify-content:center; gap:18px; margin:6px 0 16px; }
   .year-switch b{ font-size:17px; }
+
+  /* ---------- Accordion (Aktif Masalar / Canlı Stok Durumu) ---------- */
+  .accordion-head{ display:flex; justify-content:space-between; align-items:center; cursor:pointer; }
+  .accordion-head .chev{ font-size:11px; color:var(--ink-faint); transition:transform .2s ease; }
+  .accordion-head.open .chev{ transform:rotate(180deg); }
+  .accordion-panel{ max-height:0; overflow:hidden; transition:max-height .28s ease; }
+  .accordion-panel.open{ max-height:3000px; }
+
+  /* ---------- Stations (İstasyonlar) ---------- */
+  .station-card{ background:var(--surface); border:1px solid var(--line); border-radius:11px; padding:14px; margin-bottom:12px; }
+  .station-card.inactive{ opacity:.55; }
+  .station-card .row1{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:10px; }
+  .station-cat-chip{ display:inline-flex; align-items:center; background:var(--bg); border:1px solid var(--line); border-radius:20px; padding:6px 12px; font-size:12.5px; font-weight:600; margin:3px 4px 3px 0; }
+  .station-cat-chip.assigned{ background:var(--navy); color:#fff; border-color:var(--navy); }
+
+  /* ---------- Inline admin edit on order screen ---------- */
+  .item-tile.edit-mode{ text-align:left; }
+  .item-tile.edit-mode input{ width:100%; padding:5px 6px; border-radius:6px; border:1px solid var(--line); font-size:12px; margin-bottom:4px; }
+  .item-tile.edit-mode select{ width:100%; padding:5px 6px; border-radius:6px; border:1px solid var(--line); font-size:11.5px; margin-bottom:4px; }
+  .item-tile .edit-row{ display:flex; gap:4px; margin-top:4px; }
+  .item-tile .edit-row .btn{ flex:1; padding:5px 4px; font-size:10.5px; }
+  .edit-toggle-bar{ display:flex; justify-content:flex-end; margin-bottom:8px; }
+
+  /* ---------- Kasa / expense ---------- */
+  .neg{ color:var(--danger); font-weight:800; }
 </style>
 </head>
 <body>
@@ -434,19 +470,31 @@ const DEFAULT_SETTINGS = {
   tiktokUsername: '',
   mapsUrl: 'https://maps.app.goo.gl/oAsHzkYzVyex5WN77',
   showStock: true, // yönetici kapatırsa stok adetleri personel/müşteri ekranlarında gizlenir
+  stationPin: '9999', // istasyon personeli (mutfak/bar/nargile vb.) için ortak giriş şifresi
 };
+// 5 sabit, yönetici tarafından yeniden isimlendirilebilen / aktif-pasif yapılabilen istasyon alanı
+const DEFAULT_STATIONS = [
+  {id:'st1', name:'Mutfak', active:true},
+  {id:'st2', name:'Bar', active:true},
+  {id:'st3', name:'Nargile', active:false},
+  {id:'st4', name:'İstasyon 4', active:false},
+  {id:'st5', name:'İstasyon 5', active:false},
+];
 const ROLE_LABEL = {yonetici:'Yönetici', kasiyer:'Kasiyer', garson:'Garson', mutfak:'Mutfak'};
 const ROLE_HOME = {yonetici:'/masalar', kasiyer:'/masalar', garson:'/masalar', mutfak:'/mutfak'};
 const NAV_ITEMS = [
   {path:'/masalar', label:'Masalar', roles:['yonetici','kasiyer','garson']},
   {path:'/mutfak', label:'Mutfak', roles:['yonetici','mutfak']},
-  {path:'/cari', label:'Cari', roles:['yonetici','kasiyer']},
+  {path:'/cari', label:'Giderler', roles:['yonetici','kasiyer']}, // eski "Cari" nav'ı artık Gider girişi (cari hesaplar Yönetim > Cari Hesaplar'a taşındı)
   {path:'/rapor', label:'Rapor', roles:['yonetici','kasiyer']},
   {path:'/admin', label:'Yönetim', roles:['yonetici']},
 ];
 
 // ---------- global state ----------
-let STATE = { menu:[], tables:[], zones:[], orders:[], bills:[], assign:{}, staff:[], cari:[], settings:{}, loaded:false };
+let STATE = { menu:[], tables:[], zones:[], orders:[], bills:[], assign:{}, staff:[], cari:[], settings:{}, stations:[], catStation:{}, expenses:[], readyAlerts:[], tableCustomLabels:{}, kasa:{}, loaded:false };
+let EDIT_MODE = false; // yönetici için sipariş ekranında canlı (inline) ürün düzenleme modu
+let RAPOR_UI = { activeOpen:false, stockOpen:false }; // akordeon açık/kapalı durumları
+let MODAL_STATION_STAFF = null; // istasyon-şifresi ile giriş yapan oturum için geçici ad
 let CART = {};        // itemId -> qty (staff order-entry screen)
 let CART_NOTES = {};  // itemId -> not (staff order-entry screen)
 let CART_TABLE_ID = null;
@@ -473,10 +521,12 @@ function setSession(s){ sessionStorage.setItem('seyir_session', JSON.stringify(s
 function clearSession(){ sessionStorage.removeItem('seyir_session'); }
 
 async function loadState(){
-  const [menu, tables, orders, bills, assign, staff, zones, cari, settings] = await Promise.all([
+  const [menu, tables, orders, bills, assign, staff, zones, cari, settings, stations, catStation, expenses, readyAlerts, tableCustomLabels, kasa] = await Promise.all([
     sGet('seyir:menu', null), sGet('seyir:tables', null), sGet('seyir:orders', []),
     sGet('seyir:bills', []), sGet('seyir:assign', {}), sGet('seyir:staff', null),
     sGet('seyir:zones', null), sGet('seyir:cari', []), sGet('seyir:settings', null),
+    sGet('seyir:stations', null), sGet('seyir:catStation', {}), sGet('seyir:expenses', []),
+    sGet('seyir:readyAlerts', []), sGet('seyir:tableCustomLabels', {}), sGet('seyir:kasa', null),
   ]);
   const writes = [];
   STATE.menu = menu; if(!STATE.menu){ STATE.menu = DEFAULT_MENU; writes.push(sSet('seyir:menu',STATE.menu)); }
@@ -490,6 +540,14 @@ async function loadState(){
   STATE.cari = cari || [];
   STATE.settings = Object.assign({}, DEFAULT_SETTINGS, settings || {});
   if(!settings){ writes.push(sSet('seyir:settings', STATE.settings)); }
+  STATE.stations = (stations && stations.length) ? stations : DEFAULT_STATIONS.map(s=>Object.assign({},s));
+  if(!stations || !stations.length){ writes.push(sSet('seyir:stations', STATE.stations)); }
+  STATE.catStation = catStation || {};
+  STATE.expenses = expenses || [];
+  STATE.readyAlerts = readyAlerts || [];
+  STATE.tableCustomLabels = tableCustomLabels || {};
+  STATE.kasa = kasa || { manualCloseAt: null };
+  if(!kasa){ writes.push(sSet('seyir:kasa', STATE.kasa)); }
 
   // normalize records coming from older saved data so new fields always exist
   STATE.menu.forEach(cat=>cat.items.forEach(it=>{
@@ -512,16 +570,62 @@ function tableTotal(tableId){ let s=0; tableOrders(tableId).forEach(o=>o.items.f
 function tableStatus(tableId){
   const orders = tableOrders(tableId);
   if(!orders.length) return 'bos';
-  if(orders.some(o=>o.status==='yeni')) return 'bekliyor'; // en az bir sipariş henüz onaylanmadı (mutfağa/hazırlığa geçmedi)
+  if(orders.some(o=>o.status==='yeni')) return 'bekliyor'; // en az bir sipariş henüz saha onayından geçmedi
+  if(STATE.readyAlerts && STATE.readyAlerts.includes(tableId)) return 'hazirbildirim'; // mutfak hazırladı, saha ekibi masaya dokunana kadar yanıp söner
+  if(orders.some(o=>o.status==='hazirlaniyor')) return 'hazirlaniyor'; // saha onayı verildi, mutfakta hazırlanıyor
   return 'dolu';
 }
-function statusLabel(s){ return {yeni:'Alındı',hazirlaniyor:'Hazırlanıyor',hazir:'Hazır',servis:'Servis Edildi'}[s]||s; }
+function statusLabel(s){ return {yeni:'Onay Bekliyor',hazirlaniyor:'Hazırlanıyor',hazir:'Hazır',servis:'Servis Edildi'}[s]||s; }
+function tableStatusLabel(st){ return {bos:'Boş', dolu:'Dolu', bekliyor:'Onay Bekliyor', hazirlaniyor:'Hazırlanıyor', hazirbildirim:'Hazır! Servise Alın'}[st]||st; }
 // Garson, masanın/adisyonun TOPLAM tutarını göremez (sadece ürün üzerindeki birim/satır fiyatlarını görür);
 // toplamı sadece kasiyer, yönetici ve müşteri (QR ekranı, session yok) görebilir.
 function canSeeTotals(){ const s=getSession(); return !(s && s.role==='garson'); }
 function orderStaffLabel(o){ return o.staffId ? esc(findStaff(o.staffId)?.name||'') : 'Müşteri (QR)'; }
+function tableCustomLabel(tableId){ return (STATE.tableCustomLabels && STATE.tableCustomLabels[tableId]) || ''; }
+async function setTableCustomLabel(tableId){
+  const session = getSession();
+  if(!session || !(session.role==='kasiyer' || session.role==='yonetici')) return;
+  const cur = tableCustomLabel(tableId);
+  const val = prompt('Bu masa için özel bir isim girin (örn. "Ahmet - Doğum Günü"). Boş bırakırsanız kaldırılır:', cur);
+  if(val===null) return;
+  const trimmed = val.trim();
+  if(trimmed){ STATE.tableCustomLabels[tableId] = trimmed; } else { delete STATE.tableCustomLabels[tableId]; }
+  await sSet('seyir:tableCustomLabels', STATE.tableCustomLabels);
+  showToast('Masa ismi güncellendi ✓');
+  render();
+}
 
 function showToast(msg){ const t=document.createElement('div'); t.className='toast'; t.textContent=msg; document.body.appendChild(t); setTimeout(()=>t.remove(),2200); }
+
+// ---------- istasyonlar (dinamik 5 alan) ----------
+function activeStations(){ return STATE.stations.filter(s=>s.active); }
+function findStation(id){ return STATE.stations.find(s=>s.id===id); }
+// Bir kategori bir istasyona atanmamışsa, o ürün TÜM aktif istasyonlarda görünür (geriye dönük uyumluluk / yapılandırılmamış menü kırılmasın diye)
+function itemBelongsToStation(catId, stationId){ const assigned = STATE.catStation[catId]; return !assigned || assigned===stationId; }
+
+// ---------- kasa günü (07:00 sınırı) ----------
+// Kasa, yönetici manuel kapatmadıkça her sabah saat 07:00'de otomatik olarak "sıfırlanır"
+// (yeni kasa dönemi başlar). Yönetici isterse erken manuel kapatabilir; bu durumda
+// yeni dönem hemen o an başlar ve bir sonraki 07:00'a kadar sürer.
+function latestSevenAM(ts){
+  const d = new Date(ts);
+  const boundary = new Date(d.getFullYear(), d.getMonth(), d.getDate(), 7, 0, 0, 0).getTime();
+  return ts >= boundary ? boundary : boundary - 24*3600*1000;
+}
+function kasaPeriodStart(){
+  const auto = latestSevenAM(Date.now());
+  const manual = (STATE.kasa && STATE.kasa.manualCloseAt) || 0;
+  return Math.max(auto, manual);
+}
+async function closeKasaNow(){
+  const session = getSession();
+  if(!session || session.role!=='yonetici') return;
+  if(!confirm('Kasayı şimdi kapatmak istediğinize emin misiniz? Yeni kasa dönemi "0" ciro ile hemen başlayacak.')) return;
+  STATE.kasa.manualCloseAt = Date.now();
+  await sSet('seyir:kasa', STATE.kasa);
+  showToast('Kasa kapatıldı, yeni gün 0 ciro ile başladı ✓');
+  render();
+}
 
 // ---------- brand / logo ----------
 function brandTextHtml(){
@@ -623,6 +727,8 @@ window.addEventListener('hashchange', render);
 const SYNC_KEY_TO_FIELD = {
   'seyir:menu':'menu', 'seyir:tables':'tables', 'seyir:orders':'orders', 'seyir:bills':'bills',
   'seyir:assign':'assign', 'seyir:staff':'staff', 'seyir:zones':'zones', 'seyir:cari':'cari', 'seyir:settings':'settings',
+  'seyir:stations':'stations', 'seyir:catStation':'catStation', 'seyir:expenses':'expenses',
+  'seyir:readyAlerts':'readyAlerts', 'seyir:tableCustomLabels':'tableCustomLabels', 'seyir:kasa':'kasa',
 };
 function setupRealtimeSync(){
   if(!FIREBASE_READY) return;
@@ -660,7 +766,8 @@ document.addEventListener('focusout', function(e){
 }, true);
 
 function snapshotState(){
-  return JSON.stringify({menu:STATE.menu,tables:STATE.tables,zones:STATE.zones,orders:STATE.orders,bills:STATE.bills,assign:STATE.assign,staff:STATE.staff,cari:STATE.cari,settings:STATE.settings});
+  return JSON.stringify({menu:STATE.menu,tables:STATE.tables,zones:STATE.zones,orders:STATE.orders,bills:STATE.bills,assign:STATE.assign,staff:STATE.staff,cari:STATE.cari,settings:STATE.settings,
+    stations:STATE.stations, catStation:STATE.catStation, expenses:STATE.expenses, readyAlerts:STATE.readyAlerts, tableCustomLabels:STATE.tableCustomLabels, kasa:STATE.kasa});
 }
 let LAST_STATE_SNAPSHOT = null;
 
@@ -710,10 +817,11 @@ function render(){
   else if(path === '/musteri') html = renderMusteriSiparis(params);
   else if(path === '/masalar') html = shell(session,'/masalar', renderMasalar());
   else if(path === '/masa') html = shell(session,'/masalar', renderOrderEntry(params));
+  else if(path === '/istasyon-sec') html = renderIstasyonSec();
   else if(path === '/mutfak') html = shell(session,'/mutfak', renderMutfak());
   else if(path === '/rapor') html = shell(session,'/rapor', renderRapor());
   else if(path === '/admin') html = shell(session,'/admin', renderAdmin());
-  else if(path === '/cari') html = shell(session,'/cari', renderCari());
+  else if(path === '/cari') html = shell(session,'/cari', renderGiderler());
   else { location.hash = session ? (ROLE_HOME[session.role]||'/masalar') : '/login'; return; }
 
   // Sadece sayfa GERÇEKTEN değiştiyse (yeni bir menüye tıklandıysa) en üste
@@ -847,6 +955,8 @@ function renderModalOverlay(){
   else if(MODAL.type==='approveOrder') inner = approveOrderModalHtml(MODAL.orderId);
   else if(MODAL.type==='activeTables') inner = activeTablesModalHtml();
   else if(MODAL.type==='raporFilter') inner = raporFilterModalHtml();
+  else if(MODAL.type==='billDetail') inner = billDetailModalHtml(MODAL.billId);
+  else if(MODAL.type==='generalQr') inner = generalQrModalHtml();
   return `<div class="modal-bg" onclick="if(event.target===this) closeModal()"><div class="modal">${inner}</div></div>`;
 }
 
@@ -878,33 +988,67 @@ function pinBack(){ PIN_BUF = PIN_BUF.slice(0,-1); render(); }
 function pinClear(){ PIN_BUF=''; LOGIN_ERR=''; render(); }
 function tryLogin(){
   const staff = STATE.staff.find(s=>s.pin===PIN_BUF);
-  if(staff){
-    setSession({staffId:staff.id, name:staff.name, role:staff.role});
+  // Ortak istasyon şifresi: mutfak/bar/nargile gibi üretim personeli için, tek
+  // tek personel hesabı açmaya gerek kalmadan ortak bir şifreyle giriş.
+  const isStationPin = !staff && STATE.settings.stationPin && PIN_BUF===STATE.settings.stationPin;
+  if(staff || isStationPin){
+    if(staff){ setSession({staffId:staff.id, name:staff.name, role:staff.role, stationId:null}); }
+    else{ setSession({staffId:null, name:'İstasyon Personeli', role:'mutfak', stationId:null}); }
     PIN_BUF=''; LOGIN_ERR='';
     warmupAudio(); // kullanıcı etkileşimi ile ses altyapısını hazırla (tarayıcı otomatik-oynatma engelini aşmak için)
     if('Notification' in window && Notification.permission==='default'){ requestNotifPermission(); }
-    location.hash = ROLE_HOME[staff.role]||'/masalar';
+    const role = staff ? staff.role : 'mutfak';
+    // Mutfak/istasyon rolündeki personel, birden fazla aktif istasyon varsa önce hangi
+    // istasyonda çalıştığını seçmelidir; tek aktif istasyon varsa otomatik atanır.
+    if(role==='mutfak'){
+      const actives = activeStations();
+      if(actives.length>1){ location.hash='/istasyon-sec'; return; }
+      if(actives.length===1){ const s=getSession(); s.stationId=actives[0].id; setSession(s); }
+    }
+    location.hash = ROLE_HOME[role]||'/masalar';
   }else{
     LOGIN_ERR = 'Hatalı PIN, tekrar deneyin';
     PIN_BUF='';
     setTimeout(render, 60);
   }
 }
+
+// ================= İSTASYON SEÇİMİ (mutfak/bar/nargile vb.) =================
+function renderIstasyonSec(){
+  const actives = activeStations();
+  return `<div class="login-wrap"><div class="login-card">
+    <div class="mark">S</div>
+    <h2>İstasyon Seçin</h2>
+    <p>Bu oturumda hangi istasyonda çalışıyorsunuz?</p>
+    <div style="display:flex;flex-direction:column;gap:10px;">
+      ${actives.map(s=>`<button class="btn block" onclick="chooseStation('${s.id}')">${esc(s.name)}</button>`).join('')}
+    </div>
+  </div></div>`;
+}
+function chooseStation(stationId){
+  const s = getSession(); if(!s) return;
+  s.stationId = stationId; setSession(s);
+  location.hash = '/mutfak';
+}
+function currentStationName(){
+  const s = getSession(); if(!s || !s.stationId) return null;
+  const st = findStation(s.stationId); return st ? st.name : null;
+}
 function doLogout(){ clearAlertState(); clearSession(); location.hash='/login'; }
 
 // ================= MASALAR (table grid) =================
 function renderMasalar(){
   const filtered = MASALAR_ZONE==='all' ? STATE.tables : STATE.tables.filter(t=>t.zone===MASALAR_ZONE);
-  const session = getSession();
-  const canQuickClose = session && (session.role==='kasiyer' || session.role==='yonetici');
   return `
     <div class="page-title">Masalar</div>
-    <div class="page-sub">Bir masaya dokunarak sipariş girin veya adisyonu görüntüleyin.</div>
+    <div class="page-sub">Bir masaya dokunarak sipariş girin veya adisyonu görüntüleyin. Hesap kapatma ve masa birleştirme işlemleri masa detayında yapılır.</div>
     <div class="tables-toolbar">
       <div class="legend">
         <span><i style="background:var(--ink-faint)"></i> Boş</span>
         <span><i style="background:var(--brand)"></i> Dolu</span>
         <span><i style="background:var(--danger)"></i> Onay Bekliyor</span>
+        <span><i style="background:var(--brand-soft);border:1.5px solid var(--danger);"></i> Hazırlanıyor</span>
+        <span><i style="background:var(--brand);border:1.5px solid var(--brand-deep);"></i> Hazır! Servise Alın</span>
       </div>
     </div>
     <div class="cat-tabs">
@@ -917,15 +1061,14 @@ function renderMasalar(){
         const total = tableTotal(t.id);
         const waiterId = STATE.assign[t.id];
         const waiter = waiterId ? findStaff(waiterId) : null;
-        const stLabel = st==='bekliyor' ? 'Onay Bekliyor' : (st==='dolu' ? 'Dolu' : 'Boş');
-        return `<div class="table-card ${st==='dolu'?'dolu':''} ${st==='bekliyor'?'bekliyor':''}" onclick="location.hash='/masa?id=${t.id}'" style="cursor:pointer;">
+        const custom = tableCustomLabel(t.id);
+        return `<div class="table-card ${st==='dolu'?'dolu':''} ${st}" onclick="location.hash='/masa?id=${t.id}'" style="cursor:pointer;">
           <div class="dot-indicator"></div>
           <h4>${esc(t.name)}</h4>
-          <div class="status-txt">${stLabel} · ${esc(t.zone||'')}</div>
+          ${custom?`<div class="custom-label">${esc(custom)}</div>`:''}
+          <div class="status-txt">${tableStatusLabel(st)} · ${esc(t.zone||'')}</div>
           ${(total>0 && canSeeTotals())?`<div class="amt">${money(total)}</div>`:''}
           ${waiter?`<div class="waiter">Garson: ${esc(waiter.name)}</div>`:''}
-          ${(canQuickClose && st!=='bos')?`<button class="btn ghost sm" style="margin-top:8px;width:100%;" onclick="event.stopPropagation(); openModal({type:'closeBill',tableId:'${t.id}'})">Hesabı Kapat</button>`:''}
-          ${(canQuickClose && st!=='bos')?`<button class="btn ghost sm" style="margin-top:6px;width:100%;" onclick="event.stopPropagation(); openModal({type:'moveTable',tableId:'${t.id}'})">Taşı / Birleştir</button>`:''}
         </div>`;
       }).join('')}
     </div>
@@ -954,7 +1097,14 @@ function renderOrderEntry(params){
   const session = getSession();
   const canClose = session.role==='kasiyer' || session.role==='yonetici';
   const canManage = session.role==='kasiyer' || session.role==='yonetici'; // yanlış ürün silme / taşıma / masa birleştirme yetkisi
+  const isAdmin = session.role==='yonetici';
   const hasPending = tableOrders(tableId).some(o=>o.status==='yeni');
+
+  // Saha ekibi bu masaya girdiğinde, "hazır" bildirimi (yeşil yanıp sönme) burada söner.
+  if(STATE.readyAlerts && STATE.readyAlerts.includes(tableId)){
+    STATE.readyAlerts = STATE.readyAlerts.filter(id=>id!==tableId);
+    sSet('seyir:readyAlerts', STATE.readyAlerts);
+  }
 
   if(CUR_CAT===null || !STATE.menu.find(c=>c.id===CUR_CAT)) CUR_CAT = STATE.menu[0] ? STATE.menu[0].id : null;
   const activeCat = STATE.menu.find(c=>c.id===CUR_CAT) || STATE.menu[0];
@@ -963,19 +1113,32 @@ function renderOrderEntry(params){
   const cartCount = Object.values(CART).reduce((a,b)=>a+b,0);
   const cartTotal = Object.entries(CART).reduce((s,[id,qty])=>{ const it=findItem(id); return s+(it?it.price*qty:0); },0);
   const total = tableTotal(tableId);
+  const custom = tableCustomLabel(tableId);
 
   return `
     <div class="order-header">
       <a class="back" href="#/masalar">← Masalar</a>
-      <div class="page-title" style="margin:0;">${esc(table.name)}</div>
-      <div style="width:70px;"></div>
+      <div style="text-align:center;">
+        <div class="page-title" style="margin:0;">${esc(table.name)}</div>
+        ${custom?`<div class="custom-label" style="text-align:center;">${esc(custom)}</div>`:''}
+      </div>
+      <div style="width:70px;text-align:right;">
+        ${canManage?`<button class="btn ghost sm" onclick="setTableCustomLabel('${tableId}')" title="Masayı özel isimlendir">✎</button>`:''}
+      </div>
     </div>
+
+    ${isAdmin?`
+      <div class="edit-toggle-bar">
+        <button class="btn ${EDIT_MODE?'':'ghost'} sm" onclick="toggleEditMode()">${EDIT_MODE?'✓ Canlı Düzenleme Açık':'✏️ Canlı Düzenle (isim/fiyat/foto/kategori)'}</button>
+      </div>
+    `:''}
 
     <div class="cat-tabs">
       ${STATE.menu.map(c=>`<button class="${activeCat && c.id===activeCat.id?'active':''}" onclick="setCat('${c.id}')">${esc(c.cat)}</button>`).join('')}
     </div>
     <div class="item-grid">
       ${activeCat ? activeCat.items.map(it=>{
+        if(EDIT_MODE && isAdmin) return editableItemTileHtml(activeCat.id, it);
         const qty = CART[it.id]||0;
         const outOfStock = it.trackStock && it.stock<=0;
         const blocked = !it.available; // sadece "mevcut değil" işaretli ürünler tamamen engellenir
@@ -1037,6 +1200,47 @@ function renderOrderEntry(params){
   `;
 }
 function setCat(id){ CUR_CAT=id; render(); }
+
+// ---------- yönetici için sipariş ekranında canlı (inline) ürün düzenleme ----------
+// Ayrı bir Yönetim paneline gitmeye gerek kalmadan; isim, fiyat, kategori ve fotoğraf
+// doğrudan bu ekrandan (ilgili sayfa üzerinde) düzenlenebilir.
+function toggleEditMode(){ EDIT_MODE = !EDIT_MODE; render(); }
+function editableItemTileHtml(catId, it){
+  return `<div class="item-tile edit-mode">
+    ${it.photo?`<div class="tile-photo" style="background-image:url('${it.photo}')"></div>`:''}
+    <input id="edt_nm_${it.id}" value="${esc(it.name)}" placeholder="Ürün adı" onchange="inlineUpdateName('${catId}','${it.id}',this.value)">
+    <input id="edt_pr_${it.id}" type="number" value="${it.price}" placeholder="Fiyat" onchange="inlineUpdatePrice('${catId}','${it.id}',this.value)">
+    <select onchange="inlineMoveCategory('${catId}','${it.id}',this.value)">
+      ${STATE.menu.map(c=>`<option value="${c.id}" ${c.id===catId?'selected':''}>${esc(c.cat)}</option>`).join('')}
+    </select>
+    <div class="edit-row">
+      <label class="btn ghost sm" style="cursor:pointer;">Foto
+        <input type="file" accept="image/*" style="display:none;" onchange="handlePhotoUpload('${catId}','${it.id}',this)">
+      </label>
+      <button class="btn ghost sm" onclick="deleteItem('${catId}','${it.id}')">Sil</button>
+    </div>
+  </div>`;
+}
+async function inlineUpdateName(catId,itemId,val){
+  const cat=STATE.menu.find(c=>c.id===catId); const it=cat.items.find(i=>i.id===itemId);
+  const name = val.trim(); if(!name) return;
+  it.name = name; await sSet('seyir:menu',STATE.menu); showToast('Ürün adı güncellendi ✓'); render();
+}
+async function inlineUpdatePrice(catId,itemId,val){
+  const cat=STATE.menu.find(c=>c.id===catId); const it=cat.items.find(i=>i.id===itemId);
+  it.price = parseFloat(val)||0; await sSet('seyir:menu',STATE.menu); showToast('Fiyat güncellendi ✓'); render();
+}
+async function inlineMoveCategory(fromCatId,itemId,toCatId){
+  if(fromCatId===toCatId) return;
+  const fromCat=STATE.menu.find(c=>c.id===fromCatId); const toCat=STATE.menu.find(c=>c.id===toCatId);
+  if(!fromCat || !toCat) return;
+  const idx = fromCat.items.findIndex(i=>i.id===itemId); if(idx<0) return;
+  const [it] = fromCat.items.splice(idx,1);
+  toCat.items.push(it);
+  await sSet('seyir:menu',STATE.menu);
+  showToast('Ürün kategorisi güncellendi ✓');
+  render();
+}
 function cartAdd(itemId, delta){
   delta = delta===undefined ? 1 : delta;
   const it = findItem(itemId);
@@ -1058,10 +1262,10 @@ async function sendOrder(tableId){
   if(!items.length) return;
   let wentNegative = false;
   items.forEach(oi=>{ const it=findItem(oi.id); if(it && it.trackStock){ it.stock = it.stock - oi.qty; if(it.stock<0) wentNegative = true; } });
-  // Personel siparişi zaten personel tarafından kontrol edilip gönderildiği için
-  // onay beklemeden doğrudan hazırlığa düşer (onay adımı sadece müşteri QR
-  // siparişleri içindir).
-  const order = { id:genId('o'), tableId, items, status:'hazirlaniyor', staffId:session.staffId, source:'staff', createdAt:Date.now() };
+  // Garsonun girdiği sipariş de, müşteri QR siparişi gibi, doğrudan mutfağa düşmez —
+  // önce saha ekibi (kasiyer/yönetici/garson) onaylamalıdır (bkz. approveOrderModalHtml).
+  // Böylece siparişin gerçekten hazırlanacağı teyit edilmiş olur.
+  const order = { id:genId('o'), tableId, items, status:'yeni', staffId:session.staffId, source:'staff', createdAt:Date.now() };
   STATE.orders.push(order);
   if(!STATE.assign[tableId]) STATE.assign[tableId] = session.staffId;
   await Promise.all([ sSet('seyir:orders', STATE.orders), sSet('seyir:assign', STATE.assign), sSet('seyir:menu', STATE.menu) ]);
@@ -1069,7 +1273,7 @@ async function sendOrder(tableId){
   CART_NOTES = {};
   saveCart();
   saveCartNotes();
-  showToast(wentNegative ? 'Sipariş gönderildi — bazı ürünler stokta eksiye düştü ✓' : 'Sipariş mutfağa gönderildi ✓');
+  showToast(wentNegative ? 'Sipariş gönderildi (onay bekliyor) — bazı ürünler stokta eksiye düştü' : 'Sipariş gönderildi, saha onayı bekleniyor ✓');
   render();
 }
 
@@ -1132,7 +1336,9 @@ async function finalizeCloseBill(tableId, method, cariId){
   STATE.bills.push(bill);
   STATE.orders = STATE.orders.filter(o=>o.tableId!==tableId);
   delete STATE.assign[tableId];
-  const promises = [ sSet('seyir:bills', STATE.bills), sSet('seyir:orders', STATE.orders), sSet('seyir:assign', STATE.assign) ];
+  delete STATE.tableCustomLabels[tableId];
+  STATE.readyAlerts = (STATE.readyAlerts||[]).filter(id=>id!==tableId);
+  const promises = [ sSet('seyir:bills', STATE.bills), sSet('seyir:orders', STATE.orders), sSet('seyir:assign', STATE.assign), sSet('seyir:tableCustomLabels', STATE.tableCustomLabels), sSet('seyir:readyAlerts', STATE.readyAlerts) ];
   if(method==='Cari' && cariId){
     const acc = STATE.cari.find(c=>c.id===cariId);
     if(acc){
@@ -1173,28 +1379,65 @@ async function copyTableLink(link){
   try{ await navigator.clipboard.writeText(link); showToast('Link kopyalandı ✓'); }
   catch(e){ prompt('Linki kopyalayın:', link); }
 }
+// ---------- Akıllı QR: tüm masalarda kullanılabilecek TEK/ortak QR kod ----------
+// Masaya özel QR yerine tüm masalara bu tek kod basılabilir; müşteri okuttuğunda
+// masa numarasını kendisi seçer (bkz. renderMusteriMasaSecim).
+function generalQrModalHtml(){
+  const link = location.origin + location.pathname + '#/musteri';
+  const qrSrc = 'https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=' + encodeURIComponent(link);
+  return `
+    <span class="close-x" onclick="closeModal()">✕</span>
+    <h3>Tüm Masalar İçin Ortak QR Kod</h3>
+    <p class="page-sub">Masaya özel QR basmak yerine bu tek kodu tüm masalara yerleştirebilirsiniz. Müşteri okuttuğunda önce masa numarasını seçer, ardından siparişe geçer.</p>
+    <div style="text-align:center;margin:14px 0;">
+      <img src="${qrSrc}" alt="QR" style="width:220px;height:220px;border-radius:10px;border:1px solid var(--line);">
+      <div style="margin-top:10px;">
+        <a href="${esc(link)}" target="_blank" style="font-size:12.5px;color:var(--blue);word-break:break-all;">${esc(link)}</a>
+      </div>
+    </div>
+    <div class="form-inline">
+      <input readonly value="${esc(link)}" style="flex:1;min-width:180px;" onclick="this.select()">
+      <button class="btn ghost sm" onclick="copyTableLink('${link.replace(/'/g,"\\'")}')">Kopyala</button>
+    </div>
+  `;
+}
 
-// ================= MUTFAK (kitchen) =================
+// ================= MUTFAK (kitchen — dinamik istasyonlara göre filtrelenir) =================
+// Bir siparişin, o anki istasyona ait sadece kalemlerini döndürür (kategori o istasyona
+// atanmamışsa ürün her istasyonda görünür — yapılandırılmamış menülerde hiçbir şey kaybolmaz).
+function orderItemsForStation(o, stationId){
+  if(!stationId) return o.items;
+  return o.items.filter(it=>{ const mi=findItem(it.id); return mi ? itemBelongsToStation(mi.catId, stationId) : true; });
+}
 function renderMutfak(){
-  const yeni = STATE.orders.filter(o=>o.status==='yeni').sort((a,b)=>a.createdAt-b.createdAt);
-  const haz = STATE.orders.filter(o=>o.status==='hazirlaniyor').sort((a,b)=>a.createdAt-b.createdAt);
-  const rdy = STATE.orders.filter(o=>o.status==='hazir').sort((a,b)=>a.createdAt-b.createdAt);
+  const session = getSession();
+  const stationId = session ? session.stationId : null;
+  const relevantOrders = STATE.orders.filter(o=>orderItemsForStation(o,stationId).length>0);
+  const yeni = relevantOrders.filter(o=>o.status==='yeni').sort((a,b)=>a.createdAt-b.createdAt);
+  const haz = relevantOrders.filter(o=>o.status==='hazirlaniyor').sort((a,b)=>a.createdAt-b.createdAt);
+  const rdy = relevantOrders.filter(o=>o.status==='hazir').sort((a,b)=>a.createdAt-b.createdAt);
   function ticket(o, cls, nextStatus, nextLabel){
     const mins = Math.max(0, Math.round((Date.now()-o.createdAt)/60000));
     const pending = o.status==='yeni';
+    const items = orderItemsForStation(o, stationId);
     return `<div class="ticket ${cls}">
       <div class="head"><span class="tname">${esc(findTable(o.tableId)?.name||o.tableId)}</span><span class="time">${mins} dk</span></div>
       <div class="waiter">${orderStaffLabel(o)}${pending?' · <b style="color:var(--danger);">Onay bekliyor</b>':''}</div>
-      <ul>${o.items.map(it=>`<li>${it.qty}× ${esc(it.name)}${it.note?` <span style="color:var(--warn);font-weight:700;">(${esc(it.note)})</span>`:''}</li>`).join('')}</ul>
+      <ul>${items.map(it=>`<li>${it.qty}× ${esc(it.name)}${it.note?` <span style="color:var(--warn);font-weight:700;">(${esc(it.note)})</span>`:''}</li>`).join('')}</ul>
       <div style="display:flex;gap:8px;">
         ${pending?`<button class="btn sm" onclick="openModal({type:'approveOrder',orderId:'${o.id}'})">✓ Onayla</button>`:(nextStatus?`<button class="btn sm" onclick="advanceOrder('${o.id}','${nextStatus}')">${nextLabel}</button>`:'')}
         ${pending?`<button class="btn ghost sm" onclick="rejectOrder('${o.id}')">Reddet</button>`:''}
       </div>
     </div>`;
   }
+  const stName = currentStationName();
+  const actives = activeStations();
   return `
-    <div class="page-title">Mutfak Ekranı</div>
-    <div class="page-sub">Siparişler otomatik olarak günceller. Onay bekleyen sipariş varken ekran kırmızı yanıp söner.</div>
+    <div class="order-header">
+      <div class="page-title" style="margin:0;">Mutfak Ekranı${stName?` — ${esc(stName)}`:''}</div>
+      ${actives.length>1?`<a class="back" href="#/istasyon-sec">İstasyon Değiştir ⇄</a>`:''}
+    </div>
+    <div class="page-sub">Siparişler otomatik olarak güncellenir. Onay bekleyen sipariş varken ekran kırmızı yanıp söner.</div>
     <div class="kitchen-cols">
       <div class="kcol"><div class="kcol-head"><b>Yeni (Onay Bekleyen)</b><span class="count">${yeni.length}</span></div>
         ${yeni.length?yeni.map(o=>ticket(o,'urgent')).join(''):'<p class="empty-note">Bekleyen yok</p>'}
@@ -1211,7 +1454,14 @@ function renderMutfak(){
 async function advanceOrder(orderId, nextStatus){
   const o = STATE.orders.find(x=>x.id===orderId); if(!o) return;
   o.status = nextStatus;
-  await sSet('seyir:orders', STATE.orders);
+  const promises = [ sSet('seyir:orders', STATE.orders) ];
+  // Mutfak siparişi "Hazır" olarak işaretlediğinde, saha ekibinin masa ekranında o masa
+  // yeşil yanıp sönmeye başlar ve saha ekibi masaya dokunana kadar (bkz. renderOrderEntry) devam eder.
+  if(nextStatus==='hazir' && !(STATE.readyAlerts||[]).includes(o.tableId)){
+    STATE.readyAlerts = STATE.readyAlerts||[]; STATE.readyAlerts.push(o.tableId);
+    promises.push(sSet('seyir:readyAlerts', STATE.readyAlerts));
+  }
+  await Promise.all(promises);
   render();
 }
 // Not: Sipariş onaylama artık openModal({type:'approveOrder',...}) ile açılan seçim
@@ -1344,7 +1594,7 @@ async function confirmApproveOrder(orderId){
     const keep = qtys[idx]!==undefined ? qtys[idx] : it.qty;
     const removed = it.qty - keep;
     if(removed>0){
-      // müşteri (QR) siparişinde stok zaten gönderim anında düşülmüştü — çıkarılan adedi iade et
+      // sipariş gönderim anında stok zaten düşülmüştü (hem müşteri QR hem personel siparişinde) — çıkarılan adedi iade et
       const mi = findItem(it.id); if(mi && mi.trackStock){ mi.stock += removed; }
     }
     if(keep>0){ newItems.push(Object.assign({}, it, {qty:keep})); }
@@ -1374,6 +1624,26 @@ function activeTablesModalHtml(){
     <div class="table-list">
       ${openTables.length? openTables.map(t=>`<div class="r"><span>${esc(t.name)} <span style="color:var(--ink-faint);">· ${esc(t.zone||'')}</span></span><b>${money(tableTotal(t.id))}</b></div>`).join('') : '<div class="r"><span>Şu anda açık masa yok</span></div>'}
     </div>
+  `;
+}
+
+// ---------- fiş detayı: geçmiş adisyonlar hiç silinmez, her an tam olarak incelenebilir ----------
+// (müşteri itirazlarında — özellikle cariye yazılmış fişlerde — kanıt olarak ekrana getirilir)
+function billDetailModalHtml(billId){
+  const b = STATE.bills.find(x=>x.id===billId);
+  if(!b) return `<p>Fiş bulunamadı.</p>`;
+  const cariAcc = b.cariId ? STATE.cari.find(c=>c.id===b.cariId) : null;
+  return `
+    <span class="close-x" onclick="closeModal()">✕</span>
+    <h3>Fiş Detayı — ${esc(b.tableName)}</h3>
+    <p class="page-sub">${new Date(b.closedAt).toLocaleString('tr-TR')} · Ödeme: <b>${esc(PAYMENT_LABEL[b.method]||b.method)}</b>${cariAcc?` · Cari: <b>${esc(cariAcc.name)}</b>`:''}</p>
+    <div class="adisyon-list">
+      ${b.orders.map(o=>o.items.map(it=>`<div class="adisyon-row">
+          <div><div class="nm">${it.qty}× ${esc(it.name)}</div><div class="meta">${orderStaffLabel(o)}${it.note?` · Not: ${esc(it.note)}`:''}</div></div>
+          <span>${money(it.price*it.qty)}</span>
+        </div>`).join('')).join('')}
+    </div>
+    <div class="grand-total-bar"><span>Toplam</span><span>${money(b.total)}</span></div>
   `;
 }
 
@@ -1468,9 +1738,21 @@ function raporFilterModalHtml(){
   `;
 }
 
+function expensesInRange(start,end){
+  return (STATE.expenses||[]).filter(e=>{
+    const day = ymd(e.createdAt);
+    if(start && day < start) return false;
+    if(end && day > end) return false;
+    return true;
+  });
+}
+function toggleRaporAccordion(key){ RAPOR_UI[key] = !RAPOR_UI[key]; render(); }
 function renderRapor(){
   const filtered = billsInRange(RAPOR_START, RAPOR_END);
   const filteredTotal = filtered.reduce((s,b)=>s+b.total,0);
+  const filteredExpenses = expensesInRange(RAPOR_START, RAPOR_END);
+  const expensesTotal = filteredExpenses.reduce((s,e)=>s+e.amount,0);
+  const netTotal = filteredTotal - expensesTotal;
 
   const byDay = {};
   filtered.forEach(b=>{ const d=new Date(b.closedAt).toLocaleDateString('tr-TR'); byDay[d]=(byDay[d]||0)+b.total; });
@@ -1515,9 +1797,29 @@ function renderRapor(){
 
   const rangeLabel = (RAPOR_START||RAPOR_END) ? `${RAPOR_START?new Date(RAPOR_START).toLocaleDateString('tr-TR'):'başlangıç'} → ${RAPOR_END?new Date(RAPOR_END).toLocaleDateString('tr-TR'):'bugün'}` : 'Tüm zamanlar';
 
+  // ---- Kasa Durumu: 07:00 sınırlı güncel kasa dönemi ----
+  const session = getSession();
+  const pStart = kasaPeriodStart();
+  const kasaBills = STATE.bills.filter(b=>b.closedAt>=pStart);
+  const kasaExpenses = (STATE.expenses||[]).filter(e=>e.createdAt>=pStart);
+  const kasaRevenue = kasaBills.reduce((s,b)=>s+b.total,0);
+  const kasaExpenseTotal = kasaExpenses.reduce((s,e)=>s+e.amount,0);
+  const kasaOpenedAt = new Date(pStart).toLocaleString('tr-TR');
+
+  const canSeeStock = session.role==='yonetici' || STATE.settings.showStock;
+
   return `
     <div class="page-title">Raporlar</div>
     <div class="page-sub">Kapanan adisyonlara göre.</div>
+
+    <div class="section-label">Kasa Durumu</div>
+    <div class="stat-grid">
+      <div class="stat-card"><div class="num">${money(kasaRevenue)}</div><div class="lbl">Bugünkü Kasa Cirosu</div></div>
+      <div class="stat-card"><div class="num neg">-${money(kasaExpenseTotal)}</div><div class="lbl">Bugünkü Giderler</div></div>
+      <div class="stat-card"><div class="num">${money(kasaRevenue-kasaExpenseTotal)}</div><div class="lbl">Net Kasa</div></div>
+    </div>
+    <p class="page-sub" style="margin-top:-10px;">Kasa açılışı: <b>${kasaOpenedAt}</b> — yönetici kapatmadığı sürece her sabah 07:00'de otomatik olarak "0" ciro ile yeniden başlar.</p>
+    ${session.role==='yonetici'?`<button class="btn ghost sm" style="margin-bottom:16px;" onclick="closeKasaNow()">Kasayı Şimdi Kapat</button>`:''}
 
     <div class="section-label">Tarih Aralığı</div>
     <div class="form-inline" style="justify-content:space-between;">
@@ -1534,11 +1836,22 @@ function renderRapor(){
       <div class="stat-card"><div class="num">${money(openTotal)}</div><div class="lbl">Aktif Masalarda Bekleyen Ciro</div></div>
     </div>
 
-    <div class="section-label">Aktif Masalar</div>
+    <div class="section-label">Giderler (Kapanan Adisyonlar Altında)</div>
+    <div class="table-list" style="margin-bottom:8px;">
+      <div class="r"><span>Toplam Gider (seçili aralık)</span><b class="neg">-${money(expensesTotal)}</b></div>
+      <div class="r"><span>Net Ciro (Ciro − Gider)</span><b>${money(netTotal)}</b></div>
+    </div>
     <div class="table-list">
-      <div class="r" style="cursor:pointer;" onclick="openModal({type:'activeTables'})">
-        <span>${openTables.length} masa açık</span>
-        <b>${money(openTotal)} <span style="color:var(--ink-faint);font-weight:600;">→ detay</span></b>
+      ${filteredExpenses.length? filteredExpenses.slice().reverse().map(e=>`<div class="r"><span>${new Date(e.createdAt).toLocaleString('tr-TR')} · ${esc(e.desc)}${e.staffId?` · ${esc(findStaff(e.staffId)?.name||'')}`:''}</span><b class="neg">-${money(e.amount)}</b></div>`).join('') : '<div class="r"><span>Bu aralıkta gider yok</span></div>'}
+    </div>
+
+    <div class="section-label accordion-head ${RAPOR_UI.activeOpen?'open':''}" onclick="toggleRaporAccordion('activeOpen')">
+      <span>Aktif Masalar (${openTables.length} masa açık — ${money(openTotal)})</span>
+      <span class="chev">▾ Detay</span>
+    </div>
+    <div class="accordion-panel ${RAPOR_UI.activeOpen?'open':''}">
+      <div class="table-list" style="margin-bottom:14px;">
+        ${openTables.length? openTables.map(t=>`<div class="r"><span>${esc(t.name)}${tableCustomLabel(t.id)?` — ${esc(tableCustomLabel(t.id))}`:''} <span style="color:var(--ink-faint);">· ${esc(t.zone||'')}</span></span><b>${money(tableTotal(t.id))}</b></div>`).join('') : '<div class="r"><span>Şu anda açık masa yok</span></div>'}
       </div>
     </div>
 
@@ -1564,21 +1877,86 @@ function renderRapor(){
       ${Object.keys(byStaff).length? Object.entries(byStaff).sort((a,b)=>b[1]-a[1]).map(([n,t])=>`<div class="r"><span>${esc(n)}</span><b>${money(t)}</b></div>`).join('') : '<div class="r"><span>Veri yok</span></div>'}
     </div>
 
-    <div class="section-label">Canlı Stok Durumu</div>
+    ${canSeeStock?`
+    <div class="section-label accordion-head ${RAPOR_UI.stockOpen?'open':''}" onclick="toggleRaporAccordion('stockOpen')">
+      <span>Canlı Stok Durumu</span>
+      <span class="chev">▾ Detay</span>
+    </div>
+    <div class="accordion-panel ${RAPOR_UI.stockOpen?'open':''}">
+      <div class="table-list" style="margin-bottom:14px;">
+        ${stockItems.length? stockItems.map(it=>{
+          const negative = it.stock<0;
+          const soldOut = it.stock<=0;
+          const low = !soldOut && it.stock<=3;
+          const color = negative? 'var(--danger)' : (soldOut? 'var(--warn)' : (low? 'var(--warn)' : 'var(--ink)'));
+          const txt = negative? (Math.abs(it.stock)+' adet EKSİ (stoksuz satıldı)') : (soldOut? 'Tükendi' : (it.stock+' adet'));
+          return `<div class="r"><span>${esc(it.name)} <span style="color:var(--ink-faint);">· ${esc(it.catName)}</span></span><b style="color:${color};">${txt}</b></div>`;
+        }).join('') : '<div class="r"><span>Stok takibi açık ürün yok (Yönetim → Menü kısmından açabilirsiniz)</span></div>'}
+      </div>
+    </div>
+    `:''}
+
+    <div class="section-label">Fiş Arşivi (Geçmiş Adisyonlar)</div>
+    <div class="page-sub" style="margin-top:-6px;">Sistem hiçbir geçmiş fişi silmez. Cariye yazılan fişler de dahil, tüm fişler her an detaylıca incelenebilir (müşteri itirazlarında kullanılabilir).</div>
     <div class="table-list">
-      ${stockItems.length? stockItems.map(it=>{
-        const negative = it.stock<0;
-        const soldOut = it.stock<=0;
-        const low = !soldOut && it.stock<=3;
-        const color = negative? 'var(--danger)' : (soldOut? 'var(--warn)' : (low? 'var(--warn)' : 'var(--ink)'));
-        const txt = negative? (Math.abs(it.stock)+' adet EKSİ (stoksuz satıldı)') : (soldOut? 'Tükendi' : (it.stock+' adet'));
-        return `<div class="r"><span>${esc(it.name)} <span style="color:var(--ink-faint);">· ${esc(it.catName)}</span></span><b style="color:${color};">${txt}</b></div>`;
-      }).join('') : '<div class="r"><span>Stok takibi açık ürün yok (Yönetim → Menü kısmından açabilirsiniz)</span></div>'}
+      ${filtered.length? filtered.slice().reverse().slice(0,200).map(b=>`
+        <div class="r" style="cursor:pointer;" onclick="openModal({type:'billDetail',billId:'${b.id}'})">
+          <span>${new Date(b.closedAt).toLocaleString('tr-TR')} · ${esc(b.tableName)} · ${esc(PAYMENT_LABEL[b.method]||b.method)}</span>
+          <b>${money(b.total)} <span style="color:var(--ink-faint);font-weight:600;">→ fiş</span></b>
+        </div>
+      `).join('') : '<div class="r"><span>Bu aralıkta kapanan fiş yok</span></div>'}
     </div>
   `;
 }
 
-// ================= CARİ (running tab / account) =================
+// ================= GİDERLER (eski "Cari" nav sekmesinin yeni içeriği) =================
+// Cari hesap yönetimi Yönetim > Cari Hesaplar'a taşındı (bkz. renderAdminCari); bu ekran
+// artık günlük gider girişi için kullanılır. Kasiyerler de gider girebilir; girilen
+// giderler Rapor ekranında "Kapanan Adisyonlar" altında eksi (-) olarak görünür.
+function renderGiderler(){
+  const list = (STATE.expenses||[]).slice().reverse();
+  const session = getSession();
+  return `
+    <div class="page-title">Giderler</div>
+    <div class="page-sub">Gün içinde yapılan harcamaları buradan girin. Girilen tutarlar Rapor ekranında ciro tutarından düşülerek gösterilir.</div>
+    <div class="form-inline">
+      <input id="newexpdesc" placeholder="Açıklama (örn. Su faturası)">
+      <input id="newexpamt" type="number" placeholder="Tutar">
+      <button class="btn sm" onclick="addExpense()">+ Gider Ekle</button>
+    </div>
+    <div class="table-list">
+      ${list.length? list.map(e=>`
+        <div class="r">
+          <span>${new Date(e.createdAt).toLocaleString('tr-TR')} · ${esc(e.desc)}${e.staffId?` · ${esc(findStaff(e.staffId)?.name||'')}`:''}</span>
+          <span style="display:flex;align-items:center;gap:8px;">
+            <b class="neg">-${money(e.amount)}</b>
+            ${session.role==='yonetici'?`<button class="btn ghost sm" onclick="deleteExpense('${e.id}')">Sil</button>`:''}
+          </span>
+        </div>
+      `).join('') : '<div class="r"><span>Henüz gider girilmedi</span></div>'}
+    </div>
+  `;
+}
+async function addExpense(){
+  const session = getSession();
+  const d = document.getElementById('newexpdesc'), a = document.getElementById('newexpamt');
+  const desc = d.value.trim(); const amount = parseFloat(a.value)||0;
+  if(!desc || amount<=0){ alert('Açıklama ve geçerli bir tutar girin.'); return; }
+  STATE.expenses = STATE.expenses||[];
+  STATE.expenses.push({ id:genId('ex'), desc, amount, staffId:session.staffId, createdAt:Date.now() });
+  await sSet('seyir:expenses', STATE.expenses);
+  showToast('Gider kaydedildi ✓');
+  render();
+}
+async function deleteExpense(id){
+  const session = getSession();
+  if(session.role!=='yonetici') return;
+  STATE.expenses = (STATE.expenses||[]).filter(e=>e.id!==id);
+  await sSet('seyir:expenses', STATE.expenses);
+  render();
+}
+
+// ================= CARİ (running tab / account — artık Yönetim > Cari Hesaplar içinde) =================
 function renderCari(){
   const list = STATE.cari;
   return `
@@ -1662,10 +2040,12 @@ async function collectCariPayment(cariId){
 
 // ================= ADMIN =================
 function renderAdmin(){
-  const tabs = [['menu','Menü'],['tables','Masalar'],['staff','Personel'],['settings','Ayarlar']];
+  const tabs = [['menu','Menü'],['tables','Masalar'],['stations','İstasyonlar'],['staff','Personel'],['cari','Cari Hesaplar'],['settings','Ayarlar']];
   let body = ADMIN_TAB==='menu' ? renderAdminMenu()
     : ADMIN_TAB==='tables' ? renderAdminTables()
+    : ADMIN_TAB==='stations' ? renderAdminStations()
     : ADMIN_TAB==='staff' ? renderAdminStaff()
+    : ADMIN_TAB==='cari' ? renderCari()
     : renderAdminSettings();
   return `
     <div class="page-title">Yönetim</div>
@@ -1729,6 +2109,9 @@ async function addCategory(){
 
 function renderAdminTables(){
   return `
+    <div class="section-label">Akıllı QR Sistemi</div>
+    <p class="page-sub" style="margin-top:-6px;">Masaya özel QR yerine, tüm masalara aynı ortak kodu basıp müşterinin masa numarasını kendisi seçmesini sağlayabilirsiniz.</p>
+    <button class="btn sm" style="margin-bottom:18px;" onclick="openModal({type:'generalQr'})">Tüm Masalar İçin Tek (Genel) QR Kod</button>
     <div class="section-label">Bölgeler (Kategoriler)</div>
     <div class="form-inline">
       ${STATE.zones.map(z=>`<span class="zone-chip">${esc(z)} <button onclick="deleteZone('${esc(z).replace(/'/g,"\\'")}')">&times;</button></span>`).join('')}
@@ -1738,6 +2121,7 @@ function renderAdminTables(){
       <button class="btn ghost sm" onclick="addZone()">+ Bölge Ekle</button>
     </div>
     <div class="section-label">Masalar</div>
+    <p class="page-sub" style="margin-top:-6px;">Masaya özel QR isterseniz, aşağıdan ilgili masanın kendi kodunu da alabilirsiniz.</p>
     ${STATE.tables.map(t=>`
       <div class="item-row">
         <div class="nm">${esc(t.name)}</div>
@@ -1773,6 +2157,58 @@ async function addTable(){
   await sSet('seyir:tables',STATE.tables); render();
 }
 async function deleteTable(id){ if(tableOrders(id).length){ alert('Bu masada açık sipariş var, önce kapatın.'); return; } STATE.tables=STATE.tables.filter(t=>t.id!==id); await sSet('seyir:tables',STATE.tables); render(); }
+
+// ================= İSTASYONLAR (5 dinamik, yeniden isimlendirilebilen alan) =================
+function renderAdminStations(){
+  return `
+    <div class="section-label">Ortak İstasyon Şifresi</div>
+    <p class="page-sub" style="margin-top:-6px;">Mutfak/Bar/Nargile gibi üretim personeli, tek tek hesap açmaya gerek kalmadan bu ortak şifreyle giriş yapıp kendi istasyonunu seçebilir. Kişisel personel hesapları (Personel sekmesi) çalışmaya devam eder.</p>
+    <div class="form-inline">
+      <input id="set_stationpin" placeholder="4 haneli ortak şifre" maxlength="4" value="${esc(STATE.settings.stationPin||'')}">
+      <button class="btn sm" onclick="saveStationPin()">Kaydet</button>
+    </div>
+    <div class="section-label" style="margin-top:20px;">İstasyonlar</div>
+    <p class="page-sub" style="margin-top:-6px;">5 istasyon alanından dilediğinizi isimlendirip aktif/pasif yapabilirsiniz. Bir kategoriye dokunarak o kategoriyi bu istasyona atayabilir, tekrar dokunarak kaldırabilirsiniz. Atanmamış kategoriler tüm aktif istasyonlarda görünür.</p>
+    ${STATE.stations.map(s=>`
+      <div class="station-card ${s.active?'':'inactive'}">
+        <div class="row1">
+          <input style="flex:1;min-width:120px;padding:8px 10px;border-radius:8px;border:1px solid var(--line);" value="${esc(s.name)}" onchange="updateStationName('${s.id}',this.value)">
+          <label class="toggle"><input type="checkbox" ${s.active?'checked':''} onchange="toggleStationActive('${s.id}')"> Aktif</label>
+        </div>
+        <div>
+          ${STATE.menu.map(cat=>{
+            const assigned = STATE.catStation[cat.id]===s.id;
+            return `<span class="station-cat-chip ${assigned?'assigned':''}" style="cursor:pointer;" onclick="toggleCategoryStation('${cat.id}','${s.id}')">${esc(cat.cat)}</span>`;
+          }).join('')}
+        </div>
+      </div>
+    `).join('')}
+  `;
+}
+async function saveStationPin(){
+  const el = document.getElementById('set_stationpin');
+  const val = el.value.trim();
+  if(val.length!==4){ alert('4 haneli bir şifre girin.'); return; }
+  STATE.settings.stationPin = val;
+  await sSet('seyir:settings', STATE.settings);
+  showToast('Ortak istasyon şifresi kaydedildi ✓');
+  render();
+}
+async function updateStationName(id,val){
+  const s = findStation(id); if(!s) return;
+  const name = val.trim(); if(!name) return;
+  s.name = name; await sSet('seyir:stations', STATE.stations); render();
+}
+async function toggleStationActive(id){
+  const s = findStation(id); if(!s) return;
+  s.active = !s.active; await sSet('seyir:stations', STATE.stations); render();
+}
+async function toggleCategoryStation(catId, stationId){
+  const cur = STATE.catStation[catId];
+  if(cur===stationId){ delete STATE.catStation[catId]; } else { STATE.catStation[catId] = stationId; }
+  await sSet('seyir:catStation', STATE.catStation);
+  render();
+}
 
 function renderAdminStaff(){
   return `
@@ -1891,8 +2327,27 @@ function saveCustCart(){ if(!CUST_CART_TABLE) return; try{ sessionStorage.setIte
 function saveCustCartNotes(){ if(!CUST_CART_TABLE) return; try{ sessionStorage.setItem(custCartNoteKey(CUST_CART_TABLE), JSON.stringify(CUST_CART_NOTES)); }catch(e){} }
 function setCustCartNote(itemId, val){ CUST_CART_NOTES[itemId] = val; saveCustCartNotes(); } // render() ÇAĞIRMA — yazarken klavye kapanmasın
 
+// ---------- akıllı QR: masalarda tek/ortak QR kullanılıyorsa (URL'de masa parametresi
+// yoksa) müşteriden masa numarasını seçmesi istenir; masaya özel QR ise URL üzerinden
+// otomatik algılanır ve bu ekran hiç gösterilmez ----------
+function renderMusteriMasaSecim(){
+  return `
+  <div class="appbar"><div class="brand">${brandMarkHtml()}</div></div>
+  <div class="content public-menu">
+    <div class="page-title">Masanızı Seçin</div>
+    <div class="page-sub">Devam etmek için oturduğunuz masayı seçin.</div>
+    <div class="tables-grid">
+      ${STATE.tables.map(t=>`<div class="table-card" style="cursor:pointer;" onclick="goToCustomerTable('${t.id}')">
+        <h4>${esc(t.name)}</h4><div class="status-txt">${esc(t.zone||'')}</div>
+      </div>`).join('')}
+    </div>
+  </div>`;
+}
+function goToCustomerTable(tableId){ location.hash = '/musteri?masa='+tableId; }
+
 function renderMusteriSiparis(params){
   const tableId = params.get('masa');
+  if(!tableId) return renderMusteriMasaSecim();
   const table = findTable(tableId);
   if(!table) return `<div class="content"><div class="appbar"><div class="brand">${brandMarkHtml()}</div></div><p class="empty-note">Masa bulunamadı. Lütfen QR kodu tekrar okutun.</p></div>`;
   ensureCustCartLoaded(tableId);
