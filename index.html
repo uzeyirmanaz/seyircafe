@@ -399,6 +399,7 @@ const DEFAULT_SETTINGS = {
   instagramUsername: '',
   tiktokUsername: '',
   mapsUrl: 'https://maps.app.goo.gl/oAsHzkYzVyex5WN77',
+  showStock: true, // yönetici kapatırsa stok adetleri personel/müşteri ekranlarında gizlenir
 };
 const ROLE_LABEL = {yonetici:'Yönetici', kasiyer:'Kasiyer', garson:'Garson', mutfak:'Mutfak'};
 const ROLE_HOME = {yonetici:'/masalar', kasiyer:'/masalar', garson:'/masalar', mutfak:'/mutfak'};
@@ -413,10 +414,13 @@ const NAV_ITEMS = [
 // ---------- global state ----------
 let STATE = { menu:[], tables:[], zones:[], orders:[], bills:[], assign:{}, staff:[], cari:[], settings:{}, loaded:false };
 let CART = {};        // itemId -> qty (staff order-entry screen)
+let CART_NOTES = {};  // itemId -> not (staff order-entry screen)
 let CART_TABLE_ID = null;
 let CUST_CART = {};   // itemId -> qty (customer QR ordering screen)
+let CUST_CART_NOTES = {}; // itemId -> not (customer QR ordering screen)
 let CUST_CART_TABLE = null;
 let CUST_SUBMITTED = false;
+let RAPOR_BESTCAT = null; // Rapor > Çok Satanlar ekranında seçili kategori
 let PIN_BUF = '';
 let LOGIN_ERR = '';
 let ADMIN_TAB = 'menu';
@@ -590,19 +594,56 @@ function setupRealtimeSync(){
       try{
         const val = JSON.parse(snap.data().v);
         STATE[SYNC_KEY_TO_FIELD[key]] = val;
-        if(STATE.loaded) render();
+        LAST_STATE_SNAPSHOT = snapshotState();
+        if(STATE.loaded && !isTypingInApp()) render();
       }catch(e){ console.error('senkronizasyon hatası', key, e); }
     }, err => console.error('Firestore dinleyici hatası', key, err));
   });
 }
 
+// ---------- odak (focus) koruma: arka planda gelen veri yenilemeleri klavyeyi kapatmasın ----------
+function isTypingInApp(){
+  const ae = document.activeElement;
+  if(!ae) return false;
+  const tag = ae.tagName;
+  if(tag!=='INPUT' && tag!=='TEXTAREA') return false;
+  const type = (ae.type||'text').toLowerCase();
+  if(['button','checkbox','radio','range','submit','file','date'].includes(type)) return false;
+  const app = document.getElementById('app');
+  return !!(app && app.contains(ae));
+}
+// Herhangi bir input/textarea odağını kaybettiğinde (kullanıcı yazmayı bitirdiğinde)
+// kısa bir gecikmeyle ekranı güncel veriyle tazele.
+document.addEventListener('focusout', function(e){
+  const t = e.target;
+  if(t && (t.tagName==='INPUT' || t.tagName==='TEXTAREA')){
+    setTimeout(render, 80);
+  }
+}, true);
+
+function snapshotState(){
+  return JSON.stringify({menu:STATE.menu,tables:STATE.tables,zones:STATE.zones,orders:STATE.orders,bills:STATE.bills,assign:STATE.assign,staff:STATE.staff,cari:STATE.cari,settings:STATE.settings});
+}
+let LAST_STATE_SNAPSHOT = null;
+
 async function boot(){
   await loadState();
+  LAST_STATE_SNAPSHOT = snapshotState();
   render();
   if(FIREBASE_READY){
     setupRealtimeSync();       // Firebase varsa: anlık, sunucu-push tabanlı senkronizasyon
   }else{
-    setInterval(async ()=>{ await loadState(); render(); }, 2000); // Firebase yoksa: 2 sn'de bir yoklama
+    // Firebase yoksa: 2 sn'de bir yoklama. Veri gerçekten değişmediyse veya kullanıcı
+    // o an bir kutuya yazıyorsa ekranı YENİDEN ÇİZMİYORUZ — aksi halde her 2 saniyede
+    // bir input'lar odağını kaybedip mobilde klavye kapanıyordu.
+    setInterval(async ()=>{
+      await loadState();
+      const snap = snapshotState();
+      if(snap===LAST_STATE_SNAPSHOT) return;
+      LAST_STATE_SNAPSHOT = snap;
+      if(isTypingInApp()) return; // yazma bitince focusout dinleyicisi zaten tazeleyecek
+      render();
+    }, 2000);
   }
 }
 boot();
@@ -644,10 +685,29 @@ function render(){
   // sorunu yaşanmaz.
   const isNavigation = (LAST_RENDER_PATH !== path);
   const prevScrollY = window.scrollY;
+
+  // Odak koruma: yeniden çizmeden önce hangi input'ta olduğumuzu ve imleç
+  // konumunu hatırla, çizimden sonra aynı input'a (varsa) odağı geri ver.
+  const ae = document.activeElement;
+  let focusInfo = null;
+  if(ae && ae.id && app.contains(ae) && (ae.tagName==='INPUT'||ae.tagName==='TEXTAREA'||ae.tagName==='SELECT')){
+    focusInfo = { id: ae.id, selStart: (typeof ae.selectionStart==='number'?ae.selectionStart:null), selEnd: (typeof ae.selectionEnd==='number'?ae.selectionEnd:null) };
+  }
+
   app.innerHTML = html + renderModalOverlay();
   if(isNavigation){ window.scrollTo(0,0); }
   else{ window.scrollTo(0, prevScrollY); }
   LAST_RENDER_PATH = path;
+
+  if(focusInfo){
+    const el = document.getElementById(focusInfo.id);
+    if(el){
+      el.focus();
+      if(focusInfo.selStart!=null && typeof el.setSelectionRange==='function'){
+        try{ el.setSelectionRange(focusInfo.selStart, focusInfo.selEnd); }catch(e){}
+      }
+    }
+  }
 }
 
 function shell(session, activePath, bodyHtml){
@@ -678,6 +738,8 @@ function renderModalOverlay(){
   else if(MODAL.type==='closeBill') inner = closeBillModalHtml(MODAL.tableId);
   else if(MODAL.type==='cariDetail') inner = cariDetailModalHtml(MODAL.cariId);
   else if(MODAL.type==='cariPay') inner = cariPayModalHtml(MODAL.cariId);
+  else if(MODAL.type==='moveItem') inner = moveItemModalHtml(MODAL.orderId, MODAL.itemIdx);
+  else if(MODAL.type==='moveTable') inner = moveTableModalHtml(MODAL.tableId);
   return `<div class="modal-bg" onclick="if(event.target===this) closeModal()"><div class="modal">${inner}</div></div>`;
 }
 
@@ -753,6 +815,7 @@ function renderMasalar(){
           ${total>0?`<div class="amt">${money(total)}</div>`:''}
           ${waiter?`<div class="waiter">Garson: ${esc(waiter.name)}</div>`:''}
           ${(canQuickClose && st!=='bos')?`<button class="btn ghost sm" style="margin-top:8px;width:100%;" onclick="event.stopPropagation(); openModal({type:'closeBill',tableId:'${t.id}'})">Hesabı Kapat</button>`:''}
+          ${(canQuickClose && st!=='bos')?`<button class="btn ghost sm" style="margin-top:6px;width:100%;" onclick="event.stopPropagation(); openModal({type:'moveTable',tableId:'${t.id}'})">Taşı / Birleştir</button>`:''}
         </div>`;
       }).join('')}
     </div>
@@ -762,12 +825,16 @@ function setMasalarZone(z){ MASALAR_ZONE=z; render(); }
 
 // ================= ORDER ENTRY (per table, staff) =================
 function cartKey(tableId){ return 'seyir_cart_'+tableId; }
+function cartNoteKey(tableId){ return 'seyir_cartnotes_'+tableId; }
 function ensureCartLoaded(tableId){
   if(CART_TABLE_ID===tableId) return;
   CART_TABLE_ID = tableId;
   try{ CART = JSON.parse(sessionStorage.getItem(cartKey(tableId))||'{}'); }catch(e){ CART = {}; }
+  try{ CART_NOTES = JSON.parse(sessionStorage.getItem(cartNoteKey(tableId))||'{}'); }catch(e){ CART_NOTES = {}; }
 }
 function saveCart(){ if(!CART_TABLE_ID) return; try{ sessionStorage.setItem(cartKey(CART_TABLE_ID), JSON.stringify(CART)); }catch(e){} }
+function saveCartNotes(){ if(!CART_TABLE_ID) return; try{ sessionStorage.setItem(cartNoteKey(CART_TABLE_ID), JSON.stringify(CART_NOTES)); }catch(e){} }
+function setCartNote(itemId, val){ CART_NOTES[itemId] = val; saveCartNotes(); } // render() ÇAĞIRMA — yazarken odak kaybolmasın
 
 function renderOrderEntry(params){
   const tableId = params.get('id');
@@ -776,6 +843,8 @@ function renderOrderEntry(params){
   ensureCartLoaded(tableId);
   const session = getSession();
   const canClose = session.role==='kasiyer' || session.role==='yonetici';
+  const canManage = session.role==='kasiyer' || session.role==='yonetici'; // yanlış ürün silme / taşıma / masa birleştirme yetkisi
+  const hasPending = tableOrders(tableId).some(o=>o.status==='yeni');
 
   if(CUR_CAT===null || !STATE.menu.find(c=>c.id===CUR_CAT)) CUR_CAT = STATE.menu[0] ? STATE.menu[0].id : null;
   const activeCat = STATE.menu.find(c=>c.id===CUR_CAT) || STATE.menu[0];
@@ -798,13 +867,14 @@ function renderOrderEntry(params){
     <div class="item-grid">
       ${activeCat ? activeCat.items.map(it=>{
         const qty = CART[it.id]||0;
-        const soldOut = !it.available || (it.trackStock && it.stock<=0);
-        return `<button class="item-tile ${soldOut?'sold-out':''}" ${soldOut?'disabled':`onclick="cartAdd('${it.id}')"`}>
+        const outOfStock = it.trackStock && it.stock<=0;
+        const blocked = !it.available; // sadece "mevcut değil" işaretli ürünler tamamen engellenir
+        return `<button class="item-tile ${outOfStock?'sold-out':''}" ${blocked?'disabled':`onclick="cartAdd('${it.id}')"`}>
           ${qty>0?`<div class="badge-qty">${qty}</div>`:''}
           ${it.photo?`<div class="tile-photo" style="background-image:url('${it.photo}')"></div>`:''}
           <div class="nm">${esc(it.name)}</div>
           <div class="pr">${money(it.price)}</div>
-          ${it.trackStock?`<div class="stock-tag ${it.stock<=3?'low':''}">${it.stock<=0?'Tükendi':'Stok: '+it.stock}</div>`:''}
+          ${(it.trackStock && STATE.settings.showStock)?`<div class="stock-tag ${it.stock<=3?'low':''}">${it.stock<0?('Eksi: '+Math.abs(it.stock)+' adet'):(it.stock<=0?'Tükendi (yine de girilebilir)':'Stok: '+it.stock)}</div>`:''}
         </button>`;
       }).join('') : ''}
     </div>
@@ -814,27 +884,35 @@ function renderOrderEntry(params){
       <div class="adisyon-list">
         ${Object.entries(CART).map(([id,qty])=>{
           const it = findItem(id);
-          return `<div class="adisyon-row">
+          return `<div class="adisyon-row" style="flex-wrap:wrap;">
             <div><div class="nm">${esc(it.name)}</div><div class="meta">${money(it.price)} adet</div></div>
             <div style="display:flex;align-items:center;gap:10px;">
               <button class="btn ghost sm" onclick="cartAdd('${id}',-1)">−</button>
               <b>${qty}</b>
               <button class="btn ghost sm" onclick="cartAdd('${id}',1)">+</button>
             </div>
+            <input id="note_${id}" style="width:100%;padding:7px 9px;border-radius:7px;border:1px solid var(--line);font-size:12.5px;" placeholder="Not ekle (örn. şekersiz, az pişmiş...)" value="${esc(CART_NOTES[id]||'')}" oninput="setCartNote('${id}', this.value)">
           </div>`;
         }).join('')}
       </div>
     ` : ''}
 
+    ${hasPending ? `<p class="page-sub" style="color:var(--danger);font-weight:700;">⏳ Bu masada müşteri tarafından girilmiş, onay bekleyen sipariş var.</p>` : ''}
     ${existing.length ? `
       <div class="section-label">Bu Masadaki Adisyon</div>
       <div class="adisyon-list">
-        ${existing.map(o=>o.items.map(it=>`<div class="adisyon-row">
-            <div><div class="nm">${it.qty}× ${esc(it.name)}</div><div class="meta">${orderStaffLabel(o)} · <span class="status-pill status-${o.status}">${statusLabel(o.status)}</span></div></div>
-            <div>${money(it.price*it.qty)}</div>
+        ${existing.map(o=>o.items.map((it,idx)=>`<div class="adisyon-row" style="flex-wrap:wrap;">
+            <div><div class="nm">${it.qty}× ${esc(it.name)}</div><div class="meta">${orderStaffLabel(o)} · <span class="status-pill status-${o.status}">${statusLabel(o.status)}</span>${it.note?` · <span style="color:var(--warn);font-weight:700;">Not: ${esc(it.note)}</span>`:''}</div></div>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <span>${money(it.price*it.qty)}</span>
+              ${o.status==='yeni'?`<button class="btn sm" onclick="approveOrder('${o.id}')">Onayla</button>`:''}
+              ${canManage?`<button class="btn ghost sm" onclick="openModal({type:'moveItem',orderId:'${o.id}',itemIdx:${idx}})">Taşı</button>`:''}
+              ${canManage?`<button class="btn ghost sm" onclick="deleteOrderItem('${o.id}',${idx})">Sil</button>`:''}
+            </div>
           </div>`).join('')).join('')}
       </div>
       <div class="grand-total-bar"><span>Toplam</span><span>${money(total)}</span></div>
+      ${canManage?`<div style="margin-bottom:10px;"><button class="btn ghost block" onclick="openModal({type:'moveTable',tableId:'${tableId}'})">Masayı Taşı / Birleştir</button></div>`:''}
       <div style="display:flex; gap:10px;">
         <button class="btn ghost block" onclick="location.hash='/masalar'">Masalara Dön</button>
         <button class="btn danger block" ${canClose?'':'disabled'} onclick="openModal({type:'closeBill',tableId:'${tableId}'})">Adisyonu Kapat</button>
@@ -854,9 +932,11 @@ function cartAdd(itemId, delta){
   const it = findItem(itemId);
   const cur = CART[itemId]||0;
   let next = Math.max(0, cur+delta);
+  // Personel, stokta görünmeyen bir ürünü de sipariş edebilir (örn. mutfakta
+  // aslında var ama sisteme işlenmemiş) — bu durumda engellemek yerine sadece
+  // uyarı veriyoruz; stok gönderim sırasında eksiye düşecek.
   if(it && it.trackStock && delta>0 && next>it.stock){
-    showToast(it.stock>0 ? ('Stokta sadece '+it.stock+' adet var') : 'Bu üründen stok kalmadı');
-    next = cur;
+    showToast('Uyarı: bu üründen stok yetersiz görünüyor, sipariş stoğu eksiye düşürecek');
   }
   if(next===0) delete CART[itemId]; else CART[itemId]=next;
   saveCart();
@@ -864,16 +944,22 @@ function cartAdd(itemId, delta){
 }
 async function sendOrder(tableId){
   const session = getSession();
-  const items = Object.entries(CART).map(([id,qty])=>{ const it=findItem(id); return {id,name:it.name,price:it.price,qty}; });
+  const items = Object.entries(CART).map(([id,qty])=>{ const it=findItem(id); return {id,name:it.name,price:it.price,qty,note:(CART_NOTES[id]||'').trim()}; });
   if(!items.length) return;
-  items.forEach(oi=>{ const it=findItem(oi.id); if(it && it.trackStock){ it.stock = Math.max(0, it.stock-oi.qty); } });
-  const order = { id:genId('o'), tableId, items, status:'yeni', staffId:session.staffId, source:'staff', createdAt:Date.now() };
+  let wentNegative = false;
+  items.forEach(oi=>{ const it=findItem(oi.id); if(it && it.trackStock){ it.stock = it.stock - oi.qty; if(it.stock<0) wentNegative = true; } });
+  // Personel siparişi zaten personel tarafından kontrol edilip gönderildiği için
+  // onay beklemeden doğrudan hazırlığa düşer (onay adımı sadece müşteri QR
+  // siparişleri içindir).
+  const order = { id:genId('o'), tableId, items, status:'hazirlaniyor', staffId:session.staffId, source:'staff', createdAt:Date.now() };
   STATE.orders.push(order);
   if(!STATE.assign[tableId]) STATE.assign[tableId] = session.staffId;
   await Promise.all([ sSet('seyir:orders', STATE.orders), sSet('seyir:assign', STATE.assign), sSet('seyir:menu', STATE.menu) ]);
   CART = {};
+  CART_NOTES = {};
   saveCart();
-  showToast('Sipariş mutfağa gönderildi ✓');
+  saveCartNotes();
+  showToast(wentNegative ? 'Sipariş gönderildi — bazı ürünler stokta eksiye düştü ✓' : 'Sipariş mutfağa gönderildi ✓');
   render();
 }
 
@@ -985,19 +1071,23 @@ function renderMutfak(){
   const rdy = STATE.orders.filter(o=>o.status==='hazir').sort((a,b)=>a.createdAt-b.createdAt);
   function ticket(o, cls, nextStatus, nextLabel){
     const mins = Math.max(0, Math.round((Date.now()-o.createdAt)/60000));
+    const pending = o.status==='yeni';
     return `<div class="ticket ${cls}">
       <div class="head"><span class="tname">${esc(findTable(o.tableId)?.name||o.tableId)}</span><span class="time">${mins} dk</span></div>
-      <div class="waiter">${orderStaffLabel(o)}</div>
-      <ul>${o.items.map(it=>`<li>${it.qty}× ${esc(it.name)}</li>`).join('')}</ul>
-      ${nextStatus?`<button class="btn sm" onclick="advanceOrder('${o.id}','${nextStatus}')">${nextLabel}</button>`:''}
+      <div class="waiter">${orderStaffLabel(o)}${pending?' · <b style="color:var(--danger);">Onay bekliyor</b>':''}</div>
+      <ul>${o.items.map(it=>`<li>${it.qty}× ${esc(it.name)}${it.note?` <span style="color:var(--warn);font-weight:700;">(${esc(it.note)})</span>`:''}</li>`).join('')}</ul>
+      <div style="display:flex;gap:8px;">
+        ${nextStatus?`<button class="btn sm" onclick="advanceOrder('${o.id}','${nextStatus}')">${nextLabel}</button>`:''}
+        ${pending?`<button class="btn ghost sm" onclick="rejectOrder('${o.id}')">Reddet</button>`:''}
+      </div>
     </div>`;
   }
   return `
     <div class="page-title">Mutfak Ekranı</div>
     <div class="page-sub">Siparişler otomatik olarak günceller.</div>
     <div class="kitchen-cols">
-      <div class="kcol"><div class="kcol-head"><b>Yeni</b><span class="count">${yeni.length}</span></div>
-        ${yeni.length?yeni.map(o=>ticket(o,'','hazirlaniyor','Hazırlanıyor →')).join(''):'<p class="empty-note">Bekleyen yok</p>'}
+      <div class="kcol"><div class="kcol-head"><b>Yeni (Onay Bekleyen)</b><span class="count">${yeni.length}</span></div>
+        ${yeni.length?yeni.map(o=>ticket(o,'','hazirlaniyor','✓ Onayla')).join(''):'<p class="empty-note">Bekleyen yok</p>'}
       </div>
       <div class="kcol"><div class="kcol-head"><b>Hazırlanıyor</b><span class="count">${haz.length}</span></div>
         ${haz.length?haz.map(o=>ticket(o,'warn','hazir','Hazır →')).join(''):'<p class="empty-note">Yok</p>'}
@@ -1014,13 +1104,108 @@ async function advanceOrder(orderId, nextStatus){
   await sSet('seyir:orders', STATE.orders);
   render();
 }
+// Müşterinin (QR) gönderdiği, henüz onaylanmamış siparişi personelin onaylaması —
+// onaylanınca masadaki kırmızı "onay bekliyor" ışığı söner ve sipariş hazırlığa düşer.
+async function approveOrder(orderId){ await advanceOrder(orderId, 'hazirlaniyor'); showToast('Sipariş onaylandı ✓'); }
+async function rejectOrder(orderId){
+  const o = STATE.orders.find(x=>x.id===orderId); if(!o) return;
+  if(!confirm('Bu siparişi reddetmek istediğinize emin misiniz? Stok iade edilecek.')) return;
+  o.items.forEach(it=>{ const mi=findItem(it.id); if(mi && mi.trackStock){ mi.stock += it.qty; } });
+  STATE.orders = STATE.orders.filter(x=>x.id!==orderId);
+  await Promise.all([ sSet('seyir:orders', STATE.orders), sSet('seyir:menu', STATE.menu) ]);
+  showToast('Sipariş reddedildi');
+  render();
+}
+
+// ---------- yanlış ürün silme (kasiyer / yönetici) ----------
+async function deleteOrderItem(orderId, itemIdx){
+  const session = getSession();
+  if(!(session.role==='kasiyer' || session.role==='yonetici')) return;
+  const o = STATE.orders.find(x=>x.id===orderId); if(!o) return;
+  const removed = o.items[itemIdx]; if(!removed) return;
+  if(!confirm(removed.qty+'× '+removed.name+' adisyondan silinsin mi?')) return;
+  const mi = findItem(removed.id);
+  if(mi && mi.trackStock){ mi.stock += removed.qty; }
+  o.items.splice(itemIdx,1);
+  if(o.items.length===0){ STATE.orders = STATE.orders.filter(x=>x.id!==orderId); }
+  await Promise.all([ sSet('seyir:orders', STATE.orders), sSet('seyir:menu', STATE.menu) ]);
+  showToast('Ürün adisyondan silindi ✓');
+  render();
+}
+
+// ---------- masalar arası ürün taşıma (kasiyer / yönetici) ----------
+function moveItemModalHtml(orderId, itemIdx){
+  const o = STATE.orders.find(x=>x.id===orderId);
+  if(!o) return `<p>Sipariş bulunamadı.</p>`;
+  const it = o.items[itemIdx];
+  if(!it) return `<p>Ürün bulunamadı.</p>`;
+  const others = STATE.tables.filter(t=>t.id!==o.tableId);
+  return `
+    <span class="close-x" onclick="closeModal()">✕</span>
+    <h3>Ürünü Taşı</h3>
+    <p class="page-sub">${it.qty}× ${esc(it.name)} — hangi masaya taşınsın?</p>
+    <div class="form-inline">
+      ${others.map(t=>`<button class="btn ghost sm" onclick="confirmMoveItem('${orderId}',${itemIdx},'${t.id}')">${esc(t.name)}</button>`).join('')}
+    </div>
+  `;
+}
+async function confirmMoveItem(orderId, itemIdx, targetTableId){
+  const session = getSession();
+  if(!(session.role==='kasiyer' || session.role==='yonetici')) return;
+  const o = STATE.orders.find(x=>x.id===orderId); if(!o) return;
+  const it = o.items[itemIdx]; if(!it) return;
+  o.items.splice(itemIdx,1);
+  if(o.items.length===0){ STATE.orders = STATE.orders.filter(x=>x.id!==o.id); }
+  const newOrder = { id:genId('o'), tableId: targetTableId, items:[it], status:o.status, staffId:session.staffId, source:o.source, createdAt:Date.now() };
+  STATE.orders.push(newOrder);
+  if(!STATE.assign[targetTableId]) STATE.assign[targetTableId] = session.staffId;
+  await Promise.all([ sSet('seyir:orders', STATE.orders), sSet('seyir:assign', STATE.assign) ]);
+  closeModal();
+  showToast('Ürün taşındı ✓');
+  location.hash = '/masalar';
+}
+
+// ---------- masa birleştirme / masayı olduğu gibi başka masaya taşıma (kasiyer / yönetici) ----------
+function moveTableModalHtml(tableId){
+  const table = findTable(tableId);
+  if(!table) return `<p>Masa bulunamadı.</p>`;
+  const others = STATE.tables.filter(t=>t.id!==tableId);
+  return `
+    <span class="close-x" onclick="closeModal()">✕</span>
+    <h3>${esc(table.name)} — Taşı / Birleştir</h3>
+    <p class="page-sub">Bu masadaki tüm sipariş(ler) seçtiğiniz masaya taşınır. Hedef masada zaten açık adisyon varsa otomatik birleştirilir.</p>
+    <div class="form-inline">
+      ${others.map(t=>`<button class="btn ghost sm" onclick="confirmMoveTable('${tableId}','${t.id}')">${esc(t.name)}${tableOrders(t.id).length?' (Dolu)':''}</button>`).join('')}
+    </div>
+  `;
+}
+async function confirmMoveTable(fromId, toId){
+  const session = getSession();
+  if(!(session.role==='kasiyer' || session.role==='yonetici')) return;
+  const moved = STATE.orders.filter(o=>o.tableId===fromId);
+  if(!moved.length){ showToast('Bu masada taşınacak sipariş yok'); closeModal(); return; }
+  moved.forEach(o=>{ o.tableId = toId; });
+  if(!STATE.assign[toId]) STATE.assign[toId] = STATE.assign[fromId];
+  delete STATE.assign[fromId];
+  await Promise.all([ sSet('seyir:orders', STATE.orders), sSet('seyir:assign', STATE.assign) ]);
+  closeModal();
+  showToast('Masa taşındı / birleştirildi ✓');
+  render();
+}
 
 // ================= RAPOR =================
+function ymd(ts){
+  const d = new Date(ts);
+  const y = d.getFullYear(), m = String(d.getMonth()+1).padStart(2,'0'), day = String(d.getDate()).padStart(2,'0');
+  return `${y}-${m}-${day}`;
+}
 function billsInRange(start, end){
+  // Tarihleri Date nesnesi yerine düz "YYYY-MM-DD" metin olarak karşılaştırıyoruz;
+  // böylece saat dilimi / gün sonu ayrıştırma kaynaklı hatalı ciro filtreleme sorunu oluşmaz.
   return STATE.bills.filter(b=>{
-    const d = new Date(b.closedAt);
-    if(start){ const s = new Date(start+'T00:00:00'); if(d < s) return false; }
-    if(end){ const e = new Date(end+'T23:59:59'); if(d > e) return false; }
+    const day = ymd(b.closedAt);
+    if(start && day < start) return false;
+    if(end && day > end) return false;
     return true;
   });
 }
@@ -1033,6 +1218,7 @@ function raporDatesChanged(){
 function raporToday(){ const d=new Date().toISOString().slice(0,10); setRaporRange(d,d); }
 function raporThisMonth(){ const n=new Date(); const s=new Date(n.getFullYear(),n.getMonth(),1).toISOString().slice(0,10); setRaporRange(s, n.toISOString().slice(0,10)); }
 function raporAllTime(){ setRaporRange(null,null); }
+function setRaporBestCat(cid){ RAPOR_BESTCAT = cid; render(); }
 const PAYMENT_LABEL = {Nakit:'Nakit', Kart:'Kredi Kartı', Cari:'Açık Hesap (Cari)'};
 
 function renderRapor(){
@@ -1042,9 +1228,26 @@ function renderRapor(){
   const byDay = {};
   filtered.forEach(b=>{ const d=new Date(b.closedAt).toLocaleDateString('tr-TR'); byDay[d]=(byDay[d]||0)+b.total; });
 
-  const byItem = {};
-  filtered.forEach(b=>b.orders.forEach(o=>o.items.forEach(it=>{ byItem[it.name]=(byItem[it.name]||0)+it.qty; })));
-  const topItems = Object.entries(byItem).sort((a,b)=>b[1]-a[1]).slice(0,6);
+  // Çok satan ürünler: menü kategorisi gibi sekmeli — bir kategoriye "girince"
+  // o kategorideki her ürünün kaç adet satıldığı listelenir.
+  const byCatItem = {}; // catId -> {name, qty:{itemName:qty}}
+  filtered.forEach(b=>b.orders.forEach(o=>o.items.forEach(it=>{
+    const mi = findItem(it.id);
+    const catId = mi ? mi.catId : '__other__';
+    const catName = mi ? mi.catName : 'Diğer / Silinmiş Ürünler';
+    if(!byCatItem[catId]) byCatItem[catId] = { name: catName, qty: {} };
+    byCatItem[catId].qty[it.name] = (byCatItem[catId].qty[it.name]||0) + it.qty;
+  })));
+  const bestsellerCats = Object.keys(byCatItem);
+  if(RAPOR_BESTCAT===null || (RAPOR_BESTCAT!=='__all__' && !byCatItem[RAPOR_BESTCAT])) RAPOR_BESTCAT = '__all__';
+  let bestsellerRows;
+  if(RAPOR_BESTCAT==='__all__'){
+    const allQty = {};
+    bestsellerCats.forEach(cid=>Object.entries(byCatItem[cid].qty).forEach(([n,q])=>{ allQty[n]=(allQty[n]||0)+q; }));
+    bestsellerRows = Object.entries(allQty).sort((a,b)=>b[1]-a[1]);
+  }else{
+    bestsellerRows = Object.entries(byCatItem[RAPOR_BESTCAT].qty).sort((a,b)=>b[1]-a[1]);
+  }
 
   const byStaff = {};
   filtered.forEach(b=>b.orders.forEach(o=>{
@@ -1100,9 +1303,13 @@ function renderRapor(){
     <div class="table-list">
       ${Object.keys(byDay).length? Object.entries(byDay).reverse().map(([d,t])=>`<div class="r"><span>${d}</span><b>${money(t)}</b></div>`).join('') : '<div class="r"><span>Bu aralıkta veri yok</span></div>'}
     </div>
-    <div class="section-label">En Çok Satan Ürünler</div>
+    <div class="section-label">Çok Satan Ürünler — Kategoriye Göre</div>
+    <div class="cat-tabs">
+      <button class="${RAPOR_BESTCAT==='__all__'?'active':''}" onclick="setRaporBestCat('__all__')">Tümü</button>
+      ${bestsellerCats.map(cid=>`<button class="${RAPOR_BESTCAT===cid?'active':''}" onclick="setRaporBestCat('${cid}')">${esc(byCatItem[cid].name)}</button>`).join('')}
+    </div>
     <div class="table-list">
-      ${topItems.length? topItems.map(([n,q])=>`<div class="r"><span>${esc(n)}</span><b>${q} adet</b></div>`).join('') : '<div class="r"><span>Veri yok</span></div>'}
+      ${bestsellerRows.length? bestsellerRows.map(([n,q])=>`<div class="r"><span>${esc(n)}</span><b>${q} adet</b></div>`).join('') : '<div class="r"><span>Bu aralıkta veri yok</span></div>'}
     </div>
     <div class="section-label">Garson Bazlı Ciro</div>
     <div class="table-list">
@@ -1112,10 +1319,11 @@ function renderRapor(){
     <div class="section-label">Canlı Stok Durumu</div>
     <div class="table-list">
       ${stockItems.length? stockItems.map(it=>{
+        const negative = it.stock<0;
         const soldOut = it.stock<=0;
         const low = !soldOut && it.stock<=3;
-        const color = soldOut? 'var(--danger)' : (low? 'var(--warn)' : 'var(--ink)');
-        const txt = soldOut? 'Tükendi' : (it.stock+' adet');
+        const color = negative? 'var(--danger)' : (soldOut? 'var(--warn)' : (low? 'var(--warn)' : 'var(--ink)'));
+        const txt = negative? (Math.abs(it.stock)+' adet EKSİ (stoksuz satıldı)') : (soldOut? 'Tükendi' : (it.stock+' adet'));
         return `<div class="r"><span>${esc(it.name)} <span style="color:var(--ink-faint);">· ${esc(it.catName)}</span></span><b style="color:${color};">${txt}</b></div>`;
       }).join('') : '<div class="r"><span>Stok takibi açık ürün yok (Yönetim → Menü kısmından açabilirsiniz)</span></div>'}
     </div>
@@ -1233,7 +1441,7 @@ function renderAdminMenu(){
           <input class="pr" type="number" value="${it.price}" onchange="updateItemPrice('${cat.id}','${it.id}',this.value)">
           <label class="toggle"><input type="checkbox" ${it.available?'checked':''} onchange="toggleAvailable('${cat.id}','${it.id}')"> Mevcut</label>
           <label class="toggle"><input type="checkbox" ${it.trackStock?'checked':''} onchange="toggleStockTracking('${cat.id}','${it.id}')"> Stok Takibi</label>
-          ${it.trackStock?`<input class="pr" type="number" value="${it.stock||0}" title="Stok adedi" onchange="updateItemStock('${cat.id}','${it.id}',this.value)">`:''}
+          ${it.trackStock?`<input class="pr" type="number" value="${it.stock||0}" title="Stok adedi (eksi girilebilir)" style="${it.stock<0?'color:var(--danger);font-weight:800;':''}" onchange="updateItemStock('${cat.id}','${it.id}',this.value)">`:''}
           <label class="btn ghost sm" style="cursor:pointer;">${it.photo?'Foto Değiştir':'Foto Ekle'}
             <input type="file" accept="image/*" style="display:none;" onchange="handlePhotoUpload('${cat.id}','${it.id}',this)">
           </label>
@@ -1257,7 +1465,7 @@ function renderAdminMenu(){
 async function updateItemPrice(catId,itemId,val){ const cat=STATE.menu.find(c=>c.id===catId); const it=cat.items.find(i=>i.id===itemId); it.price=parseFloat(val)||0; await sSet('seyir:menu',STATE.menu); render(); }
 async function toggleAvailable(catId,itemId){ const cat=STATE.menu.find(c=>c.id===catId); const it=cat.items.find(i=>i.id===itemId); it.available=!it.available; await sSet('seyir:menu',STATE.menu); render(); }
 async function toggleStockTracking(catId,itemId){ const cat=STATE.menu.find(c=>c.id===catId); const it=cat.items.find(i=>i.id===itemId); it.trackStock=!it.trackStock; if(it.trackStock && !it.stock) it.stock=0; await sSet('seyir:menu',STATE.menu); render(); }
-async function updateItemStock(catId,itemId,val){ const cat=STATE.menu.find(c=>c.id===catId); const it=cat.items.find(i=>i.id===itemId); it.stock=Math.max(0, parseInt(val)||0); await sSet('seyir:menu',STATE.menu); render(); }
+async function updateItemStock(catId,itemId,val){ const cat=STATE.menu.find(c=>c.id===catId); const it=cat.items.find(i=>i.id===itemId); it.stock=parseInt(val)||0; await sSet('seyir:menu',STATE.menu); render(); }
 async function deleteItem(catId,itemId){ const cat=STATE.menu.find(c=>c.id===catId); cat.items=cat.items.filter(i=>i.id!==itemId); await sSet('seyir:menu',STATE.menu); render(); }
 async function addItem(catId){
   const n=document.getElementById('nn_'+catId), p=document.getElementById('np_'+catId);
@@ -1353,6 +1561,11 @@ async function addStaff(){
 function renderAdminSettings(){
   const s = STATE.settings;
   return `
+    <div class="section-label">Stok Görünürlüğü</div>
+    <label class="toggle" style="font-size:13.5px;margin-bottom:10px;">
+      <input type="checkbox" ${s.showStock?'checked':''} onchange="toggleShowStock()"> Personel sipariş ekranında stok adetlerini göster
+    </label>
+    <p class="page-sub" style="margin-top:-6px;">Kapatırsanız personel ekranında ürünlerin kalan stok sayısı gizlenir (tükendi/eksi durumu yine de takip edilir).</p>
     <div class="section-label">Wi-Fi</div>
     <div class="form-inline">
       <input id="set_wifissid" placeholder="Wi-Fi Adı" value="${esc(s.wifiSsid)}">
@@ -1372,6 +1585,12 @@ function renderAdminSettings(){
     </div>
     <p class="page-sub">Bu bilgiler müşteri sipariş sayfasındaki (QR) ikonlarda kullanılır.</p>
   `;
+}
+async function toggleShowStock(){
+  STATE.settings.showStock = !STATE.settings.showStock;
+  await sSet('seyir:settings', STATE.settings);
+  showToast(STATE.settings.showStock ? 'Stok adetleri gösteriliyor' : 'Stok adetleri gizlendi');
+  render();
 }
 async function saveWifiSettings(){
   STATE.settings.wifiSsid = document.getElementById('set_wifissid').value.trim();
@@ -1412,13 +1631,17 @@ function renderPublicMenu(){
 
 // ================= MÜŞTERİ SİPARİŞ (QR ordering, no login) =================
 function custCartKey(tableId){ return 'seyir_musteri_cart_'+tableId; }
+function custCartNoteKey(tableId){ return 'seyir_musteri_cartnotes_'+tableId; }
 function ensureCustCartLoaded(tableId){
   if(CUST_CART_TABLE===tableId) return;
   CUST_CART_TABLE = tableId;
   try{ CUST_CART = JSON.parse(sessionStorage.getItem(custCartKey(tableId))||'{}'); }catch(e){ CUST_CART = {}; }
+  try{ CUST_CART_NOTES = JSON.parse(sessionStorage.getItem(custCartNoteKey(tableId))||'{}'); }catch(e){ CUST_CART_NOTES = {}; }
   CUST_SUBMITTED = false;
 }
 function saveCustCart(){ if(!CUST_CART_TABLE) return; try{ sessionStorage.setItem(custCartKey(CUST_CART_TABLE), JSON.stringify(CUST_CART)); }catch(e){} }
+function saveCustCartNotes(){ if(!CUST_CART_TABLE) return; try{ sessionStorage.setItem(custCartNoteKey(CUST_CART_TABLE), JSON.stringify(CUST_CART_NOTES)); }catch(e){} }
+function setCustCartNote(itemId, val){ CUST_CART_NOTES[itemId] = val; saveCustCartNotes(); } // render() ÇAĞIRMA — yazarken klavye kapanmasın
 
 function renderMusteriSiparis(params){
   const tableId = params.get('masa');
@@ -1430,6 +1653,7 @@ function renderMusteriSiparis(params){
   const activeCat = STATE.menu.find(c=>c.id===CUST_CAT) || STATE.menu[0];
   const cartCount = Object.values(CUST_CART).reduce((a,b)=>a+b,0);
   const cartTotal = Object.entries(CUST_CART).reduce((s,[id,qty])=>{ const it=findItem(id); return s+(it?it.price*qty:0); },0);
+  const myOrders = tableOrders(tableId).filter(o=>o.source==='musteri');
 
   return `
   <div class="appbar"><div class="brand">${brandMarkHtml()}</div></div>
@@ -1438,7 +1662,7 @@ function renderMusteriSiparis(params){
     <div class="page-sub">Menüden seçim yapıp doğrudan sipariş gönderebilirsiniz.</div>
     ${iconRowHtml()}
     ${CUST_SUBMITTED ? `
-      <div class="empty-note">✅ Siparişiniz alındı, teşekkür ederiz!<br>
+      <div class="empty-note">⏳ Siparişiniz alındı, personelimizin onayını bekliyor.<br>Onaylandığında hazırlanmaya başlanacaktır.<br>
         <button class="btn sm" style="margin-top:12px;" onclick="CUST_SUBMITTED=false; render();">Yeni Sipariş Ekle</button>
       </div>
     ` : `
@@ -1462,17 +1686,27 @@ function renderMusteriSiparis(params){
         <div class="adisyon-list">
           ${Object.entries(CUST_CART).map(([id,qty])=>{
             const it = findItem(id);
-            return `<div class="adisyon-row">
+            return `<div class="adisyon-row" style="flex-wrap:wrap;">
               <div><div class="nm">${esc(it.name)}</div><div class="meta">${money(it.price)}</div></div>
               <div style="display:flex;align-items:center;gap:10px;">
                 <button class="btn ghost sm" onclick="custCartAdd('${id}',-1)">−</button><b>${qty}</b>
                 <button class="btn ghost sm" onclick="custCartAdd('${id}',1)">+</button>
               </div>
+              <input id="custnote_${id}" style="width:100%;padding:7px 9px;border-radius:7px;border:1px solid var(--line);font-size:12.5px;" placeholder="Not ekle (örn. şekersiz, az pişmiş...)" value="${esc(CUST_CART_NOTES[id]||'')}" oninput="setCustCartNote('${id}', this.value)">
             </div>`;
           }).join('')}
         </div>
       ` : `<p class="empty-note">Sepetiniz boş, ürünlere dokunarak ekleyin.</p>`}
     `}
+    ${myOrders.length ? `
+      <div class="section-label">Siparişleriniz</div>
+      <div class="adisyon-list">
+        ${myOrders.map(o=>o.items.map(it=>`<div class="adisyon-row">
+            <div><div class="nm">${it.qty}× ${esc(it.name)}</div>${it.note?`<div class="meta">Not: ${esc(it.note)}</div>`:''}</div>
+            <span class="status-pill ${o.status==='yeni'?'status-yeni':'status-'+o.status}">${o.status==='yeni'?'Onay Bekliyor':statusLabel(o.status)}</span>
+          </div>`).join('')).join('')}
+      </div>
+    ` : ''}
   </div>
   ${(!CUST_SUBMITTED && cartCount>0) ? `<div class="cart-dock">
     <div><div class="total">${money(cartTotal)}</div><div class="sub">${cartCount} ürün</div></div>
@@ -1495,14 +1729,19 @@ function custCartAdd(itemId, delta){
   render();
 }
 async function submitCustomerOrder(tableId){
-  const items = Object.entries(CUST_CART).map(([id,qty])=>{ const it=findItem(id); return {id,name:it.name,price:it.price,qty}; });
+  const items = Object.entries(CUST_CART).map(([id,qty])=>{ const it=findItem(id); return {id,name:it.name,price:it.price,qty,note:(CUST_CART_NOTES[id]||'').trim()}; });
   if(!items.length) return;
+  // Müşteri siparişi doğrudan kaydedilip mutfağa düşmez — 'yeni' (onay bekliyor)
+  // durumunda oluşturulur; masada kırmızı ışık yanıp söner ve personel onaylayana
+  // kadar hazırlığa geçmez (bkz. tableStatus / approveOrder).
   items.forEach(oi=>{ const it=findItem(oi.id); if(it && it.trackStock){ it.stock = Math.max(0, it.stock-oi.qty); } });
   const order = { id:genId('o'), tableId, items, status:'yeni', staffId:null, source:'musteri', createdAt:Date.now() };
   STATE.orders.push(order);
   await Promise.all([ sSet('seyir:orders', STATE.orders), sSet('seyir:menu', STATE.menu) ]);
   CUST_CART = {};
+  CUST_CART_NOTES = {};
   saveCustCart();
+  saveCustCartNotes();
   CUST_SUBMITTED = true;
   render();
 }
