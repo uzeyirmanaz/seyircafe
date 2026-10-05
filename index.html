@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#cf2e2e">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<title>HOME — SEYİR CAFE</title>
+<title>İŞLETMEM — SEYİR CAFE</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
@@ -658,6 +658,7 @@
     <div class="c-masa"><span>🪑 Masa</span><select id="cMasa"></select></div>
     <div class="c-tabs" id="cTabs"></div>
     <div id="cItems"></div>
+    <div style="text-align:center;margin:26px 0 8px;"><button type="button" id="cStaffBtn" style="background:none;border:0;color:var(--ink-faint);font-size:.75rem;text-decoration:underline;cursor:pointer;padding:8px 14px;">Personel Girişi</button></div>
     <div class="c-bar"><div class="c-bar-in">
       <div class="c-status" id="cStatus" style="display:none;"></div>
       <input class="c-note" id="cNote" placeholder="Sipariş notu (isteğe bağlı)">
@@ -876,8 +877,8 @@
               <div class="field"><label>E-Mail (İsteğe Bağlı)</label><input id="inpEmail" placeholder=""></div>
             </div>
             <div class="field-row">
-              <div class="field"><label>Telefon Numarası</label><input id="inpTelefon" placeholder="+90"></div>
-              <div class="field"><label>Şifre (en az 4 karakter, herkeste farklı)</label><input id="inpSifre" type="password" placeholder="••••"></div>
+              <div class="field"><label>Telefon (İsteğe Bağlı)</label><input id="inpTelefon" placeholder="+90"></div>
+              <div class="field"><label>Şifre (en az 4 karakter, herkeste farklı)</label><input id="inpSifre" type="password" placeholder="••••" autocomplete="new-password"></div>
             </div>
             <div class="field"><label>Bölge Seçiniz</label>
               <select id="selBolge">
@@ -888,6 +889,7 @@
               </select>
             </div>
             <div class="toggle-row"><div class="mini-toggle off" id="tglBlocked" data-toggle><span class="k"></span></div><div class="name">Kullanıcı girişi engellensin</div></div>
+            <div id="usrErr" style="color:var(--red);font-size:.85rem;min-height:18px;margin:6px 0;"></div>
             <button class="btn-add" id="btnEkleKullanici">Ekle</button>
             <div style="clear:both;"></div>
           </div>
@@ -1716,15 +1718,7 @@
   document.getElementById('btnOdemeTipiEkle').addEventListener('click', () => {
     const name = window.prompt('Yeni ödeme tipi adı:');
     if(!name) return;
-    payTypes.push({ name: name.trim(), on: true }); renderPayTypes(); showToast(name + ' eklendi.'); return;
-    const row = document.createElement('div');
-    row.className = 'toggle-row';
-    row.innerHTML = '<div class="mini-toggle off"><span class="k"></span></div>' +
-      '<div class="name pay-name" contenteditable="true">' + name.replace(/</g,'&lt;') + '</div>' +
-      '<span class="pay-edit-hint">✎</span>';
-    wireToggle(row.querySelector('.mini-toggle'));
-    document.getElementById('btnOdemeTipiEkle').insertAdjacentElement('beforebegin', row);
-    showToast(name + ' eklendi.');
+    payTypes.push({ name: name.trim(), on: true }); renderPayTypes(); saveState(); showToast(name + ' eklendi.');
   });
 
   // ---- every permission checkbox becomes clickable ----
@@ -2129,6 +2123,7 @@
       set: (p, v) => put(p, v),
       push: (p, v) => { const id = 'o' + Date.now() + Math.random().toString(36).slice(2, 6); put(p + '/' + id, v); return id; },
       remove: p => put(p, null),
+      get: p => Promise.resolve(get(rd(), p)),
       on: (p, cb) => { L.push({ p, cb }); cb(get(rd(), p)); }
     };
   })();
@@ -2140,16 +2135,19 @@
     try{
       const B = 'https://www.gstatic.com/firebasejs/10.12.2/';
       const { initializeApp } = await import(B + 'firebase-app.js');
-      const { getDatabase, ref, set, push, onValue, remove } = await import(B + 'firebase-database.js');
+      const { getDatabase, ref, set, push, onValue, remove, get } = await import(B + 'firebase-database.js');
       const { getAuth, signInAnonymously, signInWithEmailAndPassword } = await import(B + 'firebase-auth.js');
       const app = initializeApp(c), db = getDatabase(app), auth = getAuth(app);
       if(auth.authStateReady) await auth.authStateReady();
       if(!auth.currentUser) await signInAnonymously(auth);
+      const AUTH_MSG = { 'auth/invalid-credential': 'E-posta veya şifre hatalı.', 'auth/wrong-password': 'Şifre hatalı.', 'auth/user-not-found': 'Bu e-posta ile hesap yok.', 'auth/invalid-email': 'E-posta biçimi geçersiz.', 'auth/too-many-requests': 'Çok fazla deneme. Biraz bekleyin.', 'auth/network-request-failed': 'İnternet bağlantısı yok.', 'auth/operation-not-allowed': 'Firebase’de E-posta/Şifre girişi açık değil.' };
       const staffAuth = async () => {
         if(auth.currentUser && !auth.currentUser.isAnonymous) return true;
-        const em = prompt('Personel hesabı e-postası (Firebase):'); if(!em) return false;
-        const pw = prompt('Personel hesabı şifresi:'); if(!pw) return false;
-        try{ await signInWithEmailAndPassword(auth, em.trim(), pw); return true; }catch(e){ alert('Personel girişi başarısız: ' + e.code); return false; }
+        let err = '';
+        for(;;){
+          const c = await askCred(err); if(!c) return false;
+          try{ await signInWithEmailAndPassword(auth, c.em, c.pw); return true; }catch(e){ err = AUTH_MSG[e.code] || ('Giriş başarısız: ' + e.code); }
+        }
       };
       const clean = v => (v === null ? null : JSON.parse(JSON.stringify(v)));
       RT = {
@@ -2157,12 +2155,25 @@
         set: (p, v) => set(ref(db, p), clean(v)),
         push: (p, v) => { const r = push(ref(db, p)); set(r, clean(v)); return r.key; },
         remove: p => remove(ref(db, p)),
-        on: (p, cb) => onValue(ref(db, p), s => cb(s.val()))
+        get: p => get(ref(db, p)).then(s => s.val()),
+        on: (p, cb) => onValue(ref(db, p), s => cb(s.val()), err => console.error('Firebase okuma hatası (' + p + '):', err && err.code))
       };
     }catch(e){ console.error('Firebase başlatılamadı, yerel moda geçildi:', e); RT = LocalRT; }
   }
 
   const $id = id => document.getElementById(id);
+  function askCred(err){
+    return new Promise(res => {
+      const bg = document.createElement('div'); bg.className = 'modal-bg show'; bg.style.zIndex = 1200;
+      bg.innerHTML = '<div class="modal-box"><h3 style="margin:0 0 6px">Cihaz Yetkilendirme</h3><p style="margin:0 0 8px;font-size:.82rem;color:var(--ink-faint)">Bu cihaz ilk kez personel olarak bağlanıyor. Firebase personel hesabını (e-posta/şifre) bir kez girin; cihaz hatırlar.</p>' +
+        '<input type="email" id="crEm" placeholder="Firebase e-posta" autocomplete="username" style="width:100%;padding:10px;margin:4px 0"><input type="password" id="crPw" placeholder="Firebase şifre" autocomplete="current-password" style="width:100%;padding:10px;margin:4px 0">' +
+        '<div style="color:var(--red);font-size:.85rem;min-height:18px">' + esc(err || '') + '</div><div style="display:flex;gap:8px"><button class="btn-save" id="crOk" style="margin:0">Bağlan</button><button class="btn-save" id="crNo" style="margin:0;background:var(--ink-faint)">Vazgeç</button></div></div>';
+      document.body.appendChild(bg); const em = bg.querySelector('#crEm'), pw = bg.querySelector('#crPw'); em.focus();
+      const ok = () => { if(!em.value.trim() || !pw.value) return; bg.remove(); res({ em: em.value.trim(), pw: pw.value }); };
+      bg.querySelector('#crOk').onclick = ok; bg.querySelector('#crNo').onclick = () => { bg.remove(); res(null); };
+      pw.onkeydown = em.onkeydown = e => { if(e.key === 'Enter') ok(); };
+    });
+  }
   const arr = x => Array.isArray(x) ? x.filter(Boolean) : Object.values(x || {});
   let pubData = null, staffMode = false;
 
@@ -2404,41 +2415,118 @@
   }
   const pwTaken = (pw, exceptName) => pinOK(pw) || staffUsers.some(u => u.ad !== exceptName && ((u.h && u.h === pwHash(pw)) || (u.sifre && u.sifre === pw)));
 
-  // ---- giriş / çıkış ----
-  let loginFails = 0, loginLockUntil = 0;
-  function tryLogin(){
-    const now = Date.now();
-    if(now < loginLockUntil){ $id('loginErr').textContent = 'Çok fazla hatalı deneme. ' + Math.ceil((loginLockUntil - now) / 1000) + ' sn bekleyin.'; return; }
-    const pw = $id('loginPass').value; if(!pw) return;
-    let user = null;
-    if(pinOK(pw)) user = { ad: 'Yönetici', gorev: 'Müdür', admin: true };
-    else {
-      const u = staffUsers.find(x => !x.blocked && ((x.h && x.h === pwHash(pw)) || (x.sifre && x.sifre === pw)));
-      if(u){ if(u.sifre){ u.h = pwHash(pw); delete u.sifre; } user = { ad: u.ad, gorev: u.gorev, bolge: u.bolge || '', admin: false }; }
-      else if(staffUsers.some(x => x.blocked && ((x.h && x.h === pwHash(pw)) || (x.sifre && x.sifre === pw)))){ $id('loginErr').textContent = 'Bu kullanıcının girişi engellenmiş.'; return; }
-    }
-    if(!user && !settings.pin){
-      if(pw.length < 4){ $id('loginErr').textContent = 'İlk kurulum: en az 4 haneli bir yönetici PIN\'i yazın.'; return; }
-      if(!confirm('İlk kurulum: yazdığınız şifre yönetici PIN\'i olarak kaydedilsin mi?')) return;
-      settings.pin = pwHash(pw); user = { ad: 'Yönetici', gorev: 'Müdür', admin: true };
-    }
-    if(user && user.admin && settings.pin === pw) settings.pin = pwHash(pw);
-    if(!user){
-      loginFails++; if(loginFails >= 5){ loginLockUntil = now + 30000; loginFails = 0; $id('loginErr').textContent = 'Çok fazla hatalı deneme. 30 sn bekleyin.'; }
-      else $id('loginErr').textContent = 'Şifre hatalı.';
-      return;
-    }
-    loginFails = 0; curUser = user; sessionStorage.setItem('seyirUser', JSON.stringify(user));
-    $id('loginModal').classList.remove('show'); enterStaff(); saveState();
-    if(user.admin && !settings.pin) showToast('⚠ Varsayılan PIN kullanılıyor. Ayarlar > Genel bölümünden değiştirin.');
+  // ---- personel dizini: kullanıcılar Firebase'e yazılır, her cihazdan giriş yapılabilir ----
+  // Kayıt anahtarı = şifre özeti (SHA-256). Liste halinde okunamaz; giriş sırasında yalnızca yazılan şifrenin kaydı sorgulanır.
+  const SD = 'staffDir/';
+  let dirReady = false, lastDirSig = '', dirWarned = false;
+  const isHash = x => /^[0-9a-f]{64}$/.test(x || '');
+  function buildDir(){
+    const dir = {};
+    staffUsers.forEach(u => { if(u.sifre && !u.h){ u.h = pwHash(u.sifre); } if(u.h) dir[u.h] = { ad: u.ad, gorev: u.gorev, bolge: u.bolge || '', tel: u.tel || '', email: u.email || '', blocked: !!u.blocked, admin: false }; });
+    if(isHash(settings.pin)) dir[settings.pin] = { ad: 'Yönetici', gorev: 'Müdür', bolge: '', tel: '', email: '', blocked: false, admin: true };
+    return dir;
   }
-  function restoreSession(){
+  function syncStaffDir(){
+    if(RT.local || !dirReady || !(curUser && curUser.admin)) return;
+    const dir = buildDir(), sig = JSON.stringify(dir); if(sig === lastDirSig) return;
+    lastDirSig = sig;
+    Promise.resolve().then(() => RT.set('staffDir', dir)).then(() => RT.set('staffMeta/ready', true)).catch(e => {
+      lastDirSig = '';
+      if(!dirWarned){ dirWarned = true; showToast('⚠ Personel listesi Firebase’e yazılamadı (' + ((e && e.code) || 'hata') + '). Firebase Rules ayarını kontrol edin.'); }
+    });
+  }
+  async function pullStaffDir(){
+    try{
+      const d = await RT.get('staffDir');
+      if(d && typeof d === 'object' && Object.keys(d).length){
+        staffUsers = Object.keys(d).filter(h => d[h] && !d[h].admin).map(h => ({ ad: d[h].ad, gorev: d[h].gorev, bolge: d[h].bolge || '', tel: d[h].tel || '', email: d[h].email || '', blocked: !!d[h].blocked, h }));
+        const adm = Object.keys(d).find(h => d[h] && d[h].admin); if(adm && !isHash(settings.pin)) settings.pin = adm;
+        lastDirSig = JSON.stringify(buildDir());
+      }
+      dirReady = true; if(!(d && Object.keys(d).length)) syncStaffDir(); else Promise.resolve().then(() => RT.set('staffMeta/ready', true)).catch(() => {}); renderUsers(); saveState();
+    }catch(e){
+      console.error('Personel listesi okunamadı:', e); dirReady = false;
+      showToast('⚠ Personel listesi Firebase’den okunamadı (' + ((e && e.code) || 'hata') + '). Rules ayarını kontrol edin.');
+    }
+  }
+  async function remoteStaff(pw){
+    if(RT.local || !RT.get) return null;
+    const h = pwHash(pw);
+    try{ const r = await RT.get(SD + h); return r ? Object.assign({ h }, r) : null; }catch(e){ console.error(e); return 'err'; }
+  }
+
+  // ---- giriş / çıkış ----
+  let loginFails = 0, loginLockUntil = 0, loginBusy = false;
+  async function tryLogin(){
+    if(loginBusy) return;
+    const now = Date.now(), err = $id('loginErr');
+    if(now < loginLockUntil){ err.textContent = 'Çok fazla hatalı deneme. ' + Math.ceil((loginLockUntil - now) / 1000) + ' sn bekleyin.'; return; }
+    const pw = $id('loginPass').value; if(!pw) return;
+    loginBusy = true; err.textContent = '';
+    try{
+      let user = null;
+      if(pinOK(pw)) user = { ad: 'Yönetici', gorev: 'Müdür', admin: true };
+      else {
+        const u = staffUsers.find(x => !x.blocked && ((x.h && x.h === pwHash(pw)) || (x.sifre && x.sifre === pw)));
+        if(u){ if(u.sifre){ u.h = pwHash(pw); delete u.sifre; } user = { ad: u.ad, gorev: u.gorev, bolge: u.bolge || '', admin: false, h: u.h }; }
+        else if(staffUsers.some(x => x.blocked && ((x.h && x.h === pwHash(pw)) || (x.sifre && x.sifre === pw)))){ err.textContent = 'Bu kullanıcının girişi engellenmiş.'; return; }
+      }
+      let remoteErr = false;
+      if(!user && !RT.local){
+        err.textContent = 'Kontrol ediliyor…';
+        const r = await remoteStaff(pw); err.textContent = '';
+        if(r === 'err') remoteErr = true;
+        else if(r){
+          if(r.blocked){ err.textContent = 'Bu kullanıcının girişi engellenmiş.'; return; }
+          if(r.admin){ settings.pin = r.h; user = { ad: 'Yönetici', gorev: 'Müdür', admin: true }; }
+          else user = { ad: r.ad, gorev: r.gorev, bolge: r.bolge || '', admin: false, h: r.h };
+        }
+      }
+      let firstOk = !user && !settings.pin && !remoteErr;
+      if(firstOk && !RT.local){
+        // dizin daha önce kurulduysa (bayrak var) yanlış şifre sayılır; ilk kurulum yalnızca bayrak yokken sunulur
+        let rdy = 'err'; try{ rdy = await RT.get('staffMeta/ready'); }catch(e){}
+        if(rdy !== null) firstOk = false;
+      }
+      if(firstOk){
+        if(pw.length < 4){ err.textContent = 'İlk kurulum: en az 4 haneli bir yönetici PIN\'i yazın.'; return; }
+        if(!RT.local){
+          err.textContent = 'Firebase kontrol ediliyor…';
+          const okA = RT.staffAuth ? await RT.staffAuth() : false; err.textContent = '';
+          if(!okA) return;
+          let d = null; try{ d = await RT.get('staffDir'); }catch(e){ err.textContent = 'Firebase okunamadı. Rules ayarını kontrol edin.'; return; }
+          if(d && Object.keys(d).length){ err.textContent = 'Yönetici PIN\'i zaten belirlenmiş. Doğru şifreyi yazın.'; return; }
+        }
+        if(!confirm('İlk kurulum: yazdığınız şifre yönetici PIN\'i olarak kaydedilsin mi?')) return;
+        settings.pin = pwHash(pw); user = { ad: 'Yönetici', gorev: 'Müdür', admin: true };
+      }
+      if(user && user.admin && settings.pin === pw) settings.pin = pwHash(pw);
+      if(!user){
+        if(remoteErr){ err.textContent = 'Sunucuya ulaşılamadı. İnterneti kontrol edin.'; return; }
+        loginFails++; if(loginFails >= 5){ loginLockUntil = Date.now() + 30000; loginFails = 0; err.textContent = 'Çok fazla hatalı deneme. 30 sn bekleyin.'; }
+        else err.textContent = 'Şifre hatalı.';
+        return;
+      }
+      loginFails = 0; curUser = user; sessionStorage.setItem('seyirUser', JSON.stringify(user));
+      $id('loginModal').classList.remove('show'); $id('loginPass').value = ''; enterStaff(); saveState();
+    } finally { loginBusy = false; }
+  }
+  async function restoreSession(){
     try{
       const u = JSON.parse(sessionStorage.getItem('seyirUser') || 'null'); if(!u) return;
-      if(!u.admin){ const rec = staffUsers.find(x => x.ad === u.ad); if(!rec || rec.blocked){ sessionStorage.removeItem('seyirUser'); return; } u.gorev = rec.gorev; u.bolge = rec.bolge || ''; }
+      if(!u.admin){
+        const rec = staffUsers.find(x => x.ad === u.ad || (u.h && x.h === u.h));
+        if(rec){ if(rec.blocked){ sessionStorage.removeItem('seyirUser'); return; } u.gorev = rec.gorev; u.bolge = rec.bolge || ''; }
+        else if(!RT.local && u.h){
+          const r = await remoteStaff0(u.h);
+          if(!r || r.blocked){ sessionStorage.removeItem('seyirUser'); return; }
+          u.gorev = r.gorev; u.bolge = r.bolge || '';
+        } else { sessionStorage.removeItem('seyirUser'); return; }
+      }
       curUser = u; enterStaff();
-    }catch(e){}
+    }catch(e){ console.error(e); }
   }
+  async function remoteStaff0(h){ try{ return await RT.get(SD + h); }catch(e){ return null; } }
 
   // ---- gizli giriş: logoya 4 kez dokun ----
   let logoTaps = 0, logoTimer = 0;
@@ -2447,6 +2535,7 @@
     if(logoTaps >= 4){ logoTaps = 0; $id('loginErr').textContent = ''; $id('loginPass').value = ''; $id('loginModal').classList.add('show'); setTimeout(() => $id('loginPass').focus(), 50); }
   }
   $id('cLogo').addEventListener('click', onLogoTap);
+  $id('cStaffBtn').addEventListener('click', () => { $id('loginErr').textContent = ''; $id('loginPass').value = ''; $id('loginModal').classList.add('show'); setTimeout(() => $id('loginPass').focus(), 50); });
 
   // ---- logo ----
   const EMBLEM = '<circle cx="60" cy="60" r="57" fill="none" stroke="currentColor" stroke-width="3"/><circle cx="60" cy="60" r="51.5" fill="none" stroke="currentColor" stroke-width="1" opacity=".5"/><g><circle cx="60" cy="40" r="19" fill="#c8782f"/><g stroke="#c8782f" stroke-width="2.4" stroke-linecap="round"><path d="M60 13v-5M39 21l-3.5-3.5M81 21l3.5-3.5M31 40h-5M89 40h5"/></g></g><path d="M40 106q10-5 20 0t20 0" fill="none" stroke="#c8782f" stroke-width="2.6" stroke-linecap="round"/><path d="M52 64q-5-8 0-15t0-14M64 64q-5-8 0-15t0-14" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/><path d="M38 68h44q0 22-14 26H52Q38 90 38 68Z" style="fill:var(--lgbg,#fff)" stroke="currentColor" stroke-width="3" stroke-linejoin="round"/><path d="M82 72q12 0 10 9t-12 8" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"/><path d="M32 98h56" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>';
@@ -2851,15 +2940,19 @@
       u.h = pwHash(v.p); delete u.sifre; saveState(); showToast('Şifre güncellendi.'); } });
   });
   $id('btnEkleKullanici').addEventListener('click', () => {
-    if(!can('users')){ showToast('Yetkiniz yok.'); return; }
+    const er = $id('usrErr'), fail = m => { er.textContent = m; showToast(m); };
+    er.textContent = '';
+    if(!can('users')){ fail('Yetkiniz yok.'); return; }
     const gorev = $id('selGorev').value, ad = $id('inpAdSoyad').value.trim(), tel = $id('inpTelefon').value.trim(), sifre = $id('inpSifre').value.trim();
-    if(!ad || !tel || !sifre){ showToast('Ad Soyad, Telefon ve Şifre zorunludur.'); return; }
-    if(sifre.length < 4){ showToast('Şifre en az 4 karakter olmalı.'); return; }
-    if(staffUsers.some(u => u.ad.toLowerCase() === ad.toLowerCase())){ showToast('Bu isimde bir kullanıcı var.'); return; }
-    if(pwTaken(sifre)){ showToast('Bu şifre başka birinde kullanılıyor, farklı bir şifre seçin.'); return; }
+    if(!ad || !sifre){ fail('Ad Soyad ve Şifre zorunludur.'); return; }
+    if(sifre.length < 4){ fail('Şifre en az 4 karakter olmalı.'); return; }
+    if(staffUsers.some(u => u.ad.toLowerCase() === ad.toLowerCase())){ fail('Bu isimde bir kullanıcı var.'); return; }
+    if(pwTaken(sifre)){ fail('Bu şifre başka birinde kullanılıyor, farklı bir şifre seçin.'); return; }
     staffUsers.push({ ad, tel, email: $id('inpEmail').value.trim(), gorev, bolge: $id('selBolge').value, blocked: $id('tglBlocked').classList.contains('on'), h: pwHash(sifre) });
     ['inpAdSoyad', 'inpEmail', 'inpTelefon', 'inpSifre'].forEach(i => { $id(i).value = ''; });
-    renderUsers(); saveState(); showToast('Kullanıcı eklendi: ' + ad);
+    $id('tglBlocked').classList.remove('on'); $id('tglBlocked').classList.add('off');
+    renderUsers(); saveState();
+    showToast('Kullanıcı eklendi: ' + ad + (RT.local ? ' (yerel mod: yalnızca bu cihazda geçerli)' : ' — tüm cihazlarda giriş yapabilir'));
   });
 
   // ---- yetki tablosu ----
@@ -3119,6 +3212,7 @@
     const base = Object.assign(JSON.parse(full), { savedAt, dev: DEV });
     try{ localStorage.setItem(STORE_KEY, JSON.stringify(base)); storageOK = true; }catch(e){ storageOK = false; if(!warned){ warned = true; showToast('⚠ Veriler kaydedilemiyor! Ayarlar > Yedek & Sistem’den yedek alın.'); } }
     if(!RT.local && staffMode){ delete base.staffUsers; delete base.pin; try{ RT.set('state', base); }catch(e){} }
+    try{ syncStaffDir(); }catch(e){ console.error(e); }
   }
   function applyState(s, persist){
     if(!s || typeof s !== 'object') return;
@@ -3214,8 +3308,13 @@
   // ======================= EKLER v3 =======================
   const _enterStaff = enterStaff;
   enterStaff = function(){
-    if(RT.local || !RT.staffAuth){ _enterStaff(); return; }
-    RT.staffAuth().then(ok => { if(ok) _enterStaff(); else { showToast('Firebase personel girişi gerekli.'); } });
+    if(staffMode) return;
+    if(RT.local || !RT.staffAuth){ dirReady = true; _enterStaff(); return; }
+    RT.staffAuth().then(async ok => {
+      if(!ok){ curUser = null; sessionStorage.removeItem('seyirUser'); showToast('Firebase personel girişi gerekli.'); return; }
+      if(curUser && curUser.admin) await pullStaffDir();
+      _enterStaff();
+    });
   };
   // 1) İptal: neden + yönetici PIN'i + kayıt
   const CANCEL_REASONS = ['Müşteri Vazgeçti', 'Yanlış Sipariş', 'Döküldü / Mutfak Hatası', 'Diğer'];
@@ -3329,6 +3428,7 @@
   $id('btnGuncelle').addEventListener('click', () => {
     const p = $id('setPin').value.trim(); if(!p) return;
     if(p.length < 4 || /\s/.test(p)){ showToast('PIN en az 4 karakter olmalı, boşluk içermemeli.'); return; }
+    if(staffUsers.some(u => (u.h && u.h === pwHash(p)) || (u.sifre && u.sifre === p))){ showToast('Bu şifre bir personelde kullanılıyor, farklı bir PIN seçin.'); return; }
     settings.pin = pwHash(p); $id('setPin').value = ''; saveState(); showToast('PIN güncellendi.');
   });
   $id('btnBackup').addEventListener('click', () => { settings.lastBackup = Date.now(); });
