@@ -725,13 +725,32 @@
   /* ---- canlı 3D logo ---- */
   .c-logo,.sb-logo{perspective:420px}
   .c-logo svg,.sb-logo svg{overflow:visible;transform-style:preserve-3d;animation:lgFloat 6s ease-in-out infinite;will-change:transform}
+
+  /* ---- sadece-menü anahtarı (Menü / Ürünler altı) ---- */
+  .mo-card{margin-top:16px;background:var(--panel);border-radius:12px;box-shadow:var(--shadow);padding:16px 18px;display:flex;align-items:center;gap:14px}
+  .mo-card .mo-txt{flex:1;min-width:0} .mo-card .mo-txt b{display:block;font-size:.98rem} .mo-card .mo-txt span{display:block;color:var(--ink-dim);font-size:.82rem;margin-top:3px}
+  .mo-sw{flex:none;width:58px;height:32px;border-radius:999px;border:0;background:#c9c3bb;position:relative;cursor:pointer;padding:0;margin:0}
+  .mo-sw::after{content:"";position:absolute;top:3px;left:3px;width:26px;height:26px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.3);transition:transform .18s ease}
+  .mo-sw.on{background:var(--red)} .mo-sw.on::after{transform:translateX(26px)}
+  /* ---- kayıt onay / hata bannerı ---- */
+  #saveBanner{position:fixed;left:50%;top:calc(14px + env(safe-area-inset-top,0px));transform:translate(-50%,-140%);z-index:3000;width:min(92vw,520px);display:flex;align-items:center;gap:14px;padding:18px 20px;border-radius:16px;background:#1f9d57;color:#fff;box-shadow:0 10px 30px rgba(0,0,0,.35);opacity:0;pointer-events:none;transition:transform .28s cubic-bezier(.2,.9,.3,1.2),opacity .2s ease}
+  #saveBanner.show{transform:translate(-50%,0);opacity:1}
+  #saveBanner.err{background:#cf2e2e}
+  #saveBanner .sb-ic{flex:none;width:46px;height:46px;border-radius:50%;background:rgba(255,255,255,.25);display:flex;align-items:center;justify-content:center;font-size:1.7rem;font-weight:800}
+  #saveBanner .sb-t{font-size:1.15rem;font-weight:800;line-height:1.25} #saveBanner .sb-s{font-size:.9rem;font-weight:600;opacity:.92;margin-top:2px}
+  /* personel menü seçici: ürün görseli / açıklama */
+  .mp-card .mp-img{width:100%;height:84px;border-radius:8px;object-fit:cover}
+  .mp-card small{color:var(--ink-faint);font-size:.74rem;line-height:1.25}
+  .mp-foot .btn-save.mp-save{background:#1f9d57}
+  .mp-foot .btn-save.mp-back{background:var(--ink-faint)}
+
   @keyframes lgFloat{0%,100%{transform:translateY(0) rotateY(-11deg) rotateX(4deg)}50%{transform:translateY(-4px) rotateY(11deg) rotateX(-2deg)}}
   @media (prefers-reduced-motion:reduce){.c-logo svg,.sb-logo svg{animation:none}}
 </style>
 <link rel="icon" id="favi" href="data:,">
 </head>
 <body data-theme="light">
-  <div id="customerView">
+  <div id="customerView" class="menu-only">
     <div class="c-head"><div id="cLogo" class="c-logo"></div></div>
     <div class="c-top"><div class="c-masa"><span>🪑 Masa</span><select id="cMasa"></select></div>
     <input id="cSearch" class="c-search" placeholder="🔍 Menüde ara…" autocomplete="off">
@@ -763,6 +782,7 @@
 
   <div id="printArea"></div>
   <div class="toast" id="toast"></div>
+  <div id="saveBanner" role="status" aria-live="polite"><div class="sb-ic">✓</div><div><div class="sb-t" id="sbT"></div><div class="sb-s" id="sbS"></div></div></div>
 
   <div class="eye-toggle" id="eyeToggle">
     <span class="icon" id="eyeIcon">☀️</span>
@@ -1015,7 +1035,7 @@
               <div class="mp-sw"><input id="mpSearch" placeholder="🔍 Ürün ara…" autocomplete="off"></div>
               <div class="mp-tabs" id="mpTabs"></div>
               <div class="mp-grid" id="mpGrid"></div>
-              <div class="mp-foot"><span id="mpSum">Sepet boş</span><button class="btn-save" id="mpDone">Adisyona Dön</button></div>
+              <div class="mp-foot"><span id="mpSum">Sepet boş</span><button class="btn-save mp-back" id="mpDone">Geri</button><button class="btn-save mp-save" id="mpSave">✓ KAYDET</button></div>
             </div>
 
             <div class="order-total"><span>Toplam Tutar</span><span id="orderTotalValue">₺0,00</span></div>
@@ -1067,10 +1087,6 @@
             <div class="qr-box" style="flex-direction:column;align-items:center;"><select id="qrMasa"></select><div id="qrOut" style="margin:12px;text-align:center;"></div><p id="qrLink" style="word-break:break-all;font-size:.8rem;"></p></div>
           </div>
           <div class="panel-card">
-            <div class="panel-head"><div class="pi">👁️</div><div><h2>Müşteri Siparişi</h2><p>Kapatınca QR menü sadece görüntüleme olur: sepet, sipariş ve masa seçimi görünmez.</p></div></div>
-            <button class="btn-save" id="btnMenuOnly" style="margin:0;"></button>
-          </div>
-          <div class="panel-card">
             <div class="panel-head"><div class="pi">🍴</div><div><h2>Menüde görünen kategoriler</h2><p>Menü / Ürünler ekranındaki değişiklikler anında yayınlanır.</p></div></div>
             <div class="plist" id="dmCats"></div>
           </div>
@@ -1091,6 +1107,11 @@
               </div>
               <div class="product-grid" id="productGrid"></div>
             </div>
+          </div>
+          <div class="mo-card">
+            <div class="pi" style="font-size:26px">👁️</div>
+            <div class="mo-txt"><b>Sadece menü modu</b><span id="moState">Müşteri QR menüde sipariş veremez.</span></div>
+            <button class="mo-sw" id="btnMenuOnly" role="switch" aria-checked="false" aria-label="Sadece menü modu"></button>
           </div>
         </div>
 
@@ -1683,7 +1704,7 @@
     mpList = q ? categories.flatMap(c => c.products).filter(p => p.name.toLocaleLowerCase('tr-TR').includes(q)) : ((categories[mpActiveCat] || {}).products || []);
     const grid = mpEl('mpGrid'), st = grid.scrollTop;
     grid.innerHTML = mpList.map((p, i) => { const x = cart.find(it => it.name === p.name && it.unit === p.price && !it.note), n = x ? x.qty : 0;
-      return '<div class="mp-card' + (n ? ' in' : '') + '" data-i="' + i + '">' + (p.icon ? '<span class="mi">' + esc(p.icon) + '</span>' : '') + '<b>' + esc(p.name) + '</b><span class="pr">' + fmtTL(p.price) + '</span><div class="ctl">' +
+      return '<div class="mp-card' + (n ? ' in' : '') + '" data-i="' + i + '">' + (/^https:\/\//.test(p.img || '') ? '<img class="mp-img" src="' + esc(p.img) + '" alt="" loading="lazy">' : (p.icon ? '<span class="mi">' + esc(p.icon) + '</span>' : '')) + '<b>' + esc(p.name) + '</b>' + (p.desc ? '<small>' + esc(p.desc) + '</small>' : '') + '<span class="pr">' + fmtTL(p.price) + '</span><div class="ctl">' +
         (n ? '<button class="mn" aria-label="Azalt">−</button><span class="q">' + n + '</span>' : '<span></span><span></span>') + '<button class="pl" aria-label="Ekle">+</button></div></div>'; }).join('') || '<p style="color:var(--ink-faint);padding:12px">Ürün bulunamadı.</p>';
     grid.scrollTop = st;
     const cnt = cart.reduce((a, i) => a + i.qty, 0); mpEl('mpSum').textContent = cnt ? cnt + ' ürün · ' + fmtTL(cartTotal(currentCartKey)) : 'Sepet boş';
@@ -1699,7 +1720,7 @@
   function closeMenuPicker(){ mpEl('menuPicker').style.display = 'none'; }
   mpEl('mpGrid').addEventListener('click', e => { const c = e.target.closest('.mp-card'); if(!c) return; const p = mpList[+c.dataset.i]; if(p) mpChange(p, e.target.closest('.mn') ? -1 : 1); });
   mpEl('mpSearch').addEventListener('input', renderMenuPicker);
-  mpEl('mpClose').addEventListener('click', closeMenuPicker); mpEl('mpDone').addEventListener('click', closeMenuPicker);
+  mpEl('mpClose').addEventListener('click', closeMenuPicker); mpEl('mpDone').addEventListener('click', closeMenuPicker); mpEl('mpSave').addEventListener('click', () => saveOrderAndExit());
   mpEl('btnToggleMenuPicker').addEventListener('click', openMenuPicker);
   mpEl('ppClose').addEventListener('click', () => { mpEl('paymentPanel').style.display = 'none'; });
   document.addEventListener('keydown', e => { if(e.key === 'Escape'){ closeMenuPicker(); mpEl('paymentPanel').style.display = 'none'; } });
@@ -1862,13 +1883,36 @@
     showScreen(currentBackScreen);
     if(currentBackScreen === 'siparis-masa') renderSiparisMasa();
   });
-  document.getElementById('btnSaveOrder').addEventListener('click', () => {
+  // ---- kayıt onay bannerı (büyük, yeşil/kırmızı) ----
+  let sbTimer;
+  function showSaveBanner(title, sub, isErr){
+    const b = document.getElementById('saveBanner');
+    document.getElementById('sbT').textContent = title; document.getElementById('sbS').textContent = sub || '';
+    b.classList.toggle('err', !!isErr); b.querySelector('.sb-ic').textContent = isErr ? '!' : '✓';
+    b.classList.add('show'); clearTimeout(sbTimer); sbTimer = setTimeout(() => b.classList.remove('show'), isErr ? 4500 : 3500);
+    try{ if(navigator.vibrate) navigator.vibrate(isErr ? [120, 80, 120] : 90); }catch(e){}
+  }
+  // KAYDET: mutfağa gönder → Sipariş/Masa ekranına dön → onay göster (hata olursa aynı ekranda kal)
+  function saveOrderAndExit(){
     if(!can('orders')){ showToast('Yetkiniz yok.'); return; }
-    sendToKitchen();
-    const total = cartTotal(currentCartKey);
-    renderTableGrid(); renderSiparisMasa(); if(typeof renderPaketler === 'function') renderPaketler();
-    showToast('Kaydedildi — Toplam ₺' + total.toLocaleString('tr-TR', {minimumFractionDigits:2}));
-  });
+    const key = currentCartKey, label = orderLabel(key);
+    if(!(carts[key] || []).length){ showSaveBanner('Sepet boş', 'Önce menüden ürün ekleyin.', true); return; }
+    try{
+      sendToKitchen();
+      const total = cartTotal(key);
+      renderTableGrid(); renderSiparisMasa(); if(typeof renderPaketler === 'function') renderPaketler();
+      saveState();
+      closeMenuPicker();
+      const back = currentBackScreen === 'paketler' ? 'paketler' : 'siparis-masa';
+      showScreen(back); if(back === 'siparis-masa') renderSiparisMasa();
+      window.scrollTo(0, 0);
+      showSaveBanner('Sipariş ' + label + ' için kaydedildi', 'Toplam ' + fmtTL(total) + ' · mutfağa iletildi');
+    }catch(err){
+      console.error(err);
+      showSaveBanner('Kaydedilemedi!', 'Bir hata oluştu, tekrar deneyin.', true);
+    }
+  }
+  document.getElementById('btnSaveOrder').addEventListener('click', saveOrderAndExit);
 
   // ======================================================================
   // MENÜ / ÜRÜNLER — categories with product cards
@@ -2293,10 +2337,12 @@
     const d = customerData(), q = ($id('cSearch') ? $id('cSearch').value : '').trim().toLocaleLowerCase('tr-TR');
     return q ? d.categories.flatMap(c => c.products).filter(p => p.name.toLocaleLowerCase('tr-TR').includes(q)) : ((d.categories[cTab] || {}).products || []);
   }
+  function isMenuOnly(){ return pubData ? !!pubData.menuOnly : ((typeof RT !== 'undefined' && RT.local) ? !!settings.menuOnly : true); }
   function cCount(){ return Object.values(cCart).reduce((s, i) => s + i.qty, 0); }
   function cTotal(){ return Object.values(cCart).reduce((s, i) => s + i.qty * i.unit, 0); }
   function renderCustomer(){
-    const d = customerData();
+    const d = customerData(), mo = isMenuOnly();
+    $id('customerView').classList.toggle('menu-only', mo);
     if(cTab >= d.categories.length) cTab = 0;
     const sel = $id('cMasa'), prev = sel.value || qp.get('masa') || '';
     const opts = '<option value="">Masanızı seçin…</option>' + d.tables.map(t => '<option value="' + t.n + '">' + esc(t.label) + '</option>').join('');
@@ -2306,18 +2352,19 @@
     $id('cItems').innerHTML = lst.length ? lst.map((p, i) => {
       const q = (cCart[p.name] || {}).qty || 0;
       return '<div class="c-item">' + (/^https:\/\//.test(p.img || '') ? '<img src="' + esc(p.img) + '" alt="' + esc(p.name) + '" loading="lazy" style="width:56px;height:56px;border-radius:8px;object-fit:cover;margin-right:10px">' : (p.icon ? '<span class="ci">' + esc(p.icon) + '</span>' : '')) + '<div class="nm"><b>' + esc(p.name) + '</b>' + (p.desc ? '<small style="display:block;color:var(--ink-faint)">' + esc(p.desc) + '</small>' : '') + '<span>' + fmtTL(p.price) + '</span></div>' +
-        (q ? '<div class="qty-ctl"><button class="qbtn" data-p="' + i + '" data-d="-1">−</button><b class="qv">' + q + '</b><button class="qbtn" data-p="' + i + '" data-d="1">+</button></div>'
+        (mo ? '' : q ? '<div class="qty-ctl"><button class="qbtn" data-p="' + i + '" data-d="-1">−</button><b class="qv">' + q + '</b><button class="qbtn" data-p="' + i + '" data-d="1">+</button></div>'
            : '<button class="qbtn" data-p="' + i + '" data-d="1">+</button>') + '</div>';
     }).join('') : '<p style="text-align:center;color:var(--ink-faint)">' + (($id('cSearch').value || '').trim() ? 'Ürün bulunamadı.' : 'Menü hazırlanıyor…') + '</p>';
     const n = cCount(), btn = $id('cSend'); if(!n) cOpen = false;
     $id('cCartList').style.display = cOpen ? 'block' : 'none'; $id('cNote').style.display = cOpen ? '' : 'none';
     $id('cCartList').innerHTML = Object.values(cCart).map(i => '<div class="c-crow"><span>' + esc(i.name) + '</span><div class="qty-ctl"><button class="qbtn cq" data-n="' + esc(i.name) + '" data-d="-1">−</button><b class="qv">' + i.qty + '</b><button class="qbtn cq" data-n="' + esc(i.name) + '" data-d="1">+</button></div></div>').join('');
-    const mo = pubData ? !!pubData.menuOnly : !!settings.menuOnly; $id('customerView').classList.toggle('menu-only', mo);
+    if(mo){ $id('cStatus').style.display = 'none'; $id('cCartList').innerHTML = ''; }
     btn.disabled = n === 0;
     btn.textContent = !n ? 'Sepet boş' : (cOpen ? 'Siparişi Garsona Gönder · ' : '🛒 Sepeti Gör · ') + fmtTL(cTotal()) + ' (' + n + ' ürün)';
   }
   $id('cTabs').addEventListener('click', e => { const t = e.target.closest('.c-tab'); if(t){ cTab = +t.dataset.i; renderCustomer(); } });
   $id('cItems').addEventListener('click', e => {
+    if(isMenuOnly()) return;
     const b = e.target.closest('.qbtn'); if(!b) return;
     const p = cList()[+b.dataset.p]; if(!p) return;
     const cur = cCart[p.name] || { name: p.name, unit: p.price, qty: 0 };
@@ -2342,7 +2389,7 @@
     });
   }
   $id('cSend').addEventListener('click', async () => {
-    if(pubData && pubData.menuOnly) return;
+    if(isMenuOnly()) return;
     if(!cCount()) return;
     if(!cOpen){ cOpen = true; renderCustomer(); return; }
     let masa = $id('cMasa').value;
@@ -2500,6 +2547,7 @@
     if(n === 'rapor-gunsonu') renderGunSonu();
     if(n === 'rapor-vardiya' || n === 'rapor-urun' || n === 'rapor-istatistik' || n === 'rapor-fire') renderReports();
     if(n === 'siparis-masa') renderSiparisMasa();
+    if(n === 'urunler') renderMenuOnlyBtn();
   }
 
   // ---- parola özeti (SHA-256, tarayıcıdan bağımsız) ----
@@ -2659,11 +2707,11 @@
     if(logoTaps >= 4){ logoTaps = 0; $id('loginErr').textContent = ''; $id('loginPass').value = ''; $id('loginModal').classList.add('show'); setTimeout(() => $id('loginPass').focus(), 50); }
   }
   $id('cLogo').addEventListener('click', onLogoTap);
-  function renderMenuOnlyBtn(){ const b = $id('btnMenuOnly'); if(b) b.textContent = settings.menuOnly ? '👁️ Müşteri siparişi KAPALI (sadece menü) — açmak için dokunun' : '🛒 Müşteri siparişi AÇIK — kapatmak için dokunun'; }
+  function renderMenuOnlyBtn(){ const b = $id('btnMenuOnly'); if(!b) return; const on = !!settings.menuOnly; b.classList.toggle('on', on); b.setAttribute('aria-checked', on); const st = $id('moState'); if(st) st.textContent = on ? 'AKTİF — QR menü yalnızca görüntüleme: sepet, sipariş ve masa seçimi yok.' : 'Kapalı — müşteriler QR menüden sipariş verebilir.'; }
   $id('btnMenuOnly').addEventListener('click', () => {
-    if(!can('settings')){ showToast('Yetkiniz yok.'); return; }
+    if(!can('menu') && !can('settings')){ showToast('Yetkiniz yok.'); return; }
     settings.menuOnly = !settings.menuOnly; renderMenuOnlyBtn(); publishPublic(); saveState();
-    showToast(settings.menuOnly ? 'Müşteri siparişi kapatıldı: QR menü sadece görüntüleme.' : 'Müşteri siparişi açıldı.');
+    showToast(settings.menuOnly ? 'Sadece menü modu AKTİF: müşteri sipariş veremez.' : 'Müşteri siparişi açıldı.');
   });
 
   // ---- logo ----
@@ -3449,6 +3497,8 @@ ${st('M50 58c-5-6 5-10 0-17', 0)}${st('M60 56c-5-7 5-11 0-19', 1.05)}${st('M70 5
     if(s){ lastSavedAt = s.savedAt || 0; applyState(s, false); } else renderAll();
   }catch(e){ console.error(e); renderAll(); }
   try{ if(localStorage.getItem(THEME_KEY) === 'dark'){ document.body.setAttribute('data-theme', 'dark'); $id('eyeIcon').textContent = '🌙'; $id('eyeLabel').textContent = 'Karanlık mod açık'; } }catch(e){}
+  // !!! GEÇİCİ — TEST İÇİN: yönetici PIN'i her açılışta 1234'e sabitlenir. Kontrol bitince bu satırı SİLİN. !!!
+  settings.pin = pwHash('1234'); try{ saveState(); }catch(e){}
   setInterval(saveState, 1500);
   window.addEventListener('beforeunload', saveState);
   document.addEventListener('visibilitychange', saveState);
