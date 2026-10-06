@@ -1087,7 +1087,6 @@
               <div class="cat-content-top">
                 <input class="cat-search-input" id="prodSearchInput" placeholder="Ürün ara...">
                 <span class="link-btn" id="btnYeniUrunEkle">＋ Yeni Ürün Ekle</span>
-                <span class="link-btn muted" id="btnMenuYukle" title="SEYİR CAFE hazır menüsünü ekle">📥 Menüyü Yükle</span>
                 <span class="link-btn muted" id="btnUrunAra" title="Ara">🔍</span>
               </div>
               <div class="product-grid" id="productGrid"></div>
@@ -1900,9 +1899,8 @@
     ["Nargile","💨","Nargile",[["Anason Nargile","🌱",450],["Çilek Nargile","🍓",450],["Yanık Şeftali Nargile","🍑",450],["Limon Nargile","🍋",450],["Şeftali Nargile","🍑",450],["Karpuz Nargile","🍉",450],["Kavun Nargile","🍈",450],["Karadut Nargile","🍇",450],["Yaban Mersini Nargile","🫐",450],["Elma Nargile","🍎",450],["Portakal Nargile","🍊",450],["Gül Nargile","🌹",450],["Ice Şeftali Nargile","🧊",450],["Nane Nargile","🌿",450],["Üzüm Nargile","🍇",450],["Kapuçino Nargile","☕",500],["Vivident Nargile","💨",500],["Lady Killer Nargile","💋",500],["Love 66 Nargile","❤️",500],["Pink Nargile","🌸",500],["Brownie Nargile","🍫",500],["Ice Bom Bom Nargile","🧊",500],["İzmir Romantik Nargile","💐",500],["Limon Cheesecake Nargile","🍰",500],["Kola Nargile","🥤",500],["Bisküvit Nargile","🍪",500]]]
   ];
   const SEED_GROUPS = ['Mutfak', 'Bar', 'Nargile'];
-  const OLD_SAMPLE = ['Çay', 'Türk Kahvesi', 'Çilekli Milkshake', 'Cheesecake', 'Sufle', 'Kahvaltı', 'Tost', 'Gözleme', 'Hamburger'];
+  const MENU_VER = 2; // bu sürümden eski kayıtlardaki menü silinir, yerine SEYİR CAFE menüsü konur
   function buildSeedMenu(){ return SEED_MENU.map(c => ({ name: c[0], icon: c[1], products: c[3].map(p => ({ name: p[0], icon: p[1], portion: 'Tam', price: p[2], kg: c[2] })) })); }
-  function isOldSampleMenu(c){ return Array.isArray(c) && c.length === 4 && c.map(x => x.name).join('|') === 'İçecekler|Milkshake|Tatlı ve Pastalar|Yiyecekler' && c.every(x => (x.products || []).every(p => OLD_SAMPLE.indexOf(p.name) > -1)); }
   function ensureSeedGroups(){ SEED_GROUPS.forEach(n => { if(!mutfakGruplari.some(g => g.name === n)) mutfakGruplari.push({ name: n, durum: 'Hazırlanıyor ve Hazırlandı' }); }); }
   let categories = buildSeedMenu();
   let activeCatIndex = 0;
@@ -2016,16 +2014,6 @@
     showToast('Kategori eklendi: ' + name);
   });
   document.getElementById('btnYeniUrunEkle').addEventListener('click', () => handleCategoryAction('yeniurun', activeCatIndex));
-  document.getElementById('btnMenuYukle').addEventListener('click', () => {
-    if(!window.confirm('SEYİR CAFE hazır menüsü eklensin mi? Mevcut ürünleriniz silinmez; aynı adlı ürünler atlanır, eksik kategori ve ürünler eklenir.')) return;
-    const have = new Set(categories.flatMap(c => c.products.map(p => p.name.toLocaleLowerCase('tr-TR')))); let addedP = 0, addedC = 0;
-    buildSeedMenu().forEach(sc => {
-      let cat = categories.find(c => c.name === sc.name);
-      if(!cat){ cat = { name: sc.name, icon: sc.icon, products: [] }; categories.push(cat); addedC++; } else if(!cat.icon) cat.icon = sc.icon;
-      sc.products.forEach(p => { const k = p.name.toLocaleLowerCase('tr-TR'); if(have.has(k)) return; have.add(k); cat.products.push(p); addedP++; });
-    });
-    ensureSeedGroups(); try{ renderMutfakRows(); }catch(e){} renderCatList(); renderProductGrid(); saveState(); showToast(addedC + ' kategori, ' + addedP + ' ürün eklendi.');
-  });
   document.getElementById('btnUrunAra').addEventListener('click', () => {
     const input = document.getElementById('prodSearchInput');
     input.classList.toggle('show');
@@ -3356,7 +3344,7 @@ ${st('M50 58c-5-6 5-10 0-17', 0)}${st('M60 56c-5-7 5-11 0-19', 1.05)}${st('M70 5
   // ---- durum kaydı, yedek, canlı eşitleme ----
   function snapshot(){
     readSettings();
-    return { carts, tableLabels, regions, nextTableNo, orderOpenedAt, categories, paidByKey, paymentHistoryByKey, customers, giderler, mutfakGruplari, adisyonSeq, adisyonNoByKey,
+    return { carts, tableLabels, regions, nextTableNo, orderOpenedAt, categories, menuVer: MENU_VER, paidByKey, paymentHistoryByKey, customers, giderler, mutfakGruplari, adisyonSeq, adisyonNoByKey,
       lists, payTypes, payLog, saleLog, closedAt, guestsByKey, discountByKey, extOrders, extSeq, perms, waiveLog, colLog, dayReports, cancelLog, settings: Object.assign({}, settings, { pin: undefined }) };
   }
   const localExtra = () => ({ staffUsers, pin: settings.pin });
@@ -3379,7 +3367,7 @@ ${st('M50 58c-5-6 5-10 0-17', 0)}${st('M60 56c-5-7 5-11 0-19', 1.05)}${st('M70 5
     fill(carts, s.carts); fill(tableLabels, s.tableLabels); fill(orderOpenedAt, s.orderOpenedAt); fill(adisyonNoByKey, s.adisyonNoByKey); fill(discountByKey, s.discountByKey); fill(guestsByKey, s.guestsByKey);
     if(Array.isArray(s.regions) && s.regions.length) regions = s.regions;
     if(Array.isArray(s.categories) && s.categories.length) categories = s.categories;
-    let seeded = false; if(isOldSampleMenu(categories)){ categories = buildSeedMenu(); seeded = true; }
+    let seeded = false; if(s.menuVer !== MENU_VER){ categories = buildSeedMenu(); seeded = true; }
     if(s.nextTableNo) nextTableNo = s.nextTableNo;
     paidByKey = s.paidByKey || {}; paymentHistoryByKey = s.paymentHistoryByKey || {};
     if(Array.isArray(s.customers)) customers = s.customers;
@@ -3407,6 +3395,7 @@ ${st('M50 58c-5-6 5-10 0-17', 0)}${st('M60 56c-5-7 5-11 0-19', 1.05)}${st('M70 5
     uiReady = false; applySettings(); lastSaved = fullStr();
     if(persist){ try{ localStorage.setItem(STORE_KEY, JSON.stringify(Object.assign(JSON.parse(lastSaved), { savedAt: s.savedAt || Date.now(), dev: s.dev || DEV }))); }catch(e){} }
     renderAll();
+    if(seeded) setTimeout(() => { lastSaved = ''; saveState(); }, 50);
   }
   function renderAll(){
     renderRegionTabs(); renderTableGrid(); renderSiparisMasa(); renderCatList(); renderProductGrid(); renderMutfakRows(); renderCustomers(); renderGiderler();
