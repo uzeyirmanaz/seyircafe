@@ -2282,7 +2282,11 @@
   let cCart = {}, cTab = 0, myOrderId = null, cOpen = false;
   const qp = new URLSearchParams(location.search);
   function customerData(){
-    if(pubData && pubData.categories) return { categories: arr(pubData.categories).map(c => ({ name: c.name, icon: c.icon || '', products: arr(c.products) })), tables: arr(pubData.tables) };
+    if(pubData && pubData.categories){
+      const tb = arr(pubData.tables);
+      if(pubData.menuVer === MENU_VER) return { categories: arr(pubData.categories).map(c => ({ name: c.name, icon: c.icon || '', products: arr(c.products) })), tables: tb };
+      return { categories, tables: tb }; // eski sürümden kalan yayın menüsü yok sayılır
+    }
     return { categories, tables: regions.flatMap(r => r.tables.map(n => ({ n, label: tableLabels[n] || ('Masa ' + n) }))) };
   }
   function cList(){
@@ -2390,7 +2394,7 @@
   // ---------------- GARSON PANELİ BAŞLAT ----------------
   function publishPublic(){
     const tables = regions.flatMap(r => r.tables.map(n => ({ n, label: tableLabels[n] || ('Masa ' + n) })));
-    const data = { categories: categories.map(c => ({ name: c.name, icon: c.icon || '', products: c.products.map(p => ({ name: p.name, icon: p.icon || '', price: p.price, desc: p.desc || '', img: p.img || '' })) })), tables, menuOnly: !!settings.menuOnly };
+    const data = { categories: categories.map(c => ({ name: c.name, icon: c.icon || '', products: c.products.map(p => ({ name: p.name, icon: p.icon || '', price: p.price, desc: p.desc || '', img: p.img || '' })) })), menuVer: MENU_VER, tables, menuOnly: !!settings.menuOnly };
     const s = JSON.stringify(data);
     if(s !== lastPub){ lastPub = s; RT.set('public', data); }
   }
