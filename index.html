@@ -669,6 +669,10 @@
   .mp-sw{padding:10px 16px 0;flex:none}
   #menuPicker .mp-tabs{flex-wrap:nowrap;overflow-x:auto;padding:10px 16px;margin:0;flex:none}
   #menuPicker .mp-tab{white-space:nowrap;padding:9px 16px;font-size:.88rem}
+  #menuPicker .mp-subs{padding-top:0} #menuPicker .mp-subs .mp-tab{padding:6px 12px;font-size:.78rem;background:transparent}
+  #menuPicker .mp-subs .mp-tab.active{background:var(--red)}
+  .c-subs{padding-top:0!important} .c-subs .c-tab{padding:5px 12px!important;font-size:.76rem!important;background:transparent!important;border:1px solid var(--line)!important} .c-subs .c-tab.active{background:var(--red)!important;color:#fff;border-color:var(--red)!important}
+  .c-subttl{font-weight:800;font-size:.8rem;letter-spacing:.06em;text-transform:uppercase;color:var(--red);margin:14px 2px 4px}
   #menuPicker .mp-grid{flex:1;overflow:auto;padding:4px 16px 16px;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));align-content:start}
   .mp-card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:8px;box-shadow:var(--shadow);min-height:100px;cursor:pointer}
   .mp-card.in{border-color:var(--red)} .mp-card b{font-size:.92rem} .mp-card .pr{color:var(--red);font-weight:800}
@@ -744,6 +748,16 @@
   .mp-foot .btn-save.mp-save{background:#1f9d57}
   .mp-foot .btn-save.mp-back{background:var(--ink-faint)}
 
+
+  /* ---- müşteri başlık: yan yana premium logo + sosyal medya ---- */
+  #customerView .c-head{flex-direction:column;align-items:center;gap:8px;padding:16px 0 6px}
+  #customerView .c-head .c-logo{width:min(380px,94vw);max-width:94vw;opacity:1}
+  .c-logo svg{animation-name:lgFloat2}
+  @keyframes lgFloat2{0%,100%{transform:translateY(0) rotateY(-5deg) rotateX(2deg)}50%{transform:translateY(-3px) rotateY(5deg) rotateX(-1deg)}}
+  .c-social{display:flex;gap:14px;justify-content:center;align-items:center;margin-top:2px}
+  .c-social a,.c-social button{width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:1px solid rgba(233,196,106,.55);background:linear-gradient(145deg,#2d1a10,#150a05);color:#f4d27a;box-shadow:0 3px 8px rgba(0,0,0,.3),inset 0 1px 0 rgba(255,255,255,.15);cursor:pointer;padding:0;text-decoration:none;transition:transform .15s}
+  .c-social a:active,.c-social button:active{transform:scale(.92)} .c-social svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+  .c-social .fl{fill:currentColor;stroke:none}
   @keyframes lgFloat{0%,100%{transform:translateY(0) rotateY(-11deg) rotateX(4deg)}50%{transform:translateY(-4px) rotateY(11deg) rotateX(-2deg)}}
   @media (prefers-reduced-motion:reduce){.c-logo svg,.sb-logo svg{animation:none}}
 </style>
@@ -751,10 +765,10 @@
 </head>
 <body data-theme="light">
   <div id="customerView" class="menu-only">
-    <div class="c-head"><div id="cLogo" class="c-logo"></div></div>
+    <div class="c-head"><div id="cLogo" class="c-logo"></div><div class="c-social" id="cSocial"></div></div>
     <div class="c-top"><div class="c-masa"><span>🪑 Masa</span><select id="cMasa"></select></div>
     <input id="cSearch" class="c-search" placeholder="🔍 Menüde ara…" autocomplete="off">
-    <div class="c-tabs" id="cTabs"></div></div>
+    <div class="c-tabs" id="cTabs"></div><div class="c-tabs c-subs" id="cSubs" style="display:none"></div></div>
     <div id="cItems"></div>
     <div class="c-bar"><div class="c-bar-in">
       <div class="c-status" id="cStatus" style="display:none;"></div>
@@ -930,6 +944,8 @@
               <div class="field"><label>Gün Başlangıç (gün sonu raporu bu saatte başlar)</label><div class="val" id="setDayStart" contenteditable="true">05:00</div></div>
               <div class="field"><label>Vardiya değişim saati (sabah / akşam ayrımı)</label><div class="val" id="setShift" contenteditable="true">15:00</div></div>
               <div class="field"><label>İlk adisyon numarası</label><div class="val" id="setFirstOrderNo" contenteditable="true">101</div></div>
+              <div class="field"><label>Wi-Fi adı (müşteri menüsündeki Wi-Fi butonu)</label><div class="val" id="setWifiName" contenteditable="true"></div></div>
+              <div class="field"><label>Wi-Fi şifresi (butona dokununca kopyalanır)</label><div class="val" id="setWifiPass" contenteditable="true"></div></div>
               <div class="field"><label>Yönetici PIN (personel girişi, bu cihaz)</label><input type="password" class="val" id="setPin" autocomplete="new-password" placeholder="Değiştirmek için yeni PIN yazın (en az 4 hane)" style="width:100%;border:0;background:transparent;font:inherit;color:inherit"></div>
             </div>
             <div id="tab-sistem" style="display:none;">
@@ -1033,7 +1049,7 @@
             <div class="menu-picker" id="menuPicker" style="display:none;">
               <div class="mp-head"><b id="mpTitle">🍽️ Menü</b><button class="mp-x" id="mpClose" aria-label="Kapat">✕</button></div>
               <div class="mp-sw"><input id="mpSearch" placeholder="🔍 Ürün ara…" autocomplete="off"></div>
-              <div class="mp-tabs" id="mpTabs"></div>
+              <div class="mp-tabs" id="mpTabs"></div><div class="mp-tabs mp-subs" id="mpSubs"></div>
               <div class="mp-grid" id="mpGrid"></div>
               <div class="mp-foot"><span id="mpSum">Sepet boş</span><button class="btn-save mp-back" id="mpDone">Geri</button><button class="btn-save mp-save" id="mpSave">✓ KAYDET</button></div>
             </div>
@@ -1693,15 +1709,18 @@
   }
 
   // ---- quick-add from the menu (mirrors Menü/Ürünler categories) ----
-  let mpActiveCat = 0, mpList = [];
+  let mpActiveCat = 0, mpSub = -1, mpList = [];
   const mpEl = id => document.getElementById(id);
   function renderMenuPicker(){
-    if(mpActiveCat >= categories.length) mpActiveCat = 0;
+    const groups = menuGroups(categories); if(mpActiveCat >= groups.length) mpActiveCat = 0;
     const q = mpEl('mpSearch').value.trim().toLocaleLowerCase('tr-TR'), cart = carts[currentCartKey] || [];
     const tabs = mpEl('mpTabs'); tabs.innerHTML = '';
-    categories.forEach((c, i) => { const t = document.createElement('div'); t.className = 'mp-tab' + (i === mpActiveCat && !q ? ' active' : ''); t.textContent = (c.icon ? c.icon + ' ' : '') + c.name;
-      t.addEventListener('click', () => { mpActiveCat = i; mpEl('mpSearch').value = ''; renderMenuPicker(); }); tabs.appendChild(t); });
-    mpList = q ? categories.flatMap(c => c.products).filter(p => p.name.toLocaleLowerCase('tr-TR').includes(q)) : ((categories[mpActiveCat] || {}).products || []);
+    groups.forEach((g, i) => { const t = document.createElement('div'); t.className = 'mp-tab' + (i === mpActiveCat && !q ? ' active' : ''); t.textContent = (g.icon ? g.icon + ' ' : '') + g.name;
+      t.addEventListener('click', () => { mpActiveCat = i; mpSub = -1; mpEl('mpSearch').value = ''; renderMenuPicker(); }); tabs.appendChild(t); });
+    const g0 = groups[mpActiveCat] || { subs: [] }, subsEl = mpEl('mpSubs'); subsEl.innerHTML = '';
+    if(!q && g0.subs.length > 1){ [{ idx: -1, label: 'Tümü' }].concat(g0.subs).forEach(sb => { const t = document.createElement('div'); t.className = 'mp-tab' + (sb.idx === mpSub ? ' active' : ''); t.textContent = sb.label;
+      t.addEventListener('click', () => { mpSub = sb.idx; renderMenuPicker(); }); subsEl.appendChild(t); }); subsEl.style.display = ''; } else subsEl.style.display = 'none';
+    mpList = q ? categories.flatMap(c => c.products).filter(p => p.name.toLocaleLowerCase('tr-TR').includes(q)) : g0.subs.filter(sb => mpSub < 0 || sb.idx === mpSub).flatMap(sb => sb.cat.products);
     const grid = mpEl('mpGrid'), st = grid.scrollTop;
     grid.innerHTML = mpList.map((p, i) => { const x = cart.find(it => it.name === p.name && it.unit === p.price && !it.note), n = x ? x.qty : 0;
       return '<div class="mp-card' + (n ? ' in' : '') + '" data-i="' + i + '">' + (/^https:\/\//.test(p.img || '') ? '<img class="mp-img" src="' + esc(p.img) + '" alt="" loading="lazy">' : (p.icon ? '<span class="mi">' + esc(p.icon) + '</span>' : '')) + '<b>' + esc(p.name) + '</b>' + (p.desc ? '<small>' + esc(p.desc) + '</small>' : '') + '<span class="pr">' + fmtTL(p.price) + '</span><div class="ctl">' +
@@ -1803,12 +1822,12 @@
 
   // ---- toast feedback ----
   let toastTimer;
-  function showToast(msg){
+  function showToast(msg, ms){
     const t = document.getElementById('toast');
     t.textContent = msg;
     t.classList.add('show');
     clearTimeout(toastTimer);
-    toastTimer = setTimeout(() => t.classList.remove('show'), 2200);
+    toastTimer = setTimeout(() => t.classList.remove('show'), ms || 2200);
   }
 
   // ---- every toggle switch (payment types, user flags) becomes clickable ----
@@ -1885,11 +1904,11 @@
   });
   // ---- kayıt onay bannerı (büyük, yeşil/kırmızı) ----
   let sbTimer;
-  function showSaveBanner(title, sub, isErr){
+  function showSaveBanner(title, sub, isErr, ms){
     const b = document.getElementById('saveBanner');
     document.getElementById('sbT').textContent = title; document.getElementById('sbS').textContent = sub || '';
     b.classList.toggle('err', !!isErr); b.querySelector('.sb-ic').textContent = isErr ? '!' : '✓';
-    b.classList.add('show'); clearTimeout(sbTimer); sbTimer = setTimeout(() => b.classList.remove('show'), isErr ? 4500 : 3500);
+    b.classList.add('show'); clearTimeout(sbTimer); sbTimer = setTimeout(() => b.classList.remove('show'), ms || (isErr ? 4500 : 3500));
     try{ if(navigator.vibrate) navigator.vibrate(isErr ? [120, 80, 120] : 90); }catch(e){}
   }
   // KAYDET: mutfağa gönder → Sipariş/Masa ekranına dön → onay göster (hata olursa aynı ekranda kal)
@@ -1943,8 +1962,26 @@
     ["Nargile","💨","Nargile",[["Anason Nargile","🌱",450],["Çilek Nargile","🍓",450],["Yanık Şeftali Nargile","🍑",450],["Limon Nargile","🍋",450],["Şeftali Nargile","🍑",450],["Karpuz Nargile","🍉",450],["Kavun Nargile","🍈",450],["Karadut Nargile","🍇",450],["Yaban Mersini Nargile","🫐",450],["Elma Nargile","🍎",450],["Portakal Nargile","🍊",450],["Gül Nargile","🌹",450],["Ice Şeftali Nargile","🧊",450],["Nane Nargile","🌿",450],["Üzüm Nargile","🍇",450],["Kapuçino Nargile","☕",500],["Vivident Nargile","💨",500],["Lady Killer Nargile","💋",500],["Love 66 Nargile","❤️",500],["Pink Nargile","🌸",500],["Brownie Nargile","🍫",500],["Ice Bom Bom Nargile","🧊",500],["İzmir Romantik Nargile","💐",500],["Limon Cheesecake Nargile","🍰",500],["Kola Nargile","🥤",500],["Bisküvit Nargile","🍪",500]]]
   ];
   const SEED_GROUPS = ['Mutfak', 'Bar', 'Nargile'];
+
+  // ---- ANA KATEGORİ / ALT KATEGORİ (mevcut menü silinmeden gruplanır) ----
+  const MENU_GROUPS = [['Yemekler','🍽️'],['Soğuk İçecekler','🥤'],['Sıcak İçecekler','☕'],['Dondurmalar','🍦'],['Kahveler','☕'],['Nargileler','💨']];
+  const GROUP_OF = {
+    'Tost, Burger & Hamur İşleri':['Yemekler'], 'Makarna & Mantı':['Yemekler'], 'Salatalar':['Yemekler'], 'Tatlılar':['Yemekler'], 'Çerez & Atıştırmalık':['Yemekler'],
+    'Frozen':['Soğuk İçecekler'], 'Milkshake':['Soğuk İçecekler'], 'Taze Sıkma & Limonata':['Soğuk İçecekler'], 'Soda':['Soğuk İçecekler'], 'Soğuk İçecekler':['Soğuk İçecekler','Hazır İçecekler'],
+    'Sıcak İçecekler':['Sıcak İçecekler','Çaylar & Sıcaklar'], 'Bitki Çayları':['Sıcak İçecekler'],
+    'Dondurma':['Dondurmalar'],
+    'Türk Kahveleri':['Kahveler'], 'Espresso':['Kahveler'], 'Sıcak Kahveler':['Kahveler'], 'Soğuk Kahveler':['Kahveler'],
+    'Nargile':['Nargileler']
+  };
+  function migrateMenuGroups(cats){ (cats || []).forEach(c => { if(!c.grp){ const m = GROUP_OF[c.name]; if(m){ c.grp = m[0]; if(m[1]) c.sub = m[1]; } else { const k = String(c.name).split(' / '); c.grp = k.length > 1 ? k[0] : c.name; if(k.length > 1) c.sub = k.slice(1).join(' / '); } } }); return cats; }
+  function menuGroups(cats){
+    migrateMenuGroups(cats); const m = new Map();
+    cats.forEach((c, i) => { const g = c.grp || c.name; if(!m.has(g)) m.set(g, { name: g, icon: (MENU_GROUPS.find(x => x[0] === g) || [])[1] || c.icon || '', subs: [] }); m.get(g).subs.push({ idx: i, label: c.sub || c.name, cat: c }); });
+    const order = MENU_GROUPS.map(x => x[0]);
+    return [...m.values()].sort((a, b) => { const x = order.indexOf(a.name), y = order.indexOf(b.name); return (x < 0 ? 99 : x) - (y < 0 ? 99 : y); });
+  }
   const MENU_VER = 2; // bu sürümden eski kayıtlardaki menü silinir, yerine SEYİR CAFE menüsü konur
-  function buildSeedMenu(){ return SEED_MENU.map(c => ({ name: c[0], icon: c[1], products: c[3].map(p => ({ name: p[0], icon: p[1], portion: 'Tam', price: p[2], kg: c[2] })) })); }
+  function buildSeedMenu(){ return migrateMenuGroups(SEED_MENU.map(c => ({ name: c[0], icon: c[1], products: c[3].map(p => ({ name: p[0], icon: p[1], portion: 'Tam', price: p[2], kg: c[2] })) }))); }
   function ensureSeedGroups(){ SEED_GROUPS.forEach(n => { if(!mutfakGruplari.some(g => g.name === n)) mutfakGruplari.push({ name: n, durum: 'Hazırlanıyor ve Hazırlandı' }); }); }
   let categories = buildSeedMenu();
   let activeCatIndex = 0;
@@ -1952,12 +1989,13 @@
   let prodSearch = '';
 
   function renderCatList(){
+    migrateMenuGroups(categories);
     const list = document.getElementById('catList');
     list.innerHTML = '';
     categories.forEach((cat, idx) => {
       const item = document.createElement('div');
       item.className = 'cat-item' + (idx === activeCatIndex ? ' active' : '');
-      item.innerHTML = '<span>' + (cat.icon ? '<span class="ico">' + esc(cat.icon) + '</span>' : '') + esc(cat.name) + '</span><span class="kebab" data-idx="' + idx + '">⋮</span>' +
+      item.innerHTML = '<span>' + (cat.icon ? '<span class="ico">' + esc(cat.icon) + '</span>' : '') + esc(cat.grp && (cat.sub || cat.grp !== cat.name) ? cat.grp + ' › ' + (cat.sub || cat.name) : cat.name) + '</span><span class="kebab" data-idx="' + idx + '">⋮</span>' +
         '<div class="cat-menu" id="catMenu' + idx + '">' +
           '<div class="cm-item" data-action="yeniurun" data-idx="' + idx + '">＋ Yeni Ürün Ekle</div>' +
           '<div class="cm-item" data-action="altkategori" data-idx="' + idx + '">↳ Alt Kategori Ekle</div>' +
@@ -2006,7 +2044,7 @@
     } else if(action === 'altkategori'){
       const name = window.prompt('Alt kategori adı:');
       if(!name) return;
-      categories.push({ name: categories[i].name + ' / ' + name, products: [] });
+      migrateMenuGroups(categories); categories.push({ name: categories[i].name + ' / ' + name, grp: categories[i].grp || categories[i].name, sub: name, products: [] });
       activeCatIndex = categories.length - 1;
       renderCatList(); renderProductGrid();
       showToast('Alt kategori eklendi: ' + name);
@@ -2323,19 +2361,22 @@
   let pubData = null, staffMode = false;
 
   // ---------------- MÜŞTERİ DİJİTAL MENÜ ----------------
-  let cCart = {}, cTab = 0, myOrderId = null, cOpen = false;
+  let cCart = {}, cTab = 0, cSub = -1, cSubOf = [], myOrderId = null, cOpen = false;
   const qp = new URLSearchParams(location.search);
   function customerData(){
     if(pubData && pubData.categories){
       const tb = arr(pubData.tables);
-      if(pubData.menuVer === MENU_VER) return { categories: arr(pubData.categories).map(c => ({ name: c.name, icon: c.icon || '', products: arr(c.products) })), tables: tb };
+      if(pubData.menuVer === MENU_VER) return { categories: arr(pubData.categories).map(c => ({ name: c.name, grp: c.grp, sub: c.sub, icon: c.icon || '', products: arr(c.products) })), tables: tb };
       return { categories, tables: tb }; // eski sürümden kalan yayın menüsü yok sayılır
     }
     return { categories, tables: regions.flatMap(r => r.tables.map(n => ({ n, label: tableLabels[n] || ('Masa ' + n) }))) };
   }
   function cList(){
     const d = customerData(), q = ($id('cSearch') ? $id('cSearch').value : '').trim().toLocaleLowerCase('tr-TR');
-    return q ? d.categories.flatMap(c => c.products).filter(p => p.name.toLocaleLowerCase('tr-TR').includes(q)) : ((d.categories[cTab] || {}).products || []);
+    const gs = menuGroups(d.categories); if(cTab >= gs.length) cTab = 0;
+    if(q){ cSubOf = []; return d.categories.flatMap(c => c.products).filter(p => p.name.toLocaleLowerCase('tr-TR').includes(q)); }
+    const out = []; cSubOf = []; ((gs[cTab] || { subs: [] }).subs).filter(sb => cSub < 0 || sb.idx === cSub).forEach(sb => sb.cat.products.forEach(p => { out.push(p); cSubOf.push(sb.label); }));
+    return out;
   }
   function isMenuOnly(){ return pubData ? !!pubData.menuOnly : ((typeof RT !== 'undefined' && RT.local) ? !!settings.menuOnly : true); }
   function cCount(){ return Object.values(cCart).reduce((s, i) => s + i.qty, 0); }
@@ -2343,15 +2384,18 @@
   function renderCustomer(){
     const d = customerData(), mo = isMenuOnly();
     $id('customerView').classList.toggle('menu-only', mo);
-    if(cTab >= d.categories.length) cTab = 0;
+    const gs = menuGroups(d.categories); if(cTab >= gs.length) cTab = 0;
     const sel = $id('cMasa'), prev = sel.value || qp.get('masa') || '';
     const opts = '<option value="">Masanızı seçin…</option>' + d.tables.map(t => '<option value="' + t.n + '">' + esc(t.label) + '</option>').join('');
     if(sel.innerHTML !== opts){ sel.innerHTML = opts; sel.value = prev; }
-    $id('cTabs').innerHTML = d.categories.map((c, i) => '<div class="c-tab' + (i === cTab ? ' active' : '') + '" data-i="' + i + '">' + (c.icon ? esc(c.icon) + ' ' : '') + esc(c.name) + '</div>').join('');
+    $id('cTabs').innerHTML = gs.map((g, i) => '<div class="c-tab' + (i === cTab ? ' active' : '') + '" data-i="' + i + '">' + (g.icon ? esc(g.icon) + ' ' : '') + esc(g.name) + '</div>').join('');
+    const subsOn = gs[cTab] && gs[cTab].subs.length > 1 && !($id('cSearch').value || '').trim();
+    $id('cSubs').style.display = subsOn ? '' : 'none';
+    $id('cSubs').innerHTML = subsOn ? [{ idx: -1, label: 'Tümü' }].concat(gs[cTab].subs).map(sb => '<div class="c-tab' + (sb.idx === cSub ? ' active' : '') + '" data-s="' + sb.idx + '">' + esc(sb.label) + '</div>').join('') : '';
     const lst = cList();
     $id('cItems').innerHTML = lst.length ? lst.map((p, i) => {
-      const q = (cCart[p.name] || {}).qty || 0;
-      return '<div class="c-item">' + (/^https:\/\//.test(p.img || '') ? '<img src="' + esc(p.img) + '" alt="' + esc(p.name) + '" loading="lazy" style="width:56px;height:56px;border-radius:8px;object-fit:cover;margin-right:10px">' : (p.icon ? '<span class="ci">' + esc(p.icon) + '</span>' : '')) + '<div class="nm"><b>' + esc(p.name) + '</b>' + (p.desc ? '<small style="display:block;color:var(--ink-faint)">' + esc(p.desc) + '</small>' : '') + '<span>' + fmtTL(p.price) + '</span></div>' +
+      const q = (cCart[p.name] || {}).qty || 0, hdr = (cSub < 0 && cSubOf[i] && cSubOf[i] !== cSubOf[i - 1] && subsOn) ? '<div class="c-subttl">' + esc(cSubOf[i]) + '</div>' : '';
+      return hdr + '<div class="c-item">' + (/^https:\/\//.test(p.img || '') ? '<img src="' + esc(p.img) + '" alt="' + esc(p.name) + '" loading="lazy" style="width:56px;height:56px;border-radius:8px;object-fit:cover;margin-right:10px">' : (p.icon ? '<span class="ci">' + esc(p.icon) + '</span>' : '')) + '<div class="nm"><b>' + esc(p.name) + '</b>' + (p.desc ? '<small style="display:block;color:var(--ink-faint)">' + esc(p.desc) + '</small>' : '') + '<span>' + fmtTL(p.price) + '</span></div>' +
         (mo ? '' : q ? '<div class="qty-ctl"><button class="qbtn" data-p="' + i + '" data-d="-1">−</button><b class="qv">' + q + '</b><button class="qbtn" data-p="' + i + '" data-d="1">+</button></div>'
            : '<button class="qbtn" data-p="' + i + '" data-d="1">+</button>') + '</div>';
     }).join('') : '<p style="text-align:center;color:var(--ink-faint)">' + (($id('cSearch').value || '').trim() ? 'Ürün bulunamadı.' : 'Menü hazırlanıyor…') + '</p>';
@@ -2362,7 +2406,8 @@
     btn.disabled = n === 0;
     btn.textContent = !n ? 'Sepet boş' : (cOpen ? 'Siparişi Garsona Gönder · ' : '🛒 Sepeti Gör · ') + fmtTL(cTotal()) + ' (' + n + ' ürün)';
   }
-  $id('cTabs').addEventListener('click', e => { const t = e.target.closest('.c-tab'); if(t){ cTab = +t.dataset.i; renderCustomer(); } });
+  $id('cTabs').addEventListener('click', e => { const t = e.target.closest('.c-tab'); if(t){ cTab = +t.dataset.i; cSub = -1; renderCustomer(); } });
+  $id('cSubs').addEventListener('click', e => { const t = e.target.closest('.c-tab'); if(t){ cSub = +t.dataset.s; renderCustomer(); } });
   $id('cItems').addEventListener('click', e => {
     if(isMenuOnly()) return;
     const b = e.target.closest('.qbtn'); if(!b) return;
@@ -2441,7 +2486,7 @@
   // ---------------- GARSON PANELİ BAŞLAT ----------------
   function publishPublic(){
     const tables = regions.flatMap(r => r.tables.map(n => ({ n, label: tableLabels[n] || ('Masa ' + n) })));
-    const data = { categories: categories.map(c => ({ name: c.name, icon: c.icon || '', products: c.products.map(p => ({ name: p.name, icon: p.icon || '', price: p.price, desc: p.desc || '', img: p.img || '' })) })), menuVer: MENU_VER, tables, menuOnly: !!settings.menuOnly };
+    const data = { categories: migrateMenuGroups(categories).map(c => ({ name: c.name, grp: c.grp || c.name, sub: c.sub || '', icon: c.icon || '', products: c.products.map(p => ({ name: p.name, icon: p.icon || '', price: p.price, desc: p.desc || '', img: p.img || '' })) })), menuVer: MENU_VER, tables, menuOnly: !!settings.menuOnly, wifiName: settings.wifiName || '', wifiPass: settings.wifiPass || '' };
     const s = JSON.stringify(data);
     if(s !== lastPub){ lastPub = s; RT.set('public', data); }
   }
@@ -2738,14 +2783,43 @@ ${st('M50 58c-5-6 5-10 0-17', 0)}${st('M60 56c-5-7 5-11 0-19', 1.05)}${st('M70 5
   }
   function logoSVG(mode){
     if(mode === 'mark') return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="-8 -8 136 136" overflow="visible" role="img" aria-label="SEYİR CAFE">' + emblem() + '</svg>';
-    const k = 'lt' + (++_lg);
-    return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 190" overflow="visible" role="img" aria-label="SEYİR CAFE"><defs><linearGradient id="' + k + '" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#a8741f"/><stop offset=".5" stop-color="#e9c46a"/><stop offset="1" stop-color="#a8741f"/></linearGradient></defs><g transform="translate(60 4)">' + emblem() + '</g>' +
-      '<text x="124" y="152" text-anchor="middle" font-family="Georgia,\'Times New Roman\',serif" font-weight="700" font-size="30" letter-spacing="8" fill="url(#' + k + ')">SEYİR</text>' +
-      '<g stroke="url(#' + k + ')" stroke-width="1.3" opacity=".8"><path d="M34 176h46M170 176h46"/></g>' +
-      '<text x="125" y="180" text-anchor="middle" font-family="Georgia,\'Times New Roman\',serif" font-size="12" letter-spacing="10" fill="#c8782f">CAFE</text></svg>';
+    const k = 'lt' + (++_lg), X = 124, Y = 72, FS = 50, TL = 288;
+    const lay = (i, c) => '<text x="' + (X + i * 0.6).toFixed(1) + '" y="' + (Y + i * 0.95).toFixed(1) + '" fill="' + c + '">SEYİR CAFE</text>';
+    const cols = ['#c99a3c','#b98a30','#a67a28','#8f6820','#785518','#614412','#4b350d','#382708','#281a05'];
+    let ext = ''; for(let i = cols.length; i >= 1; i--) ext += lay(i, cols[i - 1]);
+    return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 430 128" overflow="visible" role="img" aria-label="SEYİR CAFE — Ben buradayım"><defs>' +
+      '<linearGradient id="' + k + 'a" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff6d2"/><stop offset=".35" stop-color="#f4d27a"/><stop offset=".62" stop-color="#d9a441"/><stop offset="1" stop-color="#9a6a1c"/></linearGradient>' +
+      '<linearGradient id="' + k + 'b" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#e9c46a" stop-opacity="0"/><stop offset=".5" stop-color="#e9c46a"/><stop offset="1" stop-color="#e9c46a" stop-opacity="0"/></linearGradient>' +
+      '<filter id="' + k + 's" x="-10%" y="-20%" width="125%" height="160%"><feDropShadow dx="0" dy="9" stdDeviation="5" flood-color="#000" flood-opacity=".45"/></filter></defs>' +
+      '<g transform="translate(0 6) scale(.95)">' + emblem() + '</g>' +
+      '<g filter="url(#' + k + 's)" font-family="Georgia,\'Times New Roman\',serif" font-weight="800" font-size="' + FS + '" textLength="' + TL + '" lengthAdjust="spacingAndGlyphs" style="font-size:' + FS + 'px">' +
+        ext.replace(/<text /g, '<text textLength="' + TL + '" lengthAdjust="spacingAndGlyphs" ') +
+        '<text x="' + X + '" y="' + Y + '" textLength="' + TL + '" lengthAdjust="spacingAndGlyphs" fill="url(#' + k + 'a)" stroke="#fff3c4" stroke-width=".7" stroke-linejoin="round">SEYİR CAFE</text></g>' +
+      '<path d="M' + X + ' 93h' + TL + '" stroke="url(#' + k + 'b)" stroke-width="1.4"/>' +
+      '<text x="' + (X + TL / 2) + '" y="115" text-anchor="middle" font-family="Georgia,\'Times New Roman\',serif" font-style="italic" font-weight="600" font-size="15" letter-spacing="5" fill="#e9c46a">Ben buradayım</text></svg>';
+  }
+
+  // ---- sosyal medya + Wi-Fi (müşteri başlığı) ----
+  const SOCIAL = [
+    { t: 'Instagram', u: 'https://www.instagram.com/seyircafe.21', i: '<svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle class="fl" cx="17.3" cy="6.7" r="1.1"/></svg>' },
+    { t: 'TikTok', u: 'https://www.tiktok.com/@seyircafe21', i: '<svg viewBox="0 0 24 24"><path d="M14 3v11.2a3.6 3.6 0 1 1-3.6-3.6"/><path d="M14 3c.3 2.6 2 4.4 4.8 4.6"/></svg>' },
+    { t: 'Konum (Harita)', u: 'https://maps.app.goo.gl/E2nL5DAqECA42zja8', i: '<svg viewBox="0 0 24 24"><path d="M12 21s-6.5-6.2-6.5-11a6.5 6.5 0 0 1 13 0c0 4.8-6.5 11-6.5 11z"/><circle cx="12" cy="10" r="2.4"/></svg>' }
+  ];
+  function renderSocial(){
+    const el = $id('cSocial'); if(!el) return;
+    el.innerHTML = SOCIAL.map(x => '<a href="' + x.u + '" target="_blank" rel="noopener noreferrer" aria-label="' + x.t + '" title="' + x.t + '">' + x.i + '</a>').join('') +
+      '<button type="button" id="cWifi" aria-label="Wi-Fi şifresini kopyala" title="Wi-Fi"><svg viewBox="0 0 24 24"><path d="M2.5 9a14 14 0 0 1 19 0"/><path d="M5.8 12.6a9.3 9.3 0 0 1 12.4 0"/><path d="M9 16a4.6 4.6 0 0 1 6 0"/><circle class="fl" cx="12" cy="19.2" r="1.3"/></svg></button>';
+    $id('cWifi').addEventListener('click', copyWifi);
+  }
+  function copyWifi(){
+    const pw = (pubData ? pubData.wifiPass : settings.wifiPass) || '', nm = (pubData ? pubData.wifiName : settings.wifiName) || '';
+    if(!pw){ showSaveBanner('Wi-Fi şifresi tanımlı değil', 'Lütfen personelden öğrenin.', true, 5000); return; }
+    const done = () => showSaveBanner('Wi-Fi şifresi kopyalandı', (nm ? nm + ' · ' : '') + 'Şifre: ' + pw, false, 5000);
+    const fb = () => { const ta = document.createElement('textarea'); ta.value = pw; ta.style.cssText = 'position:fixed;opacity:0'; document.body.appendChild(ta); ta.select(); let ok = false; try{ ok = document.execCommand('copy'); }catch(e){} ta.remove(); ok ? done() : showSaveBanner('Şifre', pw, false, 5000); };
+    if(navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(pw).then(done, fb); else fb();
   }
   function renderLogos(){
-    $id('cLogo').innerHTML = logoSVG('full'); $id('sbLogo').innerHTML = logoSVG('mark');
+    $id('cLogo').innerHTML = logoSVG('full'); $id('sbLogo').innerHTML = logoSVG('mark'); renderSocial();
     const fav = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" style="color:#3b2418;--lgbg:#fff">' + emblem() + '</svg>';
     $id('favi').href = 'data:image/svg+xml,' + encodeURIComponent(fav);
   }
@@ -3243,11 +3317,13 @@ ${st('M50 58c-5-6 5-10 0-17', 0)}${st('M60 56c-5-7 5-11 0-19', 1.05)}${st('M70 5
     settings.dayStart = /^\d{1,2}:\d{2}$/.test(t('setDayStart')) ? t('setDayStart') : '05:00';
     settings.firstOrderNo = t('setFirstOrderNo') || '101';
     settings.shiftSplit = /^\d{1,2}:\d{2}$/.test(t('setShift')) ? t('setShift') : '15:00';
+    settings.wifiName = t('setWifiName'); settings.wifiPass = t('setWifiPass');
   }
   function applySettings(){
     $id('setRestName').textContent = settings.restName; $id('restName').value = settings.restName;
     $id('setDayStart').textContent = settings.dayStart; $id('setFirstOrderNo').textContent = settings.firstOrderNo;
     $id('setPin').value = ''; $id('setShift').textContent = settings.shiftSplit || '15:00';
+    $id('setWifiName').textContent = settings.wifiName || ''; $id('setWifiPass').textContent = settings.wifiPass || '';
     document.title = 'İŞLETMEM — ' + settings.restName; uiReady = true;
   }
   $id('restName').addEventListener('input', e => { $id('setRestName').textContent = e.target.value; });
