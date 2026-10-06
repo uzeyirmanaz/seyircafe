@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"><meta http-equiv="Pragma" content="no-cache"><meta http-equiv="Expires" content="0">
-<meta name="build" content="20261006-4">
+<meta name="build" content="20261006-5">
 <script>(function(){ if(!/^https?:/.test(location.protocol)) return; try{ const f = new URL(location.href); f.searchParams.set('_t', Date.now());
   fetch(f.toString(), { cache: 'no-store' }).then(r => r.text()).then(t => { const m = t.match(/name="build" content="([^"]+)"/), cur = document.querySelector('meta[name=build]').content;
     if(m && m[1] !== cur && sessionStorage.getItem('seyirReload') !== m[1]){ sessionStorage.setItem('seyirReload', m[1]); const u = new URL(location.href); u.searchParams.set('_v', m[1]); location.replace(u.toString()); } }).catch(() => {}); }catch(e){} })();</script>
@@ -782,6 +782,78 @@
   body[data-theme="dark"] #customerView .c-top{background:rgba(24,20,30,.7)}
   body[data-theme="dark"] #customerView .c-bar{background:rgba(26,23,30,.94)}
   .c-logo svg{filter:none!important;animation:none!important}
+
+  /* ===== v2: üst sağ aksiyonlar ===== */
+  .top-actions{ position:fixed; top:14px; right:14px; z-index:600; display:flex; align-items:center; gap:8px; }
+  .top-actions .eye-toggle{ position:static; }
+  .top-actions .staff-bar{ position:static; display:flex; gap:8px; align-items:center; }
+  .staff-bar .ta-btn{ width:38px; height:38px; padding:0; border-radius:50%; font-size:17px; display:flex; align-items:center; justify-content:center; }
+  .staff-bar .ta-btn:hover{ border-color:var(--red); }
+  .staff-bar .mode{ max-width:190px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  body:not(.staff) .top-actions{ display:none !important; }
+  .topbar{ padding-right:300px; }
+  @media (max-width:1100px){ .staff-bar .mode{ display:none; } .topbar{ padding-right:190px; } }
+  @media (max-width:860px){ .topbar{ padding-right:14px !important; } .top-actions{ top:8px; right:8px; gap:6px; } .top-actions .eye-toggle{ padding:6px 9px; } }
+
+  /* ===== v2: masa adı kalemi ===== */
+  .pen-btn{ cursor:pointer; margin-left:8px; font-size:.95em; opacity:.8; user-select:none; }
+  .pen-btn:hover{ opacity:1; }
+  .bn{ display:block; font-size:.68rem; font-weight:600; color:var(--ink-faint); margin-top:2px; }
+  .gname{ color:var(--red); }
+
+  /* ===== v2: menü seçici (müşteri tarzı sepet) ===== */
+  .mp-head .mp-x.wide{ width:auto; padding:0 12px; font-size:.82rem; font-weight:700; border-radius:19px; }
+  .mp-card .mp-ex{ font-size:.7rem; color:var(--ink-faint); font-weight:700; }
+  .mp-foot .mp-pay{ background:var(--sage); }
+  .mp-foot .mp-pay[disabled]{ opacity:.45; }
+  #mpCart{ position:absolute; inset:0; z-index:6; background:var(--bg); display:none; flex-direction:column; }
+  #mpCart.show{ display:flex; }
+  #mpCart .mc-body{ flex:1; overflow:auto; padding:12px 16px; max-width:640px; width:100%; margin:0 auto; }
+  #mpCart h4{ margin:16px 0 6px; font-size:.78rem; letter-spacing:.06em; text-transform:uppercase; color:var(--red); }
+  #mpCart .c-crow small{ display:block; color:var(--ink-faint); font-weight:600; }
+  #mpCart .c-crow.ro{ font-weight:600; color:var(--ink-dim); }
+  #mpCart .mp-empty{ color:var(--ink-faint); padding:8px 0; margin:0; }
+  #mpCart .mc-foot{ flex:none; padding:12px 16px calc(12px + env(safe-area-inset-bottom,0px)); background:var(--panel); border-top:1px solid var(--line); }
+  #mpCart .mc-foot-in{ max-width:640px; margin:0 auto; }
+  #mpCart .mc-tot{ display:flex; justify-content:space-between; font-weight:800; margin-bottom:8px; }
+  #mpCart .btn-save{ margin:0; width:100%; }
+  #mpCart .btn-save[disabled]{ opacity:.5; }
+
+  /* ===== v2: ürün seçip taşıma ===== */
+  .order-line .mv-ck{ width:22px; height:22px; flex:none; margin-right:6px; accent-color:var(--red); }
+  .mv-hint{ font-size:.76rem; color:var(--ink-faint); margin:2px 2px 8px; }
+  .mv-region{ font-weight:800; font-size:.78rem; text-transform:uppercase; letter-spacing:.05em; color:var(--ink-faint); margin:12px 0 6px; }
+  .mv-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(96px,1fr)); gap:8px; }
+  .mv-grid button{ border:1px solid var(--line); background:var(--panel-2); color:var(--ink); border-radius:10px; padding:10px 6px; font:inherit; font-weight:700; cursor:pointer; }
+  .mv-grid button small{ display:block; font-size:.7rem; font-weight:700; color:var(--sage); margin-top:3px; }
+  .mv-grid button.busy{ border-color:var(--red); } .mv-grid button.busy small{ color:var(--red); }
+  .mv-grid button:disabled{ opacity:.35; cursor:not-allowed; }
+
+  /* ===== v2: Menü / Ürünler düzeni ===== */
+  .cat-sidebar{ width:250px; background:var(--panel-2); }
+  .cat-grp{ display:flex; align-items:center; gap:8px; padding:14px 18px 6px; font-size:.72rem; font-weight:800; letter-spacing:.06em; text-transform:uppercase; color:var(--ink-faint); }
+  .cat-grp .n{ margin-left:auto; font-weight:700; }
+  .cat-item.sub{ padding:9px 18px 9px 34px; font-size:.86rem; font-weight:600; }
+  .cat-item.solo{ padding:12px 18px; font-weight:700; }
+  .cat-item .cnt{ margin-left:auto; font-size:.72rem; color:var(--ink-faint); background:var(--panel); border:1px solid var(--line); border-radius:999px; padding:1px 8px; font-weight:700; }
+  .cat-item .cnt + .kebab{ margin-left:6px; }
+  .cat-item.active{ background:var(--panel); box-shadow:inset 3px 0 0 var(--red); }
+  .cat-content-top{ flex-wrap:wrap; }
+  .cat-title{ flex:1; min-width:160px; } .cat-title b{ display:block; font-size:1.05rem; } .cat-title span{ color:var(--ink-faint); font-size:.8rem; }
+  .cat-content-top .cat-search-input{ display:inline-block; width:170px; border:1px solid var(--line); border-radius:8px; padding:8px 10px; background:var(--panel-2); }
+  .cat-content-top .link-btn.add{ margin-left:0; background:var(--red); color:#fff; padding:9px 14px; border-radius:8px; font-weight:700; }
+  .product-list{ display:flex; flex-direction:column; border:1px solid var(--line); border-radius:10px; overflow:hidden; }
+  .prow2{ display:flex; align-items:center; gap:12px; padding:10px 14px; background:var(--panel); border-bottom:1px solid var(--line); }
+  .prow2:last-child{ border-bottom:0; } .prow2:hover{ background:var(--panel-2); }
+  .prow2 .pi2{ font-size:1.4rem; width:34px; text-align:center; flex:none; }
+  .prow2 .pn{ flex:1; min-width:0; } .prow2 .pn b{ display:block; font-size:.92rem; } .prow2 .pn span{ font-size:.76rem; color:var(--ink-faint); }
+  .prow2 .pp{ font-weight:800; white-space:nowrap; }
+  .prow2 .pa{ display:flex; gap:4px; } .prow2 .pa button{ border:0; background:transparent; cursor:pointer; font-size:15px; padding:6px 8px; border-radius:6px; color:var(--ink-dim); } .prow2 .pa button:hover{ background:var(--panel-2); }
+  .prod-empty{ padding:26px; text-align:center; color:var(--ink-faint); }
+  @media (max-width:860px){
+    .cat-layout{ flex-direction:column; } .cat-sidebar{ width:auto; max-height:230px; overflow:auto; border-right:0; border-bottom:1px solid var(--line); }
+    .cat-menu{ left:auto; right:8px; top:100%; margin-left:0; }
+  }
 </style>
 <link rel="icon" id="favi" href="data:,">
 </head>
@@ -808,22 +880,24 @@
     <div style="display:flex;align-items:center;margin-bottom:10px;"><h3 style="margin:0;flex:1;">🔔 Müşteri Siparişleri</h3><span id="coClose" style="cursor:pointer;font-size:20px;">✕</span></div>
     <div id="coList"></div>
   </div></div>
-  <div class="staff-bar">
-    <span class="mode" id="rtMode"></span>
-    <button id="btnCO">🔔 Siparişler<span class="badge-n" id="coBadge">0</span></button>
-    <button id="btnKitchen">👨‍🍳 Mutfak<span class="badge-n" id="kBadge">0</span></button>
-    <button id="btnLogout">⎋ Çıkış</button>
-  </div>
 
 
   <div id="printArea"></div>
   <div class="toast" id="toast"></div>
   <div id="saveBanner" role="status" aria-live="polite"><div class="sb-ic">✓</div><div><div class="sb-t" id="sbT"></div><div class="sb-s" id="sbS"></div></div></div>
 
-  <div class="eye-toggle" id="eyeToggle">
-    <span class="icon" id="eyeIcon">☀️</span>
-    <span class="track"><span class="knob"></span></span>
-    <span id="eyeLabel">Göz dinlendirme</span>
+  <div class="top-actions">
+    <div class="staff-bar">
+      <span class="mode" id="rtMode"></span>
+      <button class="ta-btn" id="btnCO" title="Siparişler" aria-label="Siparişler">🔔<span class="badge-n" id="coBadge">0</span></button>
+      <button class="ta-btn" id="btnKitchen" title="Mutfak" aria-label="Mutfak">👨‍🍳<span class="badge-n" id="kBadge">0</span></button>
+      <button class="ta-btn" id="btnLogout" title="Çıkış" aria-label="Çıkış">⎋</button>
+    </div>
+    <div class="eye-toggle" id="eyeToggle">
+      <span class="icon" id="eyeIcon">☀️</span>
+      <span class="track"><span class="knob"></span></span>
+      <span id="eyeLabel">Göz dinlendirme</span>
+    </div>
   </div>
 
   <div class="app">
@@ -1058,7 +1132,7 @@
 
         <!-- ORDER TICKET -->
         <div class="screen ticket-screen" id="screen-order">
-          <div class="tb-dark"><span id="btnOrderBack" style="cursor:pointer;">←</span><span id="orderTableTitle">Masa 3</span><span class="spacer"></span><span id="btnPrintOrder" style="cursor:pointer;" title="Yazdır">🖨️</span></div>
+          <div class="tb-dark"><span id="btnOrderBack" style="cursor:pointer;">←</span><span id="orderTableTitle">Masa 3</span><span class="pen-btn" id="btnRenameTable" title="Masaya müşteri adı ver" style="display:none">✎</span><span class="spacer"></span><span id="btnPrintOrder" style="cursor:pointer;" title="Yazdır">🖨️</span></div>
           <div class="order-card">
             <div class="order-meta"><span>Adisyon: <input id="adisyonNo" class="editable-inline" style="width:36px;padding:0;" value="0" readonly></span> <span style="margin-left:10px">Kişi: <input id="guestNo" type="number" min="1" class="editable-inline" style="width:44px;padding:0" value="1"></span><b id="orderStatusLabel">Sipariş Durumu: Hazırlanıyor</b></div>
             <div id="orderLines"></div>
@@ -1069,15 +1143,27 @@
               <span class="link-btn muted" id="btnCustomItem">✎ Özel Ürün Ekle</span>
             </div>
             <div class="menu-picker" id="menuPicker" style="display:none;">
-              <div class="mp-head"><b id="mpTitle">🍽️ Menü</b><button class="mp-x" id="mpClose" aria-label="Kapat">✕</button></div>
+              <div class="mp-head"><b id="mpTitle">🍽️ Menü</b><button class="mp-x" id="mpRename" title="Masaya müşteri adı ver" aria-label="Masa adını değiştir">✎</button><button class="mp-x" id="mpAdisyon" title="Adisyon / taşıma / iptal" aria-label="Adisyon">📋</button><button class="mp-x" id="mpClose" title="İşlem yapmadan çık" aria-label="Çık">✕</button></div>
               <div class="mp-sw"><input id="mpSearch" placeholder="🔍 Ürün ara…" autocomplete="off"></div>
               <div class="mp-tabs" id="mpTabs"></div><div class="mp-tabs mp-subs" id="mpSubs"></div>
               <div class="mp-grid" id="mpGrid"></div>
-              <div class="mp-foot"><span id="mpSum">Sepet boş</span><button class="btn-save mp-back" id="mpDone">Geri</button><button class="btn-save mp-save" id="mpSave">✓ KAYDET</button></div>
+              <div class="mp-foot"><span id="mpSum">Sepet boş</span><button class="btn-save mp-pay" id="mpPay">💳 Ödeme Al</button><button class="btn-save mp-save" id="mpSave">🛒 Sepeti Gör</button></div>
+              <div id="mpCart">
+                <div class="mp-head"><button class="mp-x wide" id="mpCartBack">← Menü</button><b>🛒 Sepet</b></div>
+                <div class="mc-body">
+                  <h4>Kaydedilecek ürünler</h4><div id="mpCartDraft"></div>
+                  <h4>Adisyonda zaten olanlar</h4><div id="mpCartSaved"></div>
+                </div>
+                <div class="mc-foot"><div class="mc-foot-in">
+                  <div class="mc-tot"><span>Eklenecek tutar</span><span id="mpCartTot">₺0,00</span></div>
+                  <button class="btn-save" id="mpCartOk">✓ Onayla ve Kaydet</button>
+                </div></div>
+              </div>
             </div>
 
             <div class="order-total"><span>Toplam Tutar</span><span id="orderTotalValue">₺0,00</span></div>
             <button class="btn-save" id="btnSaveOrder">KAYDET</button>
+            <div class="mv-hint" id="mvHint">Yanlış girilen ürünleri soldaki kutudan işaretleyip başka masaya taşıyabilirsiniz. Hiçbir şey işaretlemezseniz tüm adisyon taşınır.</div>
             <div class="order-add-row"><button class="btn-mini" id="btnMoveTable">⇄ Masa Taşı / Birleştir</button><button class="btn-mini" id="btnCancelOrder">✕ Adisyonu İptal Et</button></div>
 
             <button class="btn-pay" id="btnTogglePayment">💳 Ödeme Al</button>
@@ -1139,11 +1225,12 @@
             </div>
             <div class="cat-content">
               <div class="cat-content-top">
-                <input class="cat-search-input" id="prodSearchInput" placeholder="Ürün ara...">
-                <span class="link-btn" id="btnYeniUrunEkle">＋ Yeni Ürün Ekle</span>
-                <span class="link-btn muted" id="btnUrunAra" title="Ara">🔍</span>
+                <div class="cat-title"><b id="catTitle">—</b><span id="catSub"></span></div>
+                <input class="cat-search-input show" id="prodSearchInput" placeholder="🔍 Ürün ara...">
+                <span class="link-btn add" id="btnYeniUrunEkle">＋ Yeni Ürün</span>
+                <span id="btnUrunAra" style="display:none"></span>
               </div>
-              <div class="product-grid" id="productGrid"></div>
+              <div class="product-list" id="productGrid"></div>
             </div>
           </div>
           <div class="mo-card">
@@ -1482,6 +1569,10 @@
   let extOrders = {}, extSeq = 0, perms = {}, waiveLog = [], colLog = [], dayReports = [], curUser = null;
   let settings = { restName:'SEYİR CAFE', dayStart:'05:00', firstOrderNo:'101', pin:'' };
   const tableLabels = {};
+  const tableGuest = {};
+  const tname = n => tableGuest[n] || tableLabels[n] || ('Masa ' + n);
+  const _e = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+  const cellName = n => tableGuest[n] ? _e(tableGuest[n]) + '<span class="bn">' + _e(tableLabels[n] || ('Masa ' + n)) + '</span>' : _e(tableLabels[n] || ('Masa ' + n));
   let regions = [
     { name: 'Salon', tables: [1,2,3,4,5,6] },
     { name: 'Bahçe', tables: [7,8,9,10] },
@@ -1517,9 +1608,9 @@
       const cell = document.createElement('div');
       cell.className = 'plain-table-cell';
       cell.innerHTML = '<span class="pencil" data-n="' + n + '">✎</span>' +
-        (tableLabels[n] || ('Masa ' + n)) +
+        cellName(n) +
         (isBusy ? '<span class="amt">₺' + total.toLocaleString('tr-TR', {minimumFractionDigits:2}) + '</span>' : '');
-      cell.addEventListener('click', () => openOrder(key, tableLabels[n] || ('Masa ' + n), 'tables'));
+      cell.addEventListener('click', () => openOrder(key, tname(n), 'tables'));
       cell.querySelector('.pencil').addEventListener('click', (e) => {
         e.stopPropagation();
         const newName = window.prompt('Masa adı (silmek için SİL yazın):', tableLabels[n] || ('Masa ' + n));
@@ -1609,10 +1700,10 @@
       const key = 'table_' + n;
       const total = cartTotal(key);
       const isBusy = carts[key] && carts[key].length > 0;
-      const label = tableLabels[n] || ('Masa ' + n);
+      const label = tname(n);
       const cell = document.createElement('div');
       cell.className = 'sm-pill';
-      cell.innerHTML = label + (isBusy ? '<span class="amt">₺' + total.toLocaleString('tr-TR', {minimumFractionDigits:2}) + '</span>' : '');
+      cell.innerHTML = cellName(n) + (isBusy ? '<span class="amt">₺' + total.toLocaleString('tr-TR', {minimumFractionDigits:2}) + '</span>' : '');
       cell.addEventListener('click', () => openOrder(key, label, 'siparis-masa'));
       grid.appendChild(cell);
     });
@@ -1664,6 +1755,8 @@
   function openOrder(key, title, backScreen){
     currentCartKey = key;
     currentBackScreen = backScreen || 'tables';
+    mvSel.clear(); mpDraft = [];
+    if(key.startsWith('table_')) title = orderLabel(key);
     document.getElementById('orderTableTitle').textContent = title;
     document.getElementById('menuPicker').style.display = 'none';
     document.getElementById('paymentPanel').style.display = 'none';
@@ -1673,12 +1766,14 @@
     if(can('orders') && !paidByKey[key]) openMenuPicker();
   }
 
+  const mvSel = new Set();
   let adisyonSeq = 0;
   const adisyonNoByKey = {};
   const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
   const fmtTL = v => '₺' + v.toLocaleString('tr-TR', {minimumFractionDigits:2});
 
   function afterOrderChange(){
+    if(currentCartKey && currentCartKey.startsWith('table_') && !(carts[currentCartKey] || []).length) delete tableGuest[+currentCartKey.slice(6)];
     renderOrderLines();
     renderTableGrid(); renderSiparisMasa(); if(typeof renderPaketler === 'function') renderPaketler();
     saveState();
@@ -1694,7 +1789,8 @@
     cart.forEach(item => {
       const line = document.createElement('div');
       line.className = 'order-line';
-      line.innerHTML =
+      const mvOn = can('move') && key.startsWith('table_');
+      line.innerHTML = (mvOn ? '<input type="checkbox" class="mv-ck" title="Taşımak için işaretle"' + (mvSel.has(item) ? ' checked' : '') + '>' : '') +
         '<div class="qty-ctl"><button class="qbtn" data-d="-1">−</button><b class="qv">' + item.qty + '</b><button class="qbtn" data-d="1">+</button></div>' +
         '<div><div class="name">' + esc(item.name) + '</div><div class="sub">' + esc(item.sub) + ' · ' + fmtTL(item.unit) + (item.sent ? ' · ✔ mutfakta' : '') + '</div>' +
         (item.note ? '<div class="sub" style="color:var(--red);">📝 ' + esc(item.note) + '</div>' : '') +
@@ -1713,6 +1809,7 @@
         afterOrderChange();
       });
       const nt = line.querySelector('.nt'); if(nt) nt.addEventListener('click', () => editNote(item));
+      const mc = line.querySelector('.mv-ck'); if(mc) mc.addEventListener('change', () => { if(mc.checked) mvSel.add(item); else mvSel.delete(item); });
       container.appendChild(line);
     });
     if(cart.length && !adisyonNoByKey[key]) adisyonNoByKey[key] = (parseInt(settings.firstOrderNo) || 1) + (adisyonSeq++);
@@ -1731,11 +1828,13 @@
   }
 
   // ---- quick-add from the menu (mirrors Menü/Ürünler categories) ----
-  let mpActiveCat = 0, mpSub = -1, mpList = [];
+  let mpActiveCat = 0, mpSub = -1, mpList = [], mpDraft = [];
   const mpEl = id => document.getElementById(id);
+  const draftCount = () => mpDraft.reduce((a, i) => a + i.qty, 0);
+  const draftTotal = () => Math.round(mpDraft.reduce((a, i) => a + i.qty * i.unit, 0) * 100) / 100;
   function renderMenuPicker(){
     const groups = menuGroups(categories); if(mpActiveCat >= groups.length) mpActiveCat = 0;
-    const q = mpEl('mpSearch').value.trim().toLocaleLowerCase('tr-TR'), cart = carts[currentCartKey] || [];
+    const q = mpEl('mpSearch').value.trim().toLocaleLowerCase('tr-TR'), saved = carts[currentCartKey] || [];
     const tabs = mpEl('mpTabs'); tabs.innerHTML = '';
     groups.forEach((g, i) => { const t = document.createElement('div'); t.className = 'mp-tab' + (i === mpActiveCat && !q ? ' active' : ''); t.textContent = (g.icon ? g.icon + ' ' : '') + g.name;
       t.addEventListener('click', () => { mpActiveCat = i; mpSub = -1; mpEl('mpSearch').value = ''; renderMenuPicker(); }); tabs.appendChild(t); });
@@ -1744,27 +1843,66 @@
       t.addEventListener('click', () => { mpSub = sb.idx; renderMenuPicker(); }); subsEl.appendChild(t); }); subsEl.style.display = ''; } else subsEl.style.display = 'none';
     mpList = q ? categories.flatMap(c => c.products).filter(p => p.name.toLocaleLowerCase('tr-TR').includes(q)) : g0.subs.filter(sb => mpSub < 0 || sb.idx === mpSub).flatMap(sb => sb.cat.products);
     const grid = mpEl('mpGrid'), st = grid.scrollTop;
-    grid.innerHTML = mpList.map((p, i) => { const x = cart.find(it => it.name === p.name && it.unit === p.price && !it.note), n = x ? x.qty : 0;
-      return '<div class="mp-card' + (n ? ' in' : '') + '" data-i="' + i + '">' + (/^https:\/\//.test(p.img || '') ? '<img class="mp-img" src="' + esc(p.img) + '" alt="" loading="lazy">' : (p.icon ? '<span class="mi">' + esc(p.icon) + '</span>' : '')) + '<b>' + esc(p.name) + '</b>' + (p.desc ? '<small>' + esc(p.desc) + '</small>' : '') + '<span class="pr">' + fmtTL(p.price) + '</span><div class="ctl">' +
+    grid.innerHTML = mpList.map((p, i) => { const d = mpDraft.find(it => it.name === p.name && it.unit === p.price), n = d ? d.qty : 0, sv = saved.filter(it => it.name === p.name && it.unit === p.price).reduce((s, it) => s + it.qty, 0);
+      return '<div class="mp-card' + (n ? ' in' : '') + '" data-i="' + i + '">' + (/^https:\/\//.test(p.img || '') ? '<img class="mp-img" src="' + esc(p.img) + '" alt="" loading="lazy">' : (p.icon ? '<span class="mi">' + esc(p.icon) + '</span>' : '')) + '<b>' + esc(p.name) + '</b>' + (p.desc ? '<small>' + esc(p.desc) + '</small>' : '') + '<span class="pr">' + fmtTL(p.price) + '</span>' + (sv ? '<span class="mp-ex">adisyonda: ' + sv + '</span>' : '') + '<div class="ctl">' +
         (n ? '<button class="mn" aria-label="Azalt">−</button><span class="q">' + n + '</span>' : '<span></span><span></span>') + '<button class="pl" aria-label="Ekle">+</button></div></div>'; }).join('') || '<p style="color:var(--ink-faint);padding:12px">Ürün bulunamadı.</p>';
     grid.scrollTop = st;
-    const cnt = cart.reduce((a, i) => a + i.qty, 0); mpEl('mpSum').textContent = cnt ? cnt + ' ürün · ' + fmtTL(cartTotal(currentCartKey)) : 'Sepet boş';
+    const cnt = draftCount(), tot = cartTotal(currentCartKey);
+    mpEl('mpSum').textContent = cnt ? cnt + ' ürün seçildi · ' + fmtTL(draftTotal()) : (tot > 0 ? 'Adisyon: ' + fmtTL(tot) : 'Sepet boş');
+    mpEl('mpSave').textContent = cnt ? '🛒 Sepeti Gör (' + cnt + ')' : '🛒 Sepeti Gör';
+    mpEl('mpPay').disabled = !(tot > 0) || !can('pay'); mpEl('mpPay').style.display = can('pay') ? '' : 'none';
   }
   function mpChange(p, d){
     if(!can('orders')){ showToast('Sipariş ekleme yetkiniz yok.'); return; }
-    const cart = carts[currentCartKey] = carts[currentCartKey] || [], x = cart.find(i => i.name === p.name && i.unit === p.price && !i.note);
-    if(d > 0){ if(x) x.qty++; else cart.push({ name: p.name, sub: (p.portion || 'tam').toLowerCase(), unit: p.price, qty: 1 }); }
-    else if(x){ if((x.sent || 0) >= x.qty){ showToast('Mutfağa gitmiş ürün burada azaltılamaz; adisyondan düzenleyin.'); return; } x.qty--; if(x.qty <= 0) cart.splice(cart.indexOf(x), 1); }
-    afterOrderChange(); renderMenuPicker();
+    const x = mpDraft.find(i => i.name === p.name && i.unit === p.price);
+    if(d > 0){ if(x) x.qty++; else mpDraft.push({ name: p.name, sub: (p.portion || 'tam').toLowerCase(), unit: p.price, qty: 1 }); }
+    else if(x){ x.qty--; if(x.qty <= 0) mpDraft.splice(mpDraft.indexOf(x), 1); }
+    renderMenuPicker();
   }
-  function openMenuPicker(){ if(!can('orders')) return; mpEl('menuPicker').style.display = 'flex'; mpEl('mpTitle').textContent = '🍽️ ' + mpEl('orderTableTitle').textContent; renderMenuPicker(); }
-  function closeMenuPicker(){ mpEl('menuPicker').style.display = 'none'; }
+  function openMenuPicker(){ if(!can('orders')) return; mpEl('menuPicker').style.display = 'flex'; mpEl('mpCart').classList.remove('show'); mpEl('mpTitle').textContent = '🍽️ ' + orderLabel(currentCartKey); renderMenuPicker(); }
+  function closeMenuPicker(){ mpEl('menuPicker').style.display = 'none'; mpEl('mpCart').classList.remove('show'); }
+  // ✕ : hiçbir işlem yapmadan masalardan çık
+  function exitPicker(){
+    if(mpDraft.length && !confirm('Sepetteki ' + draftCount() + ' ürün kaydedilmedi. Yine de çıkılsın mı?')) return;
+    mpDraft = []; closeMenuPicker();
+    if(currentCartKey.startsWith('table_') && !(carts[currentCartKey] || []).length) delete tableGuest[+currentCartKey.slice(6)];
+    const back = currentBackScreen || 'siparis-masa';
+    showScreen(back); if(back === 'siparis-masa') renderSiparisMasa(); renderTableGrid(); if(typeof renderPaketler === 'function') renderPaketler(); saveState();
+  }
+  function renderMpCart(){
+    const saved = carts[currentCartKey] || [];
+    mpEl('mpCartDraft').innerHTML = mpDraft.length ? mpDraft.map((it, i) => '<div class="c-crow"><span>' + esc(it.name) + '<small>' + fmtTL(it.unit) + ' × ' + it.qty + ' = ' + fmtTL(it.unit * it.qty) + '</small></span><div class="qty-ctl"><button class="qbtn" data-i="' + i + '" data-d="-1">−</button><b class="qv">' + it.qty + '</b><button class="qbtn" data-i="' + i + '" data-d="1">+</button></div></div>').join('') : '<p class="mp-empty">Henüz yeni ürün seçilmedi.</p>';
+    mpEl('mpCartSaved').innerHTML = saved.length ? saved.map(it => '<div class="c-crow ro"><span>' + it.qty + '× ' + esc(it.name) + (it.note ? ' <small>📝 ' + esc(it.note) + '</small>' : '') + '</span><b>' + fmtTL(it.unit * it.qty) + '</b></div>').join('') : '<p class="mp-empty">Bu masada kayıtlı ürün yok.</p>';
+    mpEl('mpCartTot').textContent = fmtTL(draftTotal());
+    mpEl('mpCartOk').disabled = !mpDraft.length;
+    mpEl('mpCartOk').textContent = mpDraft.length ? '✓ Onayla ve Kaydet · ' + draftCount() + ' ürün' : 'Kaydedilecek ürün yok';
+  }
+  function commitDraft(){
+    if(!mpDraft.length) return;
+    const key = currentCartKey, cart = carts[key] = carts[key] || [];
+    mpDraft.forEach(d => { const x = cart.find(i => i.name === d.name && i.unit === d.unit && !i.note); if(x) x.qty += d.qty; else cart.push({ name: d.name, sub: d.sub, unit: d.unit, qty: d.qty }); });
+    mpDraft = []; afterOrderChange(); saveOrderAndExit();
+  }
   mpEl('mpGrid').addEventListener('click', e => { const c = e.target.closest('.mp-card'); if(!c) return; const p = mpList[+c.dataset.i]; if(p) mpChange(p, e.target.closest('.mn') ? -1 : 1); });
   mpEl('mpSearch').addEventListener('input', renderMenuPicker);
-  mpEl('mpClose').addEventListener('click', closeMenuPicker); mpEl('mpDone').addEventListener('click', closeMenuPicker); mpEl('mpSave').addEventListener('click', () => saveOrderAndExit());
+  mpEl('mpClose').addEventListener('click', exitPicker);
+  mpEl('mpSave').addEventListener('click', () => { renderMpCart(); mpEl('mpCart').classList.add('show'); });
+  mpEl('mpCartBack').addEventListener('click', () => { mpEl('mpCart').classList.remove('show'); renderMenuPicker(); });
+  mpEl('mpCartDraft').addEventListener('click', e => { const b = e.target.closest('.qbtn'); if(!b) return; const it = mpDraft[+b.dataset.i]; if(!it) return; it.qty += +b.dataset.d; if(it.qty <= 0) mpDraft.splice(+b.dataset.i, 1); renderMpCart(); });
+  mpEl('mpCartOk').addEventListener('click', commitDraft);
+  mpEl('mpPay').addEventListener('click', () => {
+    if(!can('pay')){ showToast('Ödeme alma yetkiniz yok.'); return; }
+    if(mpDraft.length){ showToast('Önce sepetteki ürünleri kaydedin (Sepeti Gör).'); return; }
+    if(cartTotal(currentCartKey) <= 0){ showToast('Sepet boş, ödeme alınamaz.'); return; }
+    mpEl('paymentPanel').style.display = 'block'; renderPaymentPanel();
+  });
+  mpEl('mpAdisyon').addEventListener('click', () => {
+    if(mpDraft.length){ showToast('Önce sepetteki ürünleri kaydedin ya da silin.'); return; }
+    closeMenuPicker(); renderOrderLines(); showScreen('order'); window.scrollTo(0, 0);
+  });
   mpEl('btnToggleMenuPicker').addEventListener('click', openMenuPicker);
   mpEl('ppClose').addEventListener('click', () => { mpEl('paymentPanel').style.display = 'none'; });
-  document.addEventListener('keydown', e => { if(e.key === 'Escape'){ closeMenuPicker(); mpEl('paymentPanel').style.display = 'none'; } });
+  document.addEventListener('keydown', e => { if(e.key === 'Escape'){ mpEl('paymentPanel').style.display = 'none'; mpEl('mpCart').classList.remove('show'); } });
   document.getElementById('btnCustomItem').addEventListener('click', () => {
     if(!can('orders')) return;
     openForm({ title: 'Özel Ürün', fields: [{ id: 'n', label: 'Ürün adı' }, { id: 'u', label: 'Birim fiyat (₺)', type: 'number', step: '0.01', value: 0 }, { id: 'q', label: 'Adet', type: 'number', value: 1 }],
@@ -2014,10 +2152,10 @@
     migrateMenuGroups(categories);
     const list = document.getElementById('catList');
     list.innerHTML = '';
-    categories.forEach((cat, idx) => {
-      const item = document.createElement('div');
-      item.className = 'cat-item' + (idx === activeCatIndex ? ' active' : '');
-      item.innerHTML = '<span>' + (cat.icon ? '<span class="ico">' + esc(cat.icon) + '</span>' : '') + esc(cat.grp && (cat.sub || cat.grp !== cat.name) ? cat.grp + ' › ' + (cat.sub || cat.name) : cat.name) + '</span><span class="kebab" data-idx="' + idx + '">⋮</span>' +
+    const mkItem = (idx, label, cls, icon) => {
+      const cat = categories[idx], item = document.createElement('div');
+      item.className = 'cat-item ' + cls + (idx === activeCatIndex ? ' active' : '');
+      item.innerHTML = '<span>' + (icon ? '<span class="ico">' + esc(icon) + '</span>' : '') + esc(label) + '</span><span class="cnt">' + cat.products.length + '</span><span class="kebab" data-idx="' + idx + '">⋮</span>' +
         '<div class="cat-menu" id="catMenu' + idx + '">' +
           '<div class="cm-item" data-action="yeniurun" data-idx="' + idx + '">＋ Yeni Ürün Ekle</div>' +
           '<div class="cm-item" data-action="altkategori" data-idx="' + idx + '">↳ Alt Kategori Ekle</div>' +
@@ -2026,26 +2164,30 @@
         '</div>';
       item.addEventListener('click', (e) => {
         if(e.target.closest('.kebab') || e.target.closest('.cat-menu')) return;
-        activeCatIndex = idx;
-        renderCatList(); renderProductGrid();
+        activeCatIndex = idx; renderCatList(); renderProductGrid();
       });
       item.querySelector('.kebab').addEventListener('click', (e) => {
         e.stopPropagation();
-        const menu = item.querySelector('.cat-menu');
-        const willOpen = !menu.classList.contains('show');
+        const menu = item.querySelector('.cat-menu'), willOpen = !menu.classList.contains('show');
         document.querySelectorAll('.cat-menu').forEach(m => m.classList.remove('show'));
         if(willOpen) menu.classList.add('show');
       });
       item.querySelectorAll('.cm-item').forEach(cm => {
         cm.addEventListener('click', (e) => {
           e.stopPropagation();
-          const action = cm.getAttribute('data-action');
-          const i = parseInt(cm.getAttribute('data-idx'));
+          const action = cm.getAttribute('data-action'), i = parseInt(cm.getAttribute('data-idx'));
           document.querySelectorAll('.cat-menu').forEach(m => m.classList.remove('show'));
           handleCategoryAction(action, i);
         });
       });
       list.appendChild(item);
+    };
+    menuGroups(categories).forEach(g => {
+      if(g.subs.length === 1){ mkItem(g.subs[0].idx, g.name, 'solo', g.icon || categories[g.subs[0].idx].icon); return; }
+      const hd = document.createElement('div'); hd.className = 'cat-grp';
+      hd.innerHTML = '<span>' + (g.icon ? esc(g.icon) + ' ' : '') + esc(g.name) + '</span><span class="n">' + g.subs.reduce((s, x) => s + x.cat.products.length, 0) + '</span>';
+      list.appendChild(hd);
+      g.subs.forEach(sb => mkItem(sb.idx, sb.label, 'sub', ''));
     });
   }
 
@@ -2089,21 +2231,24 @@
   function renderProductGrid(){
     const grid = document.getElementById('productGrid');
     grid.innerHTML = '';
-    const products = categories[activeCatIndex].products.filter(p =>
-      p.name.toLowerCase().includes(prodSearch.toLowerCase()));
+    const cat = categories[activeCatIndex]; if(!cat) return;
+    const q = prodSearch.toLocaleLowerCase('tr-TR');
+    const products = cat.products.filter(p => p.name.toLocaleLowerCase('tr-TR').includes(q));
+    document.getElementById('catTitle').textContent = (cat.grp && cat.sub ? cat.grp + ' › ' + cat.sub : (cat.grp || cat.name));
+    document.getElementById('catSub').textContent = cat.products.length + ' ürün' + (q ? ' · ' + products.length + ' sonuç' : '');
+    if(!products.length){ grid.innerHTML = '<div class="prod-empty">' + (q ? 'Aramaya uygun ürün yok.' : 'Bu kategoride henüz ürün yok. “＋ Yeni Ürün” ile ekleyin.') + '</div>'; return; }
     products.forEach(p => {
-      const card = document.createElement('div');
-      card.className = 'product-card';
-      card.innerHTML = '<div class="pc-top"><span class="pc-ed" title="Düzenle">✎</span><span class="pc-del" title="Sil">🗑</span></div>' +
-        (p.icon ? '<div class="pc-ico">' + esc(p.icon) + '</div>' : '') +
-        '<div class="pc-name">' + esc(p.name) + '</div>' +
-        '<div class="pc-portion">' + esc(p.portion) + (p.kg ? ' · ' + esc(p.kg) : '') + '</div>' +
-        '<div class="pc-price">₺' + p.price.toLocaleString('tr-TR', {minimumFractionDigits:2}) + '</div>';
-      card.querySelector('.pc-ed').addEventListener('click', () => openProductForm(p, activeCatIndex));
-      card.querySelector('.pc-del').addEventListener('click', () => {
-        if(window.confirm('"' + p.name + '" silinsin mi?')){ const a = categories[activeCatIndex].products; a.splice(a.indexOf(p), 1); renderProductGrid(); saveState(); }
+      const row = document.createElement('div');
+      row.className = 'prow2';
+      row.innerHTML = '<div class="pi2">' + (p.icon ? esc(p.icon) : '•') + '</div>' +
+        '<div class="pn"><b>' + esc(p.name) + '</b><span>' + esc(p.portion || '') + (p.kg ? ' · ' + esc(p.kg) : '') + '</span></div>' +
+        '<div class="pp">₺' + p.price.toLocaleString('tr-TR', {minimumFractionDigits:2}) + '</div>' +
+        '<div class="pa"><button class="pc-ed" title="Düzenle">✎</button><button class="pc-del" title="Sil">🗑</button></div>';
+      row.querySelector('.pc-ed').addEventListener('click', () => openProductForm(p, activeCatIndex));
+      row.querySelector('.pc-del').addEventListener('click', () => {
+        if(window.confirm('"' + p.name + '" silinsin mi?')){ const a = categories[activeCatIndex].products; a.splice(a.indexOf(p), 1); renderCatList(); renderProductGrid(); saveState(); }
       });
-      grid.appendChild(card);
+      grid.appendChild(row);
     });
   }
   renderCatList();
@@ -2601,6 +2746,10 @@
     $id('ppDiscSel').closest('.pp-split-row').style.display = can('discount') ? '' : 'none';
     $id('btnWaive').style.display = can('discount') ? '' : 'none';
     $id('guestNo').disabled = !ed;
+    const isT = key.startsWith('table_');
+    $id('btnRenameTable').style.display = (ed && isT) ? '' : 'none';
+    $id('mpRename').style.display = (ed && isT) ? '' : 'none';
+    $id('mvHint').style.display = (can('move') && isT) ? '' : 'none';
     if(!ed) $id('menuPicker').style.display = 'none';
   }
   function onScreen(n){
@@ -2877,7 +3026,7 @@ ${st('M50 58c-5-6 5-10 0-17', 0)}${st('M60 56c-5-7 5-11 0-19', 1.05)}${st('M70 5
   function grpOf(name){ const p = findProd(name), g = p && p.kg; return (g && mutfakGruplari.some(x => x.name === g)) ? g : defGroup(); }
   function kdvRateOf(name){ const p = findProd(name); return parseRate((p && p.kdv) || defKdvName()); }
   function orderLabel(key){
-    if(key.startsWith('table_')){ const n = +key.slice(6); return tableLabels[n] || ('Masa ' + n); }
+    if(key.startsWith('table_')){ const n = +key.slice(6); return tname(n); }
     const o = extOrders[key]; return o ? ((o.type === 'paket' ? 'Paket' : 'Gel-Al') + ' · ' + o.name) : key;
   }
 
@@ -3076,7 +3225,7 @@ ${st('M50 58c-5-6 5-10 0-17', 0)}${st('M60 56c-5-7 5-11 0-19', 1.05)}${st('M70 5
         if(v.phone && !customers.some(c => c.phone === v.phone)){
           customers.push({ no: customers.length ? Math.max.apply(null, customers.map(c => c.no)) + 1 : 1, name: v.name, phone: v.phone, address: v.address || '—', acikHesap: false, balance: 0 });
         }
-        openOrder(key, orderLabel(key), 'paketler'); $id('menuPicker').style.display = 'block'; renderMenuPicker(); saveState();
+        openOrder(key, orderLabel(key), 'paketler'); openMenuPicker(); saveState();
       }
     });
   });
@@ -3144,7 +3293,9 @@ ${st('M50 58c-5-6 5-10 0-17', 0)}${st('M60 56c-5-7 5-11 0-19', 1.05)}${st('M70 5
     saleLog.push({ ts: Date.now(), label: orderLabel(key), total: cartTotal(key), gross: grossTotal(key), waived: wv, guests: Math.max(1, parseInt(guestsByKey[key]) || 1), user: uname(),
       items: carts[key].map(i => ({ name: i.name, qty: i.qty, unit: i.unit, kdv: kdvRateOf(i.name) })) });
     carts[key] = [];
+    if(key.startsWith('table_')) delete tableGuest[+key.slice(6)];
     [orderOpenedAt, adisyonNoByKey, paidByKey, paymentHistoryByKey, discountByKey, guestsByKey].forEach(o => delete o[key]);
+    closeMenuPicker(); mpDraft = [];
     const back = currentBackScreen;
     renderOrderLines(); renderTableGrid(); renderSiparisMasa(); updateHomeStats(); renderGunSonu();
     $id('paymentPanel').style.display = 'none';
@@ -3441,21 +3592,69 @@ ${st('M50 58c-5-6 5-10 0-17', 0)}${st('M60 56c-5-7 5-11 0-19', 1.05)}${st('M70 5
     carts[k] = []; delete discountByKey[k]; delete guestsByKey[k];
     afterOrderChange(); if(extOrders[k]) dropExt(k); showScreen(currentBackScreen); renderSiparisMasa(); showToast('Adisyon iptal edildi.');
   });
+  // ---- masa müşteri adı ----
+  function renameGuest(){
+    const k = currentCartKey; if(!k || !k.startsWith('table_')) return;
+    if(!can('orders')){ showToast('Yetkiniz yok.'); return; }
+    const n = +k.slice(6);
+    openForm({ title: 'Masa adı — ' + (tableLabels[n] || ('Masa ' + n)), sub: 'Müşteri adını yazın. Boş bırakırsanız masa kendi adına döner. Hesap kapanınca veya masa taşınınca ad otomatik sıfırlanır.',
+      fields: [{ id: 'n', label: 'Müşteri adı', value: tableGuest[n] || '', placeholder: 'ör. Ahmet Bey' }],
+      onOk(v){ if(v.n.length > 30) return 'En fazla 30 karakter.'; if(v.n) tableGuest[n] = v.n; else delete tableGuest[n];
+        const t = orderLabel(k); $id('orderTableTitle').textContent = t; $id('mpTitle').textContent = '🍽️ ' + t;
+        renderTableGrid(); renderSiparisMasa(); saveState(); } });
+  }
+  $id('btnRenameTable').addEventListener('click', renameGuest);
+  $id('mpRename').addEventListener('click', renameGuest);
+
+  // ---- ürün / adisyon taşıma ----
+  function pickTargetTable(fromKey, cb){
+    const bg = document.createElement('div'); bg.className = 'modal-bg show'; bg.style.zIndex = 1100;
+    const box = document.createElement('div'); box.className = 'modal-box';
+    box.innerHTML = '<div style="display:flex;align-items:center"><h3 style="margin:0;flex:1">Hangi masaya taşınsın?</h3><span id="mvX" style="cursor:pointer;font-size:20px">✕</span></div>' +
+      regions.map((r, ri) => '<div class="mv-region">' + esc(r.name) + '</div><div class="mv-grid">' + r.tables.map(n => {
+        const k = 'table_' + n, busy = (carts[k] || []).length > 0, self = k === fromKey;
+        return '<button data-n="' + n + '" class="' + (busy ? 'busy' : '') + '"' + (self ? ' disabled' : '') + '>' + cellName(n) + '<small>' + (self ? 'Bu masa' : busy ? 'DOLU · ' + fmtTL(cartTotal(k)) : 'Boş') + '</small></button>';
+      }).join('') + '</div>').join('');
+    document.body.appendChild(bg); bg.appendChild(box);
+    const close = () => bg.remove();
+    box.querySelector('#mvX').onclick = close; bg.addEventListener('mousedown', e => { if(e.target === bg) close(); });
+    box.addEventListener('click', e => { const b = e.target.closest('button[data-n]'); if(!b || b.disabled) return; close(); cb(+b.dataset.n); });
+  }
+  function doMove(k, picks, t){
+    const tk = 'table_' + t, srcN = +k.slice(6), tlabel = tname(t);
+    const busy = (carts[tk] || []).length > 0;
+    if(busy && !confirm('⚠️ DİKKAT: ' + tlabel + ' şu anda DOLU (' + fmtTL(cartTotal(tk)) + ' açık adisyon var).\n\nSeçilen ürünler bu masanın mevcut adisyonuna EKLENECEK. Devam edilsin mi?')) return;
+    carts[tk] = carts[tk] || [];
+    picks.forEach(p => {
+      const item = p.item, qty = Math.min(p.qty, item.qty), keepSent = Math.min(item.sent || 0, item.qty - qty), movedSent = (item.sent || 0) - keepSent;
+      const x = carts[tk].find(y => y.name === item.name && y.unit === item.unit && (y.note || '') === (item.note || ''));
+      if(x){ x.qty += qty; x.sent = (x.sent || 0) + movedSent; } else carts[tk].push(Object.assign({}, item, { qty, sent: movedSent }));
+      item.qty -= qty; item.sent = keepSent;
+    });
+    carts[k] = carts[k].filter(i => i.qty > 0);
+    if(!orderOpenedAt[tk]) orderOpenedAt[tk] = orderOpenedAt[k] || Date.now();
+    if(!carts[k].length){
+      paidByKey[tk] = (paidByKey[tk] || 0) + (paidByKey[k] || 0);
+      paymentHistoryByKey[tk] = (paymentHistoryByKey[tk] || []).concat(paymentHistoryByKey[k] || []);
+      [paidByKey, paymentHistoryByKey, discountByKey, orderOpenedAt, adisyonNoByKey, guestsByKey].forEach(o => delete o[k]);
+      delete tableGuest[srcN]; // eski masa kendi adına döner
+    }
+    mvSel.clear();
+    const moved = picks.reduce((s, p) => s + Math.min(p.qty, 1e9), 0);
+    if(!carts[k].length){ openOrder(tk, orderLabel(tk), currentBackScreen); } else { renderOrderLines(); }
+    afterOrderChange(); showToast('Ürünler ' + tlabel + ' masasına taşındı' + (busy ? ' (dolu masaya eklendi).' : '.'));
+  }
   $id('btnMoveTable').addEventListener('click', () => {
     const k = currentCartKey;
     if(!k.startsWith('table_')){ showToast('Yalnız masa adisyonları taşınabilir.'); return; }
-    if(!(carts[k] || []).length){ showToast('Taşınacak ürün yok.'); return; }
-    const q = (prompt('Hedef masa (ad veya numara):') || '').trim().toLowerCase(); if(!q) return;
-    const t = regions.flatMap(r => r.tables).find(n => String(n) === q || (tableLabels[n] || '').toLowerCase() === q || ('masa ' + n) === q);
-    if(!t || 'table_' + t === k){ showToast('Hedef masa bulunamadı.'); return; }
-    const tk = 'table_' + t; carts[tk] = carts[tk] || [];
-    carts[k].forEach(i => { const x = carts[tk].find(y => y.name === i.name && y.unit === i.unit); if(x){ x.qty += i.qty; x.sent = (x.sent || 0) + (i.sent || 0); } else carts[tk].push(i); });
-    paidByKey[tk] = (paidByKey[tk] || 0) + (paidByKey[k] || 0);
-    paymentHistoryByKey[tk] = (paymentHistoryByKey[tk] || []).concat(paymentHistoryByKey[k] || []);
-    if(!orderOpenedAt[tk]) orderOpenedAt[tk] = orderOpenedAt[k];
-    carts[k] = []; [paidByKey, paymentHistoryByKey, discountByKey, orderOpenedAt, adisyonNoByKey, guestsByKey].forEach(o => delete o[k]);
-    const lbl = tableLabels[t] || ('Masa ' + t);
-    openOrder(tk, lbl, currentBackScreen); afterOrderChange(); showToast('Adisyon ' + lbl + ' masasına taşındı.');
+    const cart = carts[k] || []; if(!cart.length){ showToast('Taşınacak ürün yok.'); return; }
+    const sel = cart.filter(i => mvSel.has(i)), items = sel.length ? sel : cart.slice();
+    const go = picks => pickTargetTable(k, t => doMove(k, picks, t));
+    if(sel.length && sel.some(i => i.qty > 1)){
+      openForm({ title: 'Kaç adet taşınsın?', fields: sel.map((i, ix) => ({ id: 'q' + ix, label: i.name + ' (adisyonda ' + i.qty + ')', type: 'number', step: '1', value: i.qty })), okText: 'Devam',
+        onOk(v){ const picks = []; for(let ix = 0; ix < sel.length; ix++){ const q = Math.round(v['q' + ix]); if(!(q >= 0) || q > sel[ix].qty) return sel[ix].name + ' için 0 ile ' + sel[ix].qty + ' arası girin.'; if(q > 0) picks.push({ item: sel[ix], qty: q }); }
+          if(!picks.length) return 'En az bir ürün taşınmalı.'; setTimeout(() => go(picks), 0); } });
+    } else go(items.map(i => ({ item: i, qty: i.qty })));
   });
 
   // ---- dijital menü: gerçek QR ----
@@ -3482,7 +3681,7 @@ ${st('M50 58c-5-6 5-10 0-17', 0)}${st('M60 56c-5-7 5-11 0-19', 1.05)}${st('M70 5
   // ---- durum kaydı, yedek, canlı eşitleme ----
   function snapshot(){
     readSettings();
-    return { carts, tableLabels, regions, nextTableNo, orderOpenedAt, categories, menuVer: MENU_VER, paidByKey, paymentHistoryByKey, customers, giderler, mutfakGruplari, adisyonSeq, adisyonNoByKey,
+    return { carts, tableLabels, tableGuest, regions, nextTableNo, orderOpenedAt, categories, menuVer: MENU_VER, paidByKey, paymentHistoryByKey, customers, giderler, mutfakGruplari, adisyonSeq, adisyonNoByKey,
       lists, payTypes, payLog, saleLog, closedAt, guestsByKey, discountByKey, extOrders, extSeq, perms, waiveLog, colLog, dayReports, cancelLog, settings: Object.assign({}, settings, { pin: undefined }) };
   }
   const localExtra = () => ({ staffUsers, pin: settings.pin });
@@ -3502,7 +3701,7 @@ ${st('M50 58c-5-6 5-10 0-17', 0)}${st('M60 56c-5-7 5-11 0-19', 1.05)}${st('M70 5
   function applyState(s, persist){
     if(!s || typeof s !== 'object') return;
     const fill = (t, d) => { Object.keys(t).forEach(k => delete t[k]); Object.assign(t, d && typeof d === 'object' ? d : {}); };
-    fill(carts, s.carts); fill(tableLabels, s.tableLabels); fill(orderOpenedAt, s.orderOpenedAt); fill(adisyonNoByKey, s.adisyonNoByKey); fill(discountByKey, s.discountByKey); fill(guestsByKey, s.guestsByKey);
+    fill(carts, s.carts); fill(tableLabels, s.tableLabels); fill(tableGuest, s.tableGuest); fill(orderOpenedAt, s.orderOpenedAt); fill(adisyonNoByKey, s.adisyonNoByKey); fill(discountByKey, s.discountByKey); fill(guestsByKey, s.guestsByKey);
     if(Array.isArray(s.regions) && s.regions.length) regions = s.regions;
     if(Array.isArray(s.categories) && s.categories.length) categories = s.categories;
     let seeded = false; if(s.menuVer !== MENU_VER){ categories = buildSeedMenu(); seeded = true; }
