@@ -845,7 +845,7 @@
   .product-list{ display:flex; flex-direction:column; border:1px solid var(--line); border-radius:10px; overflow:hidden; }
   .prow2{ display:flex; align-items:center; gap:12px; padding:10px 14px; background:var(--panel); border-bottom:1px solid var(--line); }
   .prow2:last-child{ border-bottom:0; } .prow2:hover{ background:var(--panel-2); }
-  .prow2 .pi2{ font-size:1.4rem; width:34px; text-align:center; flex:none; }
+  .prow2 .pi2{ display:none; }
   .prow2 .pn{ flex:1; min-width:0; } .prow2 .pn b{ display:block; font-size:.92rem; } .prow2 .pn span{ font-size:.76rem; color:var(--ink-faint); }
   .prow2 .pp{ font-weight:800; white-space:nowrap; }
   .prow2 .pa{ display:flex; gap:4px; } .prow2 .pa button{ border:0; background:transparent; cursor:pointer; font-size:15px; padding:6px 8px; border-radius:6px; color:var(--ink-dim); } .prow2 .pa button:hover{ background:var(--panel-2); }
@@ -854,6 +854,42 @@
     .cat-layout{ flex-direction:column; } .cat-sidebar{ width:auto; max-height:230px; overflow:auto; border-right:0; border-bottom:1px solid var(--line); }
     .cat-menu{ left:auto; right:8px; top:100%; margin-left:0; }
   }
+
+  /* ===== v3: görselli kategori & ürün kutucukları ===== */
+  .vis{ position:relative; overflow:hidden; display:flex; align-items:center; justify-content:center; background:linear-gradient(135deg,hsl(var(--h,20),90%,91%),hsl(calc(var(--h,20) + 40),85%,82%)); }
+  body[data-theme="dark"] .vis{ background:linear-gradient(135deg,hsl(var(--h,20),32%,26%),hsl(calc(var(--h,20) + 40),34%,18%)); }
+  .vis .vi{ font-size:var(--fs,2.4rem); line-height:1; filter:drop-shadow(0 3px 4px rgba(0,0,0,.18)); }
+  .vis img{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; }
+  .vis.v-s{ width:28px; height:28px; border-radius:8px; --fs:1rem; flex:none; margin-right:8px; }
+  .vis.v-row{ width:54px; height:54px; border-radius:10px; --fs:1.7rem; flex:none; }
+  .vis.v-cat{ width:68px; height:68px; border-radius:18px; --fs:2rem; box-shadow:0 2px 8px rgba(0,0,0,.12); }
+  .vis.v-card{ width:100%; aspect-ratio:4/3; border-radius:12px 12px 0 0; --fs:3.2rem; }
+  .vis.v-mp{ width:100%; height:92px; border-radius:9px; --fs:2.6rem; }
+  /* kategori şeritleri (müşteri + personel) */
+  .c-tabs:has(.c-cat), .mp-tabs:has(.mp-cat){ gap:8px; padding:8px 6px 8px !important; }
+  #customerView .c-tab.c-cat, #menuPicker .mp-tab.mp-cat{ background:none !important; border:0 !important; padding:2px 0 !important; border-radius:0 !important; display:flex; flex-direction:column; align-items:center; gap:5px; flex:none; width:86px; color:var(--ink) !important; font-size:.74rem !important; font-weight:700 !important; }
+  .c-cat .lb, .mp-cat .lb{ max-width:82px; white-space:normal; text-align:center; line-height:1.15; }
+  .c-cat.active .vis, .mp-cat.active .vis{ outline:3px solid var(--red); outline-offset:2px; }
+  .c-cat.active .lb, .mp-cat.active .lb{ color:var(--red); }
+  #menuPicker .mp-tab.mp-cat .vis{ width:58px; height:58px; --fs:1.7rem; }
+  /* müşteri ürün kartları */
+  #cItems{ display:grid; grid-template-columns:repeat(2,1fr); gap:12px; }
+  @media (min-width:640px){ #cItems{ grid-template-columns:repeat(3,1fr); } }
+  #cItems .c-subttl, #cItems > p{ grid-column:1/-1; }
+  #customerView .c-item.card{ display:flex; flex-direction:column; align-items:stretch; padding:0; margin:0; gap:0; overflow:hidden; }
+  .c-item.card .nm{ padding:10px 12px 4px; flex:1; } .c-item.card .nm b{ font-size:.92rem; line-height:1.2; }
+  .c-item.card .nm small{ display:block; color:var(--ink-faint); font-size:.74rem; line-height:1.25; margin-top:3px; }
+  .c-item.card .cfoot{ display:flex; align-items:center; justify-content:space-between; gap:8px; padding:6px 12px 12px; }
+  .c-item.card .cfoot .pr{ font-weight:800; color:var(--red); }
+  .c-item.card .qty-ctl{ display:flex; align-items:center; gap:8px; }
+  /* dosya alanı */
+  .ffimg{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+  .ffimg .ffprev{ width:64px; height:64px; border-radius:10px; --fs:1.6rem; flex:none; }
+  .ffimg .ffrm{ border:1px solid var(--line); background:var(--panel-2); color:var(--ink); border-radius:8px; padding:6px 10px; cursor:pointer; font:inherit; font-size:.8rem; }
+  .vis{ flex:none; }
+  #menuPicker .mp-grid{ grid-auto-rows:max-content; }
+  .mp-card{ min-height:0; }
+  .mp-card .vis.v-mp{ min-height:92px; }
 </style>
 <link rel="icon" id="favi" href="data:,">
 </head>
@@ -1836,7 +1872,7 @@
     const groups = menuGroups(categories); if(mpActiveCat >= groups.length) mpActiveCat = 0;
     const q = mpEl('mpSearch').value.trim().toLocaleLowerCase('tr-TR'), saved = carts[currentCartKey] || [];
     const tabs = mpEl('mpTabs'); tabs.innerHTML = '';
-    groups.forEach((g, i) => { const t = document.createElement('div'); t.className = 'mp-tab' + (i === mpActiveCat && !q ? ' active' : ''); t.textContent = (g.icon ? g.icon + ' ' : '') + g.name;
+    groups.forEach((g, i) => { const t = document.createElement('div'); t.className = 'mp-tab mp-cat' + (i === mpActiveCat && !q ? ' active' : ''); t.innerHTML = catVis(g) + '<span class="lb">' + esc(g.name) + '</span>';
       t.addEventListener('click', () => { mpActiveCat = i; mpSub = -1; mpEl('mpSearch').value = ''; renderMenuPicker(); }); tabs.appendChild(t); });
     const g0 = groups[mpActiveCat] || { subs: [] }, subsEl = mpEl('mpSubs'); subsEl.innerHTML = '';
     if(!q && g0.subs.length > 1){ [{ idx: -1, label: 'Tümü' }].concat(g0.subs).forEach(sb => { const t = document.createElement('div'); t.className = 'mp-tab' + (sb.idx === mpSub ? ' active' : ''); t.textContent = sb.label;
@@ -1844,7 +1880,7 @@
     mpList = q ? categories.flatMap(c => c.products).filter(p => p.name.toLocaleLowerCase('tr-TR').includes(q)) : g0.subs.filter(sb => mpSub < 0 || sb.idx === mpSub).flatMap(sb => sb.cat.products);
     const grid = mpEl('mpGrid'), st = grid.scrollTop;
     grid.innerHTML = mpList.map((p, i) => { const d = mpDraft.find(it => it.name === p.name && it.unit === p.price), n = d ? d.qty : 0, sv = saved.filter(it => it.name === p.name && it.unit === p.price).reduce((s, it) => s + it.qty, 0);
-      return '<div class="mp-card' + (n ? ' in' : '') + '" data-i="' + i + '">' + (/^https:\/\//.test(p.img || '') ? '<img class="mp-img" src="' + esc(p.img) + '" alt="" loading="lazy">' : (p.icon ? '<span class="mi">' + esc(p.icon) + '</span>' : '')) + '<b>' + esc(p.name) + '</b>' + (p.desc ? '<small>' + esc(p.desc) + '</small>' : '') + '<span class="pr">' + fmtTL(p.price) + '</span>' + (sv ? '<span class="mp-ex">adisyonda: ' + sv + '</span>' : '') + '<div class="ctl">' +
+      return '<div class="mp-card' + (n ? ' in' : '') + '" data-i="' + i + '">' + visHtml(p, '', 'v-mp') + '<b>' + esc(p.name) + '</b>' + (p.desc ? '<small>' + esc(p.desc) + '</small>' : '') + '<span class="pr">' + fmtTL(p.price) + '</span>' + (sv ? '<span class="mp-ex">adisyonda: ' + sv + '</span>' : '') + '<div class="ctl">' +
         (n ? '<button class="mn" aria-label="Azalt">−</button><span class="q">' + n + '</span>' : '<span></span><span></span>') + '<button class="pl" aria-label="Ekle">+</button></div></div>'; }).join('') || '<p style="color:var(--ink-faint);padding:12px">Ürün bulunamadı.</p>';
     grid.scrollTop = st;
     const cnt = draftCount(), tot = cartTotal(currentCartKey);
@@ -2136,9 +2172,22 @@
   function migrateMenuGroups(cats){ (cats || []).forEach(c => { if(!c.grp){ const m = GROUP_OF[c.name]; if(m){ c.grp = m[0]; if(m[1]) c.sub = m[1]; } else { const k = String(c.name).split(' / '); c.grp = k.length > 1 ? k[0] : c.name; if(k.length > 1) c.sub = k.slice(1).join(' / '); } } }); return cats; }
   function menuGroups(cats){
     migrateMenuGroups(cats); const m = new Map();
-    cats.forEach((c, i) => { const g = c.grp || c.name; if(!m.has(g)) m.set(g, { name: g, icon: (MENU_GROUPS.find(x => x[0] === g) || [])[1] || c.icon || '', subs: [] }); m.get(g).subs.push({ idx: i, label: c.sub || c.name, cat: c }); });
+    cats.forEach((c, i) => { const g = c.grp || c.name; if(!m.has(g)) m.set(g, { name: g, icon: (MENU_GROUPS.find(x => x[0] === g) || [])[1] || c.icon || '', img: '', subs: [] }); if(c.img && !m.get(g).img) m.get(g).img = c.img; m.get(g).subs.push({ idx: i, label: c.sub || c.name, cat: c }); });
     const order = MENU_GROUPS.map(x => x[0]);
     return [...m.values()].sort((a, b) => { const x = order.indexOf(a.name), y = order.indexOf(b.name); return (x < 0 ? 99 : x) - (y < 0 ? 99 : y); });
+  }
+  function artHue(s){ let h = 0; for(const c of String(s || '')) h = (h * 31 + c.charCodeAt(0)) % 360; return h; }
+  function imgOk(u){ return /^https:\/\//i.test(u || '') || /^data:image\/(jpeg|png|webp);base64,/.test(u || ''); }
+  // görsel varsa fotoğraf, yoksa renkli zemin üstünde ürün/kategori emojisi (görsel bozuksa da emoji kalır)
+  function visHtml(o, fallbackIcon, cls){
+    const ic = o.icon || fallbackIcon || '🍽️';
+    return '<div class="vis ' + cls + '" style="--h:' + artHue(o.name || ic) + '"><span class="vi">' + _e(ic) + '</span>' + (imgOk(o.img) ? '<img src="' + _e(o.img) + '" alt="" loading="lazy" onerror="this.remove()">' : '') + '</div>';
+  }
+  const catVis = g => visHtml({ img: g.img, icon: g.icon, name: g.name }, '', 'v-cat');
+  function fileToThumb(file, max, cb){
+    const r = new FileReader();
+    r.onload = () => { const im = new Image(); im.onload = () => { const k = Math.min(1, max / Math.max(im.width, im.height)), c = document.createElement('canvas'); c.width = Math.round(im.width * k); c.height = Math.round(im.height * k); c.getContext('2d').drawImage(im, 0, 0, c.width, c.height); cb(c.toDataURL('image/jpeg', 0.72)); }; im.onerror = () => cb(''); im.src = r.result; };
+    r.onerror = () => cb(''); r.readAsDataURL(file);
   }
   const MENU_VER = 2; // bu sürümden eski kayıtlardaki menü silinir, yerine SEYİR CAFE menüsü konur
   function buildSeedMenu(){ return migrateMenuGroups(SEED_MENU.map(c => ({ name: c[0], icon: c[1], products: c[3].map(p => ({ name: p[0], icon: p[1], portion: 'Tam', price: p[2], kg: c[2] })) }))); }
@@ -2155,7 +2204,7 @@
     const mkItem = (idx, label, cls, icon) => {
       const cat = categories[idx], item = document.createElement('div');
       item.className = 'cat-item ' + cls + (idx === activeCatIndex ? ' active' : '');
-      item.innerHTML = '<span>' + (icon ? '<span class="ico">' + esc(icon) + '</span>' : '') + esc(label) + '</span><span class="cnt">' + cat.products.length + '</span><span class="kebab" data-idx="' + idx + '">⋮</span>' +
+      item.innerHTML = '<span style="display:flex;align-items:center">' + visHtml({ img: cat.img, icon: cat.icon || icon, name: label }, icon, 'v-s') + esc(label) + '</span><span class="cnt">' + cat.products.length + '</span><span class="kebab" data-idx="' + idx + '">⋮</span>' +
         '<div class="cat-menu" id="catMenu' + idx + '">' +
           '<div class="cm-item" data-action="yeniurun" data-idx="' + idx + '">＋ Yeni Ürün Ekle</div>' +
           '<div class="cm-item" data-action="altkategori" data-idx="' + idx + '">↳ Alt Kategori Ekle</div>' +
@@ -2187,7 +2236,7 @@
       const hd = document.createElement('div'); hd.className = 'cat-grp';
       hd.innerHTML = '<span>' + (g.icon ? esc(g.icon) + ' ' : '') + esc(g.name) + '</span><span class="n">' + g.subs.reduce((s, x) => s + x.cat.products.length, 0) + '</span>';
       list.appendChild(hd);
-      g.subs.forEach(sb => mkItem(sb.idx, sb.label, 'sub', ''));
+      g.subs.forEach(sb => mkItem(sb.idx, sb.label, 'sub', g.icon));
     });
   }
 
@@ -2213,10 +2262,19 @@
       renderCatList(); renderProductGrid();
       showToast('Alt kategori eklendi: ' + name);
     } else if(action === 'duzenle'){
-      const name = window.prompt('Kategori adı:', categories[i].name);
-      if(!name) return;
-      categories[i].name = name;
-      renderCatList(); renderProductGrid();
+      const c = categories[i];
+      openForm({ title: 'Kategoriyi Düzenle', fields: [
+        { id: 'name', label: 'Kategori adı', value: c.sub || c.name },
+        { id: 'icon', label: 'İkon (emoji) — görsel yoksa bu görünür', value: c.icon || '' },
+        { id: 'imgf', label: 'Kategori görseli (yükle)', type: 'file', value: c.img || '', icon: c.icon, name: c.name }
+      ], onOk(v){
+        if(!v.name) return 'Kategori adı gerekli.';
+        const old = c.name;
+        if(c.sub){ c.sub = v.name; }
+        else { c.name = v.name; if(c.grp === old && !categories.some(x => x !== c && x.grp === old)) c.grp = v.name; }
+        c.icon = v.icon; c.img = v.imgf || '';
+        renderCatList(); renderProductGrid(); saveState();
+      } });
     } else if(action === 'sil'){
       if(categories.length <= 1){ showToast('En az bir kategori kalmalı.'); return; }
       if(window.confirm('"' + categories[i].name + '" kategorisi silinsin mi?')){
@@ -2240,7 +2298,7 @@
     products.forEach(p => {
       const row = document.createElement('div');
       row.className = 'prow2';
-      row.innerHTML = '<div class="pi2">' + (p.icon ? esc(p.icon) : '•') + '</div>' +
+      row.innerHTML = visHtml(p, categories[activeCatIndex].icon, 'v-row') + 
         '<div class="pn"><b>' + esc(p.name) + '</b><span>' + esc(p.portion || '') + (p.kg ? ' · ' + esc(p.kg) : '') + '</span></div>' +
         '<div class="pp">₺' + p.price.toLocaleString('tr-TR', {minimumFractionDigits:2}) + '</div>' +
         '<div class="pa"><button class="pc-ed" title="Düzenle">✎</button><button class="pc-del" title="Sil">🗑</button></div>';
@@ -2533,7 +2591,7 @@
   function customerData(){
     if(pubData && pubData.categories){
       const tb = arr(pubData.tables);
-      if(pubData.menuVer === MENU_VER) return { categories: arr(pubData.categories).map(c => ({ name: c.name, grp: c.grp, sub: c.sub, icon: c.icon || '', products: arr(c.products) })), tables: tb };
+      if(pubData.menuVer === MENU_VER) return { categories: arr(pubData.categories).map(c => ({ name: c.name, grp: c.grp, sub: c.sub, icon: c.icon || '', img: c.img || '', products: arr(c.products) })), tables: tb };
       return { categories, tables: tb }; // eski sürümden kalan yayın menüsü yok sayılır
     }
     return { categories, tables: regions.flatMap(r => r.tables.map(n => ({ n, label: tableLabels[n] || ('Masa ' + n) }))) };
@@ -2555,16 +2613,16 @@
     const sel = $id('cMasa'), prev = sel.value || qp.get('masa') || '';
     const opts = '<option value="">Masanızı seçin…</option>' + d.tables.map(t => '<option value="' + t.n + '">' + esc(t.label) + '</option>').join('');
     if(sel.innerHTML !== opts){ sel.innerHTML = opts; sel.value = prev; }
-    $id('cTabs').innerHTML = gs.map((g, i) => '<div class="c-tab' + (i === cTab ? ' active' : '') + '" data-i="' + i + '">' + (g.icon ? esc(g.icon) + ' ' : '') + esc(g.name) + '</div>').join('');
+    $id('cTabs').innerHTML = gs.map((g, i) => '<div class="c-tab c-cat' + (i === cTab ? ' active' : '') + '" data-i="' + i + '">' + catVis(g) + '<span class="lb">' + esc(g.name) + '</span></div>').join('');
     const subsOn = gs[cTab] && gs[cTab].subs.length > 1 && !($id('cSearch').value || '').trim();
     $id('cSubs').style.display = subsOn ? '' : 'none';
     $id('cSubs').innerHTML = subsOn ? [{ idx: -1, label: 'Tümü' }].concat(gs[cTab].subs).map(sb => '<div class="c-tab' + (sb.idx === cSub ? ' active' : '') + '" data-s="' + sb.idx + '">' + esc(sb.label) + '</div>').join('') : '';
     const lst = cList();
     $id('cItems').innerHTML = lst.length ? lst.map((p, i) => {
       const q = (cCart[p.name] || {}).qty || 0, hdr = (cSub < 0 && cSubOf[i] && cSubOf[i] !== cSubOf[i - 1] && subsOn) ? '<div class="c-subttl">' + esc(cSubOf[i]) + '</div>' : '';
-      return hdr + '<div class="c-item">' + (/^https:\/\//.test(p.img || '') ? '<img src="' + esc(p.img) + '" alt="' + esc(p.name) + '" loading="lazy" style="width:56px;height:56px;border-radius:8px;object-fit:cover;margin-right:10px">' : (p.icon ? '<span class="ci">' + esc(p.icon) + '</span>' : '')) + '<div class="nm"><b>' + esc(p.name) + '</b>' + (p.desc ? '<small style="display:block;color:var(--ink-faint)">' + esc(p.desc) + '</small>' : '') + '<span>' + fmtTL(p.price) + '</span></div>' +
+      return hdr + '<div class="c-item card">' + visHtml(p, '', 'v-card') + '<div class="nm"><b>' + esc(p.name) + '</b>' + (p.desc ? '<small>' + esc(p.desc) + '</small>' : '') + '</div><div class="cfoot"><span class="pr">' + fmtTL(p.price) + '</span>' +
         (mo ? '' : q ? '<div class="qty-ctl"><button class="qbtn" data-p="' + i + '" data-d="-1">−</button><b class="qv">' + q + '</b><button class="qbtn" data-p="' + i + '" data-d="1">+</button></div>'
-           : '<button class="qbtn" data-p="' + i + '" data-d="1">+</button>') + '</div>';
+           : '<button class="qbtn" data-p="' + i + '" data-d="1">+</button>') + '</div></div>';
     }).join('') : '<p style="text-align:center;color:var(--ink-faint)">' + (($id('cSearch').value || '').trim() ? 'Ürün bulunamadı.' : 'Menü hazırlanıyor…') + '</p>';
     const n = cCount(), btn = $id('cSend'); if(!n) cOpen = false;
     $id('cCartList').style.display = cOpen ? 'block' : 'none'; $id('cNote').style.display = cOpen ? '' : 'none';
@@ -2653,7 +2711,7 @@
   // ---------------- GARSON PANELİ BAŞLAT ----------------
   function publishPublic(){
     const tables = regions.flatMap(r => r.tables.map(n => ({ n, label: tableLabels[n] || ('Masa ' + n) })));
-    const data = { categories: migrateMenuGroups(categories).map(c => ({ name: c.name, grp: c.grp || c.name, sub: c.sub || '', icon: c.icon || '', products: c.products.map(p => ({ name: p.name, icon: p.icon || '', price: p.price, desc: p.desc || '', img: p.img || '' })) })), menuVer: MENU_VER, tables, menuOnly: !!settings.menuOnly, wifiName: settings.wifiName || '', wifiPass: settings.wifiPass || '' };
+    const data = { categories: migrateMenuGroups(categories).map(c => ({ name: c.name, grp: c.grp || c.name, sub: c.sub || '', icon: c.icon || '', img: c.img || '', products: c.products.map(p => ({ name: p.name, icon: p.icon || '', price: p.price, desc: p.desc || '', img: p.img || '' })) })), menuVer: MENU_VER, tables, menuOnly: !!settings.menuOnly, wifiName: settings.wifiName || '', wifiPass: settings.wifiPass || '' };
     const s = JSON.stringify(data);
     if(s !== lastPub){ lastPub = s; RT.set('public', data); }
   }
@@ -2993,6 +3051,7 @@ ${st('M50 58c-5-6 5-10 0-17', 0)}${st('M60 56c-5-7 5-11 0-19', 1.05)}${st('M70 5
       h += '<div class="ffr"><label>' + esc(f.label || '') + '</label>';
       if(f.type === 'select') h += '<select id="ff_' + f.id + '">' + f.options.map(op => { const ov = typeof op === 'object' ? op.v : op, ot = typeof op === 'object' ? op.t : op; return '<option value="' + esc(ov) + '"' + (String(ov) === String(v) ? ' selected' : '') + '>' + esc(ot) + '</option>'; }).join('') + '</select>';
       else if(f.type === 'textarea') h += '<textarea id="ff_' + f.id + '" rows="2">' + esc(v) + '</textarea>';
+      else if(f.type === 'file') h += '<div class="ffimg"><div id="ffp_' + f.id + '"></div><input type="file" accept="image/*" id="ff_' + f.id + '" style="max-width:210px"><button type="button" class="ffrm" data-rm="' + f.id + '">Görseli kaldır</button></div>';
       else if(f.type === 'checkbox') h += '<label class="ffc"><input type="checkbox" id="ff_' + f.id + '"' + (v ? ' checked' : '') + '> ' + esc(f.text || '') + '</label>';
       else if(f.type === 'checks') h += '<div class="ffchk">' + (f.options.length ? f.options.map(op => '<label class="ffc"><input type="checkbox" data-ck="' + f.id + '" value="' + esc(op) + '"' + ((v || []).indexOf(op) >= 0 ? ' checked' : '') + '> ' + esc(op) + '</label>').join('') : '<span style="color:var(--ink-faint);font-size:.85rem">Tanımlı seçenek yok (Tanımlamalar > Özellikler).</span>') + '</div>';
       else h += '<input id="ff_' + f.id + '" type="' + (f.type || 'text') + '" value="' + esc(v) + '"' + (f.step ? ' step="' + f.step + '"' : '') + (f.list ? ' list="ffl_' + f.id + '"' : '') + (f.placeholder ? ' placeholder="' + esc(f.placeholder) + '"' : '') + ' autocomplete="off">' + (f.list ? '<datalist id="ffl_' + f.id + '">' + f.list.map(x => '<option value="' + esc(x) + '">').join('') + '</datalist>' : '');
@@ -3000,9 +3059,18 @@ ${st('M50 58c-5-6 5-10 0-17', 0)}${st('M60 56c-5-7 5-11 0-19', 1.05)}${st('M70 5
     });
     h += '<div class="fferr" id="ffErr"></div><div style="display:flex;gap:8px"><button class="btn-save" id="ffOk" style="margin:0">' + esc(o.okText || 'Kaydet') + '</button><button class="btn-save" id="ffNo" style="margin:0;background:var(--ink-faint)">Vazgeç</button></div>';
     box.innerHTML = h; bg.appendChild(box); document.body.appendChild(bg);
+    const files = {};
+    o.fields.filter(f => f.type === 'file').forEach(f => {
+      files[f.id] = f.value || '';
+      const draw = () => { const pv = box.querySelector('#ffp_' + f.id); pv.innerHTML = visHtml({ img: files[f.id], icon: f.icon, name: f.name }, '', 'ffprev'); };
+      draw();
+      box.querySelector('#ff_' + f.id).addEventListener('change', e => { const fl = e.target.files[0]; if(!fl) return; fileToThumb(fl, 360, d => { if(d){ files[f.id] = d; draw(); } else box.querySelector('#ffErr').textContent = 'Görsel okunamadı.'; }); });
+      box.querySelector('[data-rm="' + f.id + '"]').onclick = () => { files[f.id] = ''; box.querySelector('#ff_' + f.id).value = ''; draw(); };
+    });
     const get = () => {
       const r = {};
       o.fields.forEach(f => {
+        if(f.type === 'file'){ r[f.id] = files[f.id]; return; }
         if(f.type === 'checks') r[f.id] = [...box.querySelectorAll('[data-ck="' + f.id + '"]:checked')].map(x => x.value);
         else if(f.type === 'checkbox') r[f.id] = box.querySelector('#ff_' + f.id).checked;
         else { const el = box.querySelector('#ff_' + f.id); r[f.id] = f.type === 'number' ? parseFloat(String(el.value).replace(',', '.')) : el.value.trim(); }
@@ -3045,7 +3113,8 @@ ${st('M50 58c-5-6 5-10 0-17', 0)}${st('M60 56c-5-7 5-11 0-19', 1.05)}${st('M70 5
         { id: 'birim', label: 'Birim', type: 'select', options: birimNames, value: (p && p.birim) || birimNames[0] },
         { id: 'barcode', label: 'Barkod (isteğe bağlı)', value: p ? (p.barcode || '') : '' },
         { id: 'desc', label: 'Açıklama (QR menüde görünür)', value: p ? (p.desc || '') : '' },
-        { id: 'img', label: 'Görsel adresi (https://...)', value: p ? (p.img || '') : '' },
+        { id: 'imgf', label: 'Ürün fotoğrafı (yükle)', type: 'file', value: p && /^data:/.test(p.img || '') ? p.img : '', icon: p ? p.icon : '', name: p ? p.name : '' },
+        { id: 'img', label: 'veya görsel adresi (https://...)', value: p && /^https:/.test(p.img || '') ? p.img : '' },
         { id: 'icon', label: 'İkon (emoji)', value: p ? (p.icon || '') : '' },
         { id: 'kg', label: 'Mutfak grubu (sipariş hangi ekrana düşsün)', type: 'select', options: mutfakGruplari.map(g => g.name), value: (p && p.kg) || defGroup() }
       ],
@@ -3056,7 +3125,7 @@ ${st('M50 58c-5-6 5-10 0-17', 0)}${st('M60 56c-5-7 5-11 0-19', 1.05)}${st('M70 5
         if(v.barcode && categories.some(c => c.products.some(x => x !== p && x.barcode && x.barcode === v.barcode.trim()))) return 'Bu barkod başka üründe kayıtlı.';
         if(v.img && !/^https:\/\//i.test(v.img.trim())) return 'Görsel adresi https:// ile başlamalı.';
         const ni = +v.cat, obj = p || {};
-        Object.assign(obj, { name: v.name, portion: v.portion || 'Tam', price: Math.round(v.price * 100) / 100, kdv: v.kdv, birim: v.birim, kg: v.kg, barcode: (v.barcode || '').trim(), desc: (v.desc || '').trim(), img: (v.img || '').trim(), icon: (v.icon || '').trim() });
+        Object.assign(obj, { name: v.name, portion: v.portion || 'Tam', price: Math.round(v.price * 100) / 100, kdv: v.kdv, birim: v.birim, kg: v.kg, barcode: (v.barcode || '').trim(), desc: (v.desc || '').trim(), img: v.imgf || (v.img || '').trim(), icon: (v.icon || '').trim() });
         if(!p) categories[ni].products.push(obj);
         else if(ni !== ci){ const a = categories[ci].products; a.splice(a.indexOf(p), 1); categories[ni].products.push(obj); }
         activeCatIndex = ni; renderCatList(); renderProductGrid(); saveState(); showToast(v.name + ' kaydedildi.');
