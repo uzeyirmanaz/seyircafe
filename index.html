@@ -897,6 +897,19 @@
   .c-item.card .qty-ctl{ width:100%; justify-content:space-between; }
   .c-item.card .qty-ctl .qbtn{ flex:none; }
   #cItems{ padding-bottom:150px; }
+  /* + / − kontrolü dar ekranda kırpılmasın (esnek genişlik) */
+  .c-item.card .qty-ctl, .mp-card .ctl{ min-width:0; gap:6px; }
+  .c-item.card .qty-ctl .qbtn, .c-item.card .cfoot > .qbtn{ flex:1 1 0 !important; min-width:0; width:auto !important; max-width:48px; height:40px; }
+  .c-item.card .cfoot > .qbtn{ max-width:none; flex:none !important; width:100% !important; }
+  .c-item.card .qty-ctl .qv{ flex:none; min-width:20px; }
+  .c-item.card .cfoot{ min-width:0; padding-left:10px; padding-right:10px; }
+  .mp-card{ min-width:0; }
+  .mp-card .ctl button{ flex:1 1 0; min-width:0; max-width:48px; width:auto !important; }
+  .mp-card .ctl button.pl{ flex:0 0 44px; max-width:none; width:44px !important; }
+  .mp-card .ctl .q{ flex:none; min-width:18px; text-align:center; }
+  #cItems{ grid-template-columns:repeat(2,minmax(0,1fr)); }
+  @media (min-width:640px){ #cItems{ grid-template-columns:repeat(3,minmax(0,1fr)); } }
+  #menuPicker .mp-grid{ grid-template-columns:repeat(auto-fill,minmax(140px,1fr)); }
   .vis img{ object-fit:cover; }
 </style>
 <link rel="icon" id="favi" href="data:,">
@@ -2312,17 +2325,29 @@
       showToast('Alt kategori eklendi: ' + name);
     } else if(action === 'duzenle'){
       const c = categories[i];
-      openForm({ title: 'Kategoriyi Düzenle', fields: [
+      const subs = categories.filter(x => x !== c && !c.sub && x.grp === c.name && x.sub);
+      const fields = [
         { id: 'name', label: 'Kategori adı', value: c.sub || c.name },
         { id: 'icon', label: 'İkon (emoji) — görsel yoksa bu görünür', value: c.icon || '' },
-        { id: 'imgf', label: 'Kategori görseli (yükle)', type: 'file', value: c.img || '', icon: c.icon, name: c.name }
-      ], onOk(v){
+        { id: 'imgf', label: 'Kategori görseli (yükle)', type: 'file', value: /^data:/.test(c.img || '') ? c.img : '', icon: c.icon, name: c.name },
+        { id: 'img', label: 'veya görsel bağlantısı (link yapıştır)', placeholder: 'https://...', value: /^https:/.test(c.img || '') ? c.img : '' },
+        { id: 'dept', label: 'Toplu departman (kategorideki ' + c.products.length + ' ürünün hepsi için)', type: 'select', options: [{ v: '', t: '— Değiştirme —' }].concat(mutfakGruplari.map(g => ({ v: g.name, t: g.name }))), value: '' }
+      ];
+      if(subs.length) fields.push({ id: 'deptSub', type: 'checkbox', label: '', text: 'Departmanı alt kategorilerdeki ürünlere de uygula (' + subs.length + ' alt kategori)', value: true });
+      openForm({ title: 'Kategoriyi Düzenle', fields, onOk(v){
         if(!v.name) return 'Kategori adı gerekli.';
+        const lnk = normImgUrl(v.img); if(lnk === null) return 'Görsel adresi geçerli bir bağlantı olmalı (https://...).';
         const old = c.name;
         if(c.sub){ c.sub = v.name; }
         else { c.name = v.name; if(c.grp === old && !categories.some(x => x !== c && x.grp === old)) c.grp = v.name; }
-        c.icon = v.icon; c.img = v.imgf || '';
+        c.icon = v.icon; c.img = v.imgf || lnk;
+        let moved = 0;
+        if(v.dept){
+          const tg = [c].concat(v.deptSub ? subs : []);
+          tg.forEach(x => x.products.forEach(pr => { pr.kg = v.dept; moved++; }));
+        }
         renderCatList(); renderProductGrid(); saveState();
+        if(moved) showToast(moved + ' ürün \"' + v.dept + '\" departmanına bağlandı.');
       } });
     } else if(action === 'sil'){
       if(categories.length <= 1){ showToast('En az bir kategori kalmalı.'); return; }
@@ -3153,6 +3178,12 @@ ${st('M50 58c-5-6 5-10 0-17', 0)}${st('M60 56c-5-7 5-11 0-19', 1.05)}${st('M70 5
   }
 
   // ---- KDV / birim / mutfak grubu yardımcıları ----
+  // görsel bağlantısı: boş -> '', http -> https, şemasız -> https:// eklenir, geçersiz -> null
+  function normImgUrl(u){
+    u = String(u || '').trim(); if(!u) return '';
+    if(/^http:\/\//i.test(u)) u = 'https://' + u.slice(7); else if(!/^https:\/\//i.test(u)) u = 'https://' + u.replace(/^\/+/, '');
+    try{ const x = new URL(u); return /\./.test(x.hostname) ? x.href : null; }catch(e){ return null; }
+  }
   const parseRate = s => parseFloat(String(s).replace(/[^\d.,]/g, '').replace(',', '.')) || 0;
   function defKdvName(){ const r = (lists.kdv || []).find(x => /varsayılan/i.test(x.val || '') && !/değil/i.test(x.val || '')); return r ? r.name : ((lists.kdv || [])[0] || { name: '%10' }).name; }
   function defGroup(){ return (mutfakGruplari[0] || { name: 'Mutfak' }).name; }
@@ -3177,21 +3208,19 @@ ${st('M50 58c-5-6 5-10 0-17', 0)}${st('M60 56c-5-7 5-11 0-19', 1.05)}${st('M70 5
         { id: 'cat', label: 'Kategori', type: 'select', options: categories.map((c, i) => ({ v: i, t: c.name })), value: ci },
         { id: 'kdv', label: 'KDV oranı', type: 'select', options: kdvNames, value: (p && p.kdv) || defKdvName() },
         { id: 'birim', label: 'Birim', type: 'select', options: birimNames, value: (p && p.birim) || birimNames[0] },
-        { id: 'barcode', label: 'Barkod (isteğe bağlı)', value: p ? (p.barcode || '') : '' },
+        { id: 'kg', label: 'Departman (sipariş hangi ekrana düşsün: Mutfak, Bar, Nargile…)', type: 'select', options: mutfakGruplari.map(g => g.name), value: (p && p.kg) || defGroup() },
         { id: 'desc', label: 'Açıklama (QR menüde görünür)', value: p ? (p.desc || '') : '' },
         { id: 'imgf', label: 'Ürün fotoğrafı (yükle)', type: 'file', value: p && /^data:/.test(p.img || '') ? p.img : '', icon: p ? p.icon : '', name: p ? p.name : '' },
-        { id: 'img', label: 'veya görsel adresi (https://...)', value: p && /^https:/.test(p.img || '') ? p.img : '' },
-        { id: 'icon', label: 'İkon (emoji)', value: p ? (p.icon || '') : '' },
-        { id: 'kg', label: 'Mutfak grubu (sipariş hangi ekrana düşsün)', type: 'select', options: mutfakGruplari.map(g => g.name), value: (p && p.kg) || defGroup() }
+        { id: 'img', label: 'veya görsel bağlantısı (link yapıştır)', placeholder: 'https://...', value: p && /^https:/.test(p.img || '') ? p.img : '' },
+        { id: 'icon', label: 'İkon (emoji)', value: p ? (p.icon || '') : '' }
       ],
       onOk(v){
         if(!v.name) return 'Ürün adı gerekli.';
         if(!(v.price >= 0)) return 'Geçerli bir fiyat girin.';
         if(categories.some(c => c.products.some(x => x !== p && x.name.toLowerCase() === v.name.toLowerCase()))) return 'Aynı adlı bir ürün zaten var.';
-        if(v.barcode && categories.some(c => c.products.some(x => x !== p && x.barcode && x.barcode === v.barcode.trim()))) return 'Bu barkod başka üründe kayıtlı.';
-        if(v.img && !/^https:\/\//i.test(v.img.trim())) return 'Görsel adresi https:// ile başlamalı.';
+        const lnk = normImgUrl(v.img); if(lnk === null) return 'Görsel adresi geçerli bir bağlantı olmalı (https://...).';
         const ni = +v.cat, obj = p || {};
-        Object.assign(obj, { name: v.name, portion: v.portion || 'Tam', price: Math.round(v.price * 100) / 100, kdv: v.kdv, birim: v.birim, kg: v.kg, barcode: (v.barcode || '').trim(), desc: (v.desc || '').trim(), img: v.imgf || (v.img || '').trim(), icon: (v.icon || '').trim() });
+        Object.assign(obj, { name: v.name, portion: v.portion || 'Tam', price: Math.round(v.price * 100) / 100, kdv: v.kdv, birim: v.birim, kg: v.kg, desc: (v.desc || '').trim(), img: v.imgf || lnk, icon: (v.icon || '').trim() });
         if(!p) categories[ni].products.push(obj);
         else if(ni !== ci){ const a = categories[ci].products; a.splice(a.indexOf(p), 1); categories[ni].products.push(obj); }
         activeCatIndex = ni; renderCatList(); renderProductGrid(); saveState(); showToast(v.name + ' kaydedildi.');
