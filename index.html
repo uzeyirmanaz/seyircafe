@@ -140,7 +140,7 @@ box(40,30,43,615,3.2,3.45,mats.frame,roof); box(204.5,30,207.5,615,3.2,3.45,mats
 
 wall(207.5,152.5,342.5,152.5,mats.outer); wall(342.5,152.5,342.5,507.5,mats.outer); wall(207.5,507.5,342.5,507.5,mats.outer);
 
-const sh = box(270,300,337.5,327.5,0,3.2,mats.shaft);
+const sh = box(265,316.25,341.4,343.75,0,3.2,mats.shaft);
 const ln = new THREE.LineSegments(new THREE.EdgesGeometry(sh.geometry),new THREE.LineBasicMaterial({color:0xe8a94a}));
 ln.position.copy(sh.position); scene.add(ln);
 
@@ -209,6 +209,9 @@ inst(new THREE.CylinderGeometry(.008,.008,.8,4),MB(0x111111),cords);
 
 [[34,208],[242,436],[468,611]].forEach(r=>ib(42,r[0],50,r[1],0,.6,0x2a2d30));
 ib(56,34,204,42,0,.6,0x2a2d30); ib(56,603,204,611,0,.6,0x2a2d30);
+// KASA: kullanım dışı alanın ucunda (x=265), tezgâh girişe/salona bakar
+ib(251,316,265,344,0,.95,0x8a5a3c); ib(249.5,314.5,266,345.5,.95,1.03,0xe8e0d6);
+ib(255,326,261,334,1.03,1.12,0x2b2f33); ib(255,327,257,333,1.12,1.42,0x2b2f33);
 const gp=[],fp=[];
 const addP=(x,y)=>{const p=pm(x,y);gp.push([p[0],.85,p[1]]); if(gp.length%4===0) fp.push([p[0]+.2,1.15,p[1]+.1]);};
 for(let y=40;y<=605;y+=13){ if(Math.abs(y-225)<22||Math.abs(y-452)<22) continue; addP(46,y); }
@@ -255,7 +258,7 @@ inst(new THREE.CylinderGeometry(.008,.008,.8,4),MB(0x111111),oc);
 const labels=[
  ['Açık alan',100,380,1.2],['Bina altı oturma alanı',225,270,1.2],
  ['Nargile odası',318,185,3.4],['Bar',311,430,1.5],['Mutfak',330,436,2.4],['Okey alanı',250,462,1.5],
- ['WC',324,480,2.4],['Koridor',256,414,1.2],["Kullanım dışı",304,314,3.5],
+ ['WC',324,480,2.4],['Koridor',256,414,1.2],["Kullanım dışı",303.2,330,3.5],['Kasa',256,330,1.7],
  ['Giriş',40,225,2.8],['Giriş',40,452,2.8]
 ].map(l=>{const d=document.createElement('div');d.className='lbl';d.textContent=l[0];document.body.appendChild(d);
   return {el:d,p:new THREE.Vector3(X(l[1]),l[3],Z(l[2]))};});
