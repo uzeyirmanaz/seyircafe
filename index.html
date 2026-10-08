@@ -153,23 +153,40 @@ box(295,152.5,324,205,-0.05,0.02,M(0xd6d1f7));   // nargile odası zemini (x 295
 box(324,152.5,342.5,198,-0.05,0.03,M(0x7a6258));
 wall(324,152.5,324,170,mats.purple); wall(324,182,324,198,mats.purple); wall(324,170,324,182,mats.frame,1.0,2.2,0.5);
 
-// === BAR / MUTFAK / WC şeridi: arka duvar boyunca, ön sınır x=312'yi geçmez ===
-// y'ye göre: WC en arkada (470–507.5) · Mutfak ortada (440–470, bardan küçük) · Bar en önde (374–440)
-box(312,374,342.5,440,-0.05,0.02,M(0xf2c6b5));    // bar zemini
-box(312,440,342.5,470,-0.05,0.02,M(0xe8e0d6));    // mutfak zemini
-box(312,470,342.5,507.5,-0.05,0.02,M(0xc9c9c6));  // WC zemini
-// bar: güney duvar ve salona bakan tezgâh (ucunda personel geçidi)
-wall(312,374,342.5,374,mats.coral);
-box(312.2,378,314.6,430,0,1.1,mats.coralD); box(312.2,378,314.6,430,1.1,1.16,mats.col);
-// bar–mutfak duvarı (y=440): servis penceresi + kapı
-[[312,316],[328,331],[339,342.5]].forEach(q=>wall(q[0],440,q[1],440,mats.coral,3.2,0,0.5));
-wall(316,440,328,440,mats.coral,1.0,0,0.5); wall(316,440,328,440,mats.glass,1.2,1.0,0.4); wall(316,440,328,440,mats.coral,1.0,2.2,0.5);
-box(330.6,439,331.4,441,0,2.2,mats.frame); box(338.6,439,339.4,441,0,2.2,mats.frame); wall(331,440,339,440,mats.frame,1.0,2.2,0.7);
-// mutfağın salona bakan duvarı ve mutfak–WC duvarı
-wall(312.5,440,312.5,470,mats.coral,3.2,0,0.5);
-wall(312,470,342.5,470,mats.gray);
-// WC'nin salona bakan duvarı + kapı boşluğu (473–485)
-wall(312.5,470,312.5,473,mats.gray,3.2,0,0.5); wall(312.5,485,312.5,507.5,mats.gray,3.2,0,0.5); wall(312.5,473,312.5,485,mats.frame,1.0,2.2,0.5);
+// === ARKA ŞERİT (çizime göre): köz/nargile yanındaki mutfak + bar, kullanım dışı alanın (şaft) hemen ardından WC ===
+// Mutfak: x 324–342.5 · Bar (ön, görsel olsun diye salona dönük): x 295–324 · ikisi de y 205 → 316.25 (şafta kadar)
+// WC: x 324–342.5 · y 343.75 (şaftın bitişi) → 507.5 (bina sonu). Hiçbir şey bu çizgilerin dışına taşmaz.
+const SY0=205, SY1=316.25, SY2=343.75;
+box(295,SY0,324,SY1,-0.05,0.02,M(0xf2c6b5));      // bar zemini
+box(324,SY0,342.5,SY1,-0.05,0.02,M(0xe8e0d6));    // mutfak zemini
+box(341.4,SY1,342.5,SY2,0,3.2,mats.shaft);        // şaft ile arka duvar arasındaki ince boşluğu kapat
+// kapı çerçevesi: iki dikme + lento (y ekseni boyunca duvar için)
+const doorY=(x,a,b)=>{ box(x-0.5,a-0.4,x+0.5,a+0.4,0,2.2,mats.frame); box(x-0.5,b-0.4,x+0.5,b+0.4,0,2.2,mats.frame); wall(x,a,x,b,mats.frame,1.0,2.2,0.7); };
+// BAR ön hattı (x=295): salona bakan tezgâh + G girişi (y 301–313)
+box(295,SY0+2,299,301,0,1.1,mats.coralD); box(294.6,SY0+2,299.4,301,1.1,1.16,mats.col);
+wall(295,313,295,SY1,mats.coral,3.2,0,0.5); doorY(295,301,313);
+// BAR–MUTFAK duvarı (x=324): P servis penceresi (y 254.5–268.5) + G kapısı (y 301–313)
+wall(324,SY0,324,254.5,mats.coral,3.2,0,0.5);
+wall(324,254.5,324,268.5,mats.coral,1.0,0,0.5); wall(324,254.5,324,268.5,mats.coral,1.0,2.2,0.5);
+wall(324,268.5,324,301,mats.coral,3.2,0,0.5);
+wall(324,313,324,SY1,mats.coral,3.2,0,0.5); doorY(324,301,313);
+// WC (x 324–342.5, y 343.75–507.5, alan aynı): BAY (2 alaturka) · ortak el yıkama · BAYAN (2 alaturka)
+// sıra: Bay kabinleri 343.75–367.75 · Bay girişi/antre 367.75–385.75 · ortak el yıkama 385.75–465.5 · Bayan antre 465.5–483.5 · Bayan kabinleri 483.5–507.5
+const WY={bayC:[SY2,367.75],bayV:[367.75,385.75],wash:[385.75,465.5],bnV:[465.5,483.5],bnC:[483.5,507.5]};
+box(324,SY2,342.5,WY.bayV[1],-0.05,0.02,M(0xc4cfd9));   // bay zemini
+box(324,WY.wash[0],342.5,WY.wash[1],-0.05,0.02,M(0xd6d9d6)); // ortak el yıkama zemini
+box(324,WY.bnV[0],342.5,507.5,-0.05,0.02,M(0xdccbd3));  // bayan zemini
+const doorX=(y,a,b)=>{ box(a-0.4,y-0.5,a+0.4,y+0.5,0,2.2,mats.frame); box(b-0.4,y-0.5,b+0.4,y+0.5,0,2.2,mats.frame); wall(a,y,b,y,mats.frame,1.0,2.2,0.7); };
+function partX(y,gaps){ let px=324; gaps.forEach(g=>{ wall(px,y,g[0],y,mats.gray,3.2,0,0.5); doorX(y,g[0],g[1]); px=g[1]; }); wall(px,y,342.5,y,mats.gray,3.2,0,0.5); }
+// salona bakan duvar: Bay girişi (y 372.25–381.25) ve Bayan girişi (y 470–479)
+wall(324,SY2,324,372.25,mats.gray,3.2,0,0.5); doorY(324,372.25,381.25);
+wall(324,381.25,324,470,mats.gray,3.2,0,0.5); doorY(324,470,479);
+wall(324,479,324,507.5,mats.gray,3.2,0,0.5);
+partX(367.75,[[325.1,332.1],[334.4,341.4]]);   // bay kabin kapıları
+partX(385.75,[[328,338]]);                    // bay antre ↔ ortak el yıkama
+partX(465.5,[[328,338]]);                     // ortak el yıkama ↔ bayan antre
+partX(483.5,[[325.1,332.1],[334.4,341.4]]);   // bayan kabin kapıları
+wall(333.25,SY2,333.25,367.75,mats.gray,3.2,0,0.5); wall(333.25,483.5,333.25,507.5,mats.gray,3.2,0,0.5);
 const fn=(x0,y0,x1,y1)=>{wall(x0,y0,x1,y1,mats.glass,1.2,0,0.15); wall(x0,y0,x1,y1,mats.frame,0.06,1.2,0.4);};
 fn(291,424,291,507.5);
 
@@ -263,20 +280,28 @@ const nt=new THREE.Mesh(new THREE.CylinderGeometry(.5,.5,.4,16),MB(0xb8875a)); n
 ib(337,156,341.4,194,0,.9,0x3b3633);
 [160,171,182,190].forEach(y=>box(338,y,340.6,y+4,.9,.98,new THREE.MeshBasicMaterial({color:0xff6a1f}),interior));
 ib(326,154,332,160,0,.6,0x2a2d30); ib(328,188,334,196,0,.5,0x2a2d30);
-// MUTFAK (y 440–470): arka duvarda ocak + davlumbaz, ada tezgâh, buzdolabı, raf
-ib(339,443,342.5,467,0,.9,0xb8bec2); ib(339,450,342.5,460,.9,.95,0x222222); ib(338.5,448,342.5,462,1.8,2.3,0x8c9296);
-ib(322,448,327,462,0,.9,0xb8bec2); ib(313.5,462,319,468.5,0,1.9,0xdfe3e5);
-ib(313.2,443,315.6,455,1.2,1.25,0xb8875a);
-// BAR (y 374–440): güney duvar boyunca arka tezgâh, espresso makinesi, raflar
-ib(315,375,339,379.5,0,.9,0xb8bec2); ib(322,375,331,379,.9,1.3,0x222222); ib(332.5,375,341,380,.9,.95,0xe8e0d6);
-ib(315,374.8,339,376,1.4,1.45,0xb8875a); ib(315,374.8,339,376,1.9,1.95,0xb8875a);
-const wm=new THREE.MeshLambertMaterial({color:0xdedbd4,side:THREE.DoubleSide});
-const WX0=313, WX1=342.5, ww=(WX1-WX0)/3;
-{ let px=WX0; for(let q=0;q<3;q++){ const c=WX0+ww*(q+.5); wall(px,490,c-2.75,490,wm,2.1,0,T*.4,interior); px=c+2.75; } wall(px,490,WX1,490,wm,2.1,0,T*.4,interior); }
-[1,2].forEach(q=>wall(WX0+ww*q,490,WX0+ww*q,507.5,wm,2.1,0,T*.4,interior));
-[0,1,2].forEach(q=>{ const c=WX0+ww*(q+.5); ib(c-3,498,c+3,505,0,.4,0xf4f4f4); ib(c-3,505,c+3,507.4,.4,.95,0xf4f4f4); });
-[322,331].forEach(x=>{ ib(x,471,x+5,477,0,.8,0xcfcfcf); ib(x-1,470.5,x+6,478,.8,.9,0xf4f4f4); });
-ib(318,470,336,471,1.2,2,0xbfd9e6);
+// MUTFAK (x 324–342.5, y 205–316): arka duvarda buzdolabı, tezgâh, ocak + davlumbaz, evye; P penceresinde servis rafı
+ib(335,207,342.2,216,0,1.9,0xdfe3e5);
+ib(337,218,342.2,296,0,.9,0xb8bec2); ib(337.5,230,342.2,252,.9,.95,0x222222); ib(336.5,228,342.5,254,1.8,2.3,0x8c9296);
+ib(337.5,264,342.2,278,.9,.95,0xcfd6da);
+ib(325,209,327,250,1.2,1.25,0xb8875a);
+ib(322.2,254.5,326.5,268.5,1.0,1.06,0xb8875a);
+// BAR (x 295–324, y 205–316): arka tezgâh, espresso makinesi, raflar
+ib(319,208,323.2,252,0,.9,0xb8bec2); ib(319,271,323.2,298,0,.9,0xb8bec2);
+ib(319.5,222,323,236,.9,1.3,0x222222); ib(319.5,276,323,284,.9,.95,0xe8e0d6);
+ib(321.6,208,323.4,252,1.4,1.45,0xb8875a); ib(321.6,208,323.4,252,1.9,1.95,0xb8875a);
+// WC: 4 alaturka (bay 2 · bayan 2), plaka + delik + ayak basamakları
+const pan=(cx,back,dir)=>{ const y=d=>back+dir*d;
+  ib(cx-3.5,y(3),cx+3.5,y(13),0,.08,0xf4f4f4); ib(cx-1.6,y(4.5),cx+1.6,y(9.5),.08,.09,0x1b1b1b);
+  ib(cx-3.2,y(10.5),cx-.8,y(12.8),.08,.15,0xe9e9e9); ib(cx+.8,y(10.5),cx+3.2,y(12.8),.08,.15,0xe9e9e9);
+  ib(cx+3.5,y(0.6),cx+4.4,y(1.6),.6,.95,0xb8bec2); };
+[328.6,337.9].forEach(cx=>{ pan(cx,344.6,1); pan(cx,506.6,-1); });
+// giriş levhaları: Bay (mavi) · Bayan (pembe)
+ib(323.2,372.5,324.7,381,2.35,2.95,0x3b7dd8); ib(323.2,470.25,324.7,478.75,2.35,2.95,0xe0679a);
+// ORTAK EL YIKAMA: arka duvarda tezgâh, 5 lavabo, ayna; ön duvarda kurutma makineleri, çöp kovası
+ib(335,392,342.2,459,0,.85,0xdedbd4); ib(341.8,392,342.4,459,1.2,2.1,0xbfd9e6);
+[399,413,427,441,455].forEach(yc=>{ ib(336.5,yc-4,341,yc+4,.85,.92,0xf4f4f4); ib(341,yc-.4,342,yc+.4,.92,1.15,0xb8bec2); });
+[410,440].forEach(yc=>ib(324.6,yc-2,326.6,yc+2,1.2,1.7,0xd8dcde)); ib(325,458,328.5,461.5,0,.7,0x6b6f72);
 const op=[[236,440],[277,440],[224,482],[260,482]].map(t=>pm(t[0],t[1]));
 inst(new THREE.BoxGeometry(.9,.05,.9),MB(0xb8875a),op.map(p=>[p[0],.75,p[1]]));
 inst(new THREE.BoxGeometry(.78,.02,.78),MB(0x2f7d52),op.map(p=>[p[0],.785,p[1]]));
@@ -298,8 +323,8 @@ inst(new THREE.CylinderGeometry(.008,.008,.8,4),MB(0x111111),oc);
 
 const labels=[
  ['Açık alan',100,380,1.2],['Bina altı oturma alanı',225,270,1.2],
- ['Nargile odası',309,186,3.4],['Köz odası',333,176,2.2],['Bar',327,407,1.5],['Mutfak',327,455,2.4],['Okey alanı',250,462,1.5],
- ['WC',327,488,2.4],['Koridor',256,414,1.2],["Kullanım dışı",303.2,330,3.5],['Kasa',256,330,1.7],
+ ['Nargile odası',309,186,3.4],['Köz odası',333,176,2.2],['Bar',309.5,262,1.5],['Mutfak',333,235,2.4],['Okey alanı',250,462,1.5],
+ ['Bay WC',333,376.75,2.4],['Ortak el yıkama',333,425,2.4],['Bayan WC',333,474.5,2.4],['Koridor',256,414,1.2],["Kullanım dışı",303.2,330,3.5],['Kasa',256,330,1.7],
  ['Giriş',40,225,2.8],['Giriş',40,452,2.8]
 ].map(l=>{const d=document.createElement('div');d.className='lbl';d.textContent=l[0];document.body.appendChild(d);
   return {el:d,p:new THREE.Vector3(X(l[1]),l[3],Z(l[2]))};});
