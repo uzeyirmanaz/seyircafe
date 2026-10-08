@@ -2,32 +2,54 @@
 <html lang="tr">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#16191b">
+<meta name="color-scheme" content="dark">
 <title>Cafe Bey 3D yerleşim planı</title>
 <style>
-  :root { --bg:#16191b; --panel:#1f2326; --line:#3a4044; --text:#ece8df; --mute:#9aa0a3; --amber:#e8a94a; }
+  :root { --bg:#16191b; --panel:#1f2326; --line:#3a4044; --text:#ece8df; --mute:#9aa0a3; --amber:#e8a94a;
+          --sl:env(safe-area-inset-left,0px); --sr:env(safe-area-inset-right,0px); --st:env(safe-area-inset-top,0px); --sb:env(safe-area-inset-bottom,0px); }
   * { box-sizing:border-box; }
-  html,body { margin:0; height:100%; background:var(--bg); color:var(--text); font-family:system-ui,-apple-system,"Segoe UI",sans-serif; overflow:hidden; }
+  html,body { margin:0; height:100%; background:var(--bg); color:var(--text); font-family:system-ui,-apple-system,"Segoe UI",sans-serif; overflow:hidden;
+    overscroll-behavior:none; -webkit-text-size-adjust:100%; -webkit-tap-highlight-color:transparent;
+    -webkit-user-select:none; user-select:none; -webkit-touch-callout:none; }
   #c { position:fixed; inset:0; width:100%; height:100%; display:block; touch-action:none; cursor:grab; }
   #c:active { cursor:grabbing; }
-  #bar { position:fixed; left:12px; right:12px; bottom:12px; display:flex; flex-wrap:wrap; gap:8px; justify-content:center; }
-  button { background:var(--panel); color:var(--text); border:1px solid var(--line); border-radius:8px; padding:9px 14px; font:inherit; font-size:14px; cursor:pointer; }
-  button:hover { border-color:var(--amber); }
+  #bar { position:fixed; left:calc(12px + var(--sl)); right:calc(12px + var(--sr)); bottom:calc(12px + var(--sb)); display:flex; flex-wrap:wrap; gap:8px; justify-content:center; }
+  button { background:var(--panel); color:var(--text); border:1px solid var(--line); border-radius:8px; padding:9px 14px; font:inherit; font-size:14px; cursor:pointer; touch-action:manipulation; white-space:nowrap; }
+  @media (hover:hover) { button:hover { border-color:var(--amber); } }
   button:focus-visible { outline:2px solid var(--amber); outline-offset:2px; }
   button[aria-pressed="true"] { background:var(--amber); color:#1b1408; border-color:var(--amber); }
   .sep { width:1px; background:var(--line); margin:0 4px; }
-  #head { position:fixed; left:14px; top:12px; pointer-events:none; }
+  #tLeg { display:none; }
+  #head { position:fixed; left:calc(14px + var(--sl)); right:calc(14px + var(--sr)); top:calc(12px + var(--st)); pointer-events:none; }
   #head h1 { margin:0; font-size:18px; font-weight:600; }
   #head p { margin:2px 0 0; font-size:13px; color:var(--mute); }
-  .lbl { position:fixed; left:0; top:0; transform:translate(-50%,-50%); font-size:12px; padding:2px 7px; border-radius:6px; background:rgba(22,25,27,.82); border:1px solid var(--line); pointer-events:none; white-space:nowrap; }
-  #legend { position:fixed; right:12px; top:12px; background:rgba(31,35,38,.9); border:1px solid var(--line); border-radius:8px; padding:10px 12px; font-size:12px; line-height:1.9; }
+  .lbl { position:fixed; left:0; top:0; transform:translate(-50%,-50%); will-change:transform; font-size:12px; padding:2px 7px; border-radius:6px; background:rgba(22,25,27,.82); border:1px solid var(--line); pointer-events:none; white-space:nowrap; }
+  #legend { position:fixed; right:calc(12px + var(--sr)); top:calc(12px + var(--st)); background:rgba(31,35,38,.9); border:1px solid var(--line); border-radius:8px; padding:10px 12px; font-size:12px; line-height:1.9; }
   #legend i { display:inline-block; width:10px; height:10px; border-radius:2px; margin-right:7px; vertical-align:-1px; }
-  @media (max-width:640px) { #legend { display:none; } button { padding:8px 10px; font-size:13px; } }
+
+  /* Telefon / küçük ekran: tek satır kaydırmalı buton çubuğu, açılır renk göstergesi */
+  @media (max-width:760px), (max-height:500px) {
+    #head h1 { font-size:16px; }
+    #head p { font-size:12px; }
+    #bar { flex-wrap:nowrap; justify-content:flex-start; overflow-x:auto; overflow-y:hidden; scrollbar-width:none; touch-action:pan-x; -webkit-overflow-scrolling:touch; }
+    #bar::-webkit-scrollbar { display:none; }
+    #bar::before, #bar::after { content:''; margin:auto; flex:none; }
+    #bar > * { flex:none; }
+    button { padding:8px 12px; font-size:13px; }
+    #tLeg { display:inline-block; }
+    #legend { display:none; right:auto; top:auto; left:calc(12px + var(--sl)); bottom:calc(68px + var(--sb)); }
+    #legend.show { display:block; }
+    .lbl { font-size:11px; padding:1px 6px; }
+  }
+  @media (max-height:500px) { #head p { display:none; } }
+  @media (pointer:coarse) { button { min-height:44px; } }
 </style>
 </head>
 <body>
 <canvas id="c"></canvas>
-<div id="head"><h1>Cafe Bey</h1><p>Sürükle: döndür · Tekerlek / iki parmak: yakınlaştır · Sağ tık: kaydır</p></div>
+<div id="head"><h1>Cafe Bey</h1><p id="hint">Sürükle: döndür · Tekerlek / iki parmak: yakınlaştır · Sağ tık: kaydır</p></div>
 <div id="legend">
   <div><i style="background:#9ad4bf"></i>Oturma alanı</div>
   <div><i style="background:#a79ff0"></i>Nargile odası</div>
@@ -47,6 +69,7 @@
   <button id="tInt" aria-pressed="true">İç mekan</button>
   <button id="tBld" aria-pressed="true">Bina</button>
   <button id="tLbl" aria-pressed="true">Etiketler</button>
+  <button id="tLeg" aria-pressed="false">Renkler</button>
 </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>
@@ -56,7 +79,8 @@ const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x16191b);
 const cv = document.getElementById('c');
 const renderer = new THREE.WebGLRenderer({canvas:cv, antialias:true});
-renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+const coarse=matchMedia("(pointer:coarse)").matches;
+renderer.setPixelRatio(Math.min(devicePixelRatio,coarse?1.5:2));
 const cam = new THREE.PerspectiveCamera(45,1,0.1,400);
 
 scene.add(new THREE.HemisphereLight(0xffffff,0x555a5e,0.75));
@@ -103,10 +127,14 @@ for(let y=30;y<=615;y+=97.5){ fr(40,y,40,y,3.4,0); }
 wall(207.5,30,207.5,152.5,mats.outer); wall(207.5,507.5,207.5,615,mats.outer);
 
 const roof = new THREE.Group(); scene.add(roof);
-const slats=[], sm=M(0x7c868c,.5), nS=16, wS=(615-30)/nS;
+const slats=[], sm=M(0x9fb4be,.45), nS=12;
+// Sürgülü çatı camı: paneller giriş yönüne doğru uzanıp kapanır, arkaya (binaya) doğru üst üste toplanıp açılır
+const RX0=X(43), RX1=X(204.5), RW=(RX1-RX0)/nS;
 for(let i=0;i<nS;i++){
-  const m=new THREE.Mesh(new THREE.BoxGeometry(X(207.5)-X(40),0.05,wS*S*0.98),sm);
-  m.position.set((X(40)+X(207.5))/2,3.3,Z(30+wS*(i+.5))); roof.add(m); slats.push(m);
+  const m=new THREE.Mesh(new THREE.BoxGeometry(RW*0.985,0.05,(Z(615)-Z(30))*0.99),sm);
+  m.position.set(RX0+RW*(i+.5),3.3,(Z(30)+Z(615))/2);
+  m.userData={cx:RX0+RW*(i+.5),ox:RX1-RW/2,i};
+  roof.add(m); slats.push(m);
 }
 box(40,30,43,615,3.2,3.45,mats.frame,roof); box(204.5,30,207.5,615,3.2,3.45,mats.frame,roof);
 
@@ -116,10 +144,10 @@ const sh = box(270,300,337.5,327.5,0,3.2,mats.shaft);
 const ln = new THREE.LineSegments(new THREE.EdgesGeometry(sh.geometry),new THREE.LineBasicMaterial({color:0xe8a94a}));
 ln.position.copy(sh.position); scene.add(ln);
 
-[[219,222],[249,222],[270,224],[289,224],[309,198],[309,257],[216,346],[216,449],[257,449],[286,449]].forEach(c=>box(c[0],c[1],c[0]+7,c[1]+7,0,3.2,mats.col));
+[[219,222],[249,222],[270,224],[289,224],[309,198],[309,257],[216,346],[216,449],[257,449],[286,449]].forEach(c=>{ if(c[0]===309&&c[1]===198) return; box(c[0],c[1],c[0]+7,c[1]+7,0,3.2,mats.col); });
 
-wall(295,152.5,295,162,mats.purple); wall(295,182,295,215,mats.purple); wall(295,215,342.5,215,mats.purple);
-box(295,152.5,342.5,215,-0.05,0.02,M(0xd6d1f7));
+wall(295,152.5,295,162,mats.purple); wall(295,182,295,205,mats.purple); box(295,198,342.5,205,0,3.2,mats.purple);
+box(295,152.5,342.5,205,-0.05,0.02,M(0xd6d1f7));
 
 box(305,403.75,318,470,-0.05,0.02,M(0xf2c6b5));
 box(318,403.75,342.5,470,-0.05,0.02,M(0xe8e0d6));
@@ -140,11 +168,16 @@ const be = new THREE.LineSegments(new THREE.EdgesGeometry(bw.geometry),new THREE
 be.position.copy(bw.position);
 const bld = new THREE.Group(); bld.add(sl,bw,be); scene.add(bld);
 
-const cvs=document.createElement('canvas'); cvs.width=1024; cvs.height=192;
-const cx=cvs.getContext('2d'); cx.fillStyle='#1e2124'; cx.fillRect(0,0,1024,192);
-cx.fillStyle='#ffe3b0'; cx.font='italic 600 110px Georgia,serif'; cx.textAlign='center'; cx.textBaseline='middle'; cx.fillText('Cafe Bey',512,100);
-const sign=new THREE.Mesh(new THREE.PlaneGeometry(6,1.12),new THREE.MeshBasicMaterial({map:new THREE.CanvasTexture(cvs)}));
-sign.position.set(-0.15,3.9,Z(225)+0.0); sign.rotation.y=-Math.PI/2; scene.add(sign);
+const cvs=document.createElement('canvas'); cvs.width=2048; cvs.height=384;
+const cx=cvs.getContext('2d'); cx.fillStyle='#1e2124'; cx.fillRect(0,0,2048,384);
+cx.strokeStyle='#e8a94a'; cx.lineWidth=8; cx.strokeRect(14,14,2020,356);
+cx.fillStyle='#ffe3b0'; cx.font='italic 600 250px Georgia,serif'; cx.textAlign='center'; cx.textBaseline='middle'; cx.fillText('Cafe Bey',1024,205);
+const cTex=new THREE.CanvasTexture(cvs); cTex.anisotropy=8;
+// iki girişin (y=225 ve y=452) tam ortasında, büyük tabela
+const SW=14, SH=SW*384/2048, SY=3.55+SH/2, SZ=Z((225+452)/2);
+const sign=new THREE.Mesh(new THREE.PlaneGeometry(SW,SH),new THREE.MeshBasicMaterial({map:cTex}));
+sign.position.set(-0.15,SY,SZ); sign.rotation.y=-Math.PI/2; scene.add(sign);
+[-1,1].forEach(d=>{const post=new THREE.Mesh(new THREE.BoxGeometry(0.14,SY+SH/2-3.2,0.14),mats.frame); post.position.set(-0.08,3.2+(SY+SH/2-3.2)/2,SZ+d*(SW/2-0.2)); scene.add(post);});
 
 const interior=new THREE.Group(); scene.add(interior);
 const D=new THREE.Object3D(), pm=(x,y)=>[X(x),Z(y)];
@@ -186,7 +219,7 @@ inst(new THREE.IcosahedronGeometry(.14,0),MB(0xe58aa8),fp);
 ib(212,153,292,161,0,.45,0x3d5a52); ib(212,152.6,292,154,.45,1.1,0x3d5a52);
 
 ib(296,153,342,160,0,.45,0x6a62c9); ib(296,152.6,342,154,.45,1.05,0x6a62c9);
-ib(335,160,342,214,0,.45,0x6a62c9); ib(340.6,160,342.4,214,.45,1.05,0x6a62c9);
+ib(335,160,342,197,0,.45,0x6a62c9); ib(340.6,160,342.4,197,.45,1.05,0x6a62c9);
 const rug=new THREE.Mesh(new THREE.CylinderGeometry(1.4,1.4,.03,24),MB(0x8a5a44)); rug.position.set(...[X(319),.02,Z(182)]); interior.add(rug);
 const nt=new THREE.Mesh(new THREE.CylinderGeometry(.5,.5,.4,16),MB(0xb8875a)); nt.position.set(X(319),.2,Z(182)); interior.add(nt);
 [-.2,.2].forEach(o=>{const h=new THREE.Mesh(new THREE.CylinderGeometry(.05,.07,.55,8),MB(0xd8b24a)); h.position.set(X(319)+o,.65,Z(182)); interior.add(h);});
@@ -228,48 +261,84 @@ const labels=[
   return {el:d,p:new THREE.Vector3(X(l[1]),l[3],Z(l[2]))};});
 
 const target=new THREE.Vector3(X(190),0,Z(320));
-const st={az:-1.0,el:0.62,r:62,tx:target.x,tz:target.z};
+const MAXR=220;
+// w: görünümün yatayda sığması gereken yaklaşık dünya genişliği (dikey/portre ekranlarda otomatik uzaklaşmak için)
+const views={persp:{az:-1.0,el:0.62,r:62,w:56},top:{az:0,el:1.5,r:68,w:32},street:{az:-1.57,el:0.2,r:40,w:56},back:{az:1.9,el:0.35,r:40,w:58}};
+let curView='persp', moved=false;
+const asp=()=>(cv.clientWidth||innerWidth)/(cv.clientHeight||innerHeight);
+function getView(n){
+  const v=views[n], a=asp();
+  const r=Math.min(MAXR,Math.max(v.r,v.w*0.9/(0.83*a)));
+  const az=(n==='persp'&&a<0.8)?-0.55:v.az;
+  return {az,el:v.el,r,tx:target.x,tz:target.z};
+}
+const st={...getView('persp')};
 const goal={...st};
-const views={persp:{az:-1.0,el:0.62,r:62},top:{az:0,el:1.5,r:68},street:{az:-1.57,el:0.2,r:40},back:{az:1.9,el:0.35,r:40}};
-document.querySelectorAll('[data-v]').forEach(b=>b.onclick=()=>Object.assign(goal,views[b.dataset.v],{tx:target.x,tz:target.z}));
+document.querySelectorAll('[data-v]').forEach(b=>b.onclick=()=>{curView=b.dataset.v;moved=false;Object.assign(goal,getView(curView));});
 function tog(id,fn){const b=document.getElementById(id);b.onclick=()=>{const on=b.getAttribute('aria-pressed')!=='true';b.setAttribute('aria-pressed',on);fn(on);};}
 let roofG=0,winG=0,roofT=0,winT=0;
 tog('tRoof',o=>{roofG=o?1:0;document.getElementById('tRoof').textContent=o?'Çatıyı kapat':'Çatıyı aç';});
 tog('tWin',o=>{winG=o?1:0;document.getElementById('tWin').textContent=o?'Camları kapat':'Camları aç';});
 tog('tInt',o=>interior.visible=o); tog('tBld',o=>bld.visible=o); tog('tLbl',o=>labels.forEach(l=>l.el.style.display=o?'':'none'));
+tog('tLeg',o=>document.getElementById('legend').classList.toggle('show',o));
+document.getElementById('hint').textContent=coarse?'Sürükle: döndür · İki parmak: yakınlaştır ve kaydır':'Sürükle: döndür · Tekerlek / iki parmak: yakınlaştır · Sağ tık: kaydır';
 
-const ptrs=new Map(); let pd=0;
+const ptrs=new Map(); let pd=0,pmx=null,pmy=null;
+function panBy(dx,dy){
+  const k=goal.r*0.0016;
+  goal.tx+=(-Math.cos(goal.az)*dx+Math.sin(goal.az)*dy*Math.sin(goal.el))*k;
+  goal.tz+=( Math.sin(goal.az)*dx+Math.cos(goal.az)*dy*Math.sin(goal.el))*k;
+  goal.tx=clamp(goal.tx,target.x-45,target.x+45); goal.tz=clamp(goal.tz,target.z-45,target.z+45);
+}
 cv.addEventListener('contextmenu',e=>e.preventDefault());
-cv.addEventListener('pointerdown',e=>{cv.setPointerCapture(e.pointerId);ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY,b:e.button,s:e.shiftKey});pd=0;});
-cv.addEventListener('pointerup',e=>ptrs.delete(e.pointerId));
-cv.addEventListener('pointercancel',e=>ptrs.delete(e.pointerId));
+cv.addEventListener('pointerdown',e=>{cv.setPointerCapture(e.pointerId);ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY,b:e.button,s:e.shiftKey});pd=0;pmx=null;});
+const endPtr=e=>{ptrs.delete(e.pointerId);pd=0;pmx=null;};
+cv.addEventListener('pointerup',endPtr);
+cv.addEventListener('pointercancel',endPtr);
 cv.addEventListener('pointermove',e=>{
   const p=ptrs.get(e.pointerId); if(!p) return;
   const dx=e.clientX-p.x, dy=e.clientY-p.y;
+  moved=true;
   if(ptrs.size===2){
+    // iki parmak: yakınlaştır + kaydır
     const o=[...ptrs.entries()].find(a=>a[0]!==e.pointerId)[1];
     const nd=Math.hypot(e.clientX-o.x,e.clientY-o.y);
-    if(pd) goal.r=clamp(goal.r*pd/nd,8,140); pd=nd;
-  } else if(p.b===2||p.s){
-    const k=goal.r*0.0016;
-    goal.tx+=(-Math.cos(goal.az)*dx+Math.sin(goal.az)*dy*Math.sin(goal.el))*k;
-    goal.tz+=( Math.sin(goal.az)*dx+Math.cos(goal.az)*dy*Math.sin(goal.el))*k;
-  } else { goal.az-=dx*0.006; goal.el=clamp(goal.el+dy*0.006,0.05,1.55); }
+    const mx=(e.clientX+o.x)/2, my=(e.clientY+o.y)/2;
+    if(pd&&nd>0) goal.r=clamp(goal.r*pd/nd,8,MAXR);
+    if(pmx!==null) panBy(mx-pmx,my-pmy);
+    pd=nd; pmx=mx; pmy=my;
+  } else if(p.b===2||p.s){ panBy(dx,dy); }
+  else { goal.az-=dx*0.006; goal.el=clamp(goal.el+dy*0.006,0.05,1.55); }
   p.x=e.clientX; p.y=e.clientY;
 });
-cv.addEventListener('wheel',e=>{e.preventDefault();goal.r=clamp(goal.r*(1+e.deltaY*0.001),8,140);},{passive:false});
+cv.addEventListener('wheel',e=>{e.preventDefault();moved=true;goal.r=clamp(goal.r*(1+e.deltaY*0.001),8,MAXR);},{passive:false});
+document.addEventListener('gesturestart',e=>e.preventDefault());
 function clamp(v,a,b){return Math.max(a,Math.min(b,v));}
 
-function resize(){renderer.setSize(innerWidth,innerHeight,false);cam.aspect=innerWidth/innerHeight;cam.updateProjectionMatrix();}
-addEventListener('resize',resize); resize();
+let W=innerWidth,H=innerHeight;
+function resize(){
+  W=cv.clientWidth||innerWidth; H=cv.clientHeight||innerHeight;
+  renderer.setSize(W,H,false); cam.aspect=W/H; cam.updateProjectionMatrix();
+  if(!moved){ const v=getView(curView); Object.assign(goal,v); }
+}
+if('ResizeObserver' in window) new ResizeObserver(resize).observe(cv); else addEventListener('resize',resize);
+addEventListener('orientationchange',()=>setTimeout(resize,250));
+resize();
 
-const v3=new THREE.Vector3();
+const v3=new THREE.Vector3(); let lastT=performance.now();
 (function loop(){
   requestAnimationFrame(loop);
   for(const k of ['az','el','r','tx','tz']) st[k]+=(goal[k]-st[k])*0.12;
   cam.position.set(st.tx+st.r*Math.cos(st.el)*Math.sin(st.az), st.r*Math.sin(st.el), st.tz+st.r*Math.cos(st.el)*Math.cos(st.az));
-  roofT+=(roofG-roofT)*0.06; winT+=(winG-winT)*0.06;
-  slats.forEach(s=>s.rotation.x=roofT*1.5);
+  const nowT=performance.now(), dt=Math.min(0.05,(nowT-lastT)/1000); lastT=nowT;
+  roofT+=clamp(roofG-roofT,-dt/3.5,dt/3.5); winT+=(winG-winT)*0.06;
+  // roofT: 0 = kapalı, 1 = açık. Açılırken önce giriş tarafındaki panel çekilir, kapanırken arkadakiler önce uzanır, en son giriş tarafı kapanır
+  slats.forEach(m=>{
+    const u=m.userData, d=u.i/(nS-1)*0.55;
+    const f=clamp((roofT-d)/0.45,0,1), e=f*f*(3-2*f);
+    m.position.x=u.cx+(u.ox-u.cx)*e;
+    m.position.y=3.3+(nS-1-u.i)*0.07*Math.min(1,f*6);
+  });
   wins.forEach(w=>w.scale.y=Math.max(0.02,1-winT));
   cam.up.set(0,1,0); cam.lookAt(st.tx,0,st.tz);
   renderer.render(scene,cam);
@@ -277,7 +346,7 @@ const v3=new THREE.Vector3();
     v3.copy(l.p).project(cam);
     const ok=v3.z<1&&Math.abs(v3.x)<1.1&&Math.abs(v3.y)<1.1;
     l.el.style.visibility=ok?'visible':'hidden';
-    l.el.style.left=((v3.x+1)/2*innerWidth)+'px'; l.el.style.top=((1-v3.y)/2*innerHeight)+'px';
+    l.el.style.transform='translate('+((v3.x+1)/2*W)+'px,'+((1-v3.y)/2*H)+'px) translate(-50%,-50%)';
   });
 })();
 </script>
