@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#16191b">
+<meta name="color-scheme" content="dark">
+<title>Cafe Bey 3D yerleşim planı</title>
+<style>
+  :root { --bg:#16191b; --panel:#1f2326; --line:#3a4044; --text:#ece8df; --mute:#9aa0a3; --amber:#e8a94a;
+          --sl:env(safe-area-inset-left,0px); --sr:env(safe-area-inset-right,0px); --st:env(safe-area-inset-top,0px); --sb:env(safe-area-inset-bottom,0px); }
+  * { box-sizing:border-box; }
+  html,body { margin:0; height:100%; background:var(--bg); color:var(--text); font-family:system-ui,-apple-system,"Segoe UI",sans-serif; overflow:hidden;
+    overscroll-behavior:none; -webkit-text-size-adjust:100%; -webkit-tap-highlight-color:transparent;
+    -webkit-user-select:none; user-select:none; -webkit-touch-callout:none; }
+  #c { position:fixed; inset:0; width:100%; height:100%; display:block; touch-action:none; cursor:grab; }
+  #c:active { cursor:grabbing; }
+  #bar { position:fixed; left:calc(12px + var(--sl)); right:calc(12px + var(--sr)); bottom:calc(12px + var(--sb)); display:flex; flex-wrap:wrap; gap:8px; justify-content:center; }
+  button { background:var(--panel); color:var(--text); border:1px solid var(--line); border-radius:8px; padding:9px 14px; font:inherit; font-size:14px; cursor:pointer; touch-action:manipulation; white-space:nowrap; }
+  @media (hover:hover) { button:hover { border-color:var(--amber); } }
+  button:focus-visible { outline:2px solid var(--amber); outline-offset:2px; }
+  button[aria-pressed="true"] { background:var(--amber); color:#1b1408; border-color:var(--amber); }
+  .sep { width:1px; background:var(--line); margin:0 4px; }
+  #tLeg { display:none; }
+  #head { position:fixed; left:calc(14px + var(--sl)); right:calc(14px + var(--sr)); top:calc(12px + var(--st)); pointer-events:none; }
+  #head h1 { margin:0; font-size:18px; font-weight:600; }
+  #head p { margin:2px 0 0; font-size:13px; color:var(--mute); }
+  .lbl { position:fixed; left:0; top:0; transform:translate(-50%,-50%); will-change:transform; font-size:12px; padding:2px 7px; border-radius:6px; background:rgba(22,25,27,.82); border:1px solid var(--line); pointer-events:none; white-space:nowrap; }
+  #legend { position:fixed; right:calc(12px + var(--sr)); top:calc(12px + var(--st)); background:rgba(31,35,38,.9); border:1px solid var(--line); border-radius:8px; padding:10px 12px; font-size:12px; line-height:1.9; }
+  #legend i { display:inline-block; width:10px; height:10px; border-radius:2px; margin-right:7px; vertical-align:-1px; }
+
+  /* Telefon / küçük ekran: tek satır kaydırmalı buton çubuğu, açılır renk göstergesi */
+  @media (max-width:760px), (max-height:500px) {
+    #head h1 { font-size:16px; }
+    #head p { font-size:12px; }
+    #bar { flex-wrap:nowrap; justify-content:flex-start; overflow-x:auto; overflow-y:hidden; scrollbar-width:none; touch-action:pan-x; -webkit-overflow-scrolling:touch; }
+    #bar::-webkit-scrollbar { display:none; }
+    #bar::before, #bar::after { content:''; margin:auto; flex:none; }
+    #bar > * { flex:none; }
+    button { padding:8px 12px; font-size:13px; }
+    #tLeg { display:inline-block; }
+    #legend { display:none; right:auto; top:auto; left:calc(12px + var(--sl)); bottom:calc(68px + var(--sb)); }
+    #legend.show { display:block; }
+    .lbl { font-size:11px; padding:1px 6px; }
+  }
+  @media (max-height:500px) { #head p { display:none; } }
+  @media (pointer:coarse) { button { min-height:44px; } }
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div id="head"><h1>Cafe Bey</h1><p id="hint">Sürükle: döndür · Tekerlek / iki parmak: yakınlaştır · Sağ tık: kaydır</p></div>
+<div id="legend">
+  <div><i style="background:#9ad4bf"></i>Oturma alanı</div>
+  <div><i style="background:#a79ff0"></i>Nargile odası</div>
+  <div><i style="background:#e58a6b"></i>Bar + mutfak</div>
+  <div><i style="background:#9a9b98"></i>WC</div>
+  <div><i style="background:#2f7d52"></i>Okey alanı</div>
+  <div><i style="background:#3a3a3a"></i>Kullanım dışı</div>
+  <div><i style="background:#7a6258"></i>Köz odası</div>
+</div>
+<div id="bar">
+  <button data-v="persp">Perspektif</button>
+  <button data-v="top">Kuş bakışı</button>
+  <button data-v="street">Sokaktan</button>
+  <button data-v="back">Arkadan</button>
+  <span class="sep"></span>
+  <button id="tRoof" aria-pressed="false">Çatıyı aç</button>
+  <button id="tWin" aria-pressed="false">Camları aç</button>
+  <button id="tInt" aria-pressed="true">İç mekan</button>
+  <button id="tBld" aria-pressed="true">Bina</button>
+  <button id="tLbl" aria-pressed="true">Etiketler</button>
+  <button id="tLeg" aria-pressed="false">Renkler</button>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+const S = 1/10.95;
+const X = v => (v-40)*S, Z = v => (v-30)*S;
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x16191b);
+const cv = document.getElementById('c');
+const renderer = new THREE.WebGLRenderer({canvas:cv, antialias:true});
+const coarse=matchMedia("(pointer:coarse)").matches;
+renderer.setPixelRatio(Math.min(devicePixelRatio,coarse?1.5:2));
+const cam = new THREE.PerspectiveCamera(45,1,0.1,400);
+
+scene.add(new THREE.HemisphereLight(0xffffff,0x555a5e,0.75));
+const sun = new THREE.DirectionalLight(0xfff1d6,0.7); sun.position.set(-20,40,-10); scene.add(sun);
+
+const M = (c,o=1) => new THREE.MeshLambertMaterial({color:c,transparent:o<1,opacity:o,side:THREE.DoubleSide,depthWrite:o>=1});
+const mats = {
+  wall:M(0xe9e4d9), outer:M(0xd2ccbf), glass:M(0x9fc4d8,.28), frame:M(0x23272a),
+  floorOpen:M(0xbfd9cc), floorIn:M(0xe6dfd0), shaft:M(0x3a3a3a),
+  purple:M(0xa79ff0), coral:M(0xe58a6b), coralD:M(0x993c1d), gray:M(0x9a9b98), col:M(0xf4f1ea)
+};
+function box(x0,z0,x1,z1,y0,y1,mat,parent=scene){
+  const m = new THREE.Mesh(new THREE.BoxGeometry(Math.abs(X(x1)-X(x0)),y1-y0,Math.abs(Z(z1)-Z(z0))),mat);
+  m.position.set((X(x0)+X(x1))/2,(y0+y1)/2,(Z(z0)+Z(z1))/2);
+  parent.add(m); return m;
+}
+const T = 0.1/S;
+function wall(x0,y0,x1,y1,mat,h=3.2,yb=0,t=T,parent=scene){
+  if(y0===y1) return box(x0,y0-t,x1,y0+t,yb,yb+h,mat,parent);
+  return box(x0-t,y0,x0+t,y1,yb,yb+h,mat,parent);
+}
+
+box(40,30,207.5,615,-0.2,0,mats.floorOpen);
+box(207.5,152.5,342.5,507.5,-0.2,0,mats.floorIn);
+
+const wins=[];
+const gl = (x0,y0,x1,y1)=>{
+  wall(x0,y0,x1,y1,mats.frame,0.9,0,0.5);
+  const n=Math.max(1,Math.round(Math.hypot(x1-x0,y1-y0)/36));
+  const px=t=>x0+(x1-x0)*t, py=t=>y0+(y1-y0)*t;
+  for(let i=0;i<n;i++){
+    const m=wall(px(i/n),py(i/n),px((i+1)/n),py((i+1)/n),mats.glass,2.3,0.9,0.4);
+    m.geometry.translate(0,1.15,0); m.position.y=0.9; wins.push(m);
+  }
+};
+const fr = (x0,y0,x1,y1,h,yb)=>wall(x0,y0,x1,y1,mats.frame,h,yb,0.8);
+gl(40,30,40,212.5); gl(40,237.5,40,440); gl(40,465,40,615);
+fr(40,212.5,40,237.5,0.9,2.3); fr(40,440,40,465,0.9,2.3);
+[[212.5],[237.5],[440],[465]].forEach(p=>fr(40,p[0],40,p[0],3.2,0));
+fr(40,30,40,615,0.15,3.2);
+gl(40,30,207.5,30); gl(40,615,207.5,615);
+fr(40,30,207.5,30,0.15,3.2); fr(40,615,207.5,615,0.15,3.2);
+for(let y=30;y<=615;y+=97.5){ fr(40,y,40,y,3.4,0); }
+wall(207.5,30,207.5,152.5,mats.outer); wall(207.5,507.5,207.5,615,mats.outer);
+
+const roof = new THREE.Group(); scene.add(roof);
+const slats=[], sm=M(0x9fb4be,.45), nS=12;
+// Sürgülü çatı camı: paneller giriş yönüne doğru uzanıp kapanır, arkaya (binaya) doğru üst üste toplanıp açılır
+const RX0=X(43), RX1=X(204.5), RW=(RX1-RX0)/nS;
+for(let i=0;i<nS;i++){
+  const m=new THREE.Mesh(new THREE.BoxGeometry(RW*0.985,0.05,(Z(615)-Z(30))*0.99),sm);
+  m.position.set(RX0+RW*(i+.5),3.3,(Z(30)+Z(615))/2);
+  m.userData={cx:RX0+RW*(i+.5),ox:RX1-RW/2,i};
+  roof.add(m); slats.push(m);
+}
+box(40,30,43,615,3.2,3.45,mats.frame,roof); box(204.5,30,207.5,615,3.2,3.45,mats.frame,roof);
+
+wall(207.5,152.5,342.5,152.5,mats.outer); wall(342.5,152.5,342.5,507.5,mats.outer); wall(207.5,507.5,342.5,507.5,mats.outer);
+
+const sh = box(265,316.25,341.4,343.75,0,3.2,mats.shaft);
+const ln = new THREE.LineSegments(new THREE.EdgesGeometry(sh.geometry),new THREE.LineBasicMaterial({color:0xe8a94a}));
+ln.position.copy(sh.position); scene.add(ln);
+
+[[219,222],[249,222],[270,224],[289,224],[309,198],[309,257],[216,346],[216,449],[257,449],[286,449]].forEach(c=>{ if(c[0]===309&&(c[1]===198||c[1]===257)) return; box(c[0],c[1],c[0]+7,c[1]+7,0,3.2,mats.col); });
+
+wall(295,152.5,295,162,mats.purple); wall(295,182,295,205,mats.purple); box(295,198,342.5,205,0,3.2,mats.purple);
+box(295,152.5,324,205,-0.05,0.02,M(0xd6d1f7));   // nargile odası zemini (x 295–324)
+// KÖZ ODASI: nargile odasının arka köşesi (x 324–342.5, y 152.5–198), ara duvarda kapı boşluğu (170–182)
+box(324,152.5,342.5,198,-0.05,0.03,M(0x7a6258));
+wall(324,152.5,324,170,mats.purple); wall(324,182,324,198,mats.purple); wall(324,170,324,182,mats.frame,1.0,2.2,0.5);
+
+// === ARKA ŞERİT (arka duvar boyunca, ön yüzler kolon hattında x=309): BAR · (kullanım dışı) · MUTFAK | KORİDOR | WC ===
+// BAR (y 257–316): en arkadaki kolon (309,257) bar'ın ön duvarıyla bütün; duvar kullanım dışı alana kadar gider
+box(316,257,342.5,316.25,-0.05,0.02,M(0xf2c6b5));
+wall(316,257,342.5,257,mats.coral);                                              // bar kuzey duvarı (kolonun arka yüzünden başlar)
+[[257,264],[296,300],[312,316.25]].forEach(q=>box(309,q[0],316,q[1],0,3.2,mats.coral));   // ön duvar, kolonla aynı kalınlıkta
+box(309,264,316,296,0,1.1,mats.coralD); box(308.6,264,316.4,296,1.1,1.18,mats.col); box(309,264,316,296,2.4,3.2,mats.coral);   // tezgâh açıklığı
+box(309,300,316,312,2.4,3.2,mats.coral);                                          // personel kapısı (300–312) lentosu
+// MUTFAK (y 345–385): bardan küçük
+box(310,345,342.5,385,-0.05,0.02,M(0xe8e0d6));
+wall(309.5,345,342.5,345,mats.coral,3.2,0,0.5); wall(309.5,345,309.5,385,mats.coral,3.2,0,0.5);
+[[309.5,318],[326,342.5]].forEach(q=>wall(q[0],385,q[1],385,mats.coral,3.2,0,0.5));    // koridora bakan duvar, kapı 318–326
+box(317.6,384,318.4,386,0,2.2,mats.frame); box(325.6,384,326.4,386,0,2.2,mats.frame); wall(318,385,326,385,mats.frame,1.0,2.2,0.6);
+// KORİDOR (y 385–409): salondan arka duvara; mutfak ve WC tam karşılıklı
+box(310,385,342.5,409,-0.05,0.02,M(0xe3e0da));
+// WC (y 409–507.5): uzun
+box(310,409,342.5,507.5,-0.05,0.02,M(0xc9c9c6));
+[[309.5,318],[326,342.5]].forEach(q=>wall(q[0],409,q[1],409,mats.gray,3.2,0,0.5));      // koridora bakan duvar, kapı 318–326
+box(317.6,408,318.4,410,0,2.2,mats.frame); box(325.6,408,326.4,410,0,2.2,mats.frame); wall(318,409,326,409,mats.frame,1.0,2.2,0.6);
+wall(309.5,409,309.5,507.5,mats.gray,3.2,0,0.5);
+const fn=(x0,y0,x1,y1)=>{wall(x0,y0,x1,y1,mats.glass,1.2,0,0.15); wall(x0,y0,x1,y1,mats.frame,0.06,1.2,0.4);};
+fn(291,424,291,507.5);
+
+const sl = box(207.5,152.5,342.5,507.5,3.2,3.4,M(0xf0ece4,.3));
+const bw = box(207.5,152.5,342.5,507.5,3.4,15,M(0xb8c4cc,.1));
+const be = new THREE.LineSegments(new THREE.EdgesGeometry(bw.geometry),new THREE.LineBasicMaterial({color:0x7d8a92}));
+be.position.copy(bw.position);
+const bld = new THREE.Group(); bld.add(sl,bw,be); scene.add(bld);
+
+const cvs=document.createElement('canvas'); cvs.width=2048; cvs.height=384;
+const cx=cvs.getContext('2d'); cx.fillStyle='#14110d'; cx.fillRect(0,0,2048,384);
+// neon çerçeve
+cx.strokeStyle='#ffb347'; cx.lineWidth=10; cx.shadowColor='#ffa127'; cx.shadowBlur=40; cx.strokeRect(18,18,2012,348); cx.strokeRect(18,18,2012,348);
+// ışıklı yazı: önce geniş parlama, sonra sıcak beyaz çekirdek
+cx.font='italic 600 250px Georgia,serif'; cx.textAlign='center'; cx.textBaseline='middle';
+cx.fillStyle='#ffb347'; cx.shadowColor='#ff9d1c'; cx.shadowBlur=70; cx.fillText('Cafe Bey',1024,205); cx.fillText('Cafe Bey',1024,205);
+cx.fillStyle='#fff1cf'; cx.shadowColor='#ffc46b'; cx.shadowBlur=22; cx.fillText('Cafe Bey',1024,205);
+const cTex=new THREE.CanvasTexture(cvs); cTex.anisotropy=8;
+// iki girişin (y=225 ve y=452) tam ortasında, büyük tabela
+const SW=14, SH=SW*384/2048, SY=3.55+SH/2, SZ=Z((225+452)/2);
+const sign=new THREE.Mesh(new THREE.PlaneGeometry(SW,SH),new THREE.MeshBasicMaterial({map:cTex}));
+sign.position.set(-0.15,SY,SZ); sign.rotation.y=-Math.PI/2; scene.add(sign);
+[-1,1].forEach(d=>{const post=new THREE.Mesh(new THREE.BoxGeometry(0.14,SY+SH/2-3.2,0.14),mats.frame); post.position.set(-0.08,3.2+(SY+SH/2-3.2)/2,SZ+d*(SW/2-0.2)); scene.add(post);});
+// tabelanın ışığı: çevreye yayılan hale, aydınlatma çubukları ve gerçek bir nokta ışık
+const gc=document.createElement('canvas'); gc.width=gc.height=256;
+const gx=gc.getContext('2d'), gg=gx.createRadialGradient(128,128,0,128,128,128);
+gg.addColorStop(0,'rgba(255,190,90,1)'); gg.addColorStop(.45,'rgba(255,160,50,.45)'); gg.addColorStop(1,'rgba(255,150,40,0)');
+gx.fillStyle=gg; gx.fillRect(0,0,256,256);
+const glowMat=new THREE.MeshBasicMaterial({map:new THREE.CanvasTexture(gc),transparent:true,blending:THREE.AdditiveBlending,depthWrite:false,side:THREE.DoubleSide,opacity:.55});
+const glow=new THREE.Mesh(new THREE.PlaneGeometry(SW*1.45,SH*3.4),glowMat);
+glow.position.set(-0.1,SY,SZ); glow.rotation.y=-Math.PI/2; scene.add(glow);
+const stripM=new THREE.MeshBasicMaterial({color:0xffc66b});
+[-1,1].forEach(d=>{const st2=new THREE.Mesh(new THREE.BoxGeometry(0.07,0.07,SW+0.28),stripM); st2.position.set(-0.2,SY+d*(SH/2+0.05),SZ); scene.add(st2);});
+const signLight=new THREE.PointLight(0xffb85c,1.2,24,2); signLight.position.set(-2.4,SY-0.4,SZ); scene.add(signLight);
+
+const interior=new THREE.Group(); scene.add(interior);
+const D=new THREE.Object3D(), pm=(x,y)=>[X(x),Z(y)];
+function inst(geo,mat,list){
+  const m=new THREE.InstancedMesh(geo,mat,list.length);
+  list.forEach((a,i)=>{D.position.set(a[0],a[1],a[2]);D.rotation.set(0,0,0);D.updateMatrix();m.setMatrixAt(i,D.matrix);});
+  interior.add(m);
+}
+const MB=(c)=>new THREE.MeshLambertMaterial({color:c});
+const ib=(x0,y0,x1,y1,h0,h1,c)=>box(x0,y0,x1,y1,h0,h1,MB(c),interior);
+
+const tabs=[];
+for(let y=60;y<=590;y+=44){ if(Math.abs(y-225)<24||Math.abs(y-452)<24) continue; [72,122,172].forEach(x=>tabs.push([x,y])); }
+[[228,182],[262,182],[225,262],[272,262],[230,312],[231,388]].forEach(t=>tabs.push(t));
+const tp=tabs.map(t=>pm(t[0],t[1]));
+inst(new THREE.CylinderGeometry(.45,.45,.05,20),MB(0xb8875a),tp.map(p=>[p[0],.75,p[1]]));
+inst(new THREE.CylinderGeometry(.05,.05,.75,8),MB(0x2b2f33),tp.map(p=>[p[0],.375,p[1]]));
+const seats=[],bx=[],bz=[],lamps=[],cords=[];
+tp.forEach(p=>{
+  [[.72,0],[-.72,0],[0,.72],[0,-.72]].forEach(o=>seats.push([p[0]+o[0],.45,p[1]+o[1]]));
+  bx.push([p[0]+.92,.7,p[1]],[p[0]-.92,.7,p[1]]); bz.push([p[0],.7,p[1]+.92],[p[0],.7,p[1]-.92]);
+  lamps.push([p[0],2.45,p[1]]); cords.push([p[0],2.85,p[1]]);
+});
+inst(new THREE.BoxGeometry(.4,.05,.4),MB(0x2b2f33),seats);
+inst(new THREE.BoxGeometry(.05,.45,.4),MB(0x2b2f33),bx);
+inst(new THREE.BoxGeometry(.4,.45,.05),MB(0x2b2f33),bz);
+inst(new THREE.SphereGeometry(.13,10,8),new THREE.MeshBasicMaterial({color:0xffc66b}),lamps);
+inst(new THREE.CylinderGeometry(.008,.008,.8,4),MB(0x111111),cords);
+
+[[34,208],[242,436],[468,611]].forEach(r=>ib(42,r[0],50,r[1],0,.6,0x2a2d30));
+ib(56,34,204,42,0,.6,0x2a2d30); ib(56,603,204,611,0,.6,0x2a2d30);
+// KASA: kullanım dışı alanın ucunda (x=265), tezgâh girişe/salona bakar
+ib(251,316,265,344,0,.95,0x8a5a3c); ib(249.5,314.5,266,345.5,.95,1.03,0xe8e0d6);
+ib(255,326,261,334,1.03,1.12,0x2b2f33); ib(255,327,257,333,1.12,1.42,0x2b2f33);
+// GİRİŞ HALILARI: iki girişin önünde, girişten içeri doğru uzanan kırmızı halı
+[225,452.5].forEach(yc=>{
+  ib(46,yc-13,156,yc+13,0,.02,0xe9dcc3);
+  ib(48.5,yc-10.5,153.5,yc+10.5,.02,.035,0x9b2d30);
+  ib(51,yc-1.3,151,yc+1.3,.035,.045,0xc9a24a);
+});
+const gp=[],fp=[];
+const addP=(x,y)=>{const p=pm(x,y);gp.push([p[0],.85,p[1]]); if(gp.length%4===0) fp.push([p[0]+.2,1.15,p[1]+.1]);};
+for(let y=40;y<=605;y+=13){ if(Math.abs(y-225)<22||Math.abs(y-452)<22) continue; addP(46,y); }
+for(let x=60;x<=200;x+=13){ addP(x,38); addP(x,607); }
+inst(new THREE.IcosahedronGeometry(.34,0),MB(0x4c8a4a),gp);
+inst(new THREE.IcosahedronGeometry(.14,0),MB(0xe58aa8),fp);
+
+ib(212,153,292,161,0,.45,0x3d5a52); ib(212,152.6,292,154,.45,1.1,0x3d5a52);
+
+ib(296,153,323,160,0,.45,0x6a62c9); ib(296,152.6,323,154,.45,1.05,0x6a62c9);
+ib(317,160,323,169,0,.45,0x6a62c9); ib(317,183,323,197,0,.45,0x6a62c9);
+ib(321.6,160,322.8,169,.45,1.05,0x6a62c9); ib(321.6,183,322.8,197,.45,1.05,0x6a62c9);
+const rug=new THREE.Mesh(new THREE.CylinderGeometry(1.0,1.0,.03,24),MB(0x8a5a44)); rug.position.set(...[X(309.5),.02,Z(179)]); interior.add(rug);
+const nt=new THREE.Mesh(new THREE.CylinderGeometry(.5,.5,.4,16),MB(0xb8875a)); nt.position.set(X(309.5),.2,Z(179)); interior.add(nt);
+[-.2,.2].forEach(o=>{const h=new THREE.Mesh(new THREE.CylinderGeometry(.05,.07,.55,8),MB(0xd8b24a)); h.position.set(X(309.5)+o,.65,Z(179)); interior.add(h);});
+
+ib(337,156,341.4,194,0,.9,0x3b3633);
+[160,171,182,190].forEach(y=>box(338,y,340.6,y+4,.9,.98,new THREE.MeshBasicMaterial({color:0xff6a1f}),interior));
+ib(326,154,332,160,0,.6,0x2a2d30); ib(328,188,334,196,0,.5,0x2a2d30);
+// BAR (y 257–316): arka duvar boyunca arka tezgâh, espresso makinesi, raflar, buzdolabı
+ib(337,262,341.4,312,0,.9,0xb8bec2); ib(338,278,341.4,288,.9,1.3,0x222222);
+ib(340.4,262,341.4,312,1.4,1.45,0xb8875a); ib(340.4,262,341.4,312,1.9,1.95,0xb8875a);
+ib(318,259.5,324,266,0,1.9,0xdfe3e5);
+// MUTFAK (y 345–385): arka duvarda ocak + davlumbaz, ada tezgâh, buzdolabı, raf
+ib(339,348,342.5,382,0,.9,0xb8bec2); ib(339,358,342.5,372,.9,.95,0x222222); ib(338.5,356,342.5,374,1.8,2.3,0x8c9296);
+ib(322,355,328,372,0,.9,0xb8bec2); ib(311,347,317,353,0,1.9,0xdfe3e5);
+ib(310.2,358,312.6,376,1.2,1.25,0xb8875a);
+const wm=new THREE.MeshLambertMaterial({color:0xdedbd4,side:THREE.DoubleSide});
+const SW0=436, sw=(507.5-436)/6;
+for(let q=0;q<=6;q++) wall(330.5,SW0+sw*q,342.5,SW0+sw*q,wm,2.1,0,T*.4,interior);
+{ let py=SW0; for(let q=0;q<6;q++){ const c=SW0+sw*(q+.5); wall(330.5,py,330.5,c-3,wm,2.1,0,T*.4,interior); py=c+3; } wall(330.5,py,330.5,507.5,wm,2.1,0,T*.4,interior); }
+for(let q=0;q<6;q++){ const c=SW0+sw*(q+.5); ib(336,c-3,341.4,c+3,0,.4,0xf4f4f4); ib(340,c-3,341.8,c+3,.4,.95,0xf4f4f4); }
+[416,424,432].forEach(y=>{ ib(311,y,316,y+5,0,.8,0xcfcfcf); ib(310.4,y-1,316.6,y+6,.8,.9,0xf4f4f4); });
+ib(310,412,311,438,1.2,2,0xbfd9e6);
+const op=[[236,440],[277,440],[224,482],[260,482]].map(t=>pm(t[0],t[1]));
+inst(new THREE.BoxGeometry(.9,.05,.9),MB(0xb8875a),op.map(p=>[p[0],.75,p[1]]));
+inst(new THREE.BoxGeometry(.78,.02,.78),MB(0x2f7d52),op.map(p=>[p[0],.785,p[1]]));
+inst(new THREE.CylinderGeometry(.05,.05,.75,8),MB(0x2b2f33),op.map(p=>[p[0],.375,p[1]]));
+const os=[],ox=[],oz=[],rz=[],rx=[],ol=[],oc=[];
+op.forEach(p=>{
+  [[.7,0],[-.7,0],[0,.7],[0,-.7]].forEach(o=>os.push([p[0]+o[0],.45,p[1]+o[1]]));
+  ox.push([p[0]+.9,.7,p[1]],[p[0]-.9,.7,p[1]]); oz.push([p[0],.7,p[1]+.9],[p[0],.7,p[1]-.9]);
+  rz.push([p[0],.83,p[1]+.3],[p[0],.83,p[1]-.3]); rx.push([p[0]+.3,.83,p[1]],[p[0]-.3,.83,p[1]]);
+  ol.push([p[0],2.45,p[1]]); oc.push([p[0],2.85,p[1]]);
+});
+inst(new THREE.BoxGeometry(.4,.05,.4),MB(0x2b2f33),os);
+inst(new THREE.BoxGeometry(.05,.45,.4),MB(0x2b2f33),ox);
+inst(new THREE.BoxGeometry(.4,.45,.05),MB(0x2b2f33),oz);
+inst(new THREE.BoxGeometry(.35,.08,.07),MB(0xe0b878),rz);
+inst(new THREE.BoxGeometry(.07,.08,.35),MB(0xe0b878),rx);
+inst(new THREE.SphereGeometry(.13,10,8),new THREE.MeshBasicMaterial({color:0xffc66b}),ol);
+inst(new THREE.CylinderGeometry(.008,.008,.8,4),MB(0x111111),oc);
+
+const labels=[
+ ['Açık alan',100,380,1.2],['Bina altı oturma alanı',225,270,1.2],
+ ['Nargile odası',309,186,3.4],['Köz odası',333,176,2.2],['Bar',329,287,1.5],['Mutfak',326,365,2.4],['Koridor',326,397,1.2],['Okey alanı',250,462,1.5],
+ ['WC',326,458,2.4],['Koridor',256,414,1.2],["Kullanım dışı",303.2,330,3.5],['Kasa',256,330,1.7],
+ ['Giriş',40,225,2.8],['Giriş',40,452,2.8]
+].map(l=>{const d=document.createElement('div');d.className='lbl';d.textContent=l[0];document.body.appendChild(d);
+  return {el:d,p:new THREE.Vector3(X(l[1]),l[3],Z(l[2]))};});
+
+const target=new THREE.Vector3(X(190),0,Z(320));
+const MAXR=220;
+// w: görünümün yatayda sığması gereken yaklaşık dünya genişliği (dikey/portre ekranlarda otomatik uzaklaşmak için)
+const views={persp:{az:-1.0,el:0.62,r:62,w:56},top:{az:0,el:1.5,r:68,w:32},street:{az:-1.57,el:0.2,r:40,w:56},back:{az:1.9,el:0.35,r:40,w:58}};
+let curView='persp', moved=false;
+const asp=()=>(cv.clientWidth||innerWidth)/(cv.clientHeight||innerHeight);
+function getView(n){
+  const v=views[n], a=asp();
+  const r=Math.min(MAXR,Math.max(v.r,v.w*0.9/(0.83*a)));
+  const az=(n==='persp'&&a<0.8)?-0.55:v.az;
+  return {az,el:v.el,r,tx:target.x,tz:target.z};
+}
+const st={...getView('persp')};
+const goal={...st};
+document.querySelectorAll('[data-v]').forEach(b=>b.onclick=()=>{curView=b.dataset.v;moved=false;Object.assign(goal,getView(curView));});
+function tog(id,fn){const b=document.getElementById(id);b.onclick=()=>{const on=b.getAttribute('aria-pressed')!=='true';b.setAttribute('aria-pressed',on);fn(on);};}
+let roofG=0,winG=0,roofT=0,winT=0;
+tog('tRoof',o=>{roofG=o?1:0;document.getElementById('tRoof').textContent=o?'Çatıyı kapat':'Çatıyı aç';});
+tog('tWin',o=>{winG=o?1:0;document.getElementById('tWin').textContent=o?'Camları kapat':'Camları aç';});
+tog('tInt',o=>interior.visible=o); tog('tBld',o=>bld.visible=o); tog('tLbl',o=>labels.forEach(l=>l.el.style.display=o?'':'none'));
+tog('tLeg',o=>document.getElementById('legend').classList.toggle('show',o));
+document.getElementById('hint').textContent=coarse?'Sürükle: döndür · İki parmak: yakınlaştır ve kaydır':'Sürükle: döndür · Tekerlek / iki parmak: yakınlaştır · Sağ tık: kaydır';
+
+const ptrs=new Map(); let pd=0,pmx=null,pmy=null;
+function panBy(dx,dy){
+  const k=goal.r*0.0016;
+  goal.tx+=(-Math.cos(goal.az)*dx+Math.sin(goal.az)*dy*Math.sin(goal.el))*k;
+  goal.tz+=( Math.sin(goal.az)*dx+Math.cos(goal.az)*dy*Math.sin(goal.el))*k;
+  goal.tx=clamp(goal.tx,target.x-45,target.x+45); goal.tz=clamp(goal.tz,target.z-45,target.z+45);
+}
+cv.addEventListener('contextmenu',e=>e.preventDefault());
+cv.addEventListener('pointerdown',e=>{cv.setPointerCapture(e.pointerId);ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY,b:e.button,s:e.shiftKey});pd=0;pmx=null;});
+const endPtr=e=>{ptrs.delete(e.pointerId);pd=0;pmx=null;};
+cv.addEventListener('pointerup',endPtr);
+cv.addEventListener('pointercancel',endPtr);
+cv.addEventListener('pointermove',e=>{
+  const p=ptrs.get(e.pointerId); if(!p) return;
+  const dx=e.clientX-p.x, dy=e.clientY-p.y;
+  moved=true;
+  if(ptrs.size===2){
+    // iki parmak: yakınlaştır + kaydır
+    const o=[...ptrs.entries()].find(a=>a[0]!==e.pointerId)[1];
+    const nd=Math.hypot(e.clientX-o.x,e.clientY-o.y);
+    const mx=(e.clientX+o.x)/2, my=(e.clientY+o.y)/2;
+    if(pd&&nd>0) goal.r=clamp(goal.r*pd/nd,8,MAXR);
+    if(pmx!==null) panBy(mx-pmx,my-pmy);
+    pd=nd; pmx=mx; pmy=my;
+  } else if(p.b===2||p.s){ panBy(dx,dy); }
+  else { goal.az-=dx*0.006; goal.el=clamp(goal.el+dy*0.006,0.05,1.55); }
+  p.x=e.clientX; p.y=e.clientY;
+});
+cv.addEventListener('wheel',e=>{e.preventDefault();moved=true;goal.r=clamp(goal.r*(1+e.deltaY*0.001),8,MAXR);},{passive:false});
+document.addEventListener('gesturestart',e=>e.preventDefault());
+function clamp(v,a,b){return Math.max(a,Math.min(b,v));}
+
+let W=innerWidth,H=innerHeight;
+function resize(){
+  W=cv.clientWidth||innerWidth; H=cv.clientHeight||innerHeight;
+  renderer.setSize(W,H,false); cam.aspect=W/H; cam.updateProjectionMatrix();
+  if(!moved){ const v=getView(curView); Object.assign(goal,v); }
+}
+if('ResizeObserver' in window) new ResizeObserver(resize).observe(cv); else addEventListener('resize',resize);
+addEventListener('orientationchange',()=>setTimeout(resize,250));
+resize();
+
+const v3=new THREE.Vector3(); let lastT=performance.now();
+(function loop(){
+  requestAnimationFrame(loop);
+  for(const k of ['az','el','r','tx','tz']) st[k]+=(goal[k]-st[k])*0.12;
+  cam.position.set(st.tx+st.r*Math.cos(st.el)*Math.sin(st.az), st.r*Math.sin(st.el), st.tz+st.r*Math.cos(st.el)*Math.cos(st.az));
+  const nowT=performance.now(), dt=Math.min(0.05,(nowT-lastT)/1000); lastT=nowT;
+  roofT+=clamp(roofG-roofT,-dt/3.5,dt/3.5); glowMat.opacity=0.52+0.06*Math.sin(nowT/700); winT+=(winG-winT)*0.06;
+  // roofT: 0 = kapalı, 1 = açık. Açılırken önce giriş tarafındaki panel çekilir, kapanırken arkadakiler önce uzanır, en son giriş tarafı kapanır
+  slats.forEach(m=>{
+    const u=m.userData, d=u.i/(nS-1)*0.55;
+    const f=clamp((roofT-d)/0.45,0,1), e=f*f*(3-2*f);
+    m.position.x=u.cx+(u.ox-u.cx)*e;
+    m.position.y=3.3+(nS-1-u.i)*0.07*Math.min(1,f*6);
+  });
+  wins.forEach(w=>w.scale.y=Math.max(0.02,1-winT));
+  cam.up.set(0,1,0); cam.lookAt(st.tx,0,st.tz);
+  renderer.render(scene,cam);
+  labels.forEach(l=>{
+    v3.copy(l.p).project(cam);
+    const ok=v3.z<1&&Math.abs(v3.x)<1.1&&Math.abs(v3.y)<1.1;
+    l.el.style.visibility=ok?'visible':'hidden';
+    l.el.style.transform='translate('+((v3.x+1)/2*W)+'px,'+((1-v3.y)/2*H)+'px) translate(-50%,-50%)';
+  });
+})();
+</script>
+</body>
+</html>
