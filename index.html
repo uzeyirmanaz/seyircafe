@@ -94,6 +94,7 @@
   <button data-v="street">Sokaktan</button>
   <button data-v="back">Arkadan</button>
   <span class="sep"></span>
+  <button id="tWalk" aria-pressed="false">Gezin</button>
   <button id="tRoof" aria-pressed="false">Çatıyı aç</button>
   <button id="tWin" aria-pressed="false">Camları aç</button>
   <button id="tInt" aria-pressed="true">İç mekan</button>
@@ -140,7 +141,7 @@ const M = (c,o=1) => new THREE.MeshLambertMaterial({color:c,transparent:o<1,opac
 const mats = {
   wall:M(0xe9e4d9), outer:M(0xd2ccbf), glass:M(0x9fc4d8,.28), frame:M(0x23272a),
   floorOpen:M(0xbfd9cc), floorIn:M(0xe6dfd0), shaft:M(0x3a3a3a),
-  purple:M(0xa79ff0), coral:M(0xe58a6b), coralD:M(0x993c1d), gray:M(0x9a9b98), col:M(0xf4f1ea)
+  purple:M(0xa79ff0), coral:M(0xe58a6b), coralD:M(0x993c1d), gray:M(0x9a9b98), col:M(0xf4f1ea), wcw:M(0xefe6d2), panel:M(0xd9c9ad), wood:M(0x6e4a2c)
 };
 function box(x0,z0,x1,z1,y0,y1,mat,parent=scene){
   const m = new THREE.Mesh(new THREE.BoxGeometry(Math.abs(X(x1)-X(x0)),y1-y0,Math.abs(Z(z1)-Z(z0))),mat);
@@ -222,22 +223,22 @@ wall(324,313,324,SY1,mats.coral,3.2,0,0.5); doorY(324,301,313);
 // WC (x 324–342.5, y 343.75–507.5, alan aynı): BAY (2 alaturka) · ortak el yıkama · BAYAN (2 alaturka)
 // sıra: Bay kabinleri 343.75–367.75 · Bay girişi/antre 367.75–385.75 · ortak el yıkama 385.75–465.5 · Bayan antre 465.5–483.5 · Bayan kabinleri 483.5–507.5
 const WY={bayC:[SY2,367.75],bayV:[367.75,385.75],wash:[385.75,465.5],bnV:[465.5,483.5],bnC:[483.5,507.5]};
-box(324,SY2,342.5,WY.bayV[1],-0.05,0.02,M(0xc4cfd9));   // bay zemini
-box(324,WY.wash[0],342.5,WY.wash[1],-0.05,0.02,M(0xd6d9d6)); // ortak el yıkama zemini
-box(324,WY.bnV[0],342.5,507.5,-0.05,0.02,M(0xdccbd3));  // bayan zemini
-const doorX=(y,a,b)=>{ box(a-0.4,y-0.5,a+0.4,y+0.5,0,2.2,mats.frame); box(b-0.4,y-0.5,b+0.4,y+0.5,0,2.2,mats.frame); wall(a,y,b,y,mats.frame,1.0,2.2,0.7); };
-function partX(y,gaps){ let px=324; gaps.forEach(g=>{ wall(px,y,g[0],y,mats.gray,3.2,0,0.5); doorX(y,g[0],g[1]); px=g[1]; }); wall(px,y,342.5,y,mats.gray,3.2,0,0.5); }
+box(324,SY2,342.5,WY.bayV[1],-0.05,0.02,M(0xe3d9c7));   // bay zemini
+box(324,WY.wash[0],342.5,WY.wash[1],-0.05,0.02,M(0xe3d9c7)); // ortak el yıkama zemini
+box(324,WY.bnV[0],342.5,507.5,-0.05,0.02,M(0xe3d9c7));  // bayan zemini
+const doorX=(y,a,b)=>{ box(a-0.4,y-0.5,a+0.4,y+0.5,0,2.2,mats.wood); box(b-0.4,y-0.5,b+0.4,y+0.5,0,2.2,mats.wood); wall(a,y,b,y,mats.wood,1.0,2.2,0.7); };
+function partX(y,gaps){ let px=324; gaps.forEach(g=>{ wall(px,y,g[0],y,mats.panel,3.2,0,0.5); doorX(y,g[0],g[1]); px=g[1]; }); wall(px,y,342.5,y,mats.panel,3.2,0,0.5); }
 // salona bakan duvar: Bay girişi (y 372.25–381.25) ve Bayan girişi (y 470–479)
-wall(324,SY2,324,372.25,mats.gray,3.2,0,0.5); doorY(324,372.25,381.25);
-wall(324,381.25,324,470,mats.gray,3.2,0,0.5); doorY(324,470,479);
-wall(324,479,324,507.5,mats.gray,3.2,0,0.5);
+wall(324,SY2,324,372.25,mats.wcw,3.2,0,0.5); doorY(324,372.25,381.25);
+wall(324,381.25,324,470,mats.wcw,3.2,0,0.5); doorY(324,470,479);
+wall(324,479,324,507.5,mats.wcw,3.2,0,0.5);
 partX(367.75,[[325.1,332.1],[334.4,341.4]]);   // bay kabin kapıları
 partX(385.75,[[328,338]]);                    // bay antre ↔ ortak el yıkama
 partX(465.5,[[328,338]]);                     // ortak el yıkama ↔ bayan antre
 partX(483.5,[[325.1,332.1],[334.4,341.4]]);   // bayan kabin kapıları
-wall(333.25,SY2,333.25,367.75,mats.gray,3.2,0,0.5); wall(333.25,483.5,333.25,507.5,mats.gray,3.2,0,0.5);
+wall(333.25,SY2,333.25,367.75,mats.panel,3.2,0,0.5); wall(333.25,483.5,333.25,507.5,mats.panel,3.2,0,0.5);
 const fn=(x0,y0,x1,y1)=>{wall(x0,y0,x1,y1,mats.glass,1.2,0,0.15); wall(x0,y0,x1,y1,mats.frame,0.06,1.2,0.4);};
-fn(291,424,291,507.5);
+// (okey alanı ile koridor arasındaki cam bölme kaldırıldı: Bayan WC yolu açık)
 
 const sl = box(207.5,152.5,342.5,507.5,3.2,3.4,M(0xf0ece4,.3));
 const bw = box(207.5,152.5,342.5,507.5,3.4,15,M(0xb8c4cc,.1));
@@ -281,21 +282,69 @@ function inst(geo,mat,list){
 const MB=(c)=>new THREE.MeshLambertMaterial({color:c});
 const ib=(x0,y0,x1,y1,h0,h1,c)=>box(x0,y0,x1,y1,h0,h1,MB(c),interior);
 
-const tabs=[];
-for(let y=60;y<=590;y+=44){ if(Math.abs(y-225)<24||Math.abs(y-452)<24) continue; [72,122,172].forEach(x=>tabs.push([x,y])); }
-[[228,182],[262,182],[225,262],[272,262],[230,312],[231,388]].forEach(t=>tabs.push(t));
-const tp=tabs.map(t=>pm(t[0],t[1]));
-inst(new THREE.CylinderGeometry(.45,.45,.05,20),MB(0xb8875a),tp.map(p=>[p[0],.75,p[1]]));
-inst(new THREE.CylinderGeometry(.05,.05,.75,8),MB(0x2b2f33),tp.map(p=>[p[0],.375,p[1]]));
-const seats=[],bx=[],bz=[],lamps=[],cords=[];
-tp.forEach(p=>{
-  [[.72,0],[-.72,0],[0,.72],[0,-.72]].forEach(o=>seats.push([p[0]+o[0],.45,p[1]+o[1]]));
-  bx.push([p[0]+.92,.7,p[1]],[p[0]-.92,.7,p[1]]); bz.push([p[0],.7,p[1]+.92],[p[0],.7,p[1]-.92]);
-  lamps.push([p[0],2.45,p[1]]); cords.push([p[0],2.85,p[1]]);
-});
-inst(new THREE.BoxGeometry(.4,.05,.4),MB(0x2b2f33),seats);
-inst(new THREE.BoxGeometry(.05,.45,.4),MB(0x2b2f33),bx);
-inst(new THREE.BoxGeometry(.4,.45,.05),MB(0x2b2f33),bz);
+// === MASALAR: bina altı = oyun (okey) alanı · açık alan = kanepe+koltuk takımı (fotoğraflara göre) ===
+const UB=new THREE.BoxGeometry(1,1,1), UC=new THREE.CylinderGeometry(.5,.5,1,12);
+function instT(geo,mat,list){ const m=new THREE.InstancedMesh(geo,mat,list.length);
+  list.forEach((a,i)=>{D.position.set(a[0],a[1],a[2]);D.rotation.set(0,0,0);D.scale.set(a[3],a[4],a[5]);D.updateMatrix();m.setMatrixAt(i,D.matrix);});
+  D.scale.set(1,1,1); interior.add(m); }
+const P={};
+const part=(k,geo,col)=>{ if(!P[k]) P[k]={geo,col,list:[]}; return P[k].list; };
+const box3=(k,col,x,y,z,sx,sy,sz)=>part(k,UB,col).push([x,y,z,sx,sy,sz]);
+const cyl3=(k,col,x,y,z,d,h)=>part(k,UC,col).push([x,y,z,d,h,d]);
+const lamps=[],cords=[],topL=[];
+// oyun masası: dört girintili ahşap tabla, ortada deri alan + ahşap istekeler, 4 kapitone koltuk (siyah iskelet)
+const lobe=(()=>{ const h=.54,r=.1,n=.26,c=.3,s=new THREE.Shape();
+  s.moveTo(-h+r,-h); s.lineTo(-n,-h); s.quadraticCurveTo(0,-h+c,n,-h); s.lineTo(h-r,-h); s.quadraticCurveTo(h,-h,h,-h+r);
+  s.lineTo(h,-n); s.quadraticCurveTo(h-c,0,h,n); s.lineTo(h,h-r); s.quadraticCurveTo(h,h,h-r,h);
+  s.lineTo(n,h); s.quadraticCurveTo(0,h-c,-n,h); s.lineTo(-h+r,h); s.quadraticCurveTo(-h,h,-h,h-r);
+  s.lineTo(-h,n); s.quadraticCurveTo(-h+c,0,-h,-n); s.lineTo(-h,-h+r); s.quadraticCurveTo(-h,-h,-h+r,-h);
+  const g=new THREE.ExtrudeGeometry(s,{depth:.04,bevelEnabled:false}); g.rotateX(-Math.PI/2); return g; })();
+function gameTable(cx,cz){
+  topL.push([cx,.73,cz,1,1,1]);
+  box3('leather',0xb5632f,cx,.778,cz,.5,.012,.5);
+  [-.11,.11].forEach(o=>box3('rack',0xe0a24e,cx+o,.82,cz,.075,.07,.4));
+  [-.15,.15].forEach(o=>box3('rack2',0xe8b563,cx,.805,cz+o,.36,.05,.07));
+  box3('white',0xf3f0ea,cx,.85,cz,.12,.14,.12);
+  cyl3('ped',0x2b2f33,cx,.365,cz,.1,.73); box3('baseA',0x2b2f33,cx,.015,cz,.6,.03,.1); box3('baseB',0x2b2f33,cx,.015,cz,.1,.03,.6);
+  [[1,0],[-1,0],[0,1],[0,-1]].forEach(d=>{ const ax=Math.abs(d[0]), px=cx+d[0]*.62, pz=cz+d[1]*.62;
+    box3('seat',0xb4602f,px,.45,pz,.5,.1,.5);
+    box3('back',0xc06a38,cx+d[0]*.84,.72,cz+d[1]*.84,ax?.09:.5,.4,ax?.5:.09);
+    box3('frame',0x1b1d20,cx+d[0]*.89,.72,cz+d[1]*.89,ax?.04:.54,.44,ax?.54:.04);
+    [[-.22,-.22],[.22,-.22],[-.22,.22],[.22,.22]].forEach(o=>cyl3('leg',0x1b1d20,px+o[0],.2,pz+o[1],.035,.4));
+  });
+  lamps.push([cx,2.45,cz]); cords.push([cx,2.85,cz]);
+}
+// açık alan takımı: solda 2'li bordo kanepe, ortada doğal kenarlı ahşap masa, sağda iki bordo koltuk
+function sofaSet(cx,cz){
+  box3('otop',0xc7a070,cx,.74,cz,.75,.04,1.2);
+  [-.4,.4].forEach(o=>box3('oleg',0x1b1d20,cx,.36,cz+o,.6,.72,.04));
+  const sx=cx-1.1;
+  box3('sSeat',0x15161a,sx+.05,.34,cz,.7,.2,1.4);
+  box3('sFrame',0x1f2124,sx-.4,.45,cz,.04,.5,1.44);
+  [-.35,.35].forEach(o=>box3('cush',0x7a1030,sx-.27,.66,cz+o,.2,.5,.66));
+  [-.72,.72].forEach(o=>{ box3('arm',0x8c5a2b,sx,.62,cz+o,.84,.05,.07); [-.38,.38].forEach(q=>box3('post',0x1f2124,sx+q,.22,cz+o,.04,.44,.04)); });
+  const ax=cx+1.075;
+  [-.37,.37].forEach(o=>{ const z=cz+o;
+    box3('sSeat',0x15161a,ax-.05,.34,z,.7,.2,.64);
+    box3('cush',0x7a1030,ax+.28,.66,z,.2,.5,.6);
+    box3('sFrame',0x1f2124,ax+.4,.45,z,.04,.5,.66);
+    [-.35,.35].forEach(q=>{ box3('arm',0x8c5a2b,ax,.62,z+q,.84,.05,.06); [-.38,.38].forEach(w=>box3('post',0x1f2124,ax+w,.22,z+q,.04,.44,.04)); });
+  });
+  lamps.push([cx,2.45,cz]); cords.push([cx,2.85,cz]);
+}
+// açık alan: sütun başına bir takım, giriş halılarının olduğu sıralar boş
+for(let y=62;y<=590;y+=36){ if(Math.abs(y-225)<24||Math.abs(y-452)<24) continue; [76,126,176].forEach(x=>{ const q=pm(x,y); sofaSet(q[0],q[1]); }); }
+// bina altı: mümkün olan en fazla oyun masası (kolon, kasa ve şaftla çakışanlar atlanır)
+const colsC=[[219,222],[249,222],[270,224],[289,224],[309,257],[216,346],[216,449],[257,449],[286,449]];
+let nGame=0;
+for(let y=183;y<=497;y+=26){ [222,248,274,300].forEach(x=>{
+  if(x===300&&y<358) return;
+  if(colsC.some(c=>Math.abs(x-(c[0]+3.5))<13&&Math.abs(y-(c[1]+3.5))<13)) return;
+  if(x>240&&x<=275.5&&y>305&&y<355) return;
+  const q=pm(x,y); gameTable(q[0],q[1]); nGame++;
+}); }
+Object.values(P).forEach(o=>instT(o.geo,MB(o.col),o.list));
+instT(lobe,MB(0x8f5a33),topL);
 inst(new THREE.SphereGeometry(.13,10,8),new THREE.MeshBasicMaterial({color:0xffc66b}),lamps);
 inst(new THREE.CylinderGeometry(.008,.008,.8,4),MB(0x111111),cords);
 
@@ -339,36 +388,145 @@ ib(322.2,254.5,326.5,268.5,1.0,1.06,0xb8875a);
 ib(319,208,323.2,252,0,.9,0xb8bec2); ib(319,271,323.2,298,0,.9,0xb8bec2);
 ib(319.5,222,323,236,.9,1.3,0x222222); ib(319.5,276,323,284,.9,.95,0xe8e0d6);
 ib(321.6,208,323.4,252,1.4,1.45,0xb8875a); ib(321.6,208,323.4,252,1.9,1.95,0xb8875a);
-// WC: 4 alaturka (bay 2 · bayan 2), plaka + delik + ayak basamakları
-const pan=(cx,back,dir)=>{ const y=d=>back+dir*d;
-  ib(cx-3.5,y(3),cx+3.5,y(13),0,.08,0xf4f4f4); ib(cx-1.6,y(4.5),cx+1.6,y(9.5),.08,.09,0x1b1b1b);
-  ib(cx-3.2,y(10.5),cx-.8,y(12.8),.08,.15,0xe9e9e9); ib(cx+.8,y(10.5),cx+3.2,y(12.8),.08,.15,0xe9e9e9);
-  ib(cx+3.5,y(0.6),cx+4.4,y(1.6),.6,.95,0xb8bec2); };
-[328.6,337.9].forEach(cx=>{ pan(cx,344.6,1); pan(cx,506.6,-1); });
-// giriş levhaları: Bay (mavi) · Bayan (pembe)
-ib(323.2,372.5,324.7,381,2.35,2.95,0x3b7dd8); ib(323.2,470.25,324.7,478.75,2.35,2.95,0xe0679a);
-// ORTAK EL YIKAMA: arka duvarda tezgâh, 5 lavabo, ayna; ön duvarda kurutma makineleri, çöp kovası
-ib(335,392,342.2,459,0,.85,0xdedbd4); ib(341.8,392,342.4,459,1.2,2.1,0xbfd9e6);
-[399,413,427,441,455].forEach(yc=>{ ib(336.5,yc-4,341,yc+4,.85,.92,0xf4f4f4); ib(341,yc-.4,342,yc+.4,.92,1.15,0xb8bec2); });
-[410,440].forEach(yc=>ib(324.6,yc-2,326.6,yc+2,1.2,1.7,0xd8dcde)); ib(325,458,328.5,461.5,0,.7,0x6b6f72);
-const op=[[236,440],[277,440],[224,482],[260,482]].map(t=>pm(t[0],t[1]));
-inst(new THREE.BoxGeometry(.9,.05,.9),MB(0xb8875a),op.map(p=>[p[0],.75,p[1]]));
-inst(new THREE.BoxGeometry(.78,.02,.78),MB(0x2f7d52),op.map(p=>[p[0],.785,p[1]]));
-inst(new THREE.CylinderGeometry(.05,.05,.75,8),MB(0x2b2f33),op.map(p=>[p[0],.375,p[1]]));
-const os=[],ox=[],oz=[],rz=[],rx=[],ol=[],oc=[];
-op.forEach(p=>{
-  [[.7,0],[-.7,0],[0,.7],[0,-.7]].forEach(o=>os.push([p[0]+o[0],.45,p[1]+o[1]]));
-  ox.push([p[0]+.9,.7,p[1]],[p[0]-.9,.7,p[1]]); oz.push([p[0],.7,p[1]+.9],[p[0],.7,p[1]-.9]);
-  rz.push([p[0],.83,p[1]+.3],[p[0],.83,p[1]-.3]); rx.push([p[0]+.3,.83,p[1]],[p[0]-.3,.83,p[1]]);
-  ol.push([p[0],2.45,p[1]]); oc.push([p[0],2.85,p[1]]);
+
+
+// === DUVAR SÜSÜ: duvar kağıtları ve çerçeveli görseller ===
+const deco=new THREE.Group(); interior.add(deco);
+const mkT=(w,h,fn)=>{const c=document.createElement('canvas');c.width=w;c.height=h;fn(c.getContext('2d'),w,h);const t=new THREE.CanvasTexture(c);t.anisotropy=4;return t;};
+const cupD=(g,cx,cy,k,col)=>{g.strokeStyle=col;g.lineWidth=k*.05;g.lineCap='round';
+  g.beginPath();g.ellipse(cx,cy+k*.42,k*.62,k*.14,0,0,Math.PI*2);g.stroke();
+  g.beginPath();g.moveTo(cx-k*.4,cy-k*.1);g.lineTo(cx-k*.32,cy+k*.35);g.quadraticCurveTo(cx,cy+k*.5,cx+k*.32,cy+k*.35);g.lineTo(cx+k*.4,cy-k*.1);g.closePath();g.stroke();
+  g.beginPath();g.ellipse(cx,cy-k*.1,k*.4,k*.08,0,0,Math.PI*2);g.stroke();
+  g.beginPath();g.arc(cx+k*.42,cy+k*.1,k*.14,-1.2,1.2);g.stroke();
+  for(let i=-1;i<=1;i++){g.beginPath();g.moveTo(cx+i*k*.18,cy-k*.25);g.bezierCurveTo(cx+i*k*.18+k*.12,cy-k*.4,cx+i*k*.18-k*.12,cy-k*.55,cx+i*k*.18,cy-k*.72);g.stroke();}};
+const beanD=(g,x,y,k,a,col)=>{g.save();g.translate(x,y);g.rotate(a);g.fillStyle=col;g.beginPath();g.ellipse(0,0,k,k*.62,0,0,Math.PI*2);g.fill();g.strokeStyle='rgba(0,0,0,.45)';g.lineWidth=k*.12;g.beginPath();g.moveTo(-k*.8,0);g.quadraticCurveTo(0,k*.35,k*.8,0);g.stroke();g.restore();};
+const leafD=(g,x,y,len,a,col)=>{g.save();g.translate(x,y);g.rotate(a);g.fillStyle=col;g.beginPath();g.moveTo(0,0);g.quadraticCurveTo(len*.35,-len*.28,len,0);g.quadraticCurveTo(len*.35,len*.28,0,0);g.fill();g.strokeStyle='rgba(255,255,255,.35)';g.lineWidth=2;g.beginPath();g.moveTo(0,0);g.lineTo(len*.95,0);g.stroke();g.restore();};
+const starP=(g,cx,cy,r,n,col,lw)=>{g.strokeStyle=col;g.lineWidth=lw;g.beginPath();for(let i=0;i<n*2;i++){const a=i*Math.PI/n-Math.PI/2,rr=i%2?r*.55:r;g[i?'lineTo':'moveTo'](cx+Math.cos(a)*rr,cy+Math.sin(a)*rr);}g.closePath();g.stroke();};
+const PAT={
+  cup:()=>mkT(512,640,(g,w,h)=>{g.fillStyle='#efe6d2';g.fillRect(0,0,w,h);cupD(g,256,320,300,'#2a2420');g.fillStyle='#2a2420';g.font='italic 600 54px Georgia,serif';g.textAlign='center';g.fillText('Cafe Bey',256,580);}),
+  leaf:()=>mkT(512,640,(g,w,h)=>{g.fillStyle='#24382d';g.fillRect(0,0,w,h);for(let i=0;i<9;i++)leafD(g,256,600,300+((i*37)%120),-Math.PI/2+(i-4)*.28,i%2?'#4f8a5c':'#6aa774');}),
+  arch:()=>mkT(512,640,(g,w,h)=>{g.fillStyle='#efe6d2';g.fillRect(0,0,w,h);g.fillStyle='#c8734f';g.beginPath();g.arc(256,110,38,0,7);g.fill();[['#c8734f',200],['#e0b05a',150],['#8aa58a',100]].forEach(a=>{const r=a[1],cy=560-r*1.6;g.fillStyle=a[0];g.beginPath();g.moveTo(256-r,560);g.lineTo(256-r,cy);g.arc(256,cy,r,Math.PI,0);g.lineTo(256+r,560);g.closePath();g.fill();});}),
+  star:()=>mkT(512,640,(g,w,h)=>{g.fillStyle='#17444a';g.fillRect(0,0,w,h);for(let r=220;r>40;r-=40)starP(g,256,320,r,8,'#d8b25a',3);}),
+  type:()=>mkT(512,640,(g,w,h)=>{g.fillStyle='#1e2124';g.fillRect(0,0,w,h);g.strokeStyle='#c9a24a';g.lineWidth=4;g.strokeRect(24,24,w-48,h-48);g.fillStyle='#ffe3b0';g.font='italic 600 84px Georgia,serif';g.textAlign='center';g.fillText('Cafe Bey',256,310);g.font='26px Georgia,serif';g.fillStyle='#c9a24a';g.fillText('Kahve · Nargile · Okey',256,370);}),
+  beans:()=>mkT(512,640,(g,w,h)=>{g.fillStyle='#3a2418';g.fillRect(0,0,w,h);for(let i=0;i<30;i++)beanD(g,40+((i*97)%440),40+((i*151)%560),34+(i%3)*8,i*.7,i%2?'#6b4128':'#84522f');}),
+  damask:()=>mkT(256,256,(g)=>{g.fillStyle='#2b2f33';g.fillRect(0,0,256,256);g.strokeStyle='rgba(216,178,90,.7)';g.lineWidth=3;[104,52].forEach(r=>{g.beginPath();g.moveTo(128,128-r);g.lineTo(128+r,128);g.lineTo(128,128+r);g.lineTo(128-r,128);g.closePath();g.stroke();});g.fillStyle='rgba(216,178,90,.8)';[[0,0],[256,0],[0,256],[256,256],[128,128]].forEach(c=>{g.beginPath();g.arc(c[0],c[1],12,0,7);g.fill();});[[128,0],[0,128],[256,128],[128,256]].forEach(c=>{g.beginPath();g.arc(c[0],c[1],6,0,7);g.fill();});}),
+  botan:()=>mkT(256,256,(g)=>{g.fillStyle='#e4eadf';g.fillRect(0,0,256,256);[[60,200,90,-1.1,'#7fae86'],[190,210,80,-2.0,'#9bc29f'],[130,70,70,.5,'#9bc29f'],[210,60,60,2.4,'#7fae86'],[40,60,50,-.4,'#9bc29f']].forEach(l=>leafD(g,l[0],l[1],l[2],l[3],l[4]));}),
+  tilepat:()=>mkT(256,256,(g)=>{g.fillStyle='#17444a';g.fillRect(0,0,256,256);[[128,128,100],[0,0,100],[256,0,100],[0,256,100],[256,256,100]].forEach(c=>starP(g,c[0],c[1],c[2],8,'#d8b25a',3));starP(g,128,128,55,8,'#d8b25a',2);}),
+  beanpat:()=>mkT(256,256,(g)=>{g.fillStyle='#2a1a12';g.fillRect(0,0,256,256);[[40,40],[128,128],[216,40],[40,216],[216,216]].forEach((c,i)=>beanD(g,c[0],c[1],26,i*1.1,'#6b4128'));}),
+  mural:()=>mkT(640,800,(g,w,h)=>{const gr=g.createLinearGradient(0,0,0,h);gr.addColorStop(0,'#1b1612');gr.addColorStop(1,'#2e2218');g.fillStyle=gr;g.fillRect(0,0,w,h);
+    g.strokeStyle='#c9a24a';g.lineWidth=5;g.strokeRect(22,22,w-44,h-44);g.lineWidth=2;g.strokeRect(36,36,w-72,h-72);
+    for(let i=0;i<14;i++)beanD(g,70+((i*173)%500),200+((i*229)%420),18+(i%3)*5,i*.9,i%2?'#4a2d1b':'#5a3822');
+    leafD(g,60,750,190,-.9,'#3e6b4f');leafD(g,580,750,190,-2.2,'#3e6b4f');
+    g.textAlign='center';g.fillStyle='#ffe3b0';g.font='italic 600 72px Georgia,serif';g.fillText('Cafe Bey',320,140);
+    g.strokeStyle='#d8b25a';g.lineWidth=7;g.lineJoin='round';
+    g.fillStyle='#2b2f33';g.fillRect(240,230,160,90);g.strokeRect(240,230,160,90);
+    g.fillStyle='#7fe0a0';g.font='bold 46px monospace';g.fillText('0,00',320,292);
+    g.beginPath();g.moveTo(200,330);g.lineTo(440,330);g.lineTo(490,450);g.lineTo(150,450);g.closePath();g.stroke();
+    g.fillStyle='#d8b25a';for(let r=0;r<3;r++)for(let c=0;c<5;c++)g.fillRect(215+c*42+r*6,348+r*30,30,16);
+    g.strokeRect(150,450,340,100);g.beginPath();g.moveTo(180,520);g.lineTo(460,520);g.stroke();g.fillRect(285,500,70,12);
+    g.fillStyle='#ffe3b0';g.font='bold 140px Georgia,serif';g.fillText('KASA',320,690);
+    g.fillStyle='#c9a24a';g.font='30px Georgia,serif';g.fillText('Hesap · Ödeme noktası',320,740);})
+};
+const picD=(g,cx,cy,k,fem)=>{g.fillStyle='#fff';g.beginPath();g.arc(cx,cy-k*.78,k*.17,0,7);g.fill();
+  if(fem){g.beginPath();g.moveTo(cx-k*.14,cy-k*.56);g.lineTo(cx+k*.14,cy-k*.56);g.lineTo(cx+k*.32,cy+k*.12);g.lineTo(cx-k*.32,cy+k*.12);g.closePath();g.fill();g.fillRect(cx-k*.13,cy+k*.1,k*.09,k*.46);g.fillRect(cx+k*.04,cy+k*.1,k*.09,k*.46);}
+  else{g.fillRect(cx-k*.24,cy-k*.56,k*.48,k*.52);g.fillRect(cx-k*.22,cy-k*.06,k*.18,k*.62);g.fillRect(cx+k*.04,cy-k*.06,k*.18,k*.62);}};
+const signP=(fem)=>mkT(1024,320,(g,w,h)=>{g.fillStyle='#6b4a2f';g.fillRect(0,0,w,h);g.strokeStyle='#fff';g.lineWidth=6;g.strokeRect(12,12,w-24,h-24);picD(g,130,190,220,fem);g.fillRect(250,50,6,h-100);g.textAlign='left';g.fillStyle='#fff';g.font='bold 86px Arial,sans-serif';g.fillText(fem?'BAYAN':'BAY',290,150);g.font='bold 62px Arial,sans-serif';g.fillText('TUVALETİ',290,235);});
+const plaqueP=(fem)=>mkT(320,320,(g,w,h)=>{g.fillStyle='#6b4a2f';g.fillRect(0,0,w,h);g.strokeStyle='#fff';g.lineWidth=6;g.strokeRect(10,10,w-20,h-20);picD(g,160,220,230,fem);});
+PAT.signBay=()=>signP(false); PAT.signBayan=()=>signP(true); PAT.plBay=()=>plaqueP(false); PAT.plBayan=()=>plaqueP(true);
+const FACE={xm:[-1,0,-Math.PI/2],xp:[1,0,Math.PI/2],zp:[0,1,0],zm:[0,-1,Math.PI]};
+const TC={}, T_=k=>TC[k]||(TC[k]=PAT[k]());
+const BM=t=>new THREE.MeshBasicMaterial({map:t,color:0xe6e6e6});
+function put(face,px,py,yc,off,fn){const f=FACE[face],g=new THREE.Group();g.position.set(X(px)+f[0]*off,yc,Z(py)+f[1]*off);g.rotation.y=f[2];fn(g);deco.add(g);}
+function paper(face,px,py,len,h,pat,off){const t=T_(pat).clone();t.needsUpdate=true;t.wrapS=t.wrapT=THREE.RepeatWrapping;t.repeat.set(len/1.2,h/1.2);put(face,px,py,h/2,off,g=>g.add(new THREE.Mesh(new THREE.PlaneGeometry(len,h),BM(t))));}
+function framed(face,px,py,art,off,yc=1.75,w=.9,h=1.12){put(face,px,py,yc,off+.005,g=>{g.add(new THREE.Mesh(new THREE.BoxGeometry(w+.12,h+.12,.05),MB(0x3a2a1e)));const m=new THREE.Mesh(new THREE.PlaneGeometry(w,h),BM(T_(art)));m.position.z=.03;g.add(m);});}
+// kasa arka duvarı (kullanım dışı bloğun salona bakan yüzü): görselli duvar kağıdı
+put('xm',265,330,1.6,.02,g=>g.add(new THREE.Mesh(new THREE.PlaneGeometry(27.5*S,3.1),BM(T_('mural')))));
+// açık alana bakan bina duvarları
+paper('xm',207.5,91.25,122.5*S,3.2,'botan',.115); paper('xm',207.5,561.25,107.5*S,3.2,'botan',.115);
+[[55,'arch'],[91,'cup'],[127,'leaf'],[528,'star'],[561,'type'],[594,'beans']].forEach(a=>framed('xm',207.5,a[0],a[1],.115));
+// bina altı üst duvar (bank üstü)
+paper('zp',250.75,152.5,86.5*S,3.2,'damask',.115);
+[[224,'type'],[251,'leaf'],[278,'arch']].forEach(a=>framed('zp',a[0],152.5,a[1],.115,1.95));
+// nargile odası
+paper('zp',309.5,152.5,27*S,3.2,'tilepat',.115); framed('zp',309.5,152.5,'star',.115,1.8,.8,1.0);
+framed('xp',295,193.5,'cup',.115);
+// bar arka duvarı
+paper('xm',324,229.5,45*S,3.2,'beanpat',.06); framed('xm',324,229.5,'type',.06);
+framed('xm',324,284.5,'cup',.06);
+// okey alanı arka duvarı
+paper('zm',249,507.5,82*S,3.2,'botan',.115);
+[[222,'arch'],[249,'type'],[276,'star']].forEach(a=>framed('zm',a[0],507.5,a[1],.115));
+// WC salon duvarı
+paper('xm',324,425.6,88.75*S,3.2,'damask',.06);
+[[395,'leaf'],[425,'arch'],[455,'leaf']].forEach(a=>framed('xm',324,a[0],a[1],.06));
+framed('xm',324,358,'cup',.06); framed('xm',324,493,'beans',.06);
+
+// WC giriş tabelaları: kapı üstünde aydınlatmalı yazı + figür, kapı yanında figür plakası
+const BW=t=>new THREE.MeshBasicMaterial({map:t});
+[[376.75,'signBay','plBay',366.5],[474.5,'signBayan','plBayan',466.5]].forEach(d=>{
+  put('xm',324,d[0],2.72,.09,g=>{g.add(new THREE.Mesh(new THREE.BoxGeometry(1.84,.6,.05),MB(0x2a1d12)));const m=new THREE.Mesh(new THREE.PlaneGeometry(1.76,.55),BW(T_(d[1])));m.position.z=.03;g.add(m);});
+  put('xm',324,d[3],1.5,.09,g=>{g.add(new THREE.Mesh(new THREE.BoxGeometry(.5,.5,.05),MB(0x2a1d12)));const m=new THREE.Mesh(new THREE.PlaneGeometry(.44,.44),BW(T_(d[2])));m.position.z=.03;g.add(m);});
 });
-inst(new THREE.BoxGeometry(.4,.05,.4),MB(0x2b2f33),os);
-inst(new THREE.BoxGeometry(.05,.45,.4),MB(0x2b2f33),ox);
-inst(new THREE.BoxGeometry(.4,.45,.05),MB(0x2b2f33),oz);
-inst(new THREE.BoxGeometry(.35,.08,.07),MB(0xe0b878),rz);
-inst(new THREE.BoxGeometry(.07,.08,.35),MB(0xe0b878),rx);
-inst(new THREE.SphereGeometry(.13,10,8),new THREE.MeshBasicMaterial({color:0xffc66b}),ol);
-inst(new THREE.CylinderGeometry(.008,.008,.8,4),MB(0x111111),oc);
+
+// === WC İÇ MEKAN (fotoğraflara göre): ceviz kapılar, bej paneller, mermer + desenli kabin duvarı, bej alaturka, altın armatür, taş tezgâh ===
+const gold=0xc9a24a, goldM=MB(gold);
+PAT.marble=()=>mkT(256,256,(g)=>{g.fillStyle='#d9d6cf';g.fillRect(0,0,256,256);g.strokeStyle='rgba(120,116,108,.22)';g.lineWidth=1.5;for(let i=0;i<7;i++){const x=(i*83)%256;g.beginPath();g.moveTo(x,0);g.bezierCurveTo(x+40,80,x-30,170,x+20,256);g.stroke();}g.strokeStyle='#b9b5ab';g.lineWidth=3;g.strokeRect(0,0,256,256);});
+PAT.ottoman=()=>mkT(128,128,(g)=>{g.fillStyle='#ebe6dc';g.fillRect(0,0,128,128);g.strokeStyle='#8d9297';g.lineWidth=3;[[64,64],[0,0],[128,0],[0,128],[128,128]].forEach(c=>{g.beginPath();g.arc(c[0],c[1],26,0,7);g.stroke();g.beginPath();g.arc(c[0],c[1],10,0,7);g.stroke();});g.beginPath();g.moveTo(64,10);g.lineTo(118,64);g.lineTo(64,118);g.lineTo(10,64);g.closePath();g.stroke();});
+PAT.walnut=()=>mkT(128,256,(g)=>{g.fillStyle='#6e4a2c';g.fillRect(0,0,128,256);for(let i=0;i<46;i++){g.strokeStyle=i%2?'rgba(40,24,12,.35)':'rgba(150,104,62,.35)';g.lineWidth=1+(i%3);const x=(i*29)%128;g.beginPath();g.moveTo(x,0);g.bezierCurveTo(x+14,70,x-12,150,x+6,256);g.stroke();}});
+PAT.molding=()=>mkT(256,256,(g)=>{g.fillStyle='#f1e9d6';g.fillRect(0,0,256,256);g.strokeStyle='#d3c4a2';g.lineWidth=6;g.strokeRect(22,22,212,212);g.lineWidth=2;g.strokeRect(38,38,180,180);});
+PAT.orn=()=>mkT(256,256,(g)=>{g.fillStyle='#e9e3d8';g.fillRect(0,0,256,256);g.strokeStyle='#7d8287';g.lineWidth=4;for(let i=0;i<4;i++)g.strokeRect(10+i*14,10+i*14,236-i*28,236-i*28);g.fillStyle='#7d8287';for(let i=0;i<8;i++){g.beginPath();g.arc(32+i*27,32,5,0,7);g.fill();g.beginPath();g.arc(32+i*27,224,5,0,7);g.fill();}});
+const T2=(k,rx,ry)=>{const t=T_(k).clone();t.needsUpdate=true;t.wrapS=t.wrapT=THREE.RepeatWrapping;t.repeat.set(rx,ry);return t;};
+function clad(face,px,py,len,h,key,off,rx,ry){ put(face,px,py,h/2,off,g=>g.add(new THREE.Mesh(new THREE.PlaneGeometry(len,h),BM(T2(key,rx,ry))))); }
+function cabinBack(face,cx,py,off){ put(face,cx,py,1.55,off,g=>{
+  g.add(new THREE.Mesh(new THREE.PlaneGeometry(.52,2.9),BM(T2('ottoman',1,5.5))));
+  [-.27,.27].forEach(x=>{const b=new THREE.Mesh(new THREE.BoxGeometry(.015,2.9,.012),goldM);b.position.set(x,0,.006);g.add(b);});
+  const sh=new THREE.Mesh(new THREE.BoxGeometry(.84,.025,.07),goldM); sh.position.set(0,-.25,.03); g.add(sh);
+  const fp=new THREE.Mesh(new THREE.BoxGeometry(.2,.12,.02),goldM); fp.position.set(0,-.55,.012); g.add(fp);
+}); }
+// kabin duvar kaplamaları (mermer desenli) + arka duvarda desenli şerit, altın çıta, altın rezervuar düğmesi
+[[324,333.25,SY2,367.75,'zp',SY2],[333.25,342.5,SY2,367.75,'zp',SY2],[324,333.25,483.5,507.5,'zm',507.5],[333.25,342.5,483.5,507.5,'zm',507.5]].forEach(c=>{
+  const x0=c[0],x1=c[1],ym=(c[2]+c[3])/2,L=(c[3]-c[2])*S,cx=(x0+x1)/2,W=(x1-x0)*S,bf=c[4],by=c[5];
+  clad(bf,cx,by,W,3.2,'marble',bf==='zp'?.02:.115,W/.6,3.2/.6);
+  cabinBack(bf,cx,by,bf==='zp'?.025:.12);
+  if(x0===324){ clad('xp',324,ym,L,3.2,'marble',.065,L/.6,3.2/.6); clad('xm',333.25,ym,L,3.2,'marble',.065,L/.6,3.2/.6); }
+  else { clad('xp',333.25,ym,L,3.2,'marble',.065,L/.6,3.2/.6); clad('xm',342.5,ym,L,3.2,'marble',.115,L/.6,3.2/.6); }
+});
+// bej seramik alaturka + süslü zemin çerçevesi + altın taharet seti + tuvalet kağıdı
+const pan=(cx,back,dir)=>{ const y=d=>back+dir*d;
+  const o=new THREE.Mesh(new THREE.PlaneGeometry(9.2*S,12*S),BM(T_('orn'))); o.rotation.x=-Math.PI/2; o.position.set(X(cx),.036,Z(y(8.2))); interior.add(o);
+  ib(cx-3.5,y(3),cx+3.5,y(13),.03,.09,0xcdb89a); ib(cx-1.6,y(4.5),cx+1.6,y(9),.09,.1,0x3a3128);
+  ib(cx-3.2,y(10),cx-.8,y(12.8),.09,.16,0xd8c4a6); ib(cx+.8,y(10),cx+3.2,y(12.8),.09,.16,0xd8c4a6);
+  ib(cx+3.7,y(3.6),cx+4.5,y(4.2),.55,1.05,gold); ib(cx+3.7,y(3.4),cx+4.5,y(4.6),1.0,1.1,gold);
+  ib(cx-4.4,y(7),cx-3.8,y(8.6),.95,1.1,0xf4f4f4); };
+[328.6,337.9].forEach(cx=>{ pan(cx,344.6,1); pan(cx,506.6,-1); });
+// ceviz kapı kanatları (altın kulp ve menteşe, cinsiyet figürlü plaka)
+const walnut=new THREE.MeshLambertMaterial({map:T_('walnut')});
+function leaf(px,py,dir,open,wm,fem){ const g=new THREE.Group(); g.position.set(X(px),0,Z(py)); g.rotation.y=dir+open;
+  const m=new THREE.Mesh(new THREE.BoxGeometry(wm,2.1,.04),walnut); m.position.set(wm/2,1.05,0); g.add(m);
+  const hd=new THREE.Mesh(new THREE.BoxGeometry(.12,.025,.07),goldM); hd.position.set(wm-.1,1.0,0); g.add(hd);
+  [.2,1.85].forEach(y=>{const h=new THREE.Mesh(new THREE.BoxGeometry(.03,.1,.05),goldM);h.position.set(.01,y,0);g.add(h);});
+  [1,-1].forEach(sd=>{const pl=new THREE.Mesh(new THREE.PlaneGeometry(.2,.2),BW(T_(fem?'plBayan':'plBay')));pl.position.set(wm/2,1.6,.022*sd);if(sd<0)pl.rotation.y=Math.PI;g.add(pl);});
+  interior.add(g); }
+const D70=Math.PI*70/180, D75=Math.PI*75/180;
+leaf(324,372.25,-Math.PI/2,D75,.82,false); leaf(324,470,-Math.PI/2,D75,.82,true);   // giriş kapıları (içeri açık)
+leaf(325.1,367.75,0,-D70,.64,false); leaf(341.4,367.75,Math.PI,0,.64,false);       // bay: kabin 1 açık, kabin 2 kapalı
+leaf(325.1,483.5,0,D70,.64,true);    leaf(341.4,483.5,Math.PI,0,.64,true);         // bayan: kabin 1 açık, kabin 2 kapalı
+// ORTAK EL YIKAMA: taş tezgâh, bej vessel lavabolar, altın armatür, çerçeveli aynalar, paneller, gizli led
+ib(335,392,342.2,459,0,.78,0xcfc6b6); ib(334.6,391.6,342.4,459.4,.78,.86,0xece6d9);
+const bowls=[],taps=[]; [399,413,427,441,455].forEach(yc=>{ const b=pm(338.6,yc),t=pm(341.3,yc); bowls.push([b[0],.95,b[1]]); taps.push([t[0],1.0,t[1]]); });
+inst(new THREE.CylinderGeometry(.2,.15,.14,18),MB(0xd7c3a8),bowls);
+inst(new THREE.CylinderGeometry(.018,.018,.28,8),goldM,taps);
+[399,413,427,441,455].forEach(yc=>put('xm',342.5,yc,1.55,.115,g=>{
+  g.add(new THREE.Mesh(new THREE.BoxGeometry(.64,.94,.04),MB(0x7a5a34)));
+  const m=new THREE.Mesh(new THREE.PlaneGeometry(.5,.8),new THREE.MeshBasicMaterial({color:0xc9dbe3})); m.position.z=.025; g.add(m);
+  const t=new THREE.Mesh(new THREE.BoxGeometry(.66,.02,.05),goldM); t.position.set(0,.47,.01); g.add(t); }));
+[410,440].forEach(yc=>ib(324.6,yc-2,326.6,yc+2,1.2,1.7,0xd8dcde)); ib(325,458,328.5,461.5,0,.7,0x6b6f72);
+clad('xp',324,425.6,79.75*S,3.2,'molding',.065,79.75*S/1.5,3.2/1.5);
+put('xp',324,425,1.5,.075,g=>{ g.add(new THREE.Mesh(new THREE.BoxGeometry(1.0,1.5,.03),MB(0xd3c4a2))); const n=new THREE.Mesh(new THREE.PlaneGeometry(.88,1.38),new THREE.MeshBasicMaterial({color:0xfff1c8})); n.position.z=.02; g.add(n); });
+const cove=new THREE.MeshBasicMaterial({color:0xfff0c8});
+box(324.3,385.75,325.3,465.5,3.1,3.17,cove,interior); box(341.2,385.75,342.2,465.5,3.1,3.17,cove,interior);
+const spots=[]; for(let y=395;y<=455;y+=15){ const q=pm(333.25,y); spots.push([q[0],3.18,q[1]]); }
+inst(new THREE.CylinderGeometry(.08,.08,.02,12),new THREE.MeshBasicMaterial({color:0xffffff}),spots);
 
 const labels=[
  ['Açık alan',100,380,1.2],['Bina altı oturma alanı',225,270,1.2],
@@ -379,7 +537,7 @@ const labels=[
   return {el:d,p:new THREE.Vector3(X(l[1]),l[3],Z(l[2]))};});
 
 const target=new THREE.Vector3(X(190),0,Z(320));
-const MAXR=220;
+const MAXR=220, MINR=1.2;
 // w: görünümün yatayda sığması gereken yaklaşık dünya genişliği (dikey/portre ekranlarda otomatik uzaklaşmak için)
 const views={persp:{az:-1.0,el:0.62,r:62,w:56},top:{az:0,el:1.5,r:68,w:32},street:{az:-1.57,el:0.2,r:40,w:56},back:{az:1.9,el:0.35,r:40,w:58}};
 let curView='persp', moved=false;
@@ -392,14 +550,18 @@ function getView(n){
 }
 const st={...getView('persp')};
 const goal={...st};
-document.querySelectorAll('[data-v]').forEach(b=>b.onclick=()=>{curView=b.dataset.v;moved=false;Object.assign(goal,getView(curView));});
+document.querySelectorAll('[data-v]').forEach(b=>b.onclick=()=>{exitWalk();curView=b.dataset.v;moved=false;Object.assign(goal,getView(curView));});
 function tog(id,fn){const b=document.getElementById(id);b.onclick=()=>{const on=b.getAttribute('aria-pressed')!=='true';b.setAttribute('aria-pressed',on);fn(on);};}
+let walk=false,wx=0,wz=0,wgx=0,wgz=0,wy=0,wp=0,wfov=70;
+const hintEl=document.getElementById('hint'); let hintOrbit='';
+function exitWalk(){ if(!walk) return; walk=false; document.getElementById('tWalk').setAttribute('aria-pressed','false'); hintEl.textContent=hintOrbit; }
 let roofG=0,winG=0,roofT=0,winT=0;
+tog('tWalk',on=>{ if(on){ wx=wgx=st.tx; wz=wgz=st.tz; wy=-st.az; wp=0; wfov=70; walk=true; hintOrbit=hintEl.textContent; hintEl.textContent='Tek parmak: etrafa bak · İki parmak: yakınlaştır · Çift dokun: oraya git'; } else exitWalk(); });
 tog('tRoof',o=>{roofG=o?1:0;document.getElementById('tRoof').textContent=o?'Çatıyı kapat':'Çatıyı aç';});
 tog('tWin',o=>{winG=o?1:0;document.getElementById('tWin').textContent=o?'Camları kapat':'Camları aç';});
 tog('tInt',o=>interior.visible=o); tog('tBld',o=>bld.visible=o); tog('tLbl',o=>labels.forEach(l=>l.el.style.display=o?'':'none'));
 tog('tLeg',o=>document.getElementById('legend').classList.toggle('show',o));
-document.getElementById('hint').textContent=coarse?'Sürükle: döndür · İki parmak: yakınlaştır ve kaydır':'Sürükle: döndür · Tekerlek / iki parmak: yakınlaştır · Sağ tık: kaydır';
+document.getElementById('hint').textContent=coarse?'Sürükle: döndür · İki parmak: yakınlaştır ve kaydır · Çift dokun: o noktaya git':'Sürükle: döndür · Tekerlek / iki parmak: yakınlaştır · Sağ tık: kaydır · Çift tık: o noktaya git';
 
 const ptrs=new Map(); let pd=0,pmx=null,pmy=null;
 function panBy(dx,dy){
@@ -417,19 +579,30 @@ cv.addEventListener('pointermove',e=>{
   const p=ptrs.get(e.pointerId); if(!p) return;
   const dx=e.clientX-p.x, dy=e.clientY-p.y;
   moved=true;
+  if(walk){
+    if(ptrs.size===2){ const o=[...ptrs.entries()].find(a=>a[0]!==e.pointerId)[1]; const nd=Math.hypot(e.clientX-o.x,e.clientY-o.y); if(pd&&nd>0) wfov=clamp(wfov*pd/nd,25,90); pd=nd; }
+    else { const k=0.005*(wfov/70); wy-=dx*k; wp=clamp(wp+dy*k,-1.3,1.3); }
+    p.x=e.clientX; p.y=e.clientY; return;
+  }
   if(ptrs.size===2){
     // iki parmak: yakınlaştır + kaydır
     const o=[...ptrs.entries()].find(a=>a[0]!==e.pointerId)[1];
     const nd=Math.hypot(e.clientX-o.x,e.clientY-o.y);
     const mx=(e.clientX+o.x)/2, my=(e.clientY+o.y)/2;
-    if(pd&&nd>0) goal.r=clamp(goal.r*pd/nd,8,MAXR);
+    if(pd&&nd>0) goal.r=clamp(goal.r*pd/nd,MINR,MAXR);
     if(pmx!==null) panBy(mx-pmx,my-pmy);
     pd=nd; pmx=mx; pmy=my;
   } else if(p.b===2||p.s){ panBy(dx,dy); }
   else { goal.az-=dx*0.006; goal.el=clamp(goal.el+dy*0.006,0.05,1.55); }
   p.x=e.clientX; p.y=e.clientY;
 });
-cv.addEventListener('wheel',e=>{e.preventDefault();moved=true;goal.r=clamp(goal.r*(1+e.deltaY*0.001),8,MAXR);},{passive:false});
+cv.addEventListener('wheel',e=>{e.preventDefault();moved=true; if(walk){ wfov=clamp(wfov*(1+e.deltaY*0.001),25,90); return; }goal.r=clamp(goal.r*(1+e.deltaY*0.001),MINR,MAXR);},{passive:false});
+cv.addEventListener('dblclick',e=>{
+  const r=cv.getBoundingClientRect(), rc=new THREE.Raycaster();
+  rc.setFromCamera({x:((e.clientX-r.left)/r.width)*2-1,y:-((e.clientY-r.top)/r.height)*2+1},cam);
+  const t=-rc.ray.origin.y/rc.ray.direction.y;
+  if(t>0&&isFinite(t)&&walk){ wgx=rc.ray.origin.x+rc.ray.direction.x*t; wgz=rc.ray.origin.z+rc.ray.direction.z*t; } else if(t>0&&isFinite(t)){ moved=true; goal.tx=clamp(rc.ray.origin.x+rc.ray.direction.x*t,target.x-45,target.x+45); goal.tz=clamp(rc.ray.origin.z+rc.ray.direction.z*t,target.z-45,target.z+45); goal.r=Math.min(goal.r,16); }
+});
 document.addEventListener('gesturestart',e=>e.preventDefault());
 function clamp(v,a,b){return Math.max(a,Math.min(b,v));}
 
@@ -447,7 +620,7 @@ const v3=new THREE.Vector3(); let lastT=performance.now();
 (function loop(){
   requestAnimationFrame(loop);
   for(const k of ['az','el','r','tx','tz']) st[k]+=(goal[k]-st[k])*0.12;
-  cam.position.set(st.tx+st.r*Math.cos(st.el)*Math.sin(st.az), st.r*Math.sin(st.el), st.tz+st.r*Math.cos(st.el)*Math.cos(st.az));
+  const ty=Math.max(0,Math.min(1,(18-st.r)/18))*1.4; cam.position.set(st.tx+st.r*Math.cos(st.el)*Math.sin(st.az), ty+st.r*Math.sin(st.el), st.tz+st.r*Math.cos(st.el)*Math.cos(st.az));
   const nowT=performance.now(), dt=Math.min(0.05,(nowT-lastT)/1000); lastT=nowT;
   roofT+=clamp(roofG-roofT,-dt/3.5,dt/3.5); glowMat.opacity=0.52+0.06*Math.sin(nowT/700); winT+=(winG-winT)*0.06;
   // roofT: 0 = kapalı, 1 = açık. Açılırken önce giriş tarafındaki panel çekilir, kapanırken arkadakiler önce uzanır, en son giriş tarafı kapanır
@@ -458,7 +631,12 @@ const v3=new THREE.Vector3(); let lastT=performance.now();
     m.position.y=3.3+(nS-1-u.i)*0.07*Math.min(1,f*6);
   });
   wins.forEach(w=>w.scale.y=Math.max(0.02,1-winT));
-  cam.up.set(0,1,0); cam.lookAt(st.tx,0,st.tz);
+  cam.up.set(0,1,0); cam.lookAt(st.tx,ty,st.tz);
+  if(walk){
+    wx+=(wgx-wx)*.12; wz+=(wgz-wz)*.12; cam.fov+=(wfov-cam.fov)*.25; cam.updateProjectionMatrix();
+    cam.position.set(wx,1.6,wz);
+    cam.lookAt(wx+Math.sin(wy)*Math.cos(wp),1.6+Math.sin(wp),wz-Math.cos(wy)*Math.cos(wp));
+  } else if(cam.fov!==45){ cam.fov=45; cam.updateProjectionMatrix(); }
   renderer.render(scene,cam);
   labels.forEach(l=>{
     v3.copy(l.p).project(cam);
