@@ -648,6 +648,11 @@ const tilePlane=(x0,y0,x1,y1,key,elev,tile)=>{ const w=(x1-x0)*S,d=(y1-y0)*S,t=T
   t.offset.set((X(x0)-X(40))/tile, -(Z(y1)-Z(30))/tile);   // tüm planlar ortak dünya ızgarasına hizalı: derzler kesintisiz devam eder
   const m=new THREE.Mesh(new THREE.PlaneGeometry(w,d),BM(t)); m.rotation.x=-Math.PI/2; m.position.set((X(x0)+X(x1))/2,elev,(Z(y0)+Z(y1))/2); interior.add(m); };
 tilePlane(40,30,207.5,615,'fayans',.008,4.8); tilePlane(207.5,152.5,342.5,507.5,'fayans',.008,4.8); tilePlane(324,374,342.5,507.5,'fayans',.024,4.8);
+// PENCEREDEN DUVARA ÇEVRİLEN YAN CEPHE (y=30, x 40–207.5): iç yüz = botanik duvar kâğıdı + ceviz lamel pilastrlar + tablolar · dış yüz (teras tarafı) = ceviz lamel
+paper('zp',123.75,30,167.5*S,3.2,'botan',.115);
+[55,100,145,190].forEach(x=>lam('zp',x,30,12*S,.13));
+[[77.5,'cup'],[122.5,'leaf'],[167.5,'arch']].forEach(p=>framed('zp',p[0],30,p[1],.125,1.75,.9,1.1));
+lam('zm',123.75,30,167.5*S,.115);
 const views={persp:{az:-1.0,el:0.62,r:62,w:56},top:{az:0,el:1.5,r:68,w:32},street:{az:-1.57,el:0.2,r:40,w:56},back:{az:1.9,el:0.35,r:40,w:58}};
 let curView='persp', moved=false;
 const asp=()=>(cv.clientWidth||innerWidth)/(cv.clientHeight||innerHeight);
