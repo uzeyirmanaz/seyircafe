@@ -459,6 +459,11 @@ ib(321.6,208,323.4,252,1.4,1.45,0xb8875a); ib(321.6,208,323.4,252,1.9,1.95,0xb88
 // === DUVAR SÜSÜ: duvar kağıtları ve çerçeveli görseller ===
 const deco=new THREE.Group(); interior.add(deco);
 const mkT=(w,h,fn)=>{const c=document.createElement('canvas');c.width=w;c.height=h;fn(c.getContext('2d'),w,h);const t=new THREE.CanvasTexture(c);t.anisotropy=4;return t;};
+const mkTile=(pal,grout)=>mkT(1024,1024,(g,w,h)=>{ let s=11; const r=()=>(s=(s*16807)%2147483647)/2147483647;   // 4x4 adet 120x120 fayans = 4.8 m periyot
+  for(let i=0;i<4;i++) for(let j=0;j<4;j++){ const x=i*256,y=j*256; g.fillStyle=pal[Math.floor(r()*pal.length)]; g.fillRect(x,y,256,256);
+    g.lineWidth=2.5; for(let k=0;k<6;k++){ g.strokeStyle=k%2?'rgba(255,246,230,.11)':'rgba(70,52,34,.10)'; g.beginPath(); const px=x+r()*256,py=y+r()*60; g.moveTo(px,py); g.bezierCurveTo(px+60*r(),py+60,px-40*r(),py+120,px+(r()-.5)*90,py+200); g.stroke(); }
+    const gr=g.createLinearGradient(x,y,x+256,y+256); gr.addColorStop(0,'rgba(255,255,255,.08)'); gr.addColorStop(1,'rgba(0,0,0,.07)'); g.fillStyle=gr; g.fillRect(x,y,256,256); }
+  g.fillStyle=grout; [[0,2],[1022,2],[254,4],[510,4],[766,4]].forEach(a=>{ g.fillRect(a[0],0,a[1],h); g.fillRect(0,a[0],w,a[1]); }); });
 const cupD=(g,cx,cy,k,col)=>{g.strokeStyle=col;g.lineWidth=k*.05;g.lineCap='round';
   g.beginPath();g.ellipse(cx,cy+k*.42,k*.62,k*.14,0,0,Math.PI*2);g.stroke();
   g.beginPath();g.moveTo(cx-k*.4,cy-k*.1);g.lineTo(cx-k*.32,cy+k*.35);g.quadraticCurveTo(cx,cy+k*.5,cx+k*.32,cy+k*.35);g.lineTo(cx+k*.4,cy-k*.1);g.closePath();g.stroke();
@@ -479,6 +484,8 @@ const PAT={
   botan:()=>mkT(256,256,(g)=>{g.fillStyle='#e4eadf';g.fillRect(0,0,256,256);[[60,200,90,-1.1,'#7fae86'],[190,210,80,-2.0,'#9bc29f'],[130,70,70,.5,'#9bc29f'],[210,60,60,2.4,'#7fae86'],[40,60,50,-.4,'#9bc29f']].forEach(l=>leafD(g,l[0],l[1],l[2],l[3],l[4]));}),
   tilepat:()=>mkT(256,256,(g)=>{g.fillStyle='#17444a';g.fillRect(0,0,256,256);[[128,128,100],[0,0,100],[256,0,100],[0,256,100],[256,256,100]].forEach(c=>starP(g,c[0],c[1],c[2],8,'#d8b25a',3));starP(g,128,128,55,8,'#d8b25a',2);}),
   beanpat:()=>mkT(256,256,(g)=>{g.fillStyle='#2a1a12';g.fillRect(0,0,256,256);[[40,40],[128,128],[216,40],[40,216],[216,216]].forEach((c,i)=>beanD(g,c[0],c[1],26,i*1.1,'#6b4128'));}),
+  fayans:()=>mkTile(['#9a8b78','#948472','#a09080','#8f806e'],'#5a5044'),
+  fayansWC:()=>mkTile(['#e0d5c0','#d8ccb6','#e4dac7','#dcd0bb'],'#b3a58f'),
   lamel:()=>mkT(256,256,(g,w,h)=>{ for(let i=0;i<4;i++){ const x=i*64,gr=g.createLinearGradient(x,0,x+64,0); gr.addColorStop(0,'#3d2616'); gr.addColorStop(.5,'#5b3a22'); gr.addColorStop(1,'#432a18'); g.fillStyle=gr; g.fillRect(x+3,0,58,h);
     g.fillStyle='rgba(20,10,4,.9)'; g.fillRect(x,0,3,h); g.fillStyle='rgba(255,220,170,.07)'; for(let j=0;j<18;j++) g.fillRect(x+6+((j*37)%48),(j*53)%h,1,40+((j*29)%60)); } }),
   mural:()=>mkT(640,800,(g,w,h)=>{const gr=g.createLinearGradient(0,0,0,h);gr.addColorStop(0,'#1b1612');gr.addColorStop(1,'#2e2218');g.fillStyle=gr;g.fillRect(0,0,w,h);
@@ -636,6 +643,11 @@ const colArt=['cup','leaf','arch','star','type','beans'];
     const ln=new THREE.Mesh(spLens,spLensM); ln.position.y=-.146; g.add(ln);
     g.add(new THREE.Mesh(spBeam,spBeamM)); interior.add(g);
     const w=new THREE.Mesh(spWash,spWashM); w.position.set(px+s*(half+.004),1.75,pz); w.rotation.y=s*Math.PI/2; interior.add(w); }); });
+// ZEMİN FAYANSI: her yerde AYNI sıcak taupe/greige 120x120 porselen, tek ortak derz ızgarası
+const tilePlane=(x0,y0,x1,y1,key,elev,tile)=>{ const w=(x1-x0)*S,d=(y1-y0)*S,t=T2(key,w/tile,d/tile);
+  t.offset.set((X(x0)-X(40))/tile, -(Z(y1)-Z(30))/tile);   // tüm planlar ortak dünya ızgarasına hizalı: derzler kesintisiz devam eder
+  const m=new THREE.Mesh(new THREE.PlaneGeometry(w,d),BM(t)); m.rotation.x=-Math.PI/2; m.position.set((X(x0)+X(x1))/2,elev,(Z(y0)+Z(y1))/2); interior.add(m); };
+tilePlane(40,30,207.5,615,'fayans',.008,4.8); tilePlane(207.5,152.5,342.5,507.5,'fayans',.008,4.8); tilePlane(324,374,342.5,507.5,'fayans',.024,4.8);
 const views={persp:{az:-1.0,el:0.62,r:62,w:56},top:{az:0,el:1.5,r:68,w:32},street:{az:-1.57,el:0.2,r:40,w:56},back:{az:1.9,el:0.35,r:40,w:58}};
 let curView='persp', moved=false;
 const asp=()=>(cv.clientWidth||innerWidth)/(cv.clientHeight||innerHeight);
