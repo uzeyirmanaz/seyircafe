@@ -95,7 +95,7 @@
   <button data-v="back">Arkadan</button>
   <span class="sep"></span>
   <button id="tWalk" aria-pressed="false">Gezin</button>
-  <button id="tRoof" aria-pressed="false">Çatıyı aç</button>
+  <button id="tRoof" aria-pressed="false">Yan çatıyı aç</button>
   <button id="tWin" aria-pressed="false">Camları aç</button>
   <button id="tInt" aria-pressed="true">İç mekan</button>
   <button id="tBld" aria-pressed="true">Bina</button>
@@ -172,7 +172,7 @@ gl(40,30,40,212.5); gl(40,237.5,40,440); gl(40,465,40,615);
 fr(40,212.5,40,237.5,0.9,2.3); fr(40,440,40,465,0.9,2.3);
 [[212.5],[237.5],[440],[465]].forEach(p=>fr(40,p[0],40,p[0],3.2,0));
 fr(40,30,40,615,0.15,3.2);
-gl(40,30,207.5,30); gl(40,615,207.5,615);
+wall(40,30,207.5,30,mats.outer,3.2); gl(40,615,207.5,615);   // kuş bakışında üstte kalan yan cephe: cam yerine DUVAR
 fr(40,30,207.5,30,0.15,3.2); fr(40,615,207.5,615,0.15,3.2);
 for(let y=30;y<=615;y+=97.5){ fr(40,y,40,y,3.4,0); }
 wall(207.5,30,207.5,152.5,mats.outer); wall(207.5,507.5,207.5,615,mats.outer);
@@ -181,13 +181,35 @@ const roof = new THREE.Group(); scene.add(roof);
 const slats=[], sm=M(0x9fb4be,.45), nS=12;
 // Sürgülü çatı camı: paneller giriş yönüne doğru uzanıp kapanır, arkaya (binaya) doğru üst üste toplanıp açılır
 const RX0=X(43), RX1=X(204.5), RW=(RX1-RX0)/nS;
-for(let i=0;i<nS;i++){
-  const m=new THREE.Mesh(new THREE.BoxGeometry(RW*0.985,0.05,(Z(615)-Z(30))*0.99),sm);
-  m.position.set(RX0+RW*(i+.5),3.3,(Z(30)+Z(615))/2);
-  m.userData={cx:RX0+RW*(i+.5),ox:RX1-RW/2,i};
-  roof.add(m); slats.push(m);
-}
+// bina hizasındaki cam çatı (y 152.5–507.5) SABİT; sağa ve sola taşan kısımlar (y 30–152.5 · 507.5–615) açılır-kapanır
+[[30,152.5],[507.5,615]].forEach(zn=>{ const zc=(Z(zn[0])+Z(zn[1]))/2, zl=(Z(zn[1])-Z(zn[0]))*0.99;
+  for(let i=0;i<nS;i++){ const m=new THREE.Mesh(new THREE.BoxGeometry(RW*0.985,0.05,zl),sm); m.position.set(RX0+RW*(i+.5),3.3,zc); m.userData={cx:RX0+RW*(i+.5),ox:RX1-RW/2,i}; roof.add(m); slats.push(m); } });
+{ const f=new THREE.Mesh(new THREE.BoxGeometry(RX1-RX0,0.05,(Z(507.5)-Z(152.5))*0.99),sm); f.position.set((RX0+RX1)/2,3.3,(Z(152.5)+Z(507.5))/2); roof.add(f); }
+box(40,151.5,207.5,153.5,3.2,3.45,mats.frame,roof); box(40,506.5,207.5,508.5,3.2,3.45,mats.frame,roof);
 box(40,30,43,615,3.2,3.45,mats.frame,roof); box(204.5,30,207.5,615,3.2,3.45,mats.frame,roof);
+
+// === DIŞ MEKAN (sokak cephesi): taş teras, iki girişin arasında 2 masa + 2'şer sandalye, boydan çiçekli korkuluk ===
+box(12,30,40,615,-0.2,0,M(0xc9c2b4)); box(12,2,207.5,30,-0.2,0,M(0xc9c2b4));   // teras üst yan duvarın önüne doğru uzanır
+// boydan boya çiçekli korkuluk (iki girişin önünde kapı boşluğu bırakılır)
+const planter=M(0xb5694a), fol=new THREE.InstancedMesh(new THREE.SphereGeometry(.17,8,6),M(0x3f7d3a),600);
+const fcol=[0xe0425a,0xf29bb5,0xf4c542,0xb08ae8], fl=fcol.map(c=>new THREE.InstancedMesh(new THREE.SphereGeometry(.07,6,5),M(c),220));
+let nf=0; const fnC=[0,0,0,0], mm=new THREE.Matrix4(), rnd=(()=>{let s=7;return()=>(s=(s*16807)%2147483647)/2147483647;})();
+const putI=(im,i,x,y,z)=>{ mm.makeTranslation(x,y,z); im.setMatrixAt(i,mm); };
+const rail=(y0,y1)=>{ box(12.2,y0,12.8,y1,1.0,1.06,mats.frame); box(12.4,y0,12.6,y1,0.5,0.54,mats.frame); box(13.2,y0,18,y1,0,.42,planter);
+  const n=Math.max(1,Math.round((y1-y0)/22)); for(let i=0;i<=n;i++){ const y=y0+(y1-y0)*i/n; box(12.2,y-.4,12.8,y+.4,0,1.1,mats.frame); }
+  const c=Math.round((y1-y0)/3.2); for(let i=0;i<c;i++){ const y=y0+(y1-y0)*(i+.5)/c;
+    if(nf<600) putI(fol,nf++,X(14.5+rnd()*2.5),.5,Z(y+(rnd()-.5)*2)); const k=Math.floor(rnd()*4);
+    for(let j=0;j<2;j++) if(fnC[k]<220) putI(fl[k],fnC[k]++,X(14.2+rnd()*3),.58+rnd()*.15,Z(y+(rnd()-.5)*3)); } };
+rail(30,212.5); rail(237.5,440); rail(465,615);
+box(12.2,614.6,40,615.4,1.0,1.06,mats.frame);
+const railX=(x0,x1)=>{ box(x0,1.7,x1,2.3,1.0,1.06,mats.frame); box(x0,1.9,x1,2.1,.5,.54,mats.frame); box(x0,2.8,x1,7.5,0,.42,planter);
+  const n=Math.round((x1-x0)/22); for(let i=0;i<=n;i++){ const x=x0+(x1-x0)*i/n; box(x-.4,1.7,x+.4,2.3,0,1.1,mats.frame); }
+  const c=Math.round((x1-x0)/3.2); for(let i=0;i<c;i++){ const x=x0+(x1-x0)*(i+.5)/c;
+    if(nf<600) putI(fol,nf++,X(x+(rnd()-.5)*2),.5,Z(3.8+rnd()*2.5)); const k=Math.floor(rnd()*4);
+    for(let j=0;j<2;j++) if(fnC[k]<220) putI(fl[k],fnC[k]++,X(x+(rnd()-.5)*3),.58+rnd()*.15,Z(3.2+rnd()*3.5)); } };
+rail(2,30); railX(12,207.5);   // köşeyi dönen çiçekli korkuluk, üst yan duvar boyunca
+box(207.2,2,207.8,30,1.0,1.06,mats.frame); box(207.2,2,207.8,30,0.5,0.54,mats.frame);
+scene.add(fol); fl.forEach(m=>{ m.count=fnC[fl.indexOf(m)]; scene.add(m); }); fol.count=nf;
 
 wall(207.5,152.5,342.5,152.5,mats.outer); wall(342.5,152.5,342.5,507.5,mats.outer); wall(207.5,507.5,342.5,507.5,mats.outer);
 
@@ -365,6 +387,18 @@ Object.keys(OC).forEach(xk=>{ const x=+xk, ys=OC[xk];
   ys.forEach(y=>{ const q=pm(x,y); sofaSet(q[0],q[1]); });
   for(let i=0;i<ys.length-1;i++) if(ys[i+1]-ys[i]<62){ const q=pm(x,(ys[i]+ys[i+1])/2); plant(q[0],q[1],1.5); }
 });
+// BAHÇE: içerdeki salon takımından çift kişilik — masa + KARŞILIKLI iki bordo koltuk (kimse dışarıya bakmaz), 8 adet:
+// iki girişin arası 2 · girişlerin dış yanlarında (sol/sağ) 2'şer · yan bahçede (üst yan duvar boyunca) 2
+function duoSet(cx,cz,ax,n){
+  const B=(key,col,du,y,dv,su,sy,sv)=>ax==='z'?box3(key,col,cx+dv,y,cz+du,sv,sy,su):box3(key,col,cx+du,y,cz+dv,su,sy,sv);
+  B('otop',0xc7a070,0,.74,0,.7,.04,.8); [-.25,.25].forEach(o=>B('oleg',0x1b1d20,0,.36,o,.55,.72,.04));
+  // ASİMETRİK MESAFE: bir koltuk masaya yakın (içeri çekilmiş), karşısındaki daha uzak; hangi tarafın uzak olacağı ve uzaklık takıma göre değişir
+  const dNear=.7+((n*29)%3)*.02, dFar=.95+((n*37)%4)*.05, far=(n%2)?1:-1;
+  [-1,1].forEach(s=>{ const d=s===far?dFar:dNear, c=s*d;
+    B('sSeat',0x15161a,c,.34,0,.7,.2,.66); B('sFrame',0x1f2124,s*(d+.4),.45,0,.04,.5,.7); B('cush',0x7a1030,s*(d+.27),.66,0,.2,.5,.6);
+    [-.35,.35].forEach(q=>{ B('arm',0x8c5a2b,c,.62,q,.84,.05,.06); [-.38,.38].forEach(w=>B('post',0x1f2124,c+w,.22,q,.04,.44,.04)); }); });
+}
+[['z',29,305],['z',29,372],['z',29,185],['z',29,118],['z',29,495],['z',29,562],['x',90,18],['x',160,18]].forEach((p,i)=>{ const q=pm(p[1],p[2]); duoSet(q[0],q[1],p[0],i); });
 // bina altı: toplam 14 oyun masası; WC kapılarına giden iki yol (Y≈377 ve Y≈475) açık, kolon/kasa/şaftla çakışma yok
 [[222,180],[252,180],[282,180],[222,256],[252,256],[282,256],[222,296],[252,296],
  [222,402],[262,402],[302,402],[222,436],[262,436],[302,436]].forEach(t=>{ const q=pm(t[0],t[1]); gameTable(q[0],q[1]); });
@@ -594,7 +628,7 @@ const hintEl=document.getElementById('hint'); let hintOrbit='';
 function exitWalk(){ if(!walk) return; walk=false; document.getElementById('tWalk').setAttribute('aria-pressed','false'); hintEl.textContent=hintOrbit; }
 let roofG=0,winG=0,roofT=0,winT=0;
 tog('tWalk',on=>{ if(on){ wx=wgx=st.tx; wz=wgz=st.tz; wy=-st.az; wp=0; wfov=70; walk=true; hintOrbit=hintEl.textContent; hintEl.textContent='Tek parmak: etrafa bak · İki parmak: yakınlaştır · Çift dokun: oraya git'; } else exitWalk(); });
-tog('tRoof',o=>{roofG=o?1:0;document.getElementById('tRoof').textContent=o?'Çatıyı kapat':'Çatıyı aç';});
+tog('tRoof',o=>{roofG=o?1:0;document.getElementById('tRoof').textContent=o?'Yan çatıyı kapat':'Yan çatıyı aç';});
 tog('tWin',o=>{winG=o?1:0;document.getElementById('tWin').textContent=o?'Camları kapat':'Camları aç';});
 tog('tInt',o=>interior.visible=o); tog('tBld',o=>bld.visible=o); tog('tLbl',o=>labels.forEach(l=>l.el.style.display=o?'':'none'));
 tog('tLeg',o=>document.getElementById('legend').classList.toggle('show',o));
