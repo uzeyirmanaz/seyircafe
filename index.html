@@ -184,7 +184,6 @@ const RX0=X(43), RX1=X(204.5), RW=(RX1-RX0)/nS;
 // bina hizasındaki cam çatı (y 152.5–507.5) SABİT; sağa ve sola taşan kısımlar (y 30–152.5 · 507.5–615) açılır-kapanır
 [[30,152.5],[507.5,615]].forEach(zn=>{ const zc=(Z(zn[0])+Z(zn[1]))/2, zl=(Z(zn[1])-Z(zn[0]))*0.99;
   for(let i=0;i<nS;i++){ const m=new THREE.Mesh(new THREE.BoxGeometry(RW*0.985,0.05,zl),sm); m.position.set(RX0+RW*(i+.5),3.3,zc); m.userData={cx:RX0+RW*(i+.5),ox:RX1-RW/2,i}; roof.add(m); slats.push(m); } });
-{ const f=new THREE.Mesh(new THREE.BoxGeometry(RX1-RX0,0.05,(Z(507.5)-Z(152.5))*0.99),sm); f.position.set((RX0+RX1)/2,3.3,(Z(152.5)+Z(507.5))/2); roof.add(f); }
 box(40,151.5,207.5,153.5,3.2,3.45,mats.frame,roof); box(40,506.5,207.5,508.5,3.2,3.45,mats.frame,roof);
 box(40,30,43,615,3.2,3.45,mats.frame,roof); box(204.5,30,207.5,615,3.2,3.45,mats.frame,roof);
 
@@ -272,6 +271,9 @@ const bw = box(207.5,152.5,342.5,507.5,3.4,15,M(0xb8c4cc,.1));
 const be = new THREE.LineSegments(new THREE.EdgesGeometry(bw.geometry),new THREE.LineBasicMaterial({color:0x7d8a92}));
 be.position.copy(bw.position);
 const bld = new THREE.Group(); bld.add(sl,bw,be); scene.add(bld);
+// bina hizasındaki ORTA ÇATI: sabit, bina görünümüyle aynı yarı saydam malzeme (içerisi görünür); "Bina" düğmesiyle bina görünümüyle birlikte gelir/gider
+const midRoof=box(40,152.5,207.5,507.5,3.2,3.4,M(0xf0ece4,.3),bld);   // bina döşemesiyle aynı yarı saydam malzeme: içerisi görünür
+const midEdge=new THREE.LineSegments(new THREE.EdgesGeometry(midRoof.geometry),new THREE.LineBasicMaterial({color:0x7d8a92})); midEdge.position.copy(midRoof.position); bld.add(midEdge);
 
 const cvs=document.createElement('canvas'); cvs.width=2048; cvs.height=384;
 const cx=cvs.getContext('2d'); cx.fillStyle='#14110d'; cx.fillRect(0,0,2048,384);
