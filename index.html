@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="build" content="20261011-3">
+<meta name="build" content="20261012-1">
 <script>(function(){ if(!/^https?:/.test(location.protocol)) return; try{ const now = Date.now(), last = +sessionStorage.getItem('seyirChk') || 0; if(now - last < 600000) return; sessionStorage.setItem('seyirChk', now); const f = new URL(location.href); f.searchParams.set('_t', Date.now());
   fetch(f.toString(), { cache: 'no-store' }).then(r => r.text()).then(t => { const m = t.match(/name="build" content="([^"]+)"/), cur = document.querySelector('meta[name=build]').content;
     if(m && m[1] !== cur && sessionStorage.getItem('seyirReload') !== m[1]){ sessionStorage.setItem('seyirReload', m[1]); const u = new URL(location.href); u.searchParams.set('_v', m[1]); location.replace(u.toString()); } }).catch(() => {}); }catch(e){} })();</script>
@@ -2629,6 +2629,7 @@
   // Aşağıdaki bilgileri Firebase Console > Proje Ayarları > Web uygulaması bölümünden doldurun.
   // Boş bırakılırsa sistem "yerel mod"da (aynı tarayıcıdaki sekmeler arasında) çalışır.
   // ======================================================================
+  const FIREBASE_ADMIN_EMAIL = 'uzeyirmanaz@gmail.com'; // yalnızca bu Firebase hesabı menüyü yayınlar ve personel dizinini yazar
   const FIREBASE_CONFIG = {
     apiKey: "AIzaSyBrUigTh0e3BxPzGS_ofmgAdi0Xl8PVJc0", authDomain: "adisyon-sistem-818a6.firebaseapp.com", databaseURL: "https://adisyon-sistem-818a6-default-rtdb.firebaseio.com", projectId: "adisyon-sistem-818a6", appId: "1:422273915069:web:899482bfb023397856bfd4"
   };
@@ -2664,22 +2665,30 @@
       const B = 'https://www.gstatic.com/firebasejs/10.12.2/';
       const { initializeApp } = await import(B + 'firebase-app.js');
       const { getDatabase, ref, set, push, onValue, remove, get } = await import(B + 'firebase-database.js');
-      const { getAuth, signInAnonymously, signInWithEmailAndPassword } = await import(B + 'firebase-auth.js');
+      const { getAuth, signInAnonymously, signInWithEmailAndPassword, signOut } = await import(B + 'firebase-auth.js');
       const app = initializeApp(c), db = getDatabase(app), auth = getAuth(app);
       if(auth.authStateReady) await auth.authStateReady();
       if(!auth.currentUser) await signInAnonymously(auth);
       const AUTH_MSG = { 'auth/invalid-credential': 'E-posta veya şifre hatalı.', 'auth/wrong-password': 'Şifre hatalı.', 'auth/user-not-found': 'Bu e-posta ile hesap yok.', 'auth/invalid-email': 'E-posta biçimi geçersiz.', 'auth/too-many-requests': 'Çok fazla deneme. Biraz bekleyin.', 'auth/network-request-failed': 'İnternet bağlantısı yok.', 'auth/operation-not-allowed': 'Firebase’de E-posta/Şifre girişi açık değil.' };
-      const staffAuth = async () => {
-        if(auth.currentUser && !auth.currentUser.isAnonymous) return true;
-        let err = '';
+      const isAdminAcc = () => !!(auth.currentUser && !auth.currentUser.isAnonymous && (auth.currentUser.email || '').toLowerCase() === FIREBASE_ADMIN_EMAIL.toLowerCase());
+      const staffAuth = async (needAdmin) => {
+        if(auth.currentUser && !auth.currentUser.isAnonymous){
+          if(!needAdmin || isAdminAcc()) return true;
+          try{ await signOut(auth); await signInAnonymously(auth); }catch(e){}
+        }
+        let err = needAdmin ? 'Yönetici girişi için yönetici Firebase hesabını girin.' : '';
         for(;;){
           const c = await askCred(err); if(!c) return false;
-          try{ await signInWithEmailAndPassword(auth, c.em, c.pw); return true; }catch(e){ err = AUTH_MSG[e.code] || ('Giriş başarısız: ' + e.code); }
+          try{
+            await signInWithEmailAndPassword(auth, c.em, c.pw);
+            if(needAdmin && !isAdminAcc()){ err = 'Bu hesap yönetici hesabı değil.'; try{ await signOut(auth); await signInAnonymously(auth); }catch(e){} continue; }
+            return true;
+          }catch(e){ err = AUTH_MSG[e.code] || ('Giriş başarısız: ' + e.code); }
         }
       };
       const clean = v => (v === null ? null : JSON.parse(JSON.stringify(v)));
       RT = {
-        local: false, staffAuth,
+        local: false, staffAuth, isAdmin: isAdminAcc,
         set: (p, v) => set(ref(db, p), clean(v)),
         push: (p, v) => { const r = push(ref(db, p)); set(r, clean(v)); return r.key; },
         remove: p => remove(ref(db, p)),
@@ -2858,6 +2867,7 @@
   function publishPublic(){
     const tables = regions.flatMap(r => r.tables.map(n => ({ n, label: tableLabels[n] || ('Masa ' + n) })));
     const data = { categories: migrateMenuGroups(categories).map(c => ({ name: c.name, grp: c.grp || c.name, sub: c.sub || '', icon: c.icon || '', img: c.img || '', products: c.products.map(p => ({ name: p.name, icon: p.icon || '', price: p.price, desc: p.desc || '', img: p.img || '' })) })), menuVer: MENU_VER, tables, menuOnly: !!settings.menuOnly, wifiName: settings.wifiName || '', wifiPass: settings.wifiPass || '' };
+    if(!RT.local && RT.isAdmin && !RT.isAdmin()) return; // yalnızca yönetici hesabı yayınlar
     const s = JSON.stringify(data);
     if(s !== lastPub){ lastPub = s; RT.set('public', data); }
   }
@@ -3019,7 +3029,7 @@
     return dir;
   }
   function syncStaffDir(){
-    if(RT.local || !dirReady || !(curUser && curUser.admin)) return;
+    if(RT.local || !dirReady || !(curUser && curUser.admin) || (RT.isAdmin && !RT.isAdmin())) return;
     const dir = buildDir(), sig = JSON.stringify(dir); if(sig === lastDirSig) return;
     lastDirSig = sig;
     Promise.resolve().then(() => RT.set('staffDir', dir)).then(() => RT.set('staffMeta/ready', true)).catch(e => {
@@ -3084,7 +3094,7 @@
         if(pw.length < 4){ err.textContent = 'İlk kurulum: en az 4 haneli bir yönetici PIN\'i yazın.'; return; }
         if(!RT.local){
           err.textContent = 'Firebase kontrol ediliyor…';
-          const okA = RT.staffAuth ? await RT.staffAuth() : false; err.textContent = '';
+          const okA = RT.staffAuth ? await RT.staffAuth(true) : false; err.textContent = '';
           if(!okA) return;
           let d = null; try{ d = await RT.get('staffDir'); }catch(e){ err.textContent = 'Firebase okunamadı. Rules ayarını kontrol edin.'; return; }
           if(d && Object.keys(d).length){ err.textContent = 'Yönetici PIN\'i zaten belirlenmiş. Doğru şifreyi yazın.'; return; }
@@ -4023,7 +4033,7 @@ ${st('M50 58c-5-6 5-10 0-17', 0)}${st('M60 56c-5-7 5-11 0-19', 1.05)}${st('M70 5
   enterStaff = function(){
     if(staffMode) return;
     if(RT.local || !RT.staffAuth){ dirReady = true; _enterStaff(); return; }
-    RT.staffAuth().then(async ok => {
+    RT.staffAuth(!!(curUser && curUser.admin)).then(async ok => {
       if(!ok){ curUser = null; sessionStorage.removeItem('seyirUser'); showToast('Firebase personel girişi gerekli.'); return; }
       if(curUser && curUser.admin) await pullStaffDir();
       _enterStaff();
