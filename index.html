@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="build" content="20261012-1">
+<meta name="build" content="20261012-3">
 <script>(function(){ if(!/^https?:/.test(location.protocol)) return; try{ const now = Date.now(), last = +sessionStorage.getItem('seyirChk') || 0; if(now - last < 600000) return; sessionStorage.setItem('seyirChk', now); const f = new URL(location.href); f.searchParams.set('_t', Date.now());
   fetch(f.toString(), { cache: 'no-store' }).then(r => r.text()).then(t => { const m = t.match(/name="build" content="([^"]+)"/), cur = document.querySelector('meta[name=build]').content;
     if(m && m[1] !== cur && sessionStorage.getItem('seyirReload') !== m[1]){ sessionStorage.setItem('seyirReload', m[1]); const u = new URL(location.href); u.searchParams.set('_v', m[1]); location.replace(u.toString()); } }).catch(() => {}); }catch(e){} })();</script>
@@ -1573,6 +1573,18 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script>
+/* Personel arayüzü müşteri için DOM'dan çıkarılır (okuma modu / ekran okuyucu / sayfa dönüştürücüler göremez); personel girişinde geri takılır. */
+(function(){
+  const holder = document.createElement('div'), marks = [];
+  document.querySelectorAll('.top-actions,.app').forEach(el => { const m = document.createComment('staff'); el.parentNode.insertBefore(m, el); holder.appendChild(el); marks.push([el, m]); });
+  const D = document, g = D.getElementById, q = D.querySelector, qa = D.querySelectorAll;
+  D.getElementById = function(id){ return g.call(D, id) || holder.querySelector('#' + CSS.escape(id)); };
+  D.querySelector = function(sel){ return q.call(D, sel) || holder.querySelector(sel); };
+  D.querySelectorAll = function(sel){ return Array.from(qa.call(D, sel)).concat(Array.from(holder.querySelectorAll(sel))); };
+  window.__staffUI = { show(){ marks.forEach(([el, m]) => m.replaceWith(el)); delete D.getElementById; delete D.querySelector; delete D.querySelectorAll; window.__staffUI = null; } };
+})();
+</script>
+<script>
   // theme toggle — the one eye-comfort feature
   const body = document.body;
   const eyeToggle = document.getElementById('eyeToggle');
@@ -2873,7 +2885,7 @@
   }
   function enterStaff(){
     if(staffMode) return;
-    staffMode = true; document.body.classList.add('staff');
+    staffMode = true; document.body.classList.add('staff'); if(window.__staffUI) window.__staffUI.show();
     $id('rtMode').textContent = RT.local ? '● Yerel mod (Firebase ayarsız)' : '● Canlı bağlantı';
     RT.on('customerOrders', v => {
       coData = v || {};
