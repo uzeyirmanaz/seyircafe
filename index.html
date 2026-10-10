@@ -3,11 +3,20 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"><meta http-equiv="Pragma" content="no-cache"><meta http-equiv="Expires" content="0">
-<meta name="build" content="20261006-5">
-<script>(function(){ if(!/^https?:/.test(location.protocol)) return; try{ const f = new URL(location.href); f.searchParams.set('_t', Date.now());
+<meta name="build" content="20261011-3">
+<script>(function(){ if(!/^https?:/.test(location.protocol)) return; try{ const now = Date.now(), last = +sessionStorage.getItem('seyirChk') || 0; if(now - last < 600000) return; sessionStorage.setItem('seyirChk', now); const f = new URL(location.href); f.searchParams.set('_t', Date.now());
   fetch(f.toString(), { cache: 'no-store' }).then(r => r.text()).then(t => { const m = t.match(/name="build" content="([^"]+)"/), cur = document.querySelector('meta[name=build]').content;
     if(m && m[1] !== cur && sessionStorage.getItem('seyirReload') !== m[1]){ sessionStorage.setItem('seyirReload', m[1]); const u = new URL(location.href); u.searchParams.set('_v', m[1]); location.replace(u.toString()); } }).catch(() => {}); }catch(e){} })();</script>
+<meta name="description" content="SEYİR CAFE dijital menü ve sipariş sistemi">
+<meta property="og:title" content="SEYİR CAFE — Dijital Menü"><meta property="og:description" content="Menüyü inceleyin, masanızdan sipariş verin."><meta property="og:type" content="website">
+<meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="SEYİR CAFE"><meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="apple-touch-icon" id="appleIcon" href="data:,">
+<script>(function(){ try{ const c = document.createElement('canvas'); c.width = c.height = 192; const x = c.getContext('2d');
+  x.fillStyle = '#cf2e2e'; x.fillRect(0,0,192,192); x.fillStyle = '#fff'; x.font = '800 92px system-ui,sans-serif'; x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillText('SC', 96, 100);
+  const u = c.toDataURL('image/png'); document.getElementById('appleIcon').href = u;
+  if(/^https?:/.test(location.protocol)){ const m = { name:'SEYİR CAFE', short_name:'SEYİR', start_url: location.pathname, scope: location.pathname, display:'standalone', background_color:'#ffffff', theme_color:'#cf2e2e', lang:'tr', icons:[{ src:u, sizes:'192x192', type:'image/png', purpose:'any' }] };
+    const l = document.createElement('link'); l.rel = 'manifest'; l.href = URL.createObjectURL(new Blob([JSON.stringify(m)], { type:'application/manifest+json' })); document.head.appendChild(l); }
+}catch(e){} })();</script>
 <meta name="theme-color" content="#cf2e2e">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <title>İŞLETMEM — SEYİR CAFE</title>
@@ -860,6 +869,8 @@
   body[data-theme="dark"] .vis{ background:linear-gradient(135deg,hsl(var(--h,20),32%,26%),hsl(calc(var(--h,20) + 40),34%,18%)); }
   .vis .vi{ font-size:var(--fs,2.4rem); line-height:1; filter:drop-shadow(0 3px 4px rgba(0,0,0,.18)); }
   .vis img{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; }
+  .c-sk{ pointer-events:none; } .c-sk .vis{ animation:skPulse 1.1s ease-in-out infinite; } .c-sk .nm b{ display:block; height:14px; margin:8px 0; border-radius:6px; background:var(--line); }
+  @keyframes skPulse{ 0%,100%{ opacity:.55 } 50%{ opacity:1 } }
   .vis.v-s{ width:28px; height:28px; border-radius:8px; --fs:1rem; flex:none; margin-right:8px; }
   .vis.v-row{ width:54px; height:54px; border-radius:10px; --fs:1.7rem; flex:none; }
   .vis.v-cat{ width:68px; height:68px; border-radius:18px; --fs:2rem; box-shadow:0 2px 8px rgba(0,0,0,.12); }
@@ -922,7 +933,7 @@
 <link rel="icon" id="favi" href="data:,">
 </head>
 <body data-theme="light">
-  <div id="customerView" class="menu-only">
+  <div id="customerView">
     <div class="c-head"><div id="cLogo" class="c-logo"></div><div class="c-social" id="cSocial"></div></div>
     <div class="c-top"><div class="c-masa"><span>🪑 Masa</span><select id="cMasa"></select></div>
     <input id="cSearch" class="c-search" placeholder="🔍 Menüde ara…" autocomplete="off">
@@ -1677,9 +1688,9 @@
         cellName(n) +
         (isBusy ? '<span class="amt">₺' + total.toLocaleString('tr-TR', {minimumFractionDigits:2}) + '</span>' : '');
       cell.addEventListener('click', () => openOrder(key, tname(n), 'tables'));
-      cell.querySelector('.pencil').addEventListener('click', (e) => {
+      cell.querySelector('.pencil').addEventListener('click', async (e) => {
         e.stopPropagation();
-        const newName = window.prompt('Masa adı (silmek için SİL yazın):', tableLabels[n] || ('Masa ' + n));
+        const newName = await uiPrompt('Masa adı (silmek için SİL yazın):', tableLabels[n] || ('Masa ' + n));
         if(newName){
           if(/^s[iİı]l$/i.test(newName.trim())){
             if((carts[key] || []).length){ showToast('Masada açık adisyon var.'); return; }
@@ -1694,8 +1705,8 @@
   renderRegionTabs();
   renderTableGrid();
 
-  document.getElementById('btnYeniBolge').addEventListener('click', () => {
-    const name = window.prompt('Yeni bölge adı:');
+  document.getElementById('btnYeniBolge').addEventListener('click', async () => {
+    const name = await uiPrompt('Yeni bölge adı:');
     if(!name) return;
     regions.push({ name, tables: [] });
     activeRegion = regions.length - 1;
@@ -1710,8 +1721,8 @@
     renderTableGrid();
     showToast('Masa ' + n + ' eklendi.');
   });
-  document.getElementById('btnTopluMasa').addEventListener('click', () => {
-    const count = parseInt(window.prompt('Kaç masa eklensin?', '4')) || 0;
+  document.getElementById('btnTopluMasa').addEventListener('click', async () => {
+    const count = parseInt(await uiPrompt('Kaç masa eklensin?', '4')) || 0;
     for(let k = 0; k < count; k++){
       const n = nextTableNo++;
       carts['table_' + n] = [];
@@ -1721,9 +1732,9 @@
     renderTableGrid();
     if(count) showToast(count + ' masa eklendi.');
   });
-  document.getElementById('btnBolgeleriDuzenle').addEventListener('click', () => {
+  document.getElementById('btnBolgeleriDuzenle').addEventListener('click', async () => {
     const r = regions[activeRegion]; if(!r) return;
-    const v = window.prompt('Bölge adı (bölgeyi silmek için SİL yazın):', r.name); if(!v) return;
+    const v = await uiPrompt('Bölge adı (bölgeyi silmek için SİL yazın):', r.name); if(!v) return;
     if(/^s[iİı]l$/i.test(v.trim())){
       if(r.tables.some(n => (carts['table_' + n] || []).length)){ showToast('Açık adisyonu olan masalar var, silinemez.'); return; }
       if(regions.length <= 1){ showToast('En az bir bölge kalmalı.'); return; }
@@ -1928,8 +1939,8 @@
   function openMenuPicker(){ if(!can('orders')) return; mpEl('menuPicker').style.display = 'flex'; mpEl('mpCart').classList.remove('show'); mpEl('mpTitle').textContent = '🍽️ ' + orderLabel(currentCartKey); renderMenuPicker(); }
   function closeMenuPicker(){ mpEl('menuPicker').style.display = 'none'; mpEl('mpCart').classList.remove('show'); }
   // ✕ : hiçbir işlem yapmadan masalardan çık
-  function exitPicker(){
-    if(mpDraft.length && !confirm('Sepetteki ' + draftCount() + ' ürün kaydedilmedi. Yine de çıkılsın mı?')) return;
+  async function exitPicker(){
+    if(mpDraft.length && !await uiConfirm('Sepetteki ' + draftCount() + ' ürün kaydedilmedi. Yine de çıkılsın mı?')) return;
     mpDraft = []; closeMenuPicker();
     if(currentCartKey.startsWith('table_') && !(carts[currentCartKey] || []).length) delete tableGuest[+currentCartKey.slice(6)];
     const back = currentBackScreen || 'siparis-masa';
@@ -2068,8 +2079,8 @@
   document.querySelectorAll('.mini-toggle').forEach(wireToggle);
 
   // ---- payment types: add new + keep names editable/renameable ----
-  document.getElementById('btnOdemeTipiEkle').addEventListener('click', () => {
-    const name = window.prompt('Yeni ödeme tipi adı:');
+  document.getElementById('btnOdemeTipiEkle').addEventListener('click', async () => {
+    const name = await uiPrompt('Yeni ödeme tipi adı:');
     if(!name) return;
     payTypes.push({ name: name.trim(), on: true }); renderPayTypes(); saveState(); showToast(name + ' eklendi.');
   });
@@ -2104,11 +2115,11 @@
 
   // ---- generic "+ ... Ekle" buttons across the definition screens ----
   document.querySelectorAll('.btn-add-item-old').forEach(btn => {
-    btn.addEventListener('click', () => {
+    btn.addEventListener('click', async () => {
       const label = btn.textContent.replace('+', '').replace('Ekle', '').trim() || 'Öğe';
-      const name = window.prompt(label + ' adı girin:');
+      const name = await uiPrompt(label + ' adı girin:');
       if(!name) return;
-      const value = window.prompt('Değer / not (opsiyonel, boş bırakılabilir):', '');
+      const value = await uiPrompt('Değer / not (opsiyonel, boş bırakılabilir):', '');
       const panel = btn.closest('.panel-card');
       const list = panel.querySelector('.plist');
       const row = document.createElement('div');
@@ -2251,7 +2262,7 @@
   // görsel varsa fotoğraf, yoksa renkli zemin üstünde ürün/kategori emojisi (görsel bozuksa da emoji kalır)
   function visHtml(o, fallbackIcon, cls){
     const ic = o.icon || fallbackIcon || '🍽️', ok = imgOk(o.img), fb = illus(o.name), src = ok ? o.img : fb;
-    return '<div class="vis ' + cls + '" style="--h:' + artHue(o.name || ic) + '">' + (src && !ok ? '' : '<span class="vi">' + _e(ic) + '</span>') + (src ? '<img src="' + _e(src) + '" alt="" loading="lazy" referrerpolicy="no-referrer"' + (ok ? ' data-fb="' + _e(fb) + '" onerror="this.onerror=null;if(this.dataset.fb)this.src=this.dataset.fb;else this.remove()"' : '') + '>' : '') + '</div>';
+    return '<div class="vis ' + cls + '" style="--h:' + artHue(o.name || ic) + '">' + (src && !ok ? '' : '<span class="vi">' + _e(ic) + '</span>') + (src ? '<img src="' + _e(src) + '" alt="" decoding="async" loading="lazy" referrerpolicy="no-referrer" style="opacity:0;transition:opacity .25s" onload="this.style.opacity=1"' + (ok ? ' data-fb="' + _e(fb) + '" onerror="this.onerror=null;if(this.dataset.fb)this.src=this.dataset.fb;else this.remove()"' : '') + '>' : '') + '</div>';
   }
   const catVis = g => visHtml({ img: g.img, icon: g.icon, name: g.name }, '', 'v-cat');
   function fileToThumb(file, max, cb){
@@ -2318,22 +2329,22 @@
     });
   }
 
-  function handleCategoryAction(action, i){
+  async function handleCategoryAction(action, i){
     if(action === 'toplu'){
-      const pc = parseFloat(String(window.prompt('"' + categories[i].name + '" fiyatlarına % değişim (ör. 10 zam, -5 indirim):') || '').replace(',', '.'));
+      const pc = parseFloat(String(await uiPrompt('"' + categories[i].name + '" fiyatlarına % değişim (ör. 10 zam, -5 indirim):') || '').replace(',', '.'));
       if(!isFinite(pc) || pc === 0 || pc < -90 || pc > 500) return;
-      if(!window.confirm(categories[i].products.length + ' ürünün fiyatı %' + pc + ' değişecek. Onaylıyor musunuz?')) return;
+      if(!await uiConfirm(categories[i].products.length + ' ürünün fiyatı %' + pc + ' değişecek. Onaylıyor musunuz?')) return;
       categories[i].products.forEach(p => { p.price = Math.round(p.price * (1 + pc / 100) * 100) / 100; });
       renderCatList(); renderProductGrid(); saveState(); showToast('Fiyatlar güncellendi.');
     } else if(action === 'sirala'){
-      const n = parseInt(window.prompt('Sıralama:\n1 - A→Z\n2 - Fiyat (artan)\n3 - Fiyat (azalan)'), 10);
+      const n = parseInt(await uiPrompt('Sıralama:\n1 - A→Z\n2 - Fiyat (artan)\n3 - Fiyat (azalan)'), 10);
       const fn = { 1: (a, b) => a.name.localeCompare(b.name, 'tr'), 2: (a, b) => a.price - b.price, 3: (a, b) => b.price - a.price }[n];
       if(!fn) return;
       categories[i].products.sort(fn); renderCatList(); renderProductGrid(); saveState(); showToast('Ürünler sıralandı.');
     } else if(action === 'yeniurun'){
       openProductForm(null, i);
     } else if(action === 'altkategori'){
-      const name = window.prompt('Alt kategori adı:');
+      const name = await uiPrompt('Alt kategori adı:');
       if(!name) return;
       migrateMenuGroups(categories); categories.push({ name: categories[i].name + ' / ' + name, grp: categories[i].grp || categories[i].name, sub: name, products: [] });
       activeCatIndex = categories.length - 1;
@@ -2367,7 +2378,7 @@
       } });
     } else if(action === 'sil'){
       if(categories.length <= 1){ showToast('En az bir kategori kalmalı.'); return; }
-      if(window.confirm('"' + categories[i].name + '" kategorisi silinsin mi?')){
+      if(await uiConfirm('"' + categories[i].name + '" kategorisi silinsin mi?')){
         categories.splice(i, 1);
         if(activeCatIndex >= categories.length) activeCatIndex = categories.length - 1;
         renderCatList(); renderProductGrid();
@@ -2395,8 +2406,8 @@
         '<div class="pp">₺' + p.price.toLocaleString('tr-TR', {minimumFractionDigits:2}) + '</div>' +
         '<div class="pa"><button class="pc-ed" title="Düzenle">✎</button><button class="pc-del" title="Sil">🗑</button></div>';
       row.querySelector('.pc-ed').addEventListener('click', () => openProductForm(p, ci));
-      row.querySelector('.pc-del').addEventListener('click', () => {
-        if(window.confirm('"' + p.name + '" silinsin mi?')){ const a = categories[ci].products; a.splice(a.indexOf(p), 1); renderCatList(); renderProductGrid(); saveState(); }
+      row.querySelector('.pc-del').addEventListener('click', async () => {
+        if(await uiConfirm('"' + p.name + '" silinsin mi?')){ const a = categories[ci].products; a.splice(a.indexOf(p), 1); renderCatList(); renderProductGrid(); saveState(); }
       });
       grid.appendChild(row);
     });
@@ -2404,8 +2415,8 @@
   renderCatList();
   renderProductGrid();
 
-  document.getElementById('btnKategoriEkle').addEventListener('click', () => {
-    const name = window.prompt('Yeni kategori adı:');
+  document.getElementById('btnKategoriEkle').addEventListener('click', async () => {
+    const name = await uiPrompt('Yeni kategori adı:');
     if(!name) return;
     categories.push({ name, products: [] });
     activeCatIndex = categories.length - 1;
@@ -2567,7 +2578,7 @@
       row.innerHTML = '<span class="pic">🧾</span><div class="pmain"><b>' + g.name + '</b><span>' + g.date + '</span></div>' +
         '<span class="pval">₺' + g.amount.toLocaleString('tr-TR', {minimumFractionDigits:2}) + '</span>';
       const d = document.createElement('span'); d.className = 'link-btn'; d.textContent = '🗑';
-      d.onclick = () => { if(confirm('Gider silinsin mi?')){ giderler.splice(giderler.indexOf(g), 1); renderGiderler(); } };
+      d.onclick = async () => { if(await uiConfirm('Gider silinsin mi?')){ giderler.splice(giderler.indexOf(g), 1); renderGiderler(); } };
       row.appendChild(d);
       wrap.appendChild(row);
     });
@@ -2575,10 +2586,10 @@
     document.getElementById('giderToplam').textContent = '₺' + total.toLocaleString('tr-TR', {minimumFractionDigits:2});
     if(typeof updateHomeStats === 'function') updateHomeStats();
   }
-  document.getElementById('btnGiderEkle').addEventListener('click', () => {
-    const name = window.prompt('Gider adı:');
+  document.getElementById('btnGiderEkle').addEventListener('click', async () => {
+    const name = await uiPrompt('Gider adı:');
     if(!name) return;
-    const amount = parseFloat(window.prompt('Tutar (₺):', '0')) || 0;
+    const amount = parseFloat(await uiPrompt('Tutar (₺):', '0')) || 0;
     giderler.push({ name, amount, date: new Date().toLocaleDateString('tr-TR') });
     renderGiderler();
     showToast(name + ' eklendi.');
@@ -2692,7 +2703,9 @@
     });
   }
   const arr = x => Array.isArray(x) ? x.filter(Boolean) : Object.values(x || {});
-  let pubData = null, staffMode = false;
+  let pubData = null, staffMode = false, pubReady = false, pubTimer = 0;
+  const PUB_CACHE = 'seyirPubCache';
+  try{ const c = JSON.parse(localStorage.getItem(PUB_CACHE) || 'null'); if(c && c.categories && c.menuVer === MENU_VER){ pubData = c; pubReady = true; } }catch(e){}
 
   // ---------------- MÜŞTERİ DİJİTAL MENÜ ----------------
   let cCart = {}, cTab = 0, cSub = -1, cSubOf = [], myOrderId = null, cOpen = false;
@@ -2712,27 +2725,51 @@
     const out = []; cSubOf = []; ((gs[cTab] || { subs: [] }).subs).filter(sb => cSub < 0 || sb.idx === cSub).forEach(sb => sb.cat.products.forEach(p => { out.push(p); cSubOf.push(sb.label); }));
     return out;
   }
-  function isMenuOnly(){ return pubData ? !!pubData.menuOnly : ((typeof RT !== 'undefined' && RT.local) ? !!settings.menuOnly : true); }
+  function isMenuOnly(){ return pubData ? pubData.menuOnly === true : ((typeof RT !== 'undefined' && RT.local) ? settings.menuOnly === true : false); }
   function cCount(){ return Object.values(cCart).reduce((s, i) => s + i.qty, 0); }
   function cTotal(){ return Object.values(cCart).reduce((s, i) => s + i.qty * i.unit, 0); }
+
+  // ---- özel onay / giriş pencereleri (tarayıcı confirm/prompt yerine) ----
+  function uiDialog(msg, withInput, def){
+    return new Promise(res => {
+      const bg = document.createElement('div'); bg.className = 'modal-bg show'; bg.style.zIndex = 3000;
+      bg.innerHTML = '<div class="modal-box" role="dialog" aria-modal="true"><p style="margin:0 0 10px;white-space:pre-line;line-height:1.4"></p>' + (withInput ? '<input type="text" style="width:100%;padding:10px;margin:0 0 10px;box-sizing:border-box">' : '') +
+        '<div style="display:flex;gap:8px"><button class="btn-save" data-r="0" style="margin:0;background:var(--ink-faint);flex:1">Vazgeç</button><button class="btn-save" data-r="1" style="margin:0;flex:1">Tamam</button></div></div>';
+      bg.querySelector('p').textContent = String(msg == null ? '' : msg);
+      const inp = bg.querySelector('input'); if(inp) inp.value = def == null ? '' : def;
+      const done = v => { bg.remove(); res(v); };
+      bg.addEventListener('click', e => { const b = e.target.closest('button[data-r]'); if(b) done(b.dataset.r === '1' ? (inp ? inp.value : true) : (inp ? null : false)); else if(e.target === bg) done(inp ? null : false); });
+      bg.addEventListener('keydown', e => { if(e.key === 'Enter') done(inp ? inp.value : true); else if(e.key === 'Escape') done(inp ? null : false); });
+      document.body.appendChild(bg); const f = inp || bg.querySelector('button[data-r="1"]'); setTimeout(() => f.focus(), 30);
+    });
+  }
+  const uiConfirm = m => uiDialog(m, false), uiPrompt = (m, d) => uiDialog(m, true, d);
+  const _lastHtml = {};
+  function setHtml(id, html){ if(_lastHtml[id] === html && $id(id).innerHTML) return; _lastHtml[id] = html; $id(id).innerHTML = html; }
   function renderCustomer(){
+    if(!pubReady && !staffMode){
+      $id('customerView').classList.add('c-loading');
+      if(!$id('cItems').dataset.sk){ $id('cItems').dataset.sk = '1'; $id('cTabs').innerHTML = ''; $id('cItems').innerHTML = Array(6).fill('<div class="c-item card c-sk"><div class="vis v-card"></div><div class="nm"><b>&nbsp;</b></div></div>').join(''); }
+      return;
+    }
+    $id('customerView').classList.remove('c-loading'); delete $id('cItems').dataset.sk;
     const d = customerData(), mo = isMenuOnly();
     $id('customerView').classList.toggle('menu-only', mo);
     const gs = menuGroups(d.categories); if(cTab >= gs.length) cTab = 0;
     const sel = $id('cMasa'), prev = sel.value || qp.get('masa') || '';
     const opts = '<option value="">Masanızı seçin…</option>' + d.tables.map(t => '<option value="' + t.n + '">' + esc(t.label) + '</option>').join('');
     if(sel.innerHTML !== opts){ sel.innerHTML = opts; sel.value = prev; }
-    $id('cTabs').innerHTML = gs.map((g, i) => '<div class="c-tab c-cat' + (i === cTab ? ' active' : '') + '" data-i="' + i + '">' + catVis(g) + '<span class="lb">' + esc(g.name) + '</span></div>').join('');
+    setHtml('cTabs', gs.map((g, i) => '<div class="c-tab c-cat' + (i === cTab ? ' active' : '') + '" data-i="' + i + '">' + catVis(g) + '<span class="lb">' + esc(g.name) + '</span></div>').join(''));
     const subsOn = gs[cTab] && gs[cTab].subs.length > 1 && !($id('cSearch').value || '').trim();
     $id('cSubs').style.display = subsOn ? '' : 'none';
     $id('cSubs').innerHTML = subsOn ? [{ idx: -1, label: 'Tümü' }].concat(gs[cTab].subs).map(sb => '<div class="c-tab' + (sb.idx === cSub ? ' active' : '') + '" data-s="' + sb.idx + '">' + esc(sb.label) + '</div>').join('') : '';
     const lst = cList();
-    $id('cItems').innerHTML = lst.length ? lst.map((p, i) => {
+    setHtml('cItems', lst.length ? lst.map((p, i) => {
       const q = (cCart[p.name] || {}).qty || 0, hdr = (cSub < 0 && cSubOf[i] && cSubOf[i] !== cSubOf[i - 1] && subsOn) ? '<div class="c-subttl">' + esc(cSubOf[i]) + '</div>' : '';
       return hdr + '<div class="c-item card">' + visHtml(p, '', 'v-card') + '<div class="nm"><b>' + esc(p.name) + '</b>' + (p.desc ? '<small>' + esc(p.desc) + '</small>' : '') + '</div><div class="cfoot"><span class="pr">' + fmtTL(p.price) + '</span>' +
         (mo ? '' : q ? '<div class="qty-ctl"><button class="qbtn" data-p="' + i + '" data-d="-1">−</button><b class="qv">' + q + '</b><button class="qbtn" data-p="' + i + '" data-d="1">+</button></div>'
            : '<button class="qbtn" data-p="' + i + '" data-d="1">+</button>') + '</div></div>';
-    }).join('') : '<p style="text-align:center;color:var(--ink-faint)">' + (($id('cSearch').value || '').trim() ? 'Ürün bulunamadı.' : 'Menü hazırlanıyor…') + '</p>';
+    }).join('') : '<p style="text-align:center;color:var(--ink-faint)">' + (($id('cSearch').value || '').trim() ? 'Ürün bulunamadı.' : 'Menü hazırlanıyor…') + '</p>');
     const n = cCount(), btn = $id('cSend'); if(!n) cOpen = false;
     $id('cCartList').style.display = cOpen ? 'block' : 'none'; $id('cNote').style.display = cOpen ? '' : 'none';
     $id('cCartList').innerHTML = Object.values(cCart).map(i => '<div class="c-crow"><span>' + esc(i.name) + '</span><div class="qty-ctl"><button class="qbtn cq" data-n="' + esc(i.name) + '" data-d="-1">−</button><b class="qv">' + i.qty + '</b><button class="qbtn cq" data-n="' + esc(i.name) + '" data-d="1">+</button></div></div>').join('');
@@ -3052,7 +3089,7 @@
           let d = null; try{ d = await RT.get('staffDir'); }catch(e){ err.textContent = 'Firebase okunamadı. Rules ayarını kontrol edin.'; return; }
           if(d && Object.keys(d).length){ err.textContent = 'Yönetici PIN\'i zaten belirlenmiş. Doğru şifreyi yazın.'; return; }
         }
-        if(!confirm('İlk kurulum: yazdığınız şifre yönetici PIN\'i olarak kaydedilsin mi?')) return;
+        if(!await uiConfirm('İlk kurulum: yazdığınız şifre yönetici PIN\'i olarak kaydedilsin mi?')) return;
         settings.pin = pwHash(pw); user = { ad: 'Yönetici', gorev: 'Müdür', admin: true };
       }
       if(user && user.admin && settings.pin === pw) settings.pin = pwHash(pw);
@@ -3256,9 +3293,9 @@ ${st('M50 58c-5-6 5-10 0-17', 0)}${st('M60 56c-5-7 5-11 0-19', 1.05)}${st('M70 5
           categories.forEach(c => c.products.forEach(p => { if(p.kg === g.name) p.kg = v.n; })); g.name = v.n; renderMutfakRows(); saveState();
         } });
       });
-      row.querySelector('[data-act="del"]').addEventListener('click', () => {
+      row.querySelector('[data-act="del"]').addEventListener('click', async () => {
         if(mutfakGruplari.length <= 1){ showToast('En az bir mutfak grubu kalmalı.'); return; }
-        if(!confirm('"' + g.name + '" silinsin mi? Ürünleri "' + mutfakGruplari[idx === 0 ? 1 : 0].name + '" grubuna aktarılacak.')) return;
+        if(!await uiConfirm('"' + g.name + '" silinsin mi? Ürünleri "' + mutfakGruplari[idx === 0 ? 1 : 0].name + '" grubuna aktarılacak.')) return;
         const to = mutfakGruplari[idx === 0 ? 1 : 0].name;
         categories.forEach(c => c.products.forEach(p => { if(p.kg === g.name) p.kg = to; }));
         mutfakGruplari.splice(idx, 1); renderMutfakRows(); saveState(); showToast('Grup silindi.');
@@ -3370,7 +3407,7 @@ ${st('M50 58c-5-6 5-10 0-17', 0)}${st('M60 56c-5-7 5-11 0-19', 1.05)}${st('M70 5
   $id('pkTabPaket').addEventListener('click', () => { pkTab = 'paket'; renderPaketler(); });
   $id('pkTabGelal').addEventListener('click', () => { pkTab = 'gelal'; renderPaketler(); });
   function dropExt(key){ delete carts[key]; delete extOrders[key]; [paidByKey, paymentHistoryByKey, discountByKey, guestsByKey, orderOpenedAt, adisyonNoByKey].forEach(o => delete o[key]); }
-  $id('pkList').addEventListener('click', e => {
+  $id('pkList').addEventListener('click', async e => {
     const b = e.target.closest('[data-pk]'); if(!b) return;
     const k = b.dataset.k, o = extOrders[k]; if(!o) return;
     if(b.dataset.pk === 'open') openOrder(k, orderLabel(k), 'paketler');
@@ -3378,7 +3415,7 @@ ${st('M50 58c-5-6 5-10 0-17', 0)}${st('M60 56c-5-7 5-11 0-19', 1.05)}${st('M70 5
     else if(b.dataset.pk === 'del'){
       if((carts[k] || []).length && !can('cancel')){ showToast('Ürünlü siparişi iptal etme yetkiniz yok.'); return; }
       if((paidByKey[k] || 0) > 0){ showToast('Ödeme alınmış sipariş iptal edilemez.'); return; }
-      if(!confirm('Bu sipariş silinsin mi?')) return;
+      if(!await uiConfirm('Bu sipariş silinsin mi?')) return;
       dropExt(k); renderPaketler(); renderSiparisMasa(); updateHomeStats(); saveState();
     }
   });
@@ -3525,11 +3562,11 @@ ${st('M50 58c-5-6 5-10 0-17', 0)}${st('M60 56c-5-7 5-11 0-19', 1.05)}${st('M70 5
     });
   }
   $id('btnMusteriEkle').addEventListener('click', () => openCustomerForm(null));
-  $id('custRows').addEventListener('click', e => {
+  $id('custRows').addEventListener('click', async e => {
     const b = e.target.closest('[data-c]'); if(!b || !can('customers')) return;
     const c = customers.find(x => x.no === +b.dataset.no); if(!c) return;
     if(b.dataset.c === 'edit') openCustomerForm(c);
-    else if(b.dataset.c === 'del'){ if(confirm('"' + c.name + '" silinsin mi?' + (c.balance ? ' Müşterinin ' + money(c.balance) + ' bakiyesi var!' : ''))){ customers.splice(customers.indexOf(c), 1); renderCustomers(); saveState(); } }
+    else if(b.dataset.c === 'del'){ if(await uiConfirm('"' + c.name + '" silinsin mi?' + (c.balance ? ' Müşterinin ' + money(c.balance) + ' bakiyesi var!' : ''))){ customers.splice(customers.indexOf(c), 1); renderCustomers(); saveState(); } }
     else if(b.dataset.c === 'col') openForm({ title: 'Tahsilat — ' + c.name, sub: 'Bakiye: ' + money(c.balance), fields: [{ id: 'a', label: 'Tutar (₺)', type: 'number', step: '0.01', value: c.balance }, { id: 'm', label: 'Ödeme şekli', type: 'select', options: ['Nakit', 'Kredi Kartı'] }],
       onOk(v){ if(!(v.a > 0)) return 'Geçerli tutar girin.'; if(v.a > c.balance + 0.005) return 'Tutar bakiyeden fazla olamaz.'; c.balance = Math.round((c.balance - v.a) * 100) / 100; colLog.push({ ts: Date.now(), amount: v.a, method: v.m, cust: c.name, user: uname() }); renderCustomers(); renderGunSonu(); saveState(); showToast('Tahsilat alındı.'); } });
   });
@@ -3541,10 +3578,10 @@ ${st('M50 58c-5-6 5-10 0-17', 0)}${st('M60 56c-5-7 5-11 0-19', 1.05)}${st('M70 5
       '<span class="link-btn" data-ua="role" data-i="' + i + '">Görev</span><span class="link-btn" data-ua="pw" data-i="' + i + '">Şifre</span><span class="link-btn" data-ua="blk" data-i="' + i + '">' + (u.blocked ? 'Engeli kaldır' : 'Engelle') + '</span><span class="link-btn" data-ua="del" data-i="' + i + '">🗑</span></div>').join('') ||
       '<p style="color:var(--ink-faint);padding:8px;">Kullanıcı yok. Yönetici girişi için Ayarlar’daki Yönetici PIN kullanılır.</p>';
   }
-  $id('usersList').addEventListener('click', e => {
+  $id('usersList').addEventListener('click', async e => {
     const b = e.target.closest('[data-ua]'); if(!b || !can('users')) return;
     const u = staffUsers[+b.dataset.i]; if(!u) return;
-    if(b.dataset.ua === 'del'){ if(confirm('"' + u.ad + '" silinsin mi?')){ staffUsers.splice(+b.dataset.i, 1); renderUsers(); saveState(); } }
+    if(b.dataset.ua === 'del'){ if(await uiConfirm('"' + u.ad + '" silinsin mi?')){ staffUsers.splice(+b.dataset.i, 1); renderUsers(); saveState(); } }
     else if(b.dataset.ua === 'blk'){ u.blocked = !u.blocked; renderUsers(); saveState(); }
     else if(b.dataset.ua === 'role') openForm({ title: u.ad + ' — Görev', fields: [{ id: 'g', label: 'Görev', type: 'select', options: ROLES, value: u.gorev }], onOk(v){ u.gorev = v.g; renderUsers(); saveState(); } });
     else openForm({ title: u.ad + ' — Yeni Şifre', fields: [{ id: 'p', label: 'Yeni şifre (en az 4 karakter)', type: 'password' }], onOk(v){
@@ -3577,9 +3614,9 @@ ${st('M50 58c-5-6 5-10 0-17', 0)}${st('M60 56c-5-7 5-11 0-19', 1.05)}${st('M70 5
     });
     $id('permBox').innerHTML = h + '<div style="padding:14px 20px;"><span class="link-btn" id="btnPermReset">↺ Varsayılana döndür</span></div>';
   }
-  $id('permBox').addEventListener('click', e => {
+  $id('permBox').addEventListener('click', async e => {
     if(!can('users')) return;
-    if(e.target.id === 'btnPermReset'){ if(confirm('Tüm yetkiler varsayılana dönsün mü?')){ perms = defaultPerms(); renderPerms(); applyPerms(); saveState(); } return; }
+    if(e.target.id === 'btnPermReset'){ if(await uiConfirm('Tüm yetkiler varsayılana dönsün mü?')){ perms = defaultPerms(); renderPerms(); applyPerms(); saveState(); } return; }
     const c = e.target.closest('.chk'); if(!c || !c.dataset.p) return;
     const p = c.dataset.p, r = +c.dataset.r; perms[p][r] = perms[p][r] ? 0 : 1; renderPerms(); applyPerms(); saveState();
   });
@@ -3616,10 +3653,10 @@ ${st('M50 58c-5-6 5-10 0-17', 0)}${st('M60 56c-5-7 5-11 0-19', 1.05)}${st('M70 5
     $id('gsExp').textContent = money(exp); $id('gsCol').textContent = money(col); $id('gsNet').textContent = money(dailyStats.sales - (dailyStats.openTotal || 0) - exp);
     $id('repDays').innerHTML = dayReports.length ? dayReports.slice(0, 30).map(d => '<div class="prow"><span class="pic">📅</span><div class="pmain"><b>' + new Date(d.ts).toLocaleDateString('tr-TR') + ' ' + hhmm(d.ts) + '</b><span>Nakit ' + money(d.cash) + ' · Kart/Diğer ' + money(d.card) + ' · Açık hesap ' + money(d.open) + ' · ' + d.orders + ' adisyon · ' + d.guests + ' misafir · Gider ' + money(d.expense) + ' · KDV ' + money(d.kdv) + '</span></div><span class="pval">' + money(d.sales) + '</span></div>').join('') : '<p style="color:var(--ink-faint);padding:8px;">Henüz kapatılmış gün yok.</p>';
   }
-  function closeDay(){
+  async function closeDay(){
     recomputeStats();
     const open = Object.keys(carts).filter(k => (carts[k] || []).length).length;
-    if(!confirm((open ? '⚠ ' + open + ' açık adisyon var; kapanmayacak, yeni güne devredecek.\n' : '') + 'Gün kapatılsın mı? Bugünkü toplamlar arşive alınıp sıfırlanacak.')) return;
+    if(!await uiConfirm((open ? '⚠ ' + open + ' açık adisyon var; kapanmayacak, yeni güne devredecek.\n' : '') + 'Gün kapatılsın mı? Bugünkü toplamlar arşive alınıp sıfırlanacak.')) return;
     dayReports.unshift({ ts: Date.now(), sales: dailyStats.sales, cash: dailyStats.cashTotal, card: dailyStats.cardTotal, open: dailyStats.openTotal || 0, guests: dailyStats.guests, orders: todaySales().length, expense: todayExpense(), kdv: todayKdv() });
     dayReports = dayReports.slice(0, 120); closedAt = Date.now();
     updateHomeStats(); renderGunSonu(); saveState(); showToast('Gün kapatıldı, rapor arşive alındı.');
@@ -3717,31 +3754,31 @@ ${st('M50 58c-5-6 5-10 0-17', 0)}${st('M60 56c-5-7 5-11 0-19', 1.05)}${st('M70 5
       add.insertAdjacentElement('beforebegin', r);
     });
   }
-  document.addEventListener('click', e => {
+  document.addEventListener('click', async e => {
     let b = e.target.closest('[data-l]');
     if(b){
       const L = lists[b.dataset.l], i = +b.dataset.i;
-      if(b.dataset.a === 'd'){ if(confirm('Silinsin mi?')){ L.splice(i, 1); renderLists(); renderReports(); } }
+      if(b.dataset.a === 'd'){ if(await uiConfirm('Silinsin mi?')){ L.splice(i, 1); renderLists(); renderReports(); } }
       else if(b.dataset.a === 's'){ L.forEach((r, j) => { r.val = j === i ? 'Varsayılan' : 'Varsayılan değil'; }); renderLists(); showToast(L[i].name + ' varsayılan KDV oldu.'); }
-      else { const nm = prompt('Ad:', L[i].name); if(!nm) return; L[i].name = nm.trim(); const v = prompt('Değer / not:', L[i].val || ''); if(v !== null) L[i].val = v.trim(); renderLists(); renderReports(); }
+      else { const nm = await uiPrompt('Ad:', L[i].name); if(!nm) return; L[i].name = nm.trim(); const v = await uiPrompt('Değer / not:', L[i].val || ''); if(v !== null) L[i].val = v.trim(); renderLists(); renderReports(); }
       return;
     }
     b = e.target.closest('[data-pi]');
     if(b){
       const i = +b.dataset.pi;
       if(payTypes[i] && (payTypes[i].name === 'Nakit' || payTypes[i].name === 'Açık Hesap')){ showToast('Bu sistem ödeme tipidir; yalnızca açıp kapatabilirsiniz.'); return; }
-      if(b.dataset.a === 'd'){ if(payTypes.length <= 1){ showToast('En az bir ödeme tipi kalmalı.'); return; } if(confirm('Ödeme tipi silinsin mi?')){ payTypes.splice(i, 1); renderPayTypes(); } }
-      else { const nm = prompt('Ödeme tipi adı:', payTypes[i].name); if(nm){ payTypes[i].name = nm.trim(); renderPayTypes(); } }
+      if(b.dataset.a === 'd'){ if(payTypes.length <= 1){ showToast('En az bir ödeme tipi kalmalı.'); return; } if(await uiConfirm('Ödeme tipi silinsin mi?')){ payTypes.splice(i, 1); renderPayTypes(); } }
+      else { const nm = await uiPrompt('Ödeme tipi adı:', payTypes[i].name); if(nm){ payTypes[i].name = nm.trim(); renderPayTypes(); } }
       return;
     }
     b = e.target.closest('[data-ui]');
-    if(b && confirm('Kullanıcı silinsin mi?')){ staffUsers.splice(+b.dataset.ui, 1); renderUsers(); }
+    if(b && await uiConfirm('Kullanıcı silinsin mi?')){ staffUsers.splice(+b.dataset.ui, 1); renderUsers(); }
   });
-  document.querySelectorAll('.btn-add-item').forEach(btn => btn.addEventListener('click', () => {
+  document.querySelectorAll('.btn-add-item').forEach(btn => btn.addEventListener('click', async () => {
     const k = btn.closest('.screen').id.replace('screen-', '');
     if(k === 'zayi'){ zayiForm(); return; }
-    const nm = prompt('Ad:'); if(!nm) return;
-    const v = prompt('Değer / not (isteğe bağlı):', '') || '';
+    const nm = await uiPrompt('Ad:'); if(!nm) return;
+    const v = await uiPrompt('Değer / not (isteğe bağlı):', '') || '';
     lists[k].push({ name: nm.trim(), sub: k === 'zayi' ? new Date().toLocaleDateString('tr-TR') : '', val: v.trim() });
     renderLists(); renderReports(); showToast(nm + ' eklendi.');
   }));
@@ -3754,19 +3791,19 @@ ${st('M50 58c-5-6 5-10 0-17', 0)}${st('M60 56c-5-7 5-11 0-19', 1.05)}${st('M70 5
   function fillDiscSel(){
     $id('ppDiscSel').innerHTML = '<option value="none">İndirim yok</option>' + (lists.indirimler || []).map((r, i) => '<option value="' + i + '">' + esc(r.name) + ' (' + esc(r.val) + ')</option>').join('') + '<option value="manual">Elle gir…</option>';
   }
-  $id('btnDiscApply').addEventListener('click', () => {
+  $id('btnDiscApply').addEventListener('click', async () => {
     const k = currentCartKey, v = $id('ppDiscSel').value; let d = null;
-    if(v === 'manual') d = parseDisc(prompt('İndirim (örn. %10 veya 50):'));
+    if(v === 'manual') d = parseDisc(await uiPrompt('İndirim (örn. %10 veya 50):'));
     else if(v !== 'none') d = parseDisc((lists.indirimler[+v] || {}).val);
     if(v === 'none') delete discountByKey[k]; else if(d) discountByKey[k] = d; else { showToast('Geçerli bir indirim girilmedi.'); return; }
     afterOrderChange(); if((paidByKey[k] || 0) > 0 && remainingForKey(k) <= 0.005){ finalizeOrder(k, 'İndirim sonrası kalan tutar kalmadı.'); return; } renderPaymentPanel(); showToast(v === 'none' ? 'İndirim kaldırıldı.' : 'İndirim uygulandı. Yeni toplam: ' + money(cartTotal(k)));
   });
   $id('guestNo').addEventListener('input', e => { guestsByKey[currentCartKey] = Math.max(1, parseInt(e.target.value) || 1); });
-  $id('btnCancelOrder').addEventListener('click', () => {
+  $id('btnCancelOrder').addEventListener('click', async () => {
     const k = currentCartKey;
     if(!(carts[k] || []).length){ showToast('Sepet zaten boş.'); return; }
     if(paidByKey[k]){ showToast('Ödeme alınmış adisyon iptal edilemez.'); return; }
-    if(!confirm('Adisyon iptal edilsin mi? Tüm kalemler silinecek.')) return;
+    if(!await uiConfirm('Adisyon iptal edilsin mi? Tüm kalemler silinecek.')) return;
     carts[k] = []; delete discountByKey[k]; delete guestsByKey[k];
     afterOrderChange(); if(extOrders[k]) dropExt(k); showScreen(currentBackScreen); renderSiparisMasa(); showToast('Adisyon iptal edildi.');
   });
@@ -3798,10 +3835,10 @@ ${st('M50 58c-5-6 5-10 0-17', 0)}${st('M60 56c-5-7 5-11 0-19', 1.05)}${st('M70 5
     box.querySelector('#mvX').onclick = close; bg.addEventListener('mousedown', e => { if(e.target === bg) close(); });
     box.addEventListener('click', e => { const b = e.target.closest('button[data-n]'); if(!b || b.disabled) return; close(); cb(+b.dataset.n); });
   }
-  function doMove(k, picks, t){
+  async function doMove(k, picks, t){
     const tk = 'table_' + t, srcN = +k.slice(6), tlabel = tname(t);
     const busy = (carts[tk] || []).length > 0;
-    if(busy && !confirm('⚠️ DİKKAT: ' + tlabel + ' şu anda DOLU (' + fmtTL(cartTotal(tk)) + ' açık adisyon var).\n\nSeçilen ürünler bu masanın mevcut adisyonuna EKLENECEK. Devam edilsin mi?')) return;
+    if(busy && !await uiConfirm('⚠️ DİKKAT: ' + tlabel + ' şu anda DOLU (' + fmtTL(cartTotal(tk)) + ' açık adisyon var).\n\nSeçilen ürünler bu masanın mevcut adisyonuna EKLENECEK. Devam edilsin mi?')) return;
     carts[tk] = carts[tk] || [];
     picks.forEach(p => {
       const item = p.item, qty = Math.min(p.qty, item.qty), keepSent = Math.min(item.sent || 0, item.qty - qty), movedSent = (item.sent || 0) - keepSent;
@@ -3934,18 +3971,18 @@ ${st('M50 58c-5-6 5-10 0-17', 0)}${st('M60 56c-5-7 5-11 0-19', 1.05)}${st('M70 5
   $id('restoreFile').addEventListener('change', e => {
     const f = e.target.files[0]; if(!f) return;
     const r = new FileReader();
-    r.onload = () => {
+    r.onload = async () => {
       try{
         const s = JSON.parse(r.result); if(!s.carts || !s.regions) throw 0;
-        if(!confirm('Mevcut veriler bu yedekle değiştirilsin mi?')) return;
+        if(!await uiConfirm('Mevcut veriler bu yedekle değiştirilsin mi?')) return;
         s.savedAt = Date.now(); s.dev = DEV; applyState(s, true); lastSaved = ''; saveState(); showToast('Yedek yüklendi.');
       }catch(err){ showToast('Geçersiz yedek dosyası.'); }
     };
     r.readAsText(f); e.target.value = '';
   });
-  $id('btnWipe').addEventListener('click', () => {
-    if(!confirm('TÜM veriler (adisyonlar, satışlar, müşteriler, ürünler) silinecek. Emin misiniz?')) return;
-    if(prompt('Onaylamak için SIL yazın') !== 'SIL') return;
+  $id('btnWipe').addEventListener('click', async () => {
+    if(!await uiConfirm('TÜM veriler (adisyonlar, satışlar, müşteriler, ürünler) silinecek. Emin misiniz?')) return;
+    if(await uiPrompt('Onaylamak için SIL yazın') !== 'SIL') return;
     try{ localStorage.removeItem(STORE_KEY); }catch(e){}
     if(!RT.local) try{ RT.remove('state'); }catch(e){}
     location.reload();
@@ -3960,15 +3997,24 @@ ${st('M50 58c-5-6 5-10 0-17', 0)}${st('M60 56c-5-7 5-11 0-19', 1.05)}${st('M70 5
     if(s){ lastSavedAt = s.savedAt || 0; applyState(s, false); } else renderAll();
   }catch(e){ console.error(e); renderAll(); }
   try{ if(localStorage.getItem(THEME_KEY) === 'dark'){ document.body.setAttribute('data-theme', 'dark'); $id('eyeIcon').textContent = '🌙'; $id('eyeLabel').textContent = 'Karanlık mod açık'; } }catch(e){}
-  // !!! GEÇİCİ — TEST İÇİN: yönetici PIN'i her açılışta 1234'e sabitlenir. Kontrol bitince bu satırı SİLİN. !!!
-  settings.pin = pwHash('1234'); try{ saveState(); }catch(e){}
+
+  // ---- ek: tarayıcı alert'i yerine uygulama bildirimi; ikon butonlara otomatik erişilebilirlik etiketi ----
+  window.alert = m => showToast(String(m));
+  (function(){ let t = 0; const fix = () => { document.querySelectorAll('button:not([aria-label]),[role=button]:not([aria-label])').forEach(b => { const l = (b.getAttribute('title') || b.textContent || '').trim(); if(l) b.setAttribute('aria-label', l.slice(0, 40)); }); };
+    new MutationObserver(() => { clearTimeout(t); t = setTimeout(fix, 300); }).observe(document.body, { childList: true, subtree: true }); fix(); })();
   setInterval(saveState, 1500);
   window.addEventListener('beforeunload', saveState);
   document.addEventListener('visibilitychange', saveState);
 
   async function bootApp(){
     await initRT();
-    RT.on('public', v => { pubData = v; if(!staffMode) renderCustomer(); });
+    RT.on('public', v => {
+      pubData = v; pubReady = true; clearTimeout(pubTimer);
+      try{ if(v && v.categories) localStorage.setItem(PUB_CACHE, JSON.stringify(v)); }catch(e){}
+      if(!staffMode) renderCustomer();
+    });
+    // yerel mod ya da internet yoksa: 4 sn içinde veri gelmezse yerel menüyle devam et
+    if(RT.local) pubReady = true; else pubTimer = setTimeout(() => { pubReady = true; if(!staffMode) renderCustomer(); }, 4000);
     renderCustomer();
     restoreSession();
   }
@@ -3995,7 +4041,7 @@ ${st('M50 58c-5-6 5-10 0-17', 0)}${st('M60 56c-5-7 5-11 0-19', 1.05)}${st('M70 5
     const k = currentCartKey;
     if(!(carts[k] || []).length){ showToast('Sepet zaten boş.'); return; }
     if(paidByKey[k]){ showToast('Ödeme alınmış adisyon iptal edilemez.'); return; }
-    const n = parseInt(prompt('İptal nedeni:\n' + CANCEL_REASONS.map((r, i) => (i + 1) + ' - ' + r).join('\n')), 10);
+    const n = parseInt(await uiPrompt('İptal nedeni:\n' + CANCEL_REASONS.map((r, i) => (i + 1) + ' - ' + r).join('\n')), 10);
     if(!(n >= 1 && n <= CANCEL_REASONS.length)) return;
     if(!(await askManagerPin())){ showToast('PIN hatalı, iptal yapılmadı.'); return; }
     cancelLog.unshift({ ts: Date.now(), key: k, reason: CANCEL_REASONS[n - 1], total: grossTotal(k), by: uname(), items: carts[k].map(i => i.qty + '× ' + i.name) });
