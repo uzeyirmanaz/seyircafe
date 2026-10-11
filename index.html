@@ -936,6 +936,124 @@
   #menuPicker .mp-foot{ position:sticky; bottom:0; z-index:4; margin-top:auto; }
   #mpCart{ position:fixed !important; }
   .vis img{ object-fit:cover; }
+
+  /* ===== v4: Menü / Ürünler — ana kategori › alt kategori düzeni + toplu fiyat ===== */
+  #screen-urunler .cat-layout{ overflow:visible; align-items:flex-start; }
+  #screen-urunler .cat-sidebar{ width:320px; background:var(--panel-2); border-radius:12px 0 0 12px; border-right:1px solid var(--line); align-self:stretch; }
+  #screen-urunler .cat-content{ padding:20px 22px 24px; }
+  .sb-top{ padding:14px; border-bottom:1px solid var(--line); display:flex; flex-direction:column; gap:10px; }
+  .sb-add{ width:100%; padding:11px 14px !important; font-size:.9rem !important; }
+  .sb-hint{ font-size:.74rem; color:var(--ink-faint); line-height:1.45; }
+  .sb-hint b{ color:var(--ink-dim); }
+  .sb-list{ padding:6px 8px 16px; }
+  .sb-label{ font-size:.68rem; font-weight:800; letter-spacing:.08em; text-transform:uppercase; color:var(--ink-faint); padding:14px 10px 4px; }
+  .tg-row{ display:flex; align-items:center; gap:9px; padding:7px 8px; border-radius:10px; cursor:pointer; position:relative; user-select:none; }
+  .tg-row:hover{ background:var(--panel); }
+  .tg-row.active{ background:var(--panel); box-shadow:inset 3px 0 0 var(--red), 0 1px 4px rgba(0,0,0,.07); }
+  .tg-row .vis{ margin-right:0 !important; }
+  .tg-main{ margin-top:4px; padding:8px; }
+  .tg-main .tg-name b{ font-size:.93rem; font-weight:800; white-space:normal; }
+  .vis.v-tg{ width:38px; height:38px; border-radius:11px; --fs:1.2rem; flex:none; }
+  .tg-name{ flex:1; min-width:0; line-height:1.2; }
+  .tg-name b{ display:block; font-size:.86rem; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .tg-name small{ display:block; font-size:.7rem; color:var(--ink-faint); font-weight:700; margin-top:2px; }
+  .tg-chev{ width:22px; height:22px; display:grid; place-items:center; border-radius:6px; color:var(--ink-faint); font-size:.78rem; flex:none; transition:transform .15s ease, background-color .15s ease; }
+  .tg-chev:hover{ background:var(--line); }
+  .tg-chev.open{ transform:rotate(90deg); }
+  .tg-spacer{ width:22px; flex:none; }
+  .tg-row .cnt{ font-size:.72rem; color:var(--ink-faint); background:var(--panel); border:1px solid var(--line); border-radius:999px; padding:1px 8px; font-weight:700; flex:none; }
+  .tg-k{ width:26px; height:26px; display:grid; place-items:center; border-radius:7px; color:var(--ink-faint); font-weight:800; flex:none; }
+  .tg-k:hover{ background:var(--line); color:var(--ink); }
+  .tg-subs{ margin:2px 0 6px 29px; padding-left:12px; border-left:2px solid var(--line); }
+  .tg-sub{ padding:5px 6px; }
+  .tg-sub::before{ content:''; position:absolute; left:-14px; top:50%; width:12px; height:2px; background:var(--line); }
+  .tg-sub .tg-name b{ font-weight:600; }
+  .tg-all .vis{ filter:saturate(.8); }
+  #catPop{ position:fixed; z-index:1200; display:none; min-width:240px; background:var(--panel); border:1px solid var(--line); border-radius:11px; box-shadow:0 12px 34px rgba(0,0,0,.22); padding:6px; }
+  #catPop .cp-it{ display:flex; align-items:center; gap:10px; padding:9px 12px; border-radius:8px; font-size:.86rem; font-weight:600; color:var(--ink); cursor:pointer; white-space:nowrap; }
+  #catPop .cp-it span{ width:18px; text-align:center; }
+  #catPop .cp-it:hover{ background:var(--panel-2); }
+  #catPop .cp-it.danger{ color:var(--red); }
+  #catPop .cp-sep{ height:1px; background:var(--line); margin:5px 4px; }
+  .mbtn{ border:1px solid var(--line); background:var(--panel); color:var(--ink); border-radius:9px; padding:9px 13px; font:inherit; font-weight:700; font-size:.85rem; cursor:pointer; white-space:nowrap; }
+  .mbtn:hover{ background:var(--panel-2); }
+  .mbtn.pri{ background:var(--red); border-color:var(--red); color:#fff; }
+  .mbtn.pri:hover{ background:var(--red-dark); }
+  .mbtn:disabled{ opacity:.45; cursor:not-allowed; }
+  .mh{ display:flex; gap:16px; align-items:center; flex-wrap:wrap; padding-bottom:16px; border-bottom:1px solid var(--line); }
+  .mh-thumb{ position:relative; flex:none; cursor:pointer; }
+  .vis.v-mh{ width:76px; height:76px; border-radius:18px; --fs:2.3rem; box-shadow:0 2px 8px rgba(0,0,0,.12); }
+  .mh-edit{ position:absolute; right:-6px; bottom:-6px; width:26px; height:26px; border-radius:50%; background:var(--red); color:#fff; display:grid; place-items:center; font-size:.78rem; box-shadow:0 2px 6px rgba(0,0,0,.25); }
+  .mh-txt{ flex:1; min-width:200px; }
+  .mh-top{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+  .lvl{ display:inline-block; font-size:.66rem; font-weight:800; letter-spacing:.05em; text-transform:uppercase; padding:3px 9px; border-radius:999px; }
+  .lvl-main{ background:rgba(207,46,46,.12); color:var(--red); }
+  .lvl-sub{ background:rgba(47,143,91,.15); color:var(--sage); }
+  .lvl-all{ background:var(--panel-2); color:var(--ink-dim); border:1px solid var(--line); }
+  .mh-crumb{ font-size:.8rem; color:var(--ink-faint); font-weight:700; }
+  .mh-txt h2{ margin:6px 0 4px; font-size:1.35rem; line-height:1.15; }
+  .mh-stats{ display:flex; gap:4px 16px; flex-wrap:wrap; font-size:.8rem; color:var(--ink-dim); }
+  .mh-stats b{ color:var(--ink); }
+  .mh-actions{ display:flex; gap:8px; flex-wrap:wrap; }
+  .mbar{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin:14px 0; }
+  .mbar .cat-search-input{ display:inline-block; margin-left:auto; flex:1 1 150px; min-width:140px; max-width:260px; width:auto; border:1px solid var(--line); border-radius:9px; padding:9px 11px; background:var(--panel-2); color:var(--ink); font:inherit; font-size:.85rem; }
+  .seg{ display:inline-flex; background:var(--panel-2); border:1px solid var(--line); border-radius:11px; padding:3px; gap:2px; }
+  .seg button{ border:0; background:transparent; color:var(--ink-dim); font:inherit; font-weight:700; font-size:.85rem; padding:8px 14px; border-radius:8px; cursor:pointer; }
+  .seg button.on{ background:var(--panel); color:var(--ink); box-shadow:0 1px 3px rgba(0,0,0,.14); }
+  #segPrice.on{ background:var(--red); color:#fff; }
+  .seg.mini{ align-self:flex-start; } .seg.mini button{ padding:5px 11px; font-size:.78rem; }
+  .pt{ display:none; border:1px solid var(--line); background:var(--panel-2); border-radius:12px; padding:14px; margin-bottom:14px; }
+  .pt.show{ display:block; }
+  .pt-head{ display:flex; align-items:baseline; gap:6px 12px; flex-wrap:wrap; margin-bottom:10px; }
+  .pt-head b{ font-size:.98rem; } .pt-head span{ color:var(--ink-dim); font-size:.8rem; }
+  .pt-scope{ display:flex; align-items:center; gap:6px 14px; flex-wrap:wrap; margin-bottom:12px; padding:9px 12px; background:var(--panel); border:1px solid var(--line); border-radius:9px; font-size:.8rem; color:var(--ink-faint); }
+  .pt-scope b{ color:var(--ink); font-size:.85rem; }
+  .pt-all{ display:flex; align-items:center; gap:7px; font-weight:700; color:var(--ink); font-size:.85rem; cursor:pointer; }
+  .pt-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(190px,1fr)); gap:12px; }
+  .pt-card{ background:var(--panel); border:1px solid var(--line); border-radius:10px; padding:12px; display:flex; flex-direction:column; gap:9px; }
+  .pt-card h4{ margin:0; font-size:.9rem; display:flex; align-items:center; gap:8px; }
+  .pt-card h4 i{ font-style:normal; width:22px; height:22px; border-radius:50%; background:var(--red); color:#fff; display:grid; place-items:center; font-size:.72rem; flex:none; }
+  .pt-card p{ margin:0; font-size:.76rem; color:var(--ink-faint); line-height:1.4; flex:1; }
+  .pt-row{ display:flex; gap:8px; align-items:center; }
+  .pt-inp{ display:flex; align-items:center; border:1px solid var(--line); border-radius:8px; background:var(--panel-2); padding:0 10px; flex:1; min-width:0; }
+  .pt-inp span{ color:var(--ink-faint); font-weight:800; }
+  .pt-inp input{ border:0; background:transparent; color:var(--ink); font:inherit; font-weight:700; padding:9px 6px; width:100%; min-width:0; outline:none; margin:0; }
+  .pt-foot{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-top:12px; font-size:.8rem; color:var(--ink-dim); }
+  .pt-foot select{ border:1px solid var(--line); background:var(--panel); color:var(--ink); border-radius:8px; padding:7px 10px; font:inherit; font-size:.82rem; }
+  .sec-h{ display:flex; align-items:center; gap:10px; padding:9px 14px; background:var(--panel-2); border-bottom:1px solid var(--line); border-top:1px solid var(--line); font-size:.8rem; font-weight:800; color:var(--ink-dim); }
+  .product-list > .sec-h:first-child{ border-top:0; }
+  .sec-h .n{ margin-left:auto; font-weight:700; color:var(--ink-faint); }
+  .prod-empty.sm{ padding:14px; font-size:.82rem; background:var(--panel); border-bottom:1px solid var(--line); }
+  .prod-empty a{ color:var(--red); font-weight:700; text-decoration:none; }
+  .vis.v-sm2{ width:40px; height:40px; border-radius:9px; --fs:1.25rem; flex:none; }
+  .pm-row{ gap:10px; }
+  .pm-chk, .pm-secchk, .pt-all input{ width:17px; height:17px; accent-color:var(--red); flex:none; margin:0; cursor:pointer; }
+  .pm-old{ color:var(--ink-faint); font-size:.85rem; font-weight:700; white-space:nowrap; min-width:78px; text-align:right; }
+  .pm-row.chg .pm-old{ text-decoration:line-through; }
+  .pm-arrow{ color:var(--ink-faint); }
+  .pm-in{ display:flex; align-items:center; width:132px; border:1.5px solid var(--line); border-radius:9px; background:var(--panel-2); padding:0 9px; flex:none; }
+  .pm-in:focus-within{ border-color:var(--ink-dim); background:var(--panel); }
+  .pm-row.chg .pm-in{ border-color:var(--red); background:rgba(207,46,46,.07); }
+  .pm-in span{ color:var(--ink-faint); font-weight:800; }
+  .pm-in input{ border:0; background:transparent; color:var(--ink); font:inherit; font-weight:800; text-align:right; padding:8px 0 8px 6px; width:100%; min-width:0; outline:none; margin:0; }
+  .pm-delta{ min-width:104px; text-align:right; font-size:.78rem; font-weight:800; }
+  .pm-delta small{ font-weight:700; opacity:.8; }
+  .pm-delta .up{ color:var(--red); } .pm-delta .down{ color:var(--sage); }
+  .pbar{ display:none; position:sticky; bottom:10px; z-index:20; margin-top:14px; align-items:center; gap:10px 12px; flex-wrap:wrap; background:var(--panel); border:1px solid var(--line); border-left:4px solid var(--red); border-radius:12px; padding:12px 14px; box-shadow:0 8px 28px rgba(0,0,0,.2); }
+  .pbar.show{ display:flex; }
+  .pb-info{ flex:1; min-width:200px; font-size:.86rem; color:var(--ink-dim); }
+  .pb-info b{ color:var(--ink); font-size:1rem; } .pb-info span{ color:var(--ink-faint); }
+  @media (max-width:860px){
+    #screen-urunler .cat-layout{ flex-direction:column; align-items:stretch; }
+    #screen-urunler .cat-sidebar{ width:auto; max-height:340px; overflow:auto; border-right:0; border-bottom:1px solid var(--line); border-radius:12px 12px 0 0; }
+    .mbar .cat-search-input{ margin-left:0; width:100%; }
+  }
+  @media (max-width:640px){
+    .pm-old, .pm-arrow{ display:none; }
+    .pm-row{ flex-wrap:wrap; }
+    .pm-in{ width:112px; }
+    .pm-delta{ flex-basis:100%; text-align:left; min-width:0; padding-left:70px; }
+  }
 </style>
 <link rel="icon" id="favi" href="data:,">
 </head>
@@ -1302,18 +1420,59 @@
         <div class="screen" id="screen-urunler">
           <div class="cat-layout">
             <div class="cat-sidebar">
-              <div class="cat-add" id="btnKategoriEkle">＋ Kategori Ekle</div>
-              <div id="catList"></div>
+              <div class="sb-top">
+                <button class="mbtn pri sb-add" id="btnKategoriEkle" type="button">＋ Ana Kategori Ekle</button>
+                <div class="sb-hint"><b>Ana kategori</b> menünün üstündeki büyük görselli sekmedir. <b>Alt kategoriler</b> onun içinde gruplanır. İşlemler için satırın sağındaki <b>⋮</b> düğmesini kullanın.</div>
+              </div>
+              <div class="sb-list" id="catList"></div>
             </div>
             <div class="cat-content">
-              <div class="cat-content-top">
-                <div class="cat-title"><b id="catTitle">—</b><span id="catSub"></span></div>
+              <div class="mh" id="menuHead"></div>
+              <div class="mbar">
+                <div class="seg" role="tablist" aria-label="Görünüm">
+                  <button type="button" id="segList" class="on">📋 Ürün Listesi</button>
+                  <button type="button" id="segPrice">💲 Toplu Fiyat Düzenleme</button>
+                </div>
+                <button type="button" class="mbtn" id="btnTopluFoto" title="Dosya adı ürün, alt kategori veya ana kategori adıyla aynı olan fotoğrafları otomatik eşleştirir">📷 Toplu Fotoğraf</button><input type="file" id="topluFotoInp" accept="image/*" multiple style="display:none">
                 <input class="cat-search-input show" id="prodSearchInput" placeholder="🔍 Ürün ara...">
-                <span class="link-btn add" id="btnYeniUrunEkle">＋ Yeni Ürün</span>
-                <span class="link-btn" id="btnTopluFoto" title="Dosya adı ürün adıyla aynı olan fotoğrafları otomatik eşleştirir">📷 Toplu Fotoğraf</span><input type="file" id="topluFotoInp" accept="image/*" multiple style="display:none">
                 <span id="btnUrunAra" style="display:none"></span>
               </div>
+
+              <div class="pt" id="priceTools">
+                <div class="pt-head"><b>💲 Toplu Fiyat Araçları</b><span>Araçlar fiyatları yalnızca <u>hazırlar</u>. Aşağıdaki <b>“Fiyatları Güncelle”</b> düğmesine basana kadar menüde hiçbir şey değişmez.</span></div>
+                <div class="pt-scope"><label class="pt-all"><input type="checkbox" id="ptAll"> Tümünü seç</label><b id="ptScope"></b><span>Araçlar yalnızca kutusu işaretli ürünlere uygulanır. Tek tek değiştirmek için satırdaki fiyat kutusuna yazın (Enter = sıradaki ürün).</span></div>
+                <div class="pt-grid">
+                  <div class="pt-card">
+                    <h4><i>1</i> Tek fiyat yap</h4>
+                    <p>Seçili ürünlerin hepsi aynı fiyat olsun. Örn. tüm nargileler ₺500.</p>
+                    <div class="pt-row"><label class="pt-inp"><span>₺</span><input id="ptSet" inputmode="decimal" placeholder="0,00" autocomplete="off"></label><button type="button" class="mbtn pri" data-op="set">Uygula</button></div>
+                  </div>
+                  <div class="pt-card">
+                    <h4><i>2</i> Yüzde zam / indirim</h4>
+                    <p>Seçili ürünlerin mevcut fiyatına oransal artış veya düşüş uygular.</p>
+                    <div class="seg mini" data-dirgrp="pct"><button type="button" class="on" data-dir="1">▲ Zam</button><button type="button" data-dir="-1">▼ İndirim</button></div>
+                    <div class="pt-row"><label class="pt-inp"><span>%</span><input id="ptPct" inputmode="decimal" placeholder="10" autocomplete="off"></label><button type="button" class="mbtn pri" data-op="pct">Uygula</button></div>
+                  </div>
+                  <div class="pt-card">
+                    <h4><i>3</i> Tutar ekle / çıkar</h4>
+                    <p>Seçili ürünlerin fiyatına sabit bir TL tutarı ekler veya çıkarır.</p>
+                    <div class="seg mini" data-dirgrp="amt"><button type="button" class="on" data-dir="1">＋ Ekle</button><button type="button" data-dir="-1">－ Çıkar</button></div>
+                    <div class="pt-row"><label class="pt-inp"><span>₺</span><input id="ptAmt" inputmode="decimal" placeholder="25" autocomplete="off"></label><button type="button" class="mbtn pri" data-op="amt">Uygula</button></div>
+                  </div>
+                </div>
+                <div class="pt-foot"><label for="ptRound">Yuvarlama (2. ve 3. araç için):</label>
+                  <select id="ptRound"><option value="0">Kuruşlu bırak</option><option value="1">En yakın 1 ₺</option><option value="5">En yakın 5 ₺</option><option value="10">En yakın 10 ₺</option></select>
+                </div>
+              </div>
+
               <div class="product-list" id="productGrid"></div>
+
+              <div class="pbar" id="priceBar">
+                <div class="pb-info" id="pbInfo"></div>
+                <button type="button" class="mbtn" id="pbReset">Değişiklikleri Sıfırla</button>
+                <button type="button" class="mbtn pri" id="pbSave">✔ Fiyatları Güncelle</button>
+                <b id="pbCount" style="display:none">0</b>
+              </div>
             </div>
           </div>
           <div class="mo-card">
@@ -2248,11 +2407,15 @@
     else if(!c.grp){ const k = String(c.name).split(' / '); c.grp = k.length > 1 ? k[0] : c.name; if(k.length > 1) c.sub = k.slice(1).join(' / '); }
   }); return cats; }
   function menuGroups(cats){
-    migrateMenuGroups(cats); const m = new Map();
-    cats.forEach((c, i) => { const g = c.grp || c.name; if(!m.has(g)) m.set(g, { name: g, icon: (MENU_GROUPS.find(x => x[0] === g) || [])[1] || c.icon || '', img: '', subs: [] }); if(c.img && !m.get(g).img) m.get(g).img = c.img; m.get(g).subs.push({ idx: i, label: c.sub || c.name, cat: c }); });
+    migrateMenuGroups(cats); const gmArr = cats._gm || (typeof groupMeta !== 'undefined' ? groupMeta : []) || [], gmOf = n => gmArr.find(x => x && x.name === n) || {}, m = new Map();
+    cats.forEach((c, i) => { const g = c.grp || c.name, mt = gmOf(g);
+      if(!m.has(g)) m.set(g, { name: g, icon: mt.icon || (MENU_GROUPS.find(x => x[0] === g) || [])[1] || c.icon || '', img: mt.img || '', fi: m.size, subs: [] });
+      if(c.img && !c.sub && !m.get(g).img) m.get(g).img = c.img;
+      m.get(g).subs.push({ idx: i, label: c.sub || c.name, cat: c }); });
     m.forEach(g => g.subs.sort((x, y) => { const a = SUB_ORDER.indexOf(x.cat.name), b = SUB_ORDER.indexOf(y.cat.name); return (a < 0 ? 999 : a) - (b < 0 ? 999 : b); }));
     const order = MENU_GROUPS.map(x => x[0]);
-    return [...m.values()].sort((a, b) => { const x = order.indexOf(a.name), y = order.indexOf(b.name); return (x < 0 ? 99 : x) - (y < 0 ? 99 : y); });
+    const key = g => { const mt = gmOf(g.name); if(typeof mt.ord === 'number' && mt.ord >= 0) return mt.ord; const x = order.indexOf(g.name); return x < 0 ? 100 + g.fi : x; };
+    return [...m.values()].sort((a, b) => key(a) - key(b));
   }
   // ---- çizim (illüstrasyon) üretici: ürün/kategori adına göre uyumlu görsel ----
   const FLV = [[/çilek/,'#ff5c8a'],[/vişne/,'#b3132f'],[/şeftali/,'#ffae73'],[/mango/,'#ffb62e'],[/limon/,'#f4e04d'],[/elma/,'#9bd44e'],[/kivi/,'#8bc34a'],[/portakal|mandalina/,'#ff9a1f'],[/muz/,'#ffe07a'],[/karpuz/,'#ff6f7d'],[/kavun/,'#ffd27a'],[/karadut|üzüm/,'#7b3fa0'],[/yaban/,'#4b3f9e'],[/nar/,'#b3123d'],[/gül|pink|love|lady|romantik/,'#ff7fa8'],[/nane|anason|yeşil|adaçay|rezene/,'#5fc98a'],[/çikolata|kakao|brownie|mocha|kahve|espresso|latte|americano|nescafe|kapu|macchiato|dibek|menengiç|kola|cola|profiterol|supangle/,'#6b3a1e'],[/karamel|bal|baklava/,'#d8892b'],[/vanilya|ayran|sahlep|süt|beyaz|trileçe|sütlaç/,'#f3e7cf'],[/fanta|burn|atom/,'#ff8a1f'],[/sprite|soda|^su$/,'#bfe6f5'],[/cappy/,'#e0532d'],[/fıstı|fuse/,'#a9c75a'],[/ıhlamur|papatya|kış|tarçın/,'#e9c46a'],[/çay/,'#c2531f'],[/[iı]ce|buz/,'#9fe3ff']];
@@ -2312,184 +2475,461 @@
   function ensureSeedGroups(){ SEED_GROUPS.forEach(n => { if(!mutfakGruplari.some(g => g.name === n)) mutfakGruplari.push({ name: n, durum: 'Hazırlanıyor ve Hazırlandı' }); }); }
   let categories = buildSeedMenu();
   let activeCatIndex = 0;
-  let openCatMenu = null;
+  let activeGrp = null;            // ana kategori (alt kategorileriyle birlikte) seçiliyse adı
   let prodSearch = '';
   let showAllProds = false;
+  let groupMeta = [];              // ana kategori görsel / ikon / sıra bilgisi: [{ name, icon, img, ord }]
+  let priceMode = false;           // Toplu Fiyat Düzenleme görünümü
+  const priceDraft = new Map();    // ürün adı -> kaydedilmemiş yeni fiyat
+  const priceOff = new Set();      // toplu araçlardan hariç tutulan ürün adları
+  const openGrps = new Set();      // açık ana kategoriler (kenar çubuğu)
+  let openInit = false, lastGroups = [], curRows = [], curSecs = [], headCtx = {}, popAnchor = null;
   const allMode = () => showAllProds && !!(curUser && curUser.admin);
+  const mnEl = id => document.getElementById(id);
+  const isAdm = () => !!(curUser && curUser.admin);
+  const fmtP = n => '₺' + (+n || 0).toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const fmtIn = n => (+n || 0).toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  function parseNum(s){ s = String(s == null ? '' : s).replace(/[₺\s]/g, ''); if(!s) return NaN; if(s.indexOf(',') >= 0) s = s.replace(/\./g, '').replace(',', '.'); return parseFloat(s); }
+  function normGM(x){ return Array.isArray(x) ? x.filter(Boolean) : (x && typeof x === 'object' ? Object.values(x).filter(Boolean) : []); }
+  function gmSet(name, patch){ let m = groupMeta.find(x => x.name === name); if(!m){ m = { name }; groupMeta.push(m); } Object.assign(m, patch); return m; }
+  const grpName = c => c.grp || c.name;
+  const grpIdx = g => categories.map((c, i) => i).filter(i => grpName(categories[i]) === g);
+  function catLabel(c){ return c.sub ? grpName(c) + ' › ' + c.sub : ((c.grp && c.grp !== c.name) ? c.grp + ' › ' + c.name : c.name); }
+  const menuRender = () => { renderCatList(); renderProductGrid(); };
 
+  function fixActive(){
+    if(activeCatIndex >= categories.length) activeCatIndex = categories.length - 1;
+    if(activeCatIndex < 0) activeCatIndex = 0;
+    if(activeGrp && !categories.some(c => grpName(c) === activeGrp)) activeGrp = null;
+  }
+  function curView(){
+    fixActive();
+    if(allMode()) return { kind: 'all' };
+    if(activeGrp) return { kind: 'grp', grp: activeGrp };
+    return { kind: 'cat', idx: [activeCatIndex] };
+  }
+  function viewIdxs(){
+    const v = curView(), gs = menuGroups(categories);
+    if(v.kind === 'all') return gs.flatMap(g => g.subs.map(s => s.idx));
+    if(v.kind === 'grp'){ const g = gs.find(x => x.name === v.grp); return g ? g.subs.map(s => s.idx) : []; }
+    return v.idx;
+  }
+  function selectAll(){ showAllProds = true; menuRender(); }
+  function selectGrp(name){ showAllProds = false; activeGrp = name; const ix = grpIdx(name); if(ix.length) activeCatIndex = ix[0]; openGrps.add(name); menuRender(); }
+  function selectCat(i){ showAllProds = false; activeGrp = null; activeCatIndex = i; if(categories[i]) openGrps.add(grpName(categories[i])); menuRender(); }
+
+  // ---------- kenar çubuğu: ana kategori › alt kategori ağacı ----------
   function renderCatList(){
+    const list = mnEl('catList'); if(!list) return;
     migrateMenuGroups(categories);
-    const list = document.getElementById('catList');
-    list.innerHTML = '';
-    if(curUser && curUser.admin){
-      const all = document.createElement('div'); all.className = 'cat-item solo' + (allMode() ? ' active' : '');
-      all.innerHTML = '<span style="display:flex;align-items:center"><span class="vis v-s" style="--h:210"><span class="vi">📋</span></span>Tüm Ürünler</span><span class="cnt">' + categories.reduce((n, c) => n + c.products.length, 0) + '</span>';
-      all.addEventListener('click', () => { showAllProds = true; renderCatList(); renderProductGrid(); });
-      list.appendChild(all);
-    } else showAllProds = false;
-    const mkItem = (idx, label, cls, icon) => {
-      const cat = categories[idx], item = document.createElement('div');
-      item.className = 'cat-item ' + cls + (idx === activeCatIndex && !allMode() ? ' active' : '');
-      item.innerHTML = '<span style="display:flex;align-items:center">' + visHtml({ img: cat.img, icon: cat.icon || icon, name: label }, icon, 'v-s') + esc(label) + '</span><span class="cnt">' + cat.products.length + '</span><span class="kebab" data-idx="' + idx + '">⋮</span>' +
-        '<div class="cat-menu" id="catMenu' + idx + '">' +
-          '<div class="cm-item" data-action="yeniurun" data-idx="' + idx + '">＋ Yeni Ürün Ekle</div>' +
-          '<div class="cm-item" data-action="altkategori" data-idx="' + idx + '">↳ Alt Kategori Ekle</div>' +
-          '<div class="cm-item" data-action="duzenle" data-idx="' + idx + '">✎ Düzenle</div>' +
-          '<div class="cm-item danger" data-action="sil" data-idx="' + idx + '">🗑 Kategoriyi Sil</div>' +
-        '</div>';
-      item.addEventListener('click', (e) => {
-        if(e.target.closest('.kebab') || e.target.closest('.cat-menu')) return;
-        showAllProds = false; activeCatIndex = idx; renderCatList(); renderProductGrid();
-      });
-      item.querySelector('.kebab').addEventListener('click', (e) => {
-        e.stopPropagation();
-        const menu = item.querySelector('.cat-menu'), willOpen = !menu.classList.contains('show');
-        document.querySelectorAll('.cat-menu').forEach(m => m.classList.remove('show'));
-        if(willOpen) menu.classList.add('show');
-      });
-      item.querySelectorAll('.cm-item').forEach(cm => {
-        cm.addEventListener('click', (e) => {
-          e.stopPropagation();
-          const action = cm.getAttribute('data-action'), i = parseInt(cm.getAttribute('data-idx'));
-          document.querySelectorAll('.cat-menu').forEach(m => m.classList.remove('show'));
-          handleCategoryAction(action, i);
-        });
-      });
-      list.appendChild(item);
-    };
-    menuGroups(categories).forEach(g => {
-      if(g.subs.length === 1){ mkItem(g.subs[0].idx, g.name, 'solo', g.icon || categories[g.subs[0].idx].icon); return; }
-      const hd = document.createElement('div'); hd.className = 'cat-grp';
-      hd.innerHTML = '<span>' + (g.icon ? esc(g.icon) + ' ' : '') + esc(g.name) + '</span><span class="n">' + g.subs.reduce((s, x) => s + x.cat.products.length, 0) + '</span>';
-      list.appendChild(hd);
-      g.subs.forEach(sb => mkItem(sb.idx, sb.label, 'sub', g.icon));
-    });
-  }
-
-  async function handleCategoryAction(action, i){
-    if(action === 'toplu'){
-      const pc = parseFloat(String(await uiPrompt('"' + categories[i].name + '" fiyatlarına % değişim (ör. 10 zam, -5 indirim):') || '').replace(',', '.'));
-      if(!isFinite(pc) || pc === 0 || pc < -90 || pc > 500) return;
-      if(!await uiConfirm(categories[i].products.length + ' ürünün fiyatı %' + pc + ' değişecek. Onaylıyor musunuz?')) return;
-      categories[i].products.forEach(p => { p.price = Math.round(p.price * (1 + pc / 100) * 100) / 100; });
-      renderCatList(); renderProductGrid(); saveState(); showToast('Fiyatlar güncellendi.');
-    } else if(action === 'sirala'){
-      const n = parseInt(await uiPrompt('Sıralama:\n1 - A→Z\n2 - Fiyat (artan)\n3 - Fiyat (azalan)'), 10);
-      const fn = { 1: (a, b) => a.name.localeCompare(b.name, 'tr'), 2: (a, b) => a.price - b.price, 3: (a, b) => b.price - a.price }[n];
-      if(!fn) return;
-      categories[i].products.sort(fn); renderCatList(); renderProductGrid(); saveState(); showToast('Ürünler sıralandı.');
-    } else if(action === 'yeniurun'){
-      openProductForm(null, i);
-    } else if(action === 'altkategori'){
-      const name = await uiPrompt('Alt kategori adı:');
-      if(!name) return;
-      migrateMenuGroups(categories); categories.push({ name: categories[i].name + ' / ' + name, grp: categories[i].grp || categories[i].name, sub: name, products: [] });
-      activeCatIndex = categories.length - 1;
-      renderCatList(); renderProductGrid();
-      showToast('Alt kategori eklendi: ' + name);
-    } else if(action === 'duzenle'){
-      const c = categories[i];
-      const subs = categories.filter(x => x !== c && !c.sub && x.grp === c.name && x.sub);
-      const fields = [
-        { id: 'name', label: 'Kategori adı', value: c.sub || c.name },
-        { id: 'icon', label: 'İkon (emoji) — görsel yoksa bu görünür', value: c.icon || '' },
-        { id: 'imgf', label: 'Kategori görseli (yükle)', type: 'file', value: /^data:/.test(c.img || '') ? c.img : '', icon: c.icon, name: c.name },
-        { id: 'img', label: 'veya görsel bağlantısı (link yapıştır)', placeholder: 'https://...', value: /^https:/.test(c.img || '') ? c.img : '' },
-        { id: 'dept', label: 'Toplu departman (kategorideki ' + c.products.length + ' ürünün hepsi için)', type: 'select', options: [{ v: '', t: '— Değiştirme —' }].concat(mutfakGruplari.map(g => ({ v: g.name, t: g.name }))), value: '' }
-      ];
-      if(subs.length) fields.push({ id: 'deptSub', type: 'checkbox', label: '', text: 'Departmanı alt kategorilerdeki ürünlere de uygula (' + subs.length + ' alt kategori)', value: true });
-      openForm({ title: 'Kategoriyi Düzenle', fields, onOk(v){
-        if(!v.name) return 'Kategori adı gerekli.';
-        const lnk = normImgUrl(v.img); if(lnk === null) return 'Görsel adresi geçerli bir bağlantı olmalı (https://...).';
-        const old = c.name;
-        if(c.sub){ c.sub = v.name; }
-        else { c.name = v.name; if(c.grp === old && !categories.some(x => x !== c && x.grp === old)) c.grp = v.name; }
-        c.icon = v.icon; c.img = v.imgf || lnk;
-        let moved = 0;
-        if(v.dept){
-          const tg = [c].concat(v.deptSub ? subs : []);
-          tg.forEach(x => x.products.forEach(pr => { pr.kg = v.dept; moved++; }));
-        }
-        renderCatList(); renderProductGrid(); saveState();
-        if(moved) showToast(moved + ' ürün \"' + v.dept + '\" departmanına bağlandı.');
-      } });
-    } else if(action === 'sil'){
-      if(categories.length <= 1){ showToast('En az bir kategori kalmalı.'); return; }
-      if(await uiConfirm('"' + categories[i].name + '" kategorisi silinsin mi?')){
-        categories.splice(i, 1);
-        if(activeCatIndex >= categories.length) activeCatIndex = categories.length - 1;
-        renderCatList(); renderProductGrid();
-        showToast('Kategori silindi.');
-      }
+    const adm = isAdm(); if(!adm) showAllProds = false;
+    const gs = lastGroups = menuGroups(categories), v = curView();
+    if(!openInit){ openInit = true; const c0 = categories[activeCatIndex]; if(c0) openGrps.add(grpName(c0)); }
+    let h = '';
+    if(adm){
+      const tot = categories.reduce((n, c) => n + c.products.length, 0);
+      h += '<div class="tg-row tg-main tg-all' + (v.kind === 'all' ? ' active' : '') + '" data-act="all"><span class="tg-spacer"></span>' + visHtml({ img: '', icon: '📋', name: 'Tüm Ürünler' }, '', 'v-tg') + '<span class="tg-name"><b>Tüm Ürünler</b><small>Bütün kategoriler tek listede</small></span><span class="cnt">' + tot + '</span></div>';
     }
+    h += '<div class="sb-label">Ana kategoriler</div>';
+    gs.forEach((g, gi) => {
+      const nProd = g.subs.reduce((n, s) => n + s.cat.products.length, 0), gv = { img: g.img, icon: g.icon, name: g.name };
+      const leaf = g.subs.length === 1 && !g.subs[0].cat.sub;
+      if(leaf){
+        const s0 = g.subs[0], on = v.kind === 'cat' && v.idx[0] === s0.idx;
+        h += '<div class="tg-row tg-main' + (on ? ' active' : '') + '" data-act="cat" data-i="' + s0.idx + '" data-gi="' + gi + '"><span class="tg-spacer"></span>' + visHtml(gv, '', 'v-tg') + '<span class="tg-name"><b>' + esc(g.name) + '</b><small>Ana kategori · alt kategori yok</small></span><span class="cnt">' + nProd + '</span><span class="tg-k" data-act="kebab" data-t="grp" data-gi="' + gi + '" title="İşlemler">⋮</span></div>';
+        return;
+      }
+      const open = openGrps.has(g.name), on = v.kind === 'grp' && v.grp === g.name;
+      h += '<div class="tg-row tg-main' + (on ? ' active' : '') + '" data-act="grp" data-gi="' + gi + '"><span class="tg-chev' + (open ? ' open' : '') + '" data-act="tog" data-gi="' + gi + '" title="Aç / kapat">▸</span>' + visHtml(gv, '', 'v-tg') + '<span class="tg-name"><b>' + esc(g.name) + '</b><small>' + g.subs.length + ' alt kategori</small></span><span class="cnt">' + nProd + '</span><span class="tg-k" data-act="kebab" data-t="grp" data-gi="' + gi + '" title="İşlemler">⋮</span></div>';
+      if(open){
+        h += '<div class="tg-subs">';
+        g.subs.forEach(s => {
+          const son = v.kind === 'cat' && v.idx[0] === s.idx;
+          h += '<div class="tg-row tg-sub' + (son ? ' active' : '') + '" data-act="cat" data-i="' + s.idx + '" data-gi="' + gi + '">' + visHtml({ img: s.cat.img, icon: s.cat.icon || g.icon, name: s.label }, g.icon, 'v-s') + '<span class="tg-name"><b>' + esc(s.label) + '</b></span><span class="cnt">' + s.cat.products.length + '</span><span class="tg-k" data-act="kebab" data-t="cat" data-i="' + s.idx + '" title="İşlemler">⋮</span></div>';
+        });
+        h += '</div>';
+      }
+    });
+    list.innerHTML = h;
   }
 
-  function renderProductGrid(){
-    const grid = document.getElementById('productGrid');
-    grid.innerHTML = '';
-    const cat = categories[activeCatIndex]; if(!cat) return;
-    const all = allMode(), q = prodSearch.toLocaleLowerCase('tr-TR');
-    const pairs = all ? categories.flatMap((c, ci) => c.products.map(p => ({ p, ci }))) : cat.products.map(p => ({ p, ci: activeCatIndex }));
-    const shown = pairs.filter(x => x.p.name.toLocaleLowerCase('tr-TR').includes(q));
-    document.getElementById('catTitle').textContent = all ? 'Tüm Ürünler' : (cat.grp && cat.sub ? cat.grp + ' › ' + cat.sub : (cat.grp || cat.name));
-    document.getElementById('catSub').textContent = pairs.length + ' ürün' + (q ? ' · ' + shown.length + ' sonuç' : '');
-    if(!shown.length){ grid.innerHTML = '<div class="prod-empty">' + (q ? 'Aramaya uygun ürün yok.' : 'Bu kategoride henüz ürün yok. “＋ Yeni Ürün” ile ekleyin.') + '</div>'; return; }
-    shown.forEach(({ p, ci }) => {
-      const row = document.createElement('div');
-      row.className = 'prow2';
-      const cn = categories[ci];
-      row.innerHTML = visHtml(p, cn.icon, 'v-row') + 
-        '<div class="pn"><b>' + esc(p.name) + '</b><span>' + esc(p.portion || '') + (p.kg ? ' · ' + esc(p.kg) : '') + (all ? ' · ' + esc(cn.sub ? (cn.grp || '') + ' › ' + cn.sub : cn.name) : '') + '</span></div>' +
-        '<div class="pp">₺' + p.price.toLocaleString('tr-TR', {minimumFractionDigits:2}) + '</div>' +
-        '<div class="pa"><button class="pc-ed" title="Düzenle">✎</button><button class="pc-del" title="Sil">🗑</button></div>';
-      row.querySelector('.pc-ed').addEventListener('click', () => openProductForm(p, ci));
-      row.querySelector('.pc-del').addEventListener('click', async () => {
-        if(await uiConfirm('"' + p.name + '" silinsin mi?')){ const a = categories[ci].products; a.splice(a.indexOf(p), 1); renderCatList(); renderProductGrid(); saveState(); }
-      });
-      grid.appendChild(row);
+  // ---------- açılır işlem menüsü ----------
+  function closePop(){ const p = mnEl('catPop'); if(p) p.style.display = 'none'; popAnchor = null; }
+  function openPop(anchor, items){
+    let p = mnEl('catPop'); if(!p){ p = document.createElement('div'); p.id = 'catPop'; document.body.appendChild(p); }
+    if(popAnchor === anchor && p.style.display === 'block'){ closePop(); return; }
+    popAnchor = anchor;
+    p.innerHTML = items.map((it, i) => it.sep ? '<div class="cp-sep"></div>' : '<div class="cp-it' + (it.danger ? ' danger' : '') + '" data-i="' + i + '"><span>' + it.ic + '</span>' + esc(it.t) + '</div>').join('');
+    p.style.display = 'block';
+    const r = anchor.getBoundingClientRect(), w = p.offsetWidth, hh = p.offsetHeight;
+    let left = r.right + 6; if(left + w > innerWidth - 8) left = Math.max(8, r.right - w);
+    p.style.left = left + 'px'; p.style.top = Math.max(8, Math.min(r.top, innerHeight - hh - 8)) + 'px';
+    p.onclick = e => { const it = e.target.closest('.cp-it'); if(!it) return; closePop(); items[+it.dataset.i].fn(); };
+  }
+  document.addEventListener('click', e => { if(!e.target.closest('#catPop') && !e.target.closest('[data-act="kebab"]')) closePop(); });
+  window.addEventListener('resize', closePop);
+  document.addEventListener('keydown', e => { if(e.key === 'Escape') closePop(); });
+
+  function groupMenu(g){
+    const leaf = g.subs.length === 1 && !g.subs[0].cat.sub;
+    return [
+      { ic: '＋', t: 'Yeni Ürün Ekle', fn: () => openProductForm(null, g.subs[0].idx) },
+      { ic: '↳', t: 'Alt Kategori Ekle', fn: () => addSub(g.name) },
+      { ic: '✎', t: leaf ? 'Kategoriyi Düzenle (ad, görsel)' : 'Ana Kategoriyi Düzenle (ad, görsel)', fn: () => editGroup(g.name) },
+      { ic: '💲', t: 'Fiyatları Toplu Düzenle', fn: () => { if(leaf) selectCat(g.subs[0].idx); else selectGrp(g.name); setPriceMode(true); } },
+      { sep: 1 },
+      { ic: '↑', t: 'Yukarı Taşı', fn: () => moveGroup(g.name, -1) },
+      { ic: '↓', t: 'Aşağı Taşı', fn: () => moveGroup(g.name, 1) },
+      { sep: 1 },
+      { ic: '🗑', t: leaf ? 'Kategoriyi Sil' : 'Ana Kategoriyi Sil', danger: 1, fn: () => delGroup(g.name) }
+    ];
+  }
+  function catMenu(i){
+    return [
+      { ic: '＋', t: 'Yeni Ürün Ekle', fn: () => openProductForm(null, i) },
+      { ic: '✎', t: 'Alt Kategoriyi Düzenle (ad, görsel)', fn: () => editCat(i) },
+      { ic: '💲', t: 'Fiyatları Toplu Düzenle', fn: () => { selectCat(i); setPriceMode(true); } },
+      { sep: 1 },
+      { ic: '🗑', t: 'Alt Kategoriyi Sil', danger: 1, fn: () => delCat(i) }
+    ];
+  }
+  mnEl('catList').addEventListener('click', e => {
+    const t = e.target.closest('[data-act]'); if(!t) return;
+    const act = t.dataset.act, g = lastGroups[+t.dataset.gi];
+    if(act === 'tog'){ e.stopPropagation(); if(g){ openGrps.has(g.name) ? openGrps.delete(g.name) : openGrps.add(g.name); renderCatList(); } return; }
+    if(act === 'kebab'){ e.stopPropagation(); if(t.dataset.t === 'grp' && g) openPop(t, groupMenu(g)); else if(t.dataset.t === 'cat') openPop(t, catMenu(+t.dataset.i)); return; }
+    closePop();
+    if(act === 'all') selectAll(); else if(act === 'grp' && g) selectGrp(g.name); else if(act === 'cat') selectCat(+t.dataset.i);
+  });
+
+  // ---------- kategori işlemleri ----------
+  function renameGroup(old, nw){
+    menuGroups(categories).forEach((g, i) => gmSet(g.name, { ord: i }));   // mevcut sırayı sabitle
+    categories.forEach(c => { if(grpName(c) === old) c.grp = nw; });
+    const m = groupMeta.find(x => x.name === old); if(m) m.name = nw;
+  }
+  function moveGroup(name, d){
+    const gs = menuGroups(categories), i = gs.findIndex(g => g.name === name), j = i + d;
+    if(i < 0 || j < 0 || j >= gs.length) return;
+    const t = gs[i]; gs[i] = gs[j]; gs[j] = t;
+    gs.forEach((g, k) => gmSet(g.name, { ord: k }));
+    menuRender(); saveState();
+  }
+  function addGroup(){
+    openForm({
+      title: 'Ana Kategori Ekle', sub: 'Menünün üstünde görsel + isimle görünen ana sekmedir. Alt kategorileri sonra ekleyebilirsiniz.',
+      fields: [
+        { id: 'name', label: 'Ana kategori adı', value: '' },
+        { id: 'imgf', label: 'Ana kategori görseli (yükle)', type: 'file', value: '', icon: '', name: '' },
+        { id: 'icon', label: 'İkon (emoji) — görsel yoksa bu görünür', value: '' }
+      ],
+      onOk(v){
+        if(!v.name) return 'Ana kategori adı gerekli.';
+        if(menuGroups(categories).some(g => g.name.toLocaleLowerCase('tr-TR') === v.name.toLocaleLowerCase('tr-TR'))) return 'Bu adda bir ana kategori zaten var.';
+        categories.push({ name: v.name, grp: v.name, sub: '', gv: 2, icon: v.icon, img: v.imgf || '', products: [] });
+        gmSet(v.name, { icon: v.icon, img: v.imgf || '' });
+        showAllProds = false; activeGrp = null; activeCatIndex = categories.length - 1; openGrps.add(v.name);
+        menuRender(); saveState(); showToast('Ana kategori eklendi: ' + v.name);
+      }
     });
   }
-  renderCatList();
-  renderProductGrid();
+  function addSub(gname){
+    openForm({
+      title: 'Alt Kategori Ekle', sub: '“' + gname + '” ana kategorisinin içine eklenir.',
+      fields: [
+        { id: 'name', label: 'Alt kategori adı', value: '' },
+        { id: 'imgf', label: 'Görsel (isteğe bağlı)', type: 'file', value: '', icon: '', name: '' },
+        { id: 'icon', label: 'İkon (emoji, isteğe bağlı)', value: '' }
+      ],
+      onOk(v){
+        if(!v.name) return 'Alt kategori adı gerekli.';
+        if(categories.some(c => grpName(c) === gname && (c.sub || c.name).toLocaleLowerCase('tr-TR') === v.name.toLocaleLowerCase('tr-TR'))) return 'Bu ana kategoride aynı adlı bir alt kategori var.';
+        migrateMenuGroups(categories);
+        const gix = grpIdx(gname), c0 = categories[gix[0]];
+        if(gix.length === 1 && c0 && !c0.sub && !c0.products.length){   // boş, alt kategorisiz ana kategori: ilk alt kategoriye dönüşür (gereksiz tekrar satır oluşmasın)
+          gmSet(gname, { icon: groupMeta.some(m => m.name === gname && m.icon) ? undefined : c0.icon, img: groupMeta.some(m => m.name === gname && m.img) ? undefined : c0.img });
+          Object.keys(groupMeta.find(m => m.name === gname) || {}).forEach(k => { const m = groupMeta.find(x => x.name === gname); if(m[k] === undefined) delete m[k]; });
+          Object.assign(c0, { name: gname + ' / ' + v.name, sub: v.name, gv: 2, icon: v.icon, img: v.imgf || '' }); activeCatIndex = gix[0];
+        } else { categories.push({ name: gname + ' / ' + v.name, grp: gname, sub: v.name, gv: 2, icon: v.icon, img: v.imgf || '', products: [] }); activeCatIndex = categories.length - 1; }
+        showAllProds = false; activeGrp = null; openGrps.add(gname);
+        menuRender(); saveState(); showToast('Alt kategori eklendi: ' + v.name);
+      }
+    });
+  }
+  function deptField(n, what){ return { id: 'dept', label: 'Toplu departman (' + what + ' ' + n + ' ürünün hepsi için)', type: 'select', options: [{ v: '', t: '— Değiştirme —' }].concat(mutfakGruplari.map(x => ({ v: x.name, t: x.name }))), value: '' }; }
+  function editGroup(gname){
+    const g = menuGroups(categories).find(x => x.name === gname); if(!g) return;
+    const cats = g.subs.map(s => s.cat), plain = cats.filter(c => !c.sub), nProd = cats.reduce((n, c) => n + c.products.length, 0);
+    const leaf = g.subs.length === 1 && !g.subs[0].cat.sub;
+    openForm({
+      title: leaf ? 'Kategoriyi Düzenle' : 'Ana Kategoriyi Düzenle',
+      sub: 'Ana kategori, müşteri menüsünde ve sipariş ekranında üstteki görselli sekmedir.',
+      fields: [
+        { id: 'name', label: 'Ana kategori adı', value: g.name },
+        { id: 'imgf', label: 'Ana kategori görseli (yükle)', type: 'file', value: /^data:/.test(g.img || '') ? g.img : '', icon: g.icon, name: g.name },
+        { id: 'img', label: 'veya görsel bağlantısı (link yapıştır)', placeholder: 'https://...', value: /^https:/.test(g.img || '') ? g.img : '' },
+        { id: 'icon', label: 'İkon (emoji) — görsel yoksa bu görünür', value: g.icon || '' },
+        deptField(nProd, 'bu ana kategorideki')
+      ],
+      onOk(v){
+        if(!v.name) return 'Ana kategori adı gerekli.';
+        if(v.name !== g.name && menuGroups(categories).some(x => x.name.toLocaleLowerCase('tr-TR') === v.name.toLocaleLowerCase('tr-TR'))) return 'Bu adda bir ana kategori zaten var.';
+        const lnk = normImgUrl(v.img); if(lnk === null) return 'Görsel adresi geçerli bir bağlantı olmalı (https://...).';
+        const nm = v.name, img = v.imgf || lnk;
+        if(nm !== g.name){
+          plain.forEach(c => { if(c.name === g.name) c.name = nm; });
+          renameGroup(g.name, nm); openGrps.delete(g.name); openGrps.add(nm);
+          if(activeGrp === g.name) activeGrp = nm;
+        }
+        gmSet(nm, { icon: v.icon, img });
+        plain.forEach(c => { c.icon = v.icon; c.img = img; });
+        let moved = 0; if(v.dept) cats.forEach(c => c.products.forEach(pr => { pr.kg = v.dept; moved++; }));
+        menuRender(); saveState();
+        showToast(moved ? moved + ' ürün “' + v.dept + '” departmanına bağlandı.' : 'Ana kategori güncellendi.');
+      }
+    });
+  }
+  function editCat(i){
+    const c = categories[i]; if(!c) return;
+    openForm({
+      title: 'Alt Kategoriyi Düzenle', sub: catLabel(c),
+      fields: [
+        { id: 'name', label: 'Alt kategori adı', value: c.sub || c.name },
+        { id: 'imgf', label: 'Alt kategori görseli (yükle)', type: 'file', value: /^data:/.test(c.img || '') ? c.img : '', icon: c.icon, name: c.sub || c.name },
+        { id: 'img', label: 'veya görsel bağlantısı (link yapıştır)', placeholder: 'https://...', value: /^https:/.test(c.img || '') ? c.img : '' },
+        { id: 'icon', label: 'İkon (emoji) — görsel yoksa bu görünür', value: c.icon || '' },
+        deptField(c.products.length, 'kategorideki')
+      ],
+      onOk(v){
+        if(!v.name) return 'Alt kategori adı gerekli.';
+        const lnk = normImgUrl(v.img); if(lnk === null) return 'Görsel adresi geçerli bir bağlantı olmalı (https://...).';
+        if(c.sub) c.sub = v.name; else c.name = v.name;
+        c.icon = v.icon; c.img = v.imgf || lnk;
+        let moved = 0; if(v.dept) c.products.forEach(pr => { pr.kg = v.dept; moved++; });
+        menuRender(); saveState();
+        showToast(moved ? moved + ' ürün “' + v.dept + '” departmanına bağlandı.' : 'Alt kategori güncellendi.');
+      }
+    });
+  }
+  async function delCat(i){
+    const c = categories[i]; if(!c) return;
+    if(categories.length <= 1){ showToast('En az bir kategori kalmalı.'); return; }
+    const n = c.products.length;
+    if(!await uiConfirm('“' + catLabel(c) + '” alt kategorisi' + (n ? ' ve içindeki ' + n + ' ürün' : '') + ' silinsin mi? Bu işlem geri alınamaz.')) return;
+    c.products.forEach(p => priceDraft.delete(p.name));
+    categories.splice(i, 1); if(i < activeCatIndex) activeCatIndex--;
+    menuRender(); saveState(); showToast('Alt kategori silindi.');
+  }
+  async function delGroup(name){
+    const ix = grpIdx(name), n = ix.reduce((s, i) => s + categories[i].products.length, 0);
+    if(categories.length - ix.length < 1){ showToast('En az bir kategori kalmalı.'); return; }
+    if(!await uiConfirm('“' + name + '” ana kategorisi' + (ix.length > 1 ? ', ' + ix.length + ' alt kategorisi' : '') + (n ? ' ve toplam ' + n + ' ürünle birlikte' : '') + ' silinsin mi? Bu işlem geri alınamaz.')) return;
+    ix.forEach(i => categories[i].products.forEach(p => priceDraft.delete(p.name)));
+    categories = categories.filter(c => grpName(c) !== name);
+    groupMeta = groupMeta.filter(m => m.name !== name);
+    openGrps.delete(name); activeGrp = null; activeCatIndex = 0;
+    menuRender(); saveState(); showToast('Ana kategori silindi.');
+  }
 
-  document.getElementById('btnKategoriEkle').addEventListener('click', async () => {
-    const name = await uiPrompt('Yeni kategori adı:');
-    if(!name) return;
-    categories.push({ name, products: [] });
-    activeCatIndex = categories.length - 1;
-    renderCatList(); renderProductGrid();
-    showToast('Kategori eklendi: ' + name);
+  // ---------- üst başlık (seçili ana / alt kategori) ----------
+  function renderHead(){
+    const el = mnEl('menuHead'); if(!el) return;
+    const v = curView(), gs = menuGroups(categories), idxs = viewIdxs();
+    let lvl, lvlTxt, title, crumb = '', obj, edit = null, canSub = null, subN = 0;
+    if(v.kind === 'all'){ lvl = 'all'; lvlTxt = 'Genel görünüm'; title = 'Tüm Ürünler'; obj = { name: title, icon: '📋', img: '' }; }
+    else if(v.kind === 'grp'){ const g = gs.find(x => x.name === v.grp) || { name: v.grp, icon: '', img: '', subs: [] }; lvl = 'main'; lvlTxt = 'Ana kategori'; title = g.name; subN = g.subs.length; obj = { name: g.name, icon: g.icon, img: g.img }; edit = () => editGroup(g.name); canSub = g.name; }
+    else {
+      const c = categories[v.idx[0]], gn = grpName(c), g = gs.find(x => x.name === gn) || { name: gn, icon: '', img: '' }, leaf = !c.sub && grpIdx(gn).length === 1;
+      if(leaf){ lvl = 'main'; lvlTxt = 'Ana kategori'; title = g.name; obj = { name: g.name, icon: g.icon, img: g.img }; edit = () => editGroup(g.name); canSub = g.name; }
+      else { lvl = 'sub'; lvlTxt = 'Alt kategori'; crumb = gn; title = c.sub || c.name; obj = { name: title, icon: c.icon || g.icon, img: c.img }; const ci = v.idx[0]; edit = () => editCat(ci); }
+    }
+    const prices = idxs.flatMap(i => categories[i].products.map(p => p.price)), n = prices.length, st = [];
+    if(subN) st.push('<span><b>' + subN + '</b> alt kategori</span>');
+    if(n){ st.push('<span><b>' + n + '</b> ürün</span>', '<span>Ort. <b>' + fmtP(prices.reduce((a, b) => a + b, 0) / n) + '</b></span>', '<span><b>' + fmtP(Math.min.apply(null, prices)) + '</b> – <b>' + fmtP(Math.max.apply(null, prices)) + '</b></span>'); }
+    else st.push('<span>Henüz ürün yok</span>');
+    headCtx = { edit, canSub, ci: v.kind === 'cat' ? v.idx[0] : (idxs[0] != null ? idxs[0] : activeCatIndex) };
+    el.innerHTML =
+      '<div class="mh-thumb" data-act="editself"' + (edit ? ' title="Görseli / adı değiştir"' : '') + '>' + visHtml(obj, '', 'v-mh') + (edit ? '<span class="mh-edit">✎</span>' : '') + '</div>' +
+      '<div class="mh-txt"><div class="mh-top"><span class="lvl lvl-' + lvl + '">' + lvlTxt + '</span>' + (crumb ? '<span class="mh-crumb">' + esc(crumb) + ' ›</span>' : '') + '</div><h2>' + esc(title) + '</h2><div class="mh-stats">' + st.join('') + '</div></div>' +
+      '<div class="mh-actions"><button type="button" class="mbtn pri" data-act="newprod">＋ Yeni Ürün</button>' +
+      (canSub ? '<button type="button" class="mbtn" data-act="newsub">↳ Alt Kategori Ekle</button>' : '') +
+      (edit ? '<button type="button" class="mbtn" data-act="editself">✎ ' + (lvl === 'main' ? 'Ana Kategoriyi Düzenle' : 'Alt Kategoriyi Düzenle') + '</button>' : '') + '</div>';
+  }
+  mnEl('menuHead').addEventListener('click', e => {
+    const t = e.target.closest('[data-act]'); if(!t) return;
+    if(t.dataset.act === 'newprod') openProductForm(null, headCtx.ci);
+    else if(t.dataset.act === 'newsub' && headCtx.canSub) addSub(headCtx.canSub);
+    else if(t.dataset.act === 'editself' && headCtx.edit) headCtx.edit();
   });
-  // ---- toplu fotoğraf: dosya adı = ürün (veya kategori) adı ----
+
+  // ---------- ürün listesi + toplu fiyat düzenleme ----------
+  const draftOf = p => priceDraft.has(p.name) ? priceDraft.get(p.name) : null;
+  function setDraft(p, val){
+    if(val == null || !isFinite(val) || val < 0){ priceDraft.delete(p.name); return; }
+    val = Math.round(val * 100) / 100;
+    if(Math.abs(val - p.price) < 0.005) priceDraft.delete(p.name); else priceDraft.set(p.name, val);
+  }
+  function dirtyCount(){ let n = 0; categories.forEach(c => c.products.forEach(p => { const d = priceDraft.get(p.name); if(d != null && Math.abs(d - p.price) > 0.004) n++; })); return n; }
+  function deltaHtml(p, cur){
+    const diff = Math.round((cur - p.price) * 100) / 100; if(Math.abs(diff) < 0.005) return '';
+    const pct = p.price ? Math.abs(diff / p.price * 100) : 0;
+    return '<span class="' + (diff > 0 ? 'up' : 'down') + '">' + (diff > 0 ? '▲ +' : '▼ −') + fmtP(Math.abs(diff)) + ' <small>%' + pct.toFixed(1).replace(/\.0$/, '').replace('.', ',') + '</small></span>';
+  }
+  function listRow(p, k, c){
+    return '<div class="prow2" data-k="' + k + '">' + visHtml(p, c.icon, 'v-row') + '<div class="pn"><b>' + esc(p.name) + '</b><span>' + esc(p.portion || '') + (p.kg ? ' · ' + esc(p.kg) : '') + '</span></div><div class="pp">' + fmtP(p.price) + '</div><div class="pa"><button class="pc-ed" title="Düzenle">✎</button><button class="pc-del" title="Sil">🗑</button></div></div>';
+  }
+  function priceRow(p, k, c){
+    const d = draftOf(p), cur = d != null ? d : p.price;
+    return '<div class="prow2 pm-row' + (d != null ? ' chg' : '') + '" data-k="' + k + '"><input type="checkbox" class="pm-chk" data-k="' + k + '"' + (priceOff.has(p.name) ? '' : ' checked') + ' title="Toplu araçlara dahil et">' + visHtml(p, c.icon, 'v-sm2') +
+      '<div class="pn"><b>' + esc(p.name) + '</b><span>' + esc(p.portion || '') + '</span></div><div class="pm-old" title="Mevcut fiyat">' + fmtP(p.price) + '</div><span class="pm-arrow">→</span>' +
+      '<label class="pm-in"><span>₺</span><input class="pin" data-k="' + k + '" inputmode="decimal" value="' + fmtIn(cur) + '" autocomplete="off" aria-label="' + esc(p.name) + ' yeni fiyat"></label><div class="pm-delta">' + deltaHtml(p, cur) + '</div></div>';
+  }
+  function syncSecChecks(){
+    const grid = mnEl('productGrid');
+    curSecs.forEach((s, i) => { const cb = grid.querySelector('.pm-secchk[data-s="' + i + '"]'); if(!cb) return; const on = s.rows.filter(k => !priceOff.has(curRows[k].p.name)).length; cb.checked = on > 0 && on === s.rows.length; cb.indeterminate = on > 0 && on < s.rows.length; });
+  }
+  function updateScope(){
+    const tot = curRows.length, sel = curRows.filter(r => !priceOff.has(r.p.name)).length, a = mnEl('ptAll');
+    mnEl('ptScope').textContent = sel + ' / ' + tot + ' ürün seçili';
+    a.checked = tot > 0 && sel === tot; a.indeterminate = sel > 0 && sel < tot;
+  }
+  function updateBar(){
+    const n = dirtyCount(); let inView = 0;
+    curRows.forEach(r => { const d = draftOf(r.p); if(d != null && Math.abs(d - r.p.price) > 0.004) inView++; });
+    mnEl('pbInfo').innerHTML = n ? '<b>' + n + '</b> üründe fiyat değişikliği bekliyor' + (n > inView ? ' <span>(' + (n - inView) + ' tanesi diğer kategorilerde)</span>' : '') + ' <span>· henüz kaydedilmedi</span>' : 'Henüz değişiklik yok — fiyatları kutulara yazın veya yukarıdaki araçları kullanın.';
+    mnEl('pbSave').disabled = !n; mnEl('pbReset').disabled = !n;
+    mnEl('pbSave').textContent = n ? '✔ Fiyatları Güncelle (' + n + ')' : '✔ Fiyatları Güncelle';
+  }
+  function renderProductGrid(){
+    const grid = mnEl('productGrid'); if(!grid) return;
+    const ae = document.activeElement;
+    if(priceMode && ae && ae.classList && ae.classList.contains('pin') && grid.contains(ae)) return;   // fiyat yazarken (canlı eşitleme) odak kaybolmasın
+    if(!categories.length){ grid.innerHTML = ''; return; }
+    renderHead();
+    mnEl('segList').classList.toggle('on', !priceMode); mnEl('segPrice').classList.toggle('on', priceMode);
+    mnEl('priceTools').classList.toggle('show', priceMode); mnEl('priceBar').classList.toggle('show', priceMode);
+    const v = curView(), q = prodSearch.toLocaleLowerCase('tr-TR'), idxs = viewIdxs(), multi = idxs.length > 1;
+    curRows = []; curSecs = [];
+    let h = '';
+    idxs.forEach(ci => {
+      const c = categories[ci], items = c.products.filter(p => !q || p.name.toLocaleLowerCase('tr-TR').includes(q));
+      if(!items.length && (q || priceMode)) return;
+      const sec = { ci, rows: [] }, title = v.kind === 'all' ? catLabel(c) : (c.sub || c.name);
+      if(multi) h += '<div class="sec-h">' + (priceMode ? '<input type="checkbox" class="pm-secchk" data-s="' + curSecs.length + '" title="Bu bölümdeki ürünleri seç / bırak">' : '') + '<span>' + esc(title) + '</span><span class="n">' + c.products.length + ' ürün</span></div>';
+      if(!items.length) h += '<div class="prod-empty sm">Bu kategoride henüz ürün yok. <a href="#" data-addto="' + ci + '">＋ Ürün ekle</a></div>';
+      items.forEach(p => { const k = curRows.length; curRows.push({ p, ci }); sec.rows.push(k); h += priceMode ? priceRow(p, k, c) : listRow(p, k, c); });
+      curSecs.push(sec);
+    });
+    if(!h) h = '<div class="prod-empty">' + (q ? 'Aramaya uygun ürün yok.' : (priceMode ? 'Fiyatı düzenlenecek ürün yok.' : 'Bu kategoride henüz ürün yok. “＋ Yeni Ürün” ile ekleyin.')) + '</div>';
+    grid.innerHTML = h;
+    if(priceMode){ syncSecChecks(); updateScope(); updateBar(); }
+  }
+  async function setPriceMode(on){
+    if(!on && priceMode && dirtyCount()){
+      if(!await uiConfirm(dirtyCount() + ' üründe kaydedilmemiş fiyat değişikliği var. Silinsin mi?')) return;
+      priceDraft.clear();
+    }
+    priceMode = !!on; renderProductGrid();
+  }
+  async function savePrices(){
+    const n = dirtyCount(); if(!n) return;
+    if(!await uiConfirm(n + ' ürünün fiyatı güncellenecek ve menüde yayınlanacak. Onaylıyor musunuz?')) return;
+    let changed = 0;
+    categories.forEach(c => c.products.forEach(p => { const d = priceDraft.get(p.name); if(d != null && Math.abs(d - p.price) > 0.004){ p.price = d; changed++; } }));
+    priceDraft.clear(); menuRender(); saveState();
+    showToast('✔ ' + changed + ' ürünün fiyatı güncellendi.', 3000);
+  }
+  function applyOp(op){
+    const tg = curRows.filter(r => !priceOff.has(r.p.name));
+    if(!tg.length){ showToast('Önce listeden en az bir ürün seçin.'); return; }
+    const rs = +mnEl('ptRound').value || 0, rnd = x => rs ? Math.round(x / rs) * rs : Math.round(x * 100) / 100;
+    const dir = g => { const b = document.querySelector('#priceTools [data-dirgrp="' + g + '"] button.on'); return b ? +b.dataset.dir : 1; };
+    let fn;
+    if(op === 'set'){
+      const v = parseNum(mnEl('ptSet').value); if(!(v >= 0)){ showToast('Geçerli bir fiyat yazın (örn. 500).'); mnEl('ptSet').focus(); return; }
+      fn = () => v;
+    } else if(op === 'pct'){
+      const v = parseNum(mnEl('ptPct').value), s = dir('pct');
+      if(!(v > 0) || v > 500 || (s < 0 && v >= 100)){ showToast(s < 0 ? 'İndirim oranı 0 ile 100 arasında olmalı.' : 'Geçerli bir yüzde yazın (örn. 10).'); mnEl('ptPct').focus(); return; }
+      fn = x => rnd(x * (1 + s * v / 100));
+    } else {
+      const v = parseNum(mnEl('ptAmt').value), s = dir('amt');
+      if(!(v > 0)){ showToast('Geçerli bir tutar yazın (örn. 25).'); mnEl('ptAmt').focus(); return; }
+      fn = x => rnd(x + s * v);
+    }
+    tg.forEach(r => { const d = draftOf(r.p), cur = d != null ? d : r.p.price; let n = fn(cur); if(!(n >= 0)) n = 0; setDraft(r.p, n); });
+    renderProductGrid();
+    showToast(tg.length + ' ürünün yeni fiyatı hazırlandı — onaylamak için “Fiyatları Güncelle”ye basın.', 3800);
+  }
+
+  (function wireMenuUi(){
+    const grid = mnEl('productGrid');
+    grid.addEventListener('click', async e => {
+      const add = e.target.closest('[data-addto]'); if(add){ e.preventDefault(); openProductForm(null, +add.dataset.addto); return; }
+      const row = e.target.closest('.prow2'); if(!row) return; const r = curRows[+row.dataset.k]; if(!r) return;
+      if(e.target.closest('.pc-ed')) openProductForm(r.p, r.ci);
+      else if(e.target.closest('.pc-del')){
+        if(await uiConfirm('“' + r.p.name + '” silinsin mi?')){ const a = categories[r.ci].products; a.splice(a.indexOf(r.p), 1); priceDraft.delete(r.p.name); menuRender(); saveState(); }
+      }
+    });
+    grid.addEventListener('input', e => {
+      const inp = e.target.closest('.pin'); if(!inp) return;
+      const row = inp.closest('.pm-row'), r = curRows[+inp.dataset.k]; if(!row || !r) return;
+      const raw = inp.value.trim();
+      if(raw === '') setDraft(r.p, null); else { const v = parseNum(raw); if(isFinite(v)) setDraft(r.p, v); else return; }
+      const d = draftOf(r.p), cur = d != null ? d : r.p.price;
+      row.classList.toggle('chg', d != null); row.querySelector('.pm-delta').innerHTML = deltaHtml(r.p, cur); updateBar();
+    });
+    grid.addEventListener('change', e => {
+      const t = e.target;
+      if(t.classList.contains('pm-chk')){ const r = curRows[+t.dataset.k]; if(!r) return; t.checked ? priceOff.delete(r.p.name) : priceOff.add(r.p.name); syncSecChecks(); updateScope(); }
+      else if(t.classList.contains('pm-secchk')){
+        const s = curSecs[+t.dataset.s]; if(!s) return;
+        s.rows.forEach(k => { const nm = curRows[k].p.name; t.checked ? priceOff.delete(nm) : priceOff.add(nm); const cb = grid.querySelector('.pm-chk[data-k="' + k + '"]'); if(cb) cb.checked = t.checked; });
+        t.indeterminate = false; updateScope();
+      } else if(t.classList.contains('pin')){ const r = curRows[+t.dataset.k]; if(r){ const d = draftOf(r.p); t.value = fmtIn(d != null ? d : r.p.price); } }
+    });
+    grid.addEventListener('focusin', e => { if(e.target.classList && e.target.classList.contains('pin')) setTimeout(() => { try{ e.target.select(); }catch(_){} }, 0); });
+    grid.addEventListener('keydown', e => {
+      if(e.key !== 'Enter' || !e.target.classList.contains('pin')) return;
+      e.preventDefault(); const all = [...grid.querySelectorAll('.pin')], i = all.indexOf(e.target); (all[i + 1] || all[i]).focus();
+    });
+    mnEl('segList').addEventListener('click', () => setPriceMode(false));
+    mnEl('segPrice').addEventListener('click', () => setPriceMode(true));
+    mnEl('pbSave').addEventListener('click', savePrices);
+    mnEl('pbReset').addEventListener('click', () => { priceDraft.clear(); renderProductGrid(); showToast('Değişiklikler sıfırlandı.'); });
+    mnEl('ptAll').addEventListener('change', e => { curRows.forEach(r => { e.target.checked ? priceOff.delete(r.p.name) : priceOff.add(r.p.name); }); renderProductGrid(); });
+    mnEl('priceTools').addEventListener('click', e => {
+      const b = e.target.closest('[data-op]'); if(b){ applyOp(b.dataset.op); return; }
+      const d = e.target.closest('.seg.mini button'); if(d){ d.parentNode.querySelectorAll('button').forEach(x => x.classList.toggle('on', x === d)); }
+    });
+    mnEl('priceTools').addEventListener('keydown', e => { if(e.key === 'Enter' && e.target.tagName === 'INPUT'){ const c = e.target.closest('.pt-card'); const b = c && c.querySelector('[data-op]'); if(b){ e.preventDefault(); applyOp(b.dataset.op); } } });
+  })();
+  menuRender();
+
+  mnEl('btnKategoriEkle').addEventListener('click', addGroup);
+  // ---- toplu fotoğraf: dosya adı = ürün / alt kategori / ana kategori adı ----
   const normTr = t => String(t).toLocaleLowerCase('tr-TR').replace(/ç/g, 'c').replace(/ğ/g, 'g').replace(/ı/g, 'i').replace(/ö/g, 'o').replace(/ş/g, 's').replace(/ü/g, 'u').replace(/[^a-z0-9]+/g, ' ').trim();
-  document.getElementById('btnTopluFoto').addEventListener('click', () => document.getElementById('topluFotoInp').click());
-  document.getElementById('topluFotoInp').addEventListener('change', async e => {
+  mnEl('btnTopluFoto').addEventListener('click', () => mnEl('topluFotoInp').click());
+  mnEl('topluFotoInp').addEventListener('change', async e => {
     const files = [...e.target.files]; e.target.value = ''; if(!files.length) return;
-    const targets = []; categories.forEach(c => { targets.push({ o: c, n: normTr(c.sub || c.name), cat: true }); c.products.forEach(pr => targets.push({ o: pr, n: normTr(pr.name) })); });
+    const targets = [];
+    menuGroups(categories).forEach(g => targets.push({ grp: g.name, n: normTr(g.name) }));
+    categories.forEach(c => { targets.push({ o: c, n: normTr(c.sub || c.name) }); c.products.forEach(pr => targets.push({ o: pr, n: normTr(pr.name) })); });
     let ok = 0; const miss = [];
     for(const f of files){
       const fn = normTr(f.name.replace(/\.[^.]+$/, '')); if(!fn) continue;
       let t = targets.find(x => x.n === fn);
       if(!t){ const cand = targets.filter(x => x.n.length >= 4 && (fn.includes(x.n) || x.n.includes(fn))); t = cand.sort((a, b) => b.n.length - a.n.length)[0]; }
       if(!t){ miss.push(f.name); continue; }
-      const d = await new Promise(r => fileToThumb(f, 360, r)); if(d){ t.o.img = d; ok++; } else miss.push(f.name);
+      const d = await new Promise(r => fileToThumb(f, 360, r)); if(!d){ miss.push(f.name); continue; }
+      if(t.grp){ gmSet(t.grp, { img: d }); categories.forEach(c => { if(grpName(c) === t.grp && !c.sub) c.img = d; }); } else t.o.img = d;
+      ok++;
     }
-    renderCatList(); renderProductGrid(); saveState();
+    menuRender(); saveState();
     showToast(ok + ' fotoğraf eşleşti' + (miss.length ? ', eşleşmeyen: ' + miss.slice(0, 4).join(', ') + (miss.length > 4 ? '…' : '') : '.'));
   });
-  document.getElementById('btnYeniUrunEkle').addEventListener('click', () => handleCategoryAction('yeniurun', activeCatIndex));
-  document.getElementById('btnUrunAra').addEventListener('click', () => {
-    const input = document.getElementById('prodSearchInput');
-    input.classList.toggle('show');
-    if(input.classList.contains('show')) input.focus(); else { input.value = ''; prodSearch = ''; renderProductGrid(); }
-  });
-  document.getElementById('prodSearchInput').addEventListener('input', (e) => {
-    prodSearch = e.target.value;
-    renderProductGrid();
-  });
-  document.addEventListener('click', (e) => {
-    if(!e.target.closest('.cat-item')) document.querySelectorAll('.cat-menu').forEach(m => m.classList.remove('show'));
-  });
+  mnEl('prodSearchInput').addEventListener('input', e => { prodSearch = e.target.value; renderProductGrid(); });
 
   // ======================================================================
   // MUTFAK GRUPLARI
@@ -2762,7 +3202,7 @@
   function customerData(){
     if(pubData && pubData.categories){
       const tb = arr(pubData.tables);
-      if(pubData.menuVer === MENU_VER) return { categories: arr(pubData.categories).map(c => ({ name: c.name, grp: c.grp, sub: c.sub, gv: c.gv || 0, icon: c.icon || '', img: oldImg(c.img) ? '' : (c.img || ''), products: arr(c.products).map(pr => oldImg(pr.img) ? Object.assign({}, pr, { img: '' }) : pr) })), tables: tb };
+      if(pubData.menuVer === MENU_VER){ const cc = arr(pubData.categories).map(c => ({ name: c.name, grp: c.grp, sub: c.sub, gv: c.gv || 0, icon: c.icon || '', img: oldImg(c.img) ? '' : (c.img || ''), products: arr(c.products).map(pr => oldImg(pr.img) ? Object.assign({}, pr, { img: '' }) : pr) })); cc._gm = arr(pubData.groupMeta).filter(Boolean); return { categories: cc, tables: tb }; }
       return { categories, tables: tb }; // eski sürümden kalan yayın menüsü yok sayılır
     }
     return { categories, tables: regions.flatMap(r => r.tables.map(n => ({ n, label: tableLabels[n] || ('Masa ' + n) }))) };
@@ -2906,7 +3346,7 @@
   // ---------------- GARSON PANELİ BAŞLAT ----------------
   function publishPublic(){
     const tables = regions.flatMap(r => r.tables.map(n => ({ n, label: tableLabels[n] || ('Masa ' + n) })));
-    const data = { categories: migrateMenuGroups(stripOldImgs(categories)).map(c => ({ name: c.name, grp: c.grp || c.name, sub: c.sub || '', gv: c.gv || 0, icon: c.icon || '', img: c.img || '', products: c.products.map(p => ({ name: p.name, icon: p.icon || '', price: p.price, desc: p.desc || '', img: p.img || '' })) })), menuVer: MENU_VER, tables, menuOnly: !!settings.menuOnly, wifiName: settings.wifiName || '', wifiPass: settings.wifiPass || '' };
+    const data = { categories: migrateMenuGroups(stripOldImgs(categories)).map(c => ({ name: c.name, grp: c.grp || c.name, sub: c.sub || '', gv: c.gv || 0, icon: c.icon || '', img: c.img || '', products: c.products.map(p => ({ name: p.name, icon: p.icon || '', price: p.price, desc: p.desc || '', img: p.img || '' })) })), menuVer: MENU_VER, groupMeta: groupMeta.map(m => ({ name: m.name, icon: m.icon || '', img: m.img || '', ord: typeof m.ord === 'number' ? m.ord : -1 })), tables, menuOnly: !!settings.menuOnly, wifiName: settings.wifiName || '', wifiPass: settings.wifiPass || '' };
     if(!RT.local && RT.isAdmin && !RT.isAdmin()) return; // yalnızca yönetici hesabı yayınlar
     if(holdImgs) return; // güncel veri gelmeden eski yerel menüyü yayınlayıp müşteriye eski görseli gösterme
     const s = JSON.stringify(data);
@@ -3311,7 +3751,7 @@ ${st('M50 58c-5-6 5-10 0-17', 0)}${st('M60 56c-5-7 5-11 0-19', 1.05)}${st('M70 5
         { id: 'name', label: 'Ürün adı', value: p ? p.name : '' },
         { id: 'portion', label: 'Porsiyon', value: p ? p.portion : 'Tam' },
         { id: 'price', label: 'Fiyat (₺, KDV dahil)', type: 'number', step: '0.01', value: p ? p.price : '' },
-        { id: 'cat', label: 'Kategori', type: 'select', options: categories.map((c, i) => ({ v: i, t: c.name })), value: ci },
+        { id: 'cat', label: 'Kategori (Ana › Alt)', type: 'select', options: categories.map((c, i) => ({ v: i, t: catLabel(c) })), value: ci },
         { id: 'birim', label: 'Birim', type: 'select', options: birimNames, value: (p && p.birim) || birimNames[0] },
         { id: 'kg', label: 'Departman (sipariş hangi ekrana düşsün: Mutfak, Bar, Nargile…)', type: 'select', options: mutfakGruplari.map(g => g.name), value: (p && p.kg) || defGroup() },
         { id: 'desc', label: 'Açıklama (QR menüde görünür)', value: p ? (p.desc || '') : '' },
@@ -3325,7 +3765,7 @@ ${st('M50 58c-5-6 5-10 0-17', 0)}${st('M60 56c-5-7 5-11 0-19', 1.05)}${st('M70 5
         Object.assign(obj, { name: v.name, portion: v.portion || 'Tam', price: Math.round(v.price * 100) / 100, kdv: (p && p.kdv) || defKdvName(), birim: v.birim, kg: v.kg, desc: (v.desc || '').trim(), img: v.imgf || '', icon: (p && p.icon) || '' });
         if(!p){ categories[ni].products.push(obj); showAllProds = false; }
         else if(ni !== ci){ const a = categories[ci].products; a.splice(a.indexOf(p), 1); categories[ni].products.push(obj); }
-        activeCatIndex = ni; renderCatList(); renderProductGrid(); saveState(); showToast(v.name + ' kaydedildi.');
+        activeCatIndex = ni; activeGrp = null; if(categories[ni]) openGrps.add(categories[ni].grp || categories[ni].name); renderCatList(); renderProductGrid(); saveState(); showToast(v.name + ' kaydedildi.');
       }
     });
   }
@@ -3947,7 +4387,7 @@ ${st('M50 58c-5-6 5-10 0-17', 0)}${st('M60 56c-5-7 5-11 0-19', 1.05)}${st('M70 5
   // ---- durum kaydı, yedek, canlı eşitleme ----
   function snapshot(){
     readSettings();
-    return { carts, tableLabels, tableGuest, regions, nextTableNo, orderOpenedAt, categories, menuVer: MENU_VER, paidByKey, paymentHistoryByKey, customers, giderler, mutfakGruplari, adisyonSeq, adisyonNoByKey,
+    return { carts, tableLabels, tableGuest, regions, nextTableNo, orderOpenedAt, categories, groupMeta, menuVer: MENU_VER, paidByKey, paymentHistoryByKey, customers, giderler, mutfakGruplari, adisyonSeq, adisyonNoByKey,
       lists, payTypes, payLog, saleLog, closedAt, guestsByKey, discountByKey, extOrders, extSeq, perms, waiveLog, colLog, dayReports, cancelLog, settings: Object.assign({}, settings, { pin: undefined }) };
   }
   const localExtra = () => ({ staffUsers, pin: settings.pin });
@@ -3972,6 +4412,7 @@ ${st('M50 58c-5-6 5-10 0-17', 0)}${st('M60 56c-5-7 5-11 0-19', 1.05)}${st('M70 5
     if(Array.isArray(s.categories) && s.categories.length) categories = s.categories;
     stripOldImgs(categories);
     let seeded = false; if(s.menuVer !== MENU_VER){ categories = buildSeedMenu(); seeded = true; }
+    groupMeta = seeded ? [] : normGM(s.groupMeta);
     if(s.nextTableNo) nextTableNo = s.nextTableNo;
     paidByKey = s.paidByKey || {}; paymentHistoryByKey = s.paymentHistoryByKey || {};
     if(Array.isArray(s.customers)) customers = s.customers;
