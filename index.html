@@ -3009,8 +3009,10 @@
     const n = dirtyCount(); if(!n) return;
     if(!await uiConfirm(n + ' ürünün fiyatı güncellenecek ve menüde yayınlanacak. Onaylıyor musunuz?')) return;
     let changed = 0;
-    categories.forEach(c => c.products.forEach(p => { const d = priceDraft.get(p.name); if(d != null && Math.abs(d - p.price) > 0.004){ p.price = d; changed++; } }));
+    const noImg = [];
+    categories.forEach(c => c.products.forEach(p => { const d = priceDraft.get(p.name); if(d != null && Math.abs(d - p.price) > 0.004){ p.price = d; changed++; if(!imgOk(p.img)) noImg.push([p, c]); } }));
     priceDraft.clear(); menuRender(); saveState();
+    try{ noImg.forEach(x => imgQueue('prod', x[0], x[1])); }catch(e){}
     showToast('✔ ' + changed + ' ürünün fiyatı güncellendi.', 3000);
   }
   function applyOp(op){
