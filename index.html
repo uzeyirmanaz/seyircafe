@@ -1190,6 +1190,7 @@
       <span class="mode" id="rtMode"></span>
       <button class="ta-btn" id="btnCO" title="Siparişler" aria-label="Siparişler">🔔<span class="badge-n" id="coBadge">0</span></button>
       <button class="ta-btn" id="btnKitchen" title="Mutfak" aria-label="Mutfak">👨‍🍳<span class="badge-n" id="kBadge">0</span></button>
+      <button class="ta-btn" id="btnAsk" title="Soru Sor (Yapay Zekâ)" aria-label="Soru Sor">❓</button>
       <button class="ta-btn" id="btnLogout" title="Çıkış" aria-label="Çıkış">⎋</button>
     </div>
     <div class="eye-toggle" id="eyeToggle">
@@ -1765,7 +1766,7 @@
             <div class="ai-row"><button class="btn-mini" id="aiStkBtn">✨ Öneri getir</button></div><div class="ai-out" id="aiStkOut" style="display:none"></div></div>
           <div class="panel-card"><div class="panel-head"><div class="pi">📷</div><div><h2>Fotoğraftan veri girişi</h2><p>Fiş, fatura veya el yazısı listenin fotoğrafını okur; kontrol edip gider olarak ekleyebilirsiniz.</p></div></div>
             <div class="ai-row"><input type="file" accept="image/*" id="aiPhoto"><button class="btn-mini" id="aiPhotoBtn">✨ Oku</button></div><div id="aiPhotoOut"></div></div>
-          <div class="panel-card"><div class="panel-head"><div class="pi">💬</div><div><h2>Müşteri asistanı &amp; sipariş notu</h2><p>Müşteri menüsünde “💬 Menü Asistanı” düğmesi, sipariş notlarında ise “✨” düzenleme düğmesi otomatik çalışır. Müşteri başına oturumda en fazla 15 soru sorulabilir.</p></div></div></div>
+          <div class="panel-card"><div class="panel-head"><div class="pi">💬</div><div><h2>Müşteri asistanı &amp; sipariş notu</h2><p>Müşteri menüsünde “💬 Menü Asistanı” düğmesi, sipariş notlarında ise “✨” düzenleme düğmesi otomatik çalışır. Müşteri başına oturumda en fazla 10 soru sorulabilir.</p></div></div></div>
         </div>
 
         <!-- ZAYİ İŞLEMLERİ -->
@@ -3980,7 +3981,7 @@ ${st('M50 58c-5-6 5-10 0-17', 0)}${st('M60 56c-5-7 5-11 0-19', 1.05)}${st('M70 5
         Object.assign(obj, { name: v.name, portion: v.portion || 'Tam', price: Math.round(v.price * 100) / 100, kdv: (p && p.kdv) || defKdvName(), birim: v.birim, kg: v.kg, desc: (v.desc || '').trim(), img: v.imgf || '', icon: (p && p.icon) || '' });
         if(!p){ categories[ni].products.push(obj); showAllProds = false; }
         else if(ni !== ci){ const a = categories[ci].products; a.splice(a.indexOf(p), 1); categories[ni].products.push(obj); }
-        activeCatIndex = ni; activeGrp = null; if(categories[ni]) openGrps.add(categories[ni].grp || categories[ni].name); renderCatList(); renderProductGrid(); saveState(); showToast(v.name + ' kaydedildi.');
+        activeCatIndex = ni; activeGrp = null; if(categories[ni]) openGrps.add(categories[ni].grp || categories[ni].name); renderCatList(); renderProductGrid(); saveState(); showToast(v.name + ' kaydedildi.'); try{ if(!imgOk(obj.img)) autoProductImage(obj, categories[ni]); }catch(e){}
       }
     });
   }
@@ -5111,7 +5112,7 @@ ${st('M50 58c-5-6 5-10 0-17', 0)}${st('M60 56c-5-7 5-11 0-19', 1.05)}${st('M70 5
   var AI_LANGS = { en: 'İngilizce', de: 'Almanca', ru: 'Rusça', ar: 'Arapça', fr: 'Fransızca' };
   var APPCHECK_SITE_KEY = '6Lf9ieotAAAAACBfihhPp2eobnFTq1ZfvPfO-g_V';   // reCAPTCHA SITE (herkese açık) anahtarı
   var APPCHECK_ENTERPRISE = false;   // Firebase App Check'te sağlayıcı 'reCAPTCHA Enterprise' ise true yapın; 'reCAPTCHA v3' ise false kalsın
-  var AI_MODELS = ['gemini-3.8-flash', 'gemini-3.5-flash-lite', 'gemini-3.1-flash-lite'], AIM = { ai: null, gm: null, i: 0, text: null, json: null }, aiChatN = 0, aiChatHist = [], _trC = {};
+  var AI_MODELS = ['gemini-3.5-flash-lite', 'gemini-3.1-flash-lite', 'gemini-3.8-flash'], AIM = { ai: null, gm: null, i: 0, text: null, json: null }, aiChatN = 0, aiChatHist = [], _trC = {};
 
   function aiBuild(){
     AIM.text = AIM.gm(AIM.ai, { model: AI_MODELS[AIM.i] });
@@ -5134,9 +5135,9 @@ ${st('M50 58c-5-6 5-10 0-17', 0)}${st('M60 56c-5-7 5-11 0-19', 1.05)}${st('M70 5
       try{ return (await AIM[kind].generateContent(c)).response.text(); }
       catch(e){
         const m = String((e && e.message) || e), last = AIM.i >= AI_MODELS.length - 1;
-        if(/404|not.?found|no longer available|not supported/i.test(m) && !last){ AIM.i++; aiBuild(); tries = 0; continue; }
+        if((/404|not.?found|no longer available|not supported/i.test(m) || /429|quota|resource.?exhausted/i.test(m)) && !last){ AIM.i++; aiBuild(); tries = 0; continue; }
         if(/\[\s*(500|502|503|504)\s*\]|high demand|overload|unavailable|try again later/i.test(m)){
-          if(tries < 2){ await new Promise(r => setTimeout(r, 1500 * (tries + 1))); tries++; continue; }
+          if(tries < 1){ await new Promise(r => setTimeout(r, 2000)); tries++; continue; }
           if(!last){ AIM.i++; aiBuild(); tries = 0; continue; }
         }
         throw e;
@@ -5152,7 +5153,7 @@ ${st('M50 58c-5-6 5-10 0-17', 0)}${st('M60 56c-5-7 5-11 0-19', 1.05)}${st('M70 5
     if(/\[\s*(500|502|503|504)\s*\]|high demand|overload|unavailable/i.test(m)) return 'Yapay zekâ şu an çok yoğun (Google tarafında geçici). Birkaç dakika sonra tekrar deneyin.';
     if(/404|not.?found|no longer available/i.test(m)) return 'Yapay zekâ modeli bulunamadı veya kapatılmış. Ayrıntı: ' + m.slice(0, 200);
     if(/api.?not.?enabled|403|permission|api.?key|forbidden/i.test(m)) return 'Yapay zekâ erişimi reddedildi. Firebase Console > AI Logic bölümünü etkinleştirdiniz mi? (' + m.slice(0, 120) + ')';
-    if(/quota|429|resource.?exhausted/i.test(m)) return 'Yapay zekâ kotası doldu. Biraz sonra tekrar deneyin.';
+    if(/quota|429|resource.?exhausted/i.test(m)) return 'Yapay zekânın ücretsiz kotası doldu (dakikalık veya günlük). Birkaç dakika sonra tekrar deneyin; günlük kota yaklaşık sabah 10:00\'da (Türkiye saati) yenilenir.';
     if(navigator.onLine === false) return 'İnternet bağlantısı yok.';
     return 'Yapay zekâ hatası: ' + m.slice(0, 260);
   }
@@ -5253,7 +5254,7 @@ ${st('M50 58c-5-6 5-10 0-17', 0)}${st('M60 56c-5-7 5-11 0-19', 1.05)}${st('M70 5
     bg.querySelector('#aiClose').onclick = () => bg.remove();
     const go = async () => {
       const t = q.value.trim(); if(!t) return; q.value = '';
-      if(aiChatN >= 15){ add('a', 'Soru sınırına ulaştınız. Lütfen garsonumuza danışın.'); return; }
+      if(aiChatN >= 10){ add('a', 'Soru sınırına ulaştınız. Lütfen garsonumuza danışın.'); return; }
       aiChatN++; add('u', t); send.disabled = true;
       try{
         const hist = aiChatHist.slice(-6).join('\n');
@@ -5325,6 +5326,95 @@ ${st('M50 58c-5-6 5-10 0-17', 0)}${st('M60 56c-5-7 5-11 0-19', 1.05)}${st('M70 5
   });
   document.querySelectorAll('.nav-item[data-screen="ai"]').forEach(el => el.addEventListener('click', aiRefreshUI));
   aiRefreshUI();
+
+
+  // =====================================================================
+  // YÖNETİCİ SORU-CEVAP + OTOMATİK ÜRÜN GÖRSELİ
+  // =====================================================================
+  const APP_GUIDE = `Sistem: SEYİR CAFE adisyon / dijital menü uygulaması. Sol menü ve ekranlar:
+- Ana Sayfa: bugünkü satış, misafir, açık sipariş, gider ve grafikler (yalnızca rapor yetkisi olanlar).
+- Dijital Menü: masa seçip müşteri QR kodunu gösterir/yazdırmaya hazırlar.
+- Yapay Zekâ: satış özeti, menü açıklaması yazma, menü çevirisi, stok/fiyat önerisi, fotoğraftan gider girişi, bağlantı testi.
+- Tanımlamalar: Masa/Bölgeler (bölge, masa ekleme, toplu masa, ad değiştirme/silme), Menü/Ürünler (ana kategori > alt kategori, ürün ekle/düzenle, toplu fiyat düzenleme, toplu fotoğraf, "Sadece menü modu" anahtarı), Birimler, Özellikler (sipariş notları), KDV Oranları (★ ile varsayılan), İndirimler, Mutfak Grupları (Mutfak/Bar/Nargile ekranlarına yönlendirme), Müşteriler (açık hesap, tahsilat, CSV indir), Ödenmezler (ikram gerekçeleri).
+- Sipariş: Bölgeler (masalar; beyaz boş, kırmızı sipariş bekliyor/mutfakta, yeşil teslim edilmiş) ve Siparişler (kanban) sekmeleri; ⛶ tam ekran, 📶 bağlantı durumu, ↻ yenile. Masaya tıklayınca menüden ürün seçilir, "Sepeti Gör > Onayla ve Kaydet" ile mutfağa gider.
+- Adisyon ekranında: kişi sayısı, ürün notu, ⇄ Ürün/Masa Taşı, ✕ Adisyonu İptal (neden + yönetici PIN), 💳 Ödeme Al (nakit, kart, açık hesap, hesap bölme, indirim, ikram), 🖨️ fiş yazdır, ✎ masaya müşteri adı.
+- Paket / Gel-Al: yeni sipariş, yola çıktı / hazır işaretleme.
+- İşlemler: Gider/Masraf, Zayi.
+- Kullanıcılar: kullanıcı ekleme (görev, şifre, bölge, engelleme) ve Yetkiler tablosu (görev bazlı).
+- Raporlar: Ürün Satış, Gün Sonu (Günü Kapat, geçmiş günler, iptal kayıtları, CSV), Vardiya, Restaurant İstatistikleri, Fire.
+- Ayarlar: Genel (restoran adı, gün başlangıcı, vardiya saati, ilk adisyon no, Wi-Fi adı/şifresi, yönetici PIN), Ödeme Tipleri, Yedek & Sistem (yedek indir/yükle, verileri sıfırla).
+- Sağ üst: 🔔 müşteri siparişleri onayı, 👨‍🍳 mutfak ekranı, ❓ soru sor, ⎋ çıkış, güneş/ay ile karanlık mod.
+- Müşteri tarafı: logoya 4 kez dokunmak personel girişini açar.`;
+  let askHist = [];
+  function askContext(){
+    let d = 'Menüde ' + categories.reduce((n, c) => n + c.products.length, 0) + ' ürün, ' + categories.length + ' alt kategori var; ' + regions.reduce((n, r) => n + r.tables.length, 0) + ' masa tanımlı; açık adisyon: ' + Object.keys(carts).filter(k => (carts[k] || []).length).length + '.';
+    if(can('reports')){ try{ d += '\nSatış verisi (son 7 gün): ' + JSON.stringify(aiSales(7)).slice(0, 5000); }catch(e){} }
+    return d;
+  }
+  function openAskAdmin(){
+    if(!window.__fbApp){ showToast('Soru sorma için Firebase (canlı) bağlantısı gerekir.'); return; }
+    const bg = document.createElement('div'); bg.className = 'modal-bg show'; bg.style.zIndex = 1400;
+    bg.innerHTML = '<div class="modal-box" style="max-width:560px"><h3 style="margin:0 0 4px">❓ Soru Sor</h3><p style="margin:0 0 8px;font-size:.82rem;color:var(--ink-faint)">Uygulamada bir şeyin nerede olduğunu, nasıl yapılacağını veya satışlarınızı sorun.</p><div id="askLog" style="max-height:46vh;overflow:auto"></div><div style="display:flex;gap:6px;margin-top:8px"><input id="askQ" type="text" placeholder="Örn: Ürün fiyatlarını nasıl toplu artırırım?" style="flex:1;padding:10px;border:1px solid var(--line);border-radius:8px;background:var(--panel-2);color:var(--ink)"><button class="btn-save" id="askSend" style="margin:0;width:auto;padding:0 14px">Sor</button></div><button class="btn-save" id="askClose" style="margin:8px 0 0;background:var(--ink-faint)">Kapat</button></div>';
+    document.body.appendChild(bg);
+    const log = bg.querySelector('#askLog'), q = bg.querySelector('#askQ'), send = bg.querySelector('#askSend');
+    const add = (c, t) => { const d = document.createElement('div'); d.className = 'ai-bub ' + c; d.textContent = t; log.appendChild(d); log.scrollTop = log.scrollHeight; };
+    if(!askHist.length) add('a', 'Merhaba! Uygulamayla ilgili ne öğrenmek istersiniz?'); else askHist.forEach(h => add(h.r, h.t));
+    bg.querySelector('#askClose').onclick = () => bg.remove();
+    const go = async () => {
+      const t = q.value.trim(); if(!t) return; q.value = ''; add('u', t); askHist.push({ r: 'u', t }); send.disabled = true;
+      try{
+        const hist = askHist.slice(-9, -1).map(h => (h.r === 'u' ? 'Yönetici: ' : 'Asistan: ') + h.t).join('\n');
+        const a = await aiAsk('Sen bir kafe adisyon uygulamasının yardımcısısın; kullanıcı işletme yöneticisi/personeli. Türkçe, kısa ve net yanıtla (düz metin, markdown yok; adımları 1) 2) ile yaz). Uygulama soruları için aşağıdaki rehberi kullan ve hangi menü/ekranda hangi düğmeye basılacağını söyle. Rehberde olmayan bir özelliği VAR diye uydurma; yoksa dürüstçe söyle. Satış/işletme sorularında yalnızca verilen veriye dayan, veri yoksa uydurma. Genel işletme/kafe sorularına da kısa yardımcı ol.\n\nREHBER:\n' + APP_GUIDE + '\n\nGÜNCEL DURUM:\n' + askContext() + '\n\nÖNCEKİ KONUŞMA:\n' + hist + '\n\nSORU: ' + t);
+        add('a', a); askHist.push({ r: 'a', t: a });
+      }catch(e){ console.error('AI', e); add('a', 'Hata: ' + aiErr(e)); }
+      send.disabled = false; q.focus();
+    };
+    send.onclick = go; q.addEventListener('keydown', e => { if(e.key === 'Enter') go(); }); q.focus();
+  }
+  $id('btnAsk').addEventListener('click', openAskAdmin);
+
+  // ---- otomatik ürün görseli: önce yapay zekâ ile üret, olmazsa ürüne uygun çizim kalır ----
+  let imgGenQ = Promise.resolve();
+  function dataUrlToThumb(dataUrl, max){
+    return new Promise(res => { const im = new Image(); im.onerror = () => res(''); im.onload = () => { const k = Math.min(1, max / Math.max(im.width, im.height)), c = document.createElement('canvas'); c.width = Math.round(im.width * k); c.height = Math.round(im.height * k); c.getContext('2d').drawImage(im, 0, 0, c.width, c.height); res(c.toDataURL('image/jpeg', 0.72)); }; im.src = dataUrl; });
+  }
+  async function aiMakeImage(name, catName){
+    await aiInit();
+    const { ResponseModality } = await import(window.__fbB + 'firebase-ai.js');
+    const m = AIM.gm(AIM.ai, { model: 'gemini-2.5-flash-image', generationConfig: { responseModalities: [ResponseModality.TEXT, ResponseModality.IMAGE] } });
+    const r = await m.generateContent('Iştah açıcı, profesyonel bir kafe menüsü ürün fotoğrafı: "' + name + '"' + (catName ? ' (kategori: ' + catName + ')' : '') + '. Üstten veya hafif açılı çekim, sade açık renk zemin, yumuşak doğal ışık, tek ürün ön planda. Görselde yazı, logo, filigran veya insan olmasın.');
+    const parts = r.response.inlineDataParts ? r.response.inlineDataParts() : [];
+    if(!parts || !parts.length) throw new Error('Görsel üretilemedi');
+    return dataUrlToThumb('data:' + (parts[0].inlineData.mimeType || 'image/png') + ';base64,' + parts[0].inlineData.data, 360);
+  }
+  function autoProductImage(prod, cat){
+    if(!window.__fbApp || !prod || imgOk(prod.img)) return Promise.resolve(false);
+    imgGenQ = imgGenQ.then(async () => {
+      if(imgOk(prod.img)) return false;
+      showToast('🎨 “' + prod.name + '” için görsel hazırlanıyor…', 3000);
+      try{
+        const d = await aiMakeImage(prod.name, cat && (cat.sub || cat.name));
+        if(!d) throw new Error('boş');
+        prod.img = d; menuRender(); saveState(); publishPublic(); showToast('✔ “' + prod.name + '” görseli oluşturuldu.'); return true;
+      }catch(e){
+        console.error('Görsel üretimi', e);
+        showToast('Yapay zekâ görseli üretilemedi; “' + prod.name + '” için ürüne uygun çizim kullanılıyor.', 3500); return false;
+      }
+    });
+    return imgGenQ;
+  }
+  // toplu: görseli olmayan ürünler (her seferinde en fazla 10)
+  (function(){
+    const card = document.createElement('div'); card.className = 'panel-card';
+    card.innerHTML = '<div class="panel-head"><div class="pi">🎨</div><div><h2>Ürün görseli üretimi</h2><p>Fotoğrafı olmayan ürünler için yapay zekâ ile görsel üretir (her seferinde en fazla 10 ürün). Yeni eklenen ürünlerde otomatik çalışır.</p></div></div><div class="ai-row"><button class="btn-mini" id="aiImgBtn">✨ Eksik görselleri üret</button><span id="aiImgSt" class="ai-st"></span></div>';
+    const host = $id('screen-ai'); host.appendChild(card);
+    $id('aiImgBtn').addEventListener('click', () => aiRun($id('aiImgBtn'), async () => {
+      const miss = allProds().filter(x => !imgOk(x.p.img)), list = miss.slice(0, 10);
+      if(!list.length){ showToast('Tüm ürünlerin görseli var.'); return; }
+      let ok = 0; for(const x of list){ $id('aiImgSt').textContent = (ok + 1) + '/' + list.length + ' — ' + x.p.name; try{ if(await autoProductImage(x.p, x.c)) ok++; }catch(e){} }
+      $id('aiImgSt').textContent = ok + ' görsel üretildi, ' + (miss.length - ok) + ' ürün kaldı.';
+    }));
+  })();
 
   smFullApply('siparis-masa');
   bootApp();
