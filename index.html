@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="build" content="20261012-3">
+<meta name="build" content="20261012-10">
 <script>(function(){ if(!/^https?:/.test(location.protocol)) return; try{ const now = Date.now(), last = +sessionStorage.getItem('seyirChk') || 0; if(now - last < 600000) return; sessionStorage.setItem('seyirChk', now); const f = new URL(location.href); f.searchParams.set('_t', Date.now());
   fetch(f.toString(), { cache: 'no-store' }).then(r => r.text()).then(t => { const m = t.match(/name="build" content="([^"]+)"/), cur = document.querySelector('meta[name=build]').content;
     if(m && m[1] !== cur && sessionStorage.getItem('seyirReload') !== m[1]){ sessionStorage.setItem('seyirReload', m[1]); const u = new URL(location.href); u.searchParams.set('_v', m[1]); location.replace(u.toString()); } }).catch(() => {}); }catch(e){} })();</script>
@@ -1571,6 +1571,7 @@
     </div>
   </div>
 
+<script>window.__pubP = /^https?:/.test(location.protocol) ? fetch("https://adisyon-sistem-818a6-default-rtdb.firebaseio.com/public.json", { cache: "no-store" }).then(r => r.ok ? r.json() : null).catch(() => null) : Promise.resolve(null);</script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script>
 /* Personel arayüzü müşteri için DOM'dan çıkarılır (okuma modu / ekran okuyucu / sayfa dönüştürücüler göremez); personel girişinde geri takılır. */
@@ -2222,8 +2223,7 @@
     'Türk Kahveleri':['Kahveler'], 'Espresso':['Kahveler'], 'Sıcak Kahveler':['Kahveler'], 'Soğuk Kahveler':['Kahveler'],
     'Nargile':['Nargileler']
   };
-  var IMG_BASE = 'https://karekodrestaurantmenu.com/Pictures/', IMG_MAP = {"Sahlep": "fd3b5a4a-c7ed-46e4-b86b-9f98602c4c66.jpeg", "Damla Sakızlı Sahlep": "fd3b5a4a-c7ed-46e4-b86b-9f98602c4c66.jpeg", "Sıcak Çikolata": "95a5a878-4efe-42e4-b026-bb25c8fa0329.jpg", "Sütlü Kakao": "1a037857-a3a6-4f30-90e0-91ea1becdf16.jpeg", "Ballı Süt": "9afba647-2945-4f4d-81aa-193b32458775.jpeg", "Sıcak Süt": "29505646-07f7-458f-a224-cd61b7c643fc.jpeg", "Nane Limon Oralet": "0e46f4f7-fc97-4452-85e6-41d3551ffa32.jpeg", "Kuşburnu Oralet": "bc89d1cf-d940-4bca-9c25-6337c0a22c79.jpeg", "Muz Oralet": "6ae9d5c4-c2dd-4167-bc6c-556c97fc7070.jpeg", "Limon Oralet": "9dabecd7-780d-40c6-8dc7-e22310ec6375.jpeg", "Elma Oralet": "9dbc924c-8741-4946-a7a0-edc2f7d2e5c9.jpeg", "Kivi Oralet": "19e72772-0bc2-4bb4-b453-be12731c0cee.jpeg", "Portakal Oralet": "08cc6f18-02c6-4cc5-be3b-40e46b463d1e.jpeg", "Atom Oralet": "a315d0d5-6548-4fce-bd98-1d9599b50f9a.jpeg", "Çay": "a84da3b3-3b9d-4558-8a08-df5de871e239.jpg", "Saç Tava (Kuzu)": "689e4d2a-a527-4d4b-a8ea-b3491a97457f.jpg", "Et Sote": "aa89a7c8-f56e-410e-9b64-019119198690.jpg", "Tavuk Sote": "d4590939-2c38-456a-bca8-8ead566be63a.jpg", "Kasap Köfte": "03fbc0e3-0277-442c-ae64-8189e19c8032.jpg", "Tavuk Izgara": "4821a859-7274-4b6b-965e-800a3002b80f.jpeg", "Tavuk Şinitsel": "a343c363-d9de-4914-a9cf-944c2f132847.jpeg", "Köri Soslu Tavuk": "6241d9fb-99bf-40da-bceb-64015d4a2917.jpg", "Soya Soslu Tavuk": "e7a872cc-6b53-4c4e-99f1-9243b49f5a46.jpg", "Sucuklu Kaşarlı Tost": "62012f9d-e1cb-4207-9604-4c5c1d54ff17.jpg", "Yumurtalı Sucuklu Kaşarlı Tost": "b9d17656-aa6f-4529-90e1-0830c220b8d5.jpg", "Kavurmalı Kaşarlı Tost": "d271cc8a-0c05-4848-a01f-95d019daf740.jpg", "Menemen": "8f9be361-6a22-41a5-893d-de20a94e9b6d.jpeg", "Kavurmalı Menemen": "727332a4-b8e5-4ced-9ad8-22a17218aed5.jpeg", "Kaşarlı Menemen": "ea8307f8-cb4c-41d1-a680-9ea358efa109.jpeg", "Sucuklu Menemen": "264bf14e-5cea-47ca-9a53-8bbbc64c0326.jpeg", "Kaşarlı Sucuklu Menemen": "c8599736-41de-4f36-9e86-4e2041666dff.jpeg", "Hamburger": "2720bc45-3bcf-4ee7-8219-1f439c830991.jpeg", "Mercimek Çorbası": "c6f369c4-9837-478f-a627-19bce024bb1e.jpeg", "Kakule Espresso": "650b956e-3f9b-4516-a17e-d2ef6151dc3c.jpeg", "Beyaz Çikolata Espresso": "61942f1f-c6bc-4665-86d3-91efbc4e21f1.jpg", "French Vanilya Espresso": "28f79dd2-05c6-429f-87b4-a8a97bcb331d.jpg", "Colombia Espresso": "4887ae63-8436-46ab-ba58-cafc36303fc9.jpg", "Costa Rica Espresso": "4bbbaac8-741f-49a2-957c-dbaa720f7bb0.jpg", "Classic Espresso": "46c7dc38-59ed-4fd3-9f59-5e6cfd33b038.jpeg", "Swiss Chocolate Espresso": "0087cec4-45a3-44eb-b7f2-f51d61b3a4a0.jpg", "Chocolate Raspberry Espresso": "dcc05826-0247-4a01-9700-5112a7ae4b39.jpg", "Mango Frozen": "0271bdc0-cfde-4eb3-bae0-e89294931b51.jpeg", "Elma Frozen": "e967bec3-210e-4caa-8562-fcf13a056ec5.jpeg", "Çilek Frozen": "8ba27f4d-80b1-41e1-a1b7-70c87c952d5e.jpeg", "Kivi Frozen": "943addf0-6bf6-402f-873d-11a96a3a32f9.jpeg", "Şeftali Frozen": "b9726f25-a578-48d4-bab4-4ac7f3e426d6.jpeg", "Limon Frozen": "d33fe9e2-6dba-48e8-9d46-1079e83da91e.jpeg", "Muz Frozen": "0fae325e-f3bf-4c39-8e54-02015896748a.jpeg", "Muz Milkshake": "290ad05b-3412-474b-8d6b-ae8b1b96fe24.jpeg", "Çilek Milkshake": "fc702807-4951-46bc-bfd4-8a679f46fbbd.jpeg", "Vanilya Milkshake": "74b5bcb5-d066-45b0-9e92-ec3fcd1fd786.jpeg", "Çikolata Milkshake": "8a4f6e68-5a19-45af-9200-3e57b0f32125.jpeg", "Karamel Milkshake": "b359122c-34dd-4116-851a-9702be86129d.jpeg", "Vişne Milkshake": "fa28ceaf-4e69-4ff4-a4d8-7fbfdf77e1d6.jpeg", "Limon Milkshake": "1f96f51e-e9ae-4b70-9c66-a1e2b41e133a.jpeg", "Portakal Milkshake": "19fe24e1-495a-4c3e-ada8-b5511645de8f.jpeg", "Mango Milkshake": "2cf39737-1efa-487f-9539-d2434364fb73.jpeg", "Elma Milkshake": "7a700f71-980a-46c6-8b24-bf6bbd461931.jpeg", "Kivi Milkshake": "6d348a62-07d6-41bd-aad5-9d380f382bf1.jpeg", "Şeftali Milkshake": "c523bd81-e094-4874-a1a1-8ea10a80e260.jpeg", "Kapuçino Nargile": "9e3755a7-f895-442b-b22d-b8ba5a4404d1.jpg", "Anason Nargile": "1027280c-5103-415a-9bac-34f826c27a00.jpg", "Çilek Nargile": "a537cc49-d3ae-4547-893b-6ea9eb1ead24.jpeg", "Vivident Nargile": "241ffaa9-49c8-4c87-9d78-71bf4b0c62c6.jpeg", "Lady Killer Nargile": "da142438-f2cc-4d8d-bde4-dd703e95de4e.jpeg", "Love 66 Nargile": "0720c8b4-5502-46d5-b17f-2e1bd5a8c470.jpeg", "Yanık Şeftali Nargile": "ca21a09d-83f4-4532-b5bb-271d5526c76c.jpeg", "Limon Nargile": "5afaf999-8cb0-4bbe-9398-9a7fcf345eb5.jpeg", "Pink Nargile": "813774fd-ee1a-4e48-8ad7-6e452c321773.jpeg", "Şeftali Nargile": "59e55239-416a-4580-bfed-408997b082a9.jpeg", "Karpuz Nargile": "a3aaaada-6e1a-4148-be75-c84b5e4e3708.jpeg", "Kavun Nargile": "7a2272b0-aa26-4efc-87a0-441d28ca941e.jpeg", "Karadut Nargile": "8cd0f0e7-8217-4e30-9b86-f584f9769b22.jpeg", "Yaban Mersini Nargile": "6e1c144b-5732-4b4c-adf2-2f611a68e827.jpeg", "Elma Nargile": "c1f90725-045b-485a-9ac6-d8bb46e2f51b.jpeg", "Portakal Nargile": "e7909e3e-7447-43bd-bbdb-5b2d7f3c6329.jpeg", "Brownie Nargile": "b7cf0221-4cd0-4a83-9ec7-bda009870439.jpeg", "Gül Nargile": "601e928a-6838-4491-8aa4-396ddb7018ad.jpeg", "Ice Bom Bom Nargile": "81a37a66-f4d2-46ed-b93f-bba603e49125.jpeg", "Ice Şeftali Nargile": "22de32ea-824f-4d57-8cad-8b78885b405e.jpeg", "Nane Nargile": "316da6a7-b9d6-4886-a790-906a5101c14d.jpeg", "İzmir Romantik Nargile": "1a989f2d-f03c-4548-9359-df835cc6c61f.jpeg", "Üzüm Nargile": "0f84bdd5-9915-4342-a0e3-898d0b9eafe8.jpeg", "Limon Cheesecake Nargile": "cd353aba-4939-4444-a4c2-854144348050.jpeg", "Kola Nargile": "dc95edde-9c18-49b3-8115-0ad51e8224cc.jpeg", "Bisküvit Nargile": "179558a7-725e-4492-8956-9f132b6e567b.jpeg", "Dakota Çekirdek": "003f05f9-f2c2-4375-8e92-5de615736e5d.jpeg", "Leblebi": "12703c69-438a-437a-b1d5-cec5b0ea5536.jpeg", "Kabak Çekirdeği": "f6778e0e-badf-4883-be0c-b56926acdcd5.jpeg", "Fındık": "3dcfd98a-da85-4dd1-a5df-64a4e2d7e96f.jpeg", "Antep Fıstığı": "2c32607d-d085-4feb-a355-a208edcbdc22.jpeg", "Ihlamur": "db9b9f98-c48b-4a2b-986e-5665690c46d4.jpeg", "Adaçayı": "acbe570c-0671-4d1b-9376-4e958d265e46.jpeg", "Kış Çayı": "1fc9842a-927b-4a98-9a11-04e553c21ce3.jpeg", "Papatya": "8437939b-5dac-4550-abe7-e46f05dbec3b.jpeg", "Rezene": "ca57fe90-0a4e-4876-af3f-856f7998a034.jpeg", "Tarçın & Karanfil Çayı": "79bb33cb-b7af-4716-b28c-8f989f1bc8c4.jpeg", "Tarçın Çayı": "d99bbc55-48c0-416c-a198-32a520c7589c.jpeg", "Yeşil Çay": "4def7c9a-4a3e-4495-9a40-5838a71bd80e.jpeg", "Filtre Kahve": "40a67e18-9052-4aaa-acca-5dd32da568d4.jpeg", "Vanilya Dondurma": "c15e7da7-20ce-4566-913f-8b0141dedd23.jpeg", "Çikolata Dondurma": "fdf418a2-90df-4869-9154-82216bb29b61.jpeg", "Muz Dondurma": "60ff73f4-1bd6-4dfc-9d14-cbe76dfb3290.jpeg", "Limon Dondurma": "559c80c4-dd59-470a-9ba7-faf8cba044f3.jpeg", "Karamel Dondurma": "41383247-45cf-4c52-95dd-6be043163bdc.jpeg", "Çilek Dondurma": "9c78f918-5bfd-4bc5-ba7b-7cb401197f65.jpg", "El Yapımı Limonata": "621cf7e9-7c87-48f7-a7e1-98522f78ab72.jpeg", "Portakal Suyu (Sıkma)": "9fb9414c-3410-4415-ae38-380694b9f36f.jpeg", "Mandalina Suyu (Sıkma)": "71c6af84-2467-4ce4-9942-54e8d87ba370.jpeg", "Nar Suyu (Sıkma)": "83b926c3-51f9-4c8d-9688-d2dc85261f2d.jpeg", "Burn (Enerji İçeceği)": "fd5a7910-af47-4682-9478-af431523d19f.jpeg", "Coca Cola": "36a6aa52-13a9-4415-9103-e3247dae00ab.jpeg", "Sprite": "d1e36ce5-bae8-49f0-8315-92a91f3f4130.jpeg", "Fanta": "80482740-d492-40c8-8bf2-7853a53e6b51.jpeg", "Ayran": "c6388a2e-c9f2-4d1b-8866-21a4ab20f05d.jpeg", "Fuse Tea Mango": "c2ef9885-74c1-49c4-a91d-fad501dbd342.jpeg", "Fuse Tea Şeftali": "c232d5ca-b25c-46b6-a3ed-e28584502f56.jpeg", "Fuse Tea Limon": "fd9d37d6-20c6-4b65-83d4-8d0d35846f04.jpeg", "Fuse Tea Karpuz": "1f341602-33b4-4225-9c42-b96b8eaaad81.jpeg", "Cappy Vişne": "58d73804-e088-4b1e-924d-c07bd8914bd1.jpeg", "Cappy Şeftali": "7896f912-2a61-4250-a513-7c588994a898.jpeg", "Cappy Karışık": "9e8e6bfb-a925-4158-a3a0-5b09d03a4822.jpeg", "Churchill": "65537eee-61ba-467a-b858-76e0da73b1b8.jpeg", "Sade Soda": "0cf4c9aa-3ed3-4c23-8f80-5bc2d4f0234a.jpeg", "Limonlu Soda": "0ca6af29-3e08-4006-8b09-7a2a6606bebd.jpeg", "Elmalı Soda": "4650962d-71e3-4911-a75d-92cb05110ef7.jpeg", "Vişneli Soda": "af788281-aff8-4a16-a373-9cb7835e58b3.jpeg", "Çilekli Soda": "03527dd1-6132-471e-ac3f-35f790af7126.jpeg", "Çilek-Karpuzlu Soda": "133bf3b8-dac3-46f7-b09d-72d873ea471e.jpeg", "Supangle": "49d39bfe-3a62-4858-85cb-64442719bdca.jpeg", "Fırın Sütlaç": "43021cb3-1c53-4a57-a0fe-dbdaf2e88095.jpeg", "Profiterol": "87df5d71-571d-4419-802a-621433756140.jpeg", "Trileçe": "915d6d87-32c5-4e49-91a0-b6a6bbf2f4a6.jpeg", "Fıstıklı Baklava": "f61fd9ad-5146-494b-b7ac-068bae531d80.jpeg", "Cevizli Baklava": "6c9d3486-92a9-44f9-92ef-bfc212c450a4.jpeg", "Soğuk Baklava": "c14c740f-562b-49cd-89cc-8a9553688489.jpeg", "Meyveli Yaş Pasta": "33c33d0b-6602-4dff-a048-96d81e70d6f0.jpeg", "Meyve Tabağı (Mevsimlik)": "38fd2a87-a992-4065-8460-b2f7951e1926.jpg", "Bolonez Makarna": "7f714a35-6351-4f67-9ea1-602bec424c91.jpg", "Tavuklu Mantarlı Makarna": "a12a7ca2-86cd-4ef7-a676-81b09febd44b.jpg", "Arabiata Makarna": "04d0299b-977f-4345-aea6-fce694a456c9.jpg", "Ton Balıklı Makarna": "4f4562c7-8c95-4818-bb35-d93d5c80c97d.jpg", "Napoliten Makarna": "bbc6c867-bd8f-4440-a506-fd0ee1837400.jpg", "Sade Makarna": "39dcfb39-6c9c-4803-ab65-78a1489ef630.jpg", "Serpme Kahvaltı (2 Kişilik)": "7fe4e5a3-7181-48d8-aa85-5549d5a26a16.jpeg", "Kahvaltı Tabağı": "66431b64-46c7-4513-8fd9-3dff6398fed8.jpeg", "Sahanda Yumurta": "00a53119-dffa-4b81-bb88-e5db00524a3d.jpeg", "Peynirli Omlet": "800e1486-1719-48d6-8506-31605f98a66b.jpeg", "Sucuklu Yumurta": "1325b858-1ffb-4ae5-b470-2a5c96930a85.jpeg"};
-  function migrateMenuGroups(cats){ (cats || []).forEach(c => { if(typeof IMG_MAP !== 'undefined') (c.products || []).forEach(pr => { if(!pr.img && IMG_MAP[pr.name]) pr.img = IMG_BASE + IMG_MAP[pr.name]; }); if(!c.grp){ const m = GROUP_OF[c.name]; if(m){ c.grp = m[0]; if(m[1]) c.sub = m[1]; } else { const k = String(c.name).split(' / '); c.grp = k.length > 1 ? k[0] : c.name; if(k.length > 1) c.sub = k.slice(1).join(' / '); } } }); return cats; }
+  function migrateMenuGroups(cats){ (cats || []).forEach(c => { if(!c.grp){ const m = GROUP_OF[c.name]; if(m){ c.grp = m[0]; if(m[1]) c.sub = m[1]; } else { const k = String(c.name).split(' / '); c.grp = k.length > 1 ? k[0] : c.name; if(k.length > 1) c.sub = k.slice(1).join(' / '); } } }); return cats; }
   function menuGroups(cats){
     migrateMenuGroups(cats); const m = new Map();
     cats.forEach((c, i) => { const g = c.grp || c.name; if(!m.has(g)) m.set(g, { name: g, icon: (MENU_GROUPS.find(x => x[0] === g) || [])[1] || c.icon || '', img: '', subs: [] }); if(c.img && !m.get(g).img) m.get(g).img = c.img; m.get(g).subs.push({ idx: i, label: c.sub || c.name, cat: c }); });
@@ -2272,8 +2272,9 @@
   function artHue(s){ let h = 0; for(const c of String(s || '')) h = (h * 31 + c.charCodeAt(0)) % 360; return h; }
   function imgOk(u){ return /^https:\/\//i.test(u || '') || /^data:image\/(jpeg|png|webp);base64,/.test(u || ''); }
   // görsel varsa fotoğraf, yoksa renkli zemin üstünde ürün/kategori emojisi (görsel bozuksa da emoji kalır)
+  let holdImgs = false; // Firebase'den güncel veri gelene kadar eski (yerel) görseller çizilmesin
   function visHtml(o, fallbackIcon, cls){
-    const ic = o.icon || fallbackIcon || '🍽️', ok = imgOk(o.img), fb = illus(o.name), src = ok ? o.img : fb;
+    const ic = o.icon || fallbackIcon || '🍽️', ok = imgOk(o.img) && !holdImgs, fb = illus(o.name), src = ok ? o.img : fb;
     return '<div class="vis ' + cls + '" style="--h:' + artHue(o.name || ic) + '">' + (src && !ok ? '' : '<span class="vi">' + _e(ic) + '</span>') + (src ? '<img src="' + _e(src) + '" alt="" decoding="async" loading="lazy" referrerpolicy="no-referrer" style="opacity:0;transition:opacity .25s" onload="this.style.opacity=1"' + (ok ? ' data-fb="' + _e(fb) + '" onerror="this.onerror=null;if(this.dataset.fb)this.src=this.dataset.fb;else this.remove()"' : '') + '>' : '') + '</div>';
   }
   const catVis = g => visHtml({ img: g.img, icon: g.icon, name: g.name }, '', 'v-cat');
@@ -2682,6 +2683,9 @@
       if(auth.authStateReady) await auth.authStateReady();
       if(!auth.currentUser) await signInAnonymously(auth);
       const AUTH_MSG = { 'auth/invalid-credential': 'E-posta veya şifre hatalı.', 'auth/wrong-password': 'Şifre hatalı.', 'auth/user-not-found': 'Bu e-posta ile hesap yok.', 'auth/invalid-email': 'E-posta biçimi geçersiz.', 'auth/too-many-requests': 'Çok fazla deneme. Biraz bekleyin.', 'auth/network-request-failed': 'İnternet bağlantısı yok.', 'auth/operation-not-allowed': 'Firebase’de E-posta/Şifre girişi açık değil.' };
+      const _rtSeen = {};
+      const rtErr = (op, p, e) => { const c = (e && e.code) || 'hata'; console.error('Firebase ' + op + ' hatası (' + p + '):', c); const k = op + p + c; if(_rtSeen[k] && Date.now() - _rtSeen[k] < 60000) return; _rtSeen[k] = Date.now();
+        try{ showToast('⚠ Senkron ' + op + ' hatası: ' + p.split('/')[0] + ' (' + c + ')' + (/permission/i.test(c) ? ' — bu cihaz Firebase personel hesabıyla bağlı değil veya kurallar eşleşmiyor' : '')); }catch(_){} };
       const isAdminAcc = () => !!(auth.currentUser && !auth.currentUser.isAnonymous && (auth.currentUser.email || '').toLowerCase() === FIREBASE_ADMIN_EMAIL.toLowerCase());
       const staffAuth = async (needAdmin) => {
         if(auth.currentUser && !auth.currentUser.isAnonymous){
@@ -2701,11 +2705,11 @@
       const clean = v => (v === null ? null : JSON.parse(JSON.stringify(v)));
       RT = {
         local: false, staffAuth, isAdmin: isAdminAcc,
-        set: (p, v) => set(ref(db, p), clean(v)),
-        push: (p, v) => { const r = push(ref(db, p)); set(r, clean(v)); return r.key; },
-        remove: p => remove(ref(db, p)),
+        set: (p, v) => set(ref(db, p), clean(v)).catch(e => { rtErr('yazma', p, e); throw e; }),
+        push: (p, v) => { const r = push(ref(db, p)); set(r, clean(v)).catch(e => rtErr('yazma', p, e)); return r.key; },
+        remove: p => remove(ref(db, p)).catch(e => { rtErr('silme', p, e); throw e; }),
         get: p => get(ref(db, p)).then(s => s.val()),
-        on: (p, cb) => onValue(ref(db, p), s => cb(s.val()), err => console.error('Firebase okuma hatası (' + p + '):', err && err.code))
+        on: (p, cb) => onValue(ref(db, p), s => cb(s.val()), err => rtErr('okuma', p, err))
       };
     }catch(e){ console.error('Firebase başlatılamadı, yerel moda geçildi:', e); RT = LocalRT; }
   }
@@ -2734,7 +2738,7 @@
   function customerData(){
     if(pubData && pubData.categories){
       const tb = arr(pubData.tables);
-      if(pubData.menuVer === MENU_VER) return { categories: arr(pubData.categories).map(c => ({ name: c.name, grp: c.grp, sub: c.sub, icon: c.icon || '', img: c.img || '', products: arr(c.products).map(pr => (!pr.img && typeof IMG_MAP !== 'undefined' && IMG_MAP[pr.name]) ? Object.assign({}, pr, { img: IMG_BASE + IMG_MAP[pr.name] }) : pr) })), tables: tb };
+      if(pubData.menuVer === MENU_VER) return { categories: arr(pubData.categories).map(c => ({ name: c.name, grp: c.grp, sub: c.sub, icon: c.icon || '', img: c.img || '', products: arr(c.products).map(pr => pr) })), tables: tb };
       return { categories, tables: tb }; // eski sürümden kalan yayın menüsü yok sayılır
     }
     return { categories, tables: regions.flatMap(r => r.tables.map(n => ({ n, label: tableLabels[n] || ('Masa ' + n) }))) };
@@ -2880,6 +2884,7 @@
     const tables = regions.flatMap(r => r.tables.map(n => ({ n, label: tableLabels[n] || ('Masa ' + n) })));
     const data = { categories: migrateMenuGroups(categories).map(c => ({ name: c.name, grp: c.grp || c.name, sub: c.sub || '', icon: c.icon || '', img: c.img || '', products: c.products.map(p => ({ name: p.name, icon: p.icon || '', price: p.price, desc: p.desc || '', img: p.img || '' })) })), menuVer: MENU_VER, tables, menuOnly: !!settings.menuOnly, wifiName: settings.wifiName || '', wifiPass: settings.wifiPass || '' };
     if(!RT.local && RT.isAdmin && !RT.isAdmin()) return; // yalnızca yönetici hesabı yayınlar
+    if(holdImgs) return; // güncel veri gelmeden eski yerel menüyü yayınlayıp müşteriye eski görseli gösterme
     const s = JSON.stringify(data);
     if(s !== lastPub){ lastPub = s; RT.set('public', data); }
   }
@@ -2900,7 +2905,7 @@
       Object.keys(kitchenData).forEach(id => { if(!kSeen.has(id)){ kSeen.add(id); if(!kFirst) beep(); } });
       kFirst = false; renderKitchen();
     });
-    publishPublic(); setInterval(publishPublic, 3000); startStateSync();
+    startStateSync(); publishPublic(); setInterval(publishPublic, 3000);
     applyPerms(); goHome();
   }
   // ======================================================================
@@ -3981,10 +3986,13 @@ ${st('M50 58c-5-6 5-10 0-17', 0)}${st('M60 56c-5-7 5-11 0-19', 1.05)}${st('M70 5
   }
   function startStateSync(){
     if(RT.local) return;
+    holdImgs = true; renderAll();
+    const rel = () => { if(!holdImgs) return; holdImgs = false; renderAll(); };
+    setTimeout(rel, 2500);
     RT.on('state', v => {
-      if(!v){ lastSaved = ''; saveState(); return; }
-      if(v.dev === DEV) return;
-      if((v.savedAt || 0) > lastSavedAt) applyState(v, true);
+      if(!v){ lastSaved = ''; saveState(); rel(); return; }
+      if(v.dev !== DEV && (v.savedAt || 0) > lastSavedAt) applyState(v, true);
+      rel();
     });
   }
   window.addEventListener('storage', e => { if(e.key === STORE_KEY && e.newValue){ try{ applyState(JSON.parse(e.newValue), false); }catch(err){} } });
@@ -4030,13 +4038,22 @@ ${st('M50 58c-5-6 5-10 0-17', 0)}${st('M60 56c-5-7 5-11 0-19', 1.05)}${st('M70 5
 
   async function bootApp(){
     await initRT();
-    RT.on('public', v => {
+    let liveSeen = false;
+    const onPub = (v, live) => {
+      if(live) liveSeen = true; else if(liveSeen || !v || !v.categories) return;
+      if(JSON.stringify(v) === JSON.stringify(pubData) && pubReady) return;
       pubData = v; pubReady = true; clearTimeout(pubTimer);
       try{ if(v && v.categories) localStorage.setItem(PUB_CACHE, JSON.stringify(v)); }catch(e){}
       if(!staffMode) renderCustomer();
-    });
+    };
+    RT.on('public', v => onPub(v, true));
+    if(window.__pubP) window.__pubP.then(v => onPub(v, false));
     // yerel mod ya da internet yoksa: 4 sn içinde veri gelmezse yerel menüyle devam et
-    if(RT.local) pubReady = true; else pubTimer = setTimeout(() => { pubReady = true; if(!staffMode) renderCustomer(); }, 4000);
+    if(RT.local) pubReady = true; else pubTimer = setTimeout(() => {
+      if(staffMode) return;
+      if(pubData){ pubReady = true; renderCustomer(); }
+      else{ $id('cItems').dataset.sk = '1'; $id('cItems').innerHTML = '<p style="text-align:center;padding:40px 20px;color:var(--ink-faint)">Menü yüklenemedi. Bağlantınızı kontrol edip sayfayı yenileyin.</p>'; }
+    }, 8000);
     renderCustomer();
     restoreSession();
   }
