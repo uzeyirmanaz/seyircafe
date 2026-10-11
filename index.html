@@ -1425,7 +1425,7 @@
             <div class="cat-sidebar">
               <div class="sb-top">
                 <button class="mbtn pri sb-add" id="btnKategoriEkle" type="button">＋ Ana Kategori Ekle</button>
-                <div class="sb-hint"><b>Ana kategori</b> menünün üstündeki büyük görselli sekmedir. <b>Alt kategoriler</b> onun içinde gruplanır. İşlemler için satırın sağındaki <b>⋮</b> düğmesini kullanın.</div>
+                <div class="sb-hint"><b>Ana kategori</b> menünün üstündeki büyük görselli sekmedir. <b>Alt kategoriler</b> onun içinde gruplanır. İşlemler için satırın sağındaki <b>⋮</b> düğmesini kullanın. Menüden bir ana kategoriyi <b>alt kategoriye</b>, bir alt kategoriyi <b>ana kategoriye</b> çevirebilirsiniz.</div>
               </div>
               <div class="sb-list" id="catList"></div>
             </div>
@@ -2411,7 +2411,7 @@
   function stripOldImgs(cats){ (cats || []).forEach(c => { if(oldImg(c.img)) c.img = ''; (c.products || []).forEach(pr => { if(oldImg(pr.img)) pr.img = ''; }); }); return cats; }
   function migrateMenuGroups(cats){ (cats || []).forEach(c => {
     const nm = GROUP_OF[c.name];
-    if(nm){ const o = OLD_GROUP_OF[c.name], og = o ? o[0] : c.name, os = (o && o[1]) || '';
+    if(nm && c.gv !== 3){ const o = OLD_GROUP_OF[c.name], og = o ? o[0] : c.name, os = (o && o[1]) || '';
       if(!c.grp || c.gv !== 2 || (c.grp === og && (c.sub || '') === os)){ c.grp = nm[0]; c.sub = nm[1] || ''; c.gv = 2; } }
     else if(!c.grp){ const k = String(c.name).split(' / '); c.grp = k.length > 1 ? k[0] : c.name; if(k.length > 1) c.sub = k.slice(1).join(' / '); }
   }); return cats; }
@@ -2585,6 +2585,7 @@
       { ic: '＋', t: 'Yeni Ürün Ekle', fn: () => openProductForm(null, g.subs[0].idx) },
       { ic: '↳', t: 'Alt Kategori Ekle', fn: () => addSub(g.name) },
       { ic: '✎', t: leaf ? 'Kategoriyi Düzenle (ad, görsel)' : 'Ana Kategoriyi Düzenle (ad, görsel)', fn: () => editGroup(g.name) },
+      { ic: '⇩', t: 'Alt Kategoriye Çevir', fn: () => mainToSub(g.name) },
       { ic: '💲', t: 'Fiyatları Toplu Düzenle', fn: () => { if(leaf) selectCat(g.subs[0].idx); else selectGrp(g.name); setPriceMode(true); } },
       { sep: 1 },
       { ic: '↑', t: 'Yukarı Taşı', fn: () => moveGroup(g.name, -1) },
@@ -2597,6 +2598,7 @@
     return [
       { ic: '＋', t: 'Yeni Ürün Ekle', fn: () => openProductForm(null, i) },
       { ic: '✎', t: 'Alt Kategoriyi Düzenle (ad, görsel)', fn: () => editCat(i) },
+      ...(categories[i] && categories[i].sub ? [{ ic: '⇧', t: 'Ana Kategoriye Çevir', fn: () => subToMain(i) }] : []),
       { ic: '💲', t: 'Fiyatları Toplu Düzenle', fn: () => { selectCat(i); setPriceMode(true); } },
       { sep: 1 },
       { ic: '🗑', t: 'Alt Kategoriyi Sil', danger: 1, fn: () => delCat(i) }
@@ -2612,6 +2614,47 @@
   });
 
   // ---------- kategori işlemleri ----------
+
+  // ---------- ana ↔ alt kategori çevirme ----------
+  // Alt kategoriyi ana kategoriye çevirir (ürünleri korunur; ana kategori listesinde eski ana kategorisinin hemen altına girer)
+  function subToMain(i){
+    const c = categories[i]; if(!c || !c.sub) return;
+    const from = grpName(c), nm = c.sub, low = x => String(x).toLocaleLowerCase('tr-TR');
+    if(menuGroups(categories).some(g => low(g.name) === low(nm))){ showToast('“' + nm + '” adında bir ana kategori zaten var. Önce alt kategorinin adını değiştirin.'); return; }
+    c.name = nm; c.grp = nm; c.sub = ''; c.gv = 3;
+    const gs = menuGroups(categories), ni = gs.findIndex(g => g.name === nm);
+    if(ni >= 0){ const x = gs.splice(ni, 1)[0], at = gs.findIndex(g => g.name === from); gs.splice(at >= 0 ? at + 1 : gs.length, 0, x); }
+    gs.forEach((g, k) => gmSet(g.name, { ord: k }));
+    if(!categories.some(x => x !== c && grpName(x) === from)){ groupMeta = groupMeta.filter(m => m.name !== from); openGrps.delete(from); }
+    showAllProds = false; activeGrp = null; activeCatIndex = i; openGrps.add(nm);
+    menuRender(); saveState(); showToast('“' + nm + '” artık ana kategori.');
+  }
+  // Ana kategoriyi (alt kategorileriyle birlikte) başka bir ana kategorinin altına alt kategori olarak taşır
+  function mainToSub(gname){
+    const all = menuGroups(categories), g = all.find(x => x.name === gname); if(!g) return;
+    const others = all.filter(x => x.name !== gname);
+    if(!others.length){ showToast('Alt kategoriye çevirmek için başka bir ana kategori olmalı.'); return; }
+    const low = x => String(x).toLocaleLowerCase('tr-TR'), nProd = g.subs.reduce((n, s) => n + s.cat.products.length, 0);
+    openForm({
+      title: 'Alt Kategoriye Çevir',
+      sub: '“' + gname + '” (' + nProd + ' ürün) seçeceğiniz ana kategorinin içine alt kategori olarak taşınır. Ürünler silinmez.' + (g.subs.length > 1 ? ' İçindeki ' + g.subs.length + ' alt kategori de aynı ana kategorinin altına geçer.' : ''),
+      fields: [{ id: 'to', label: 'Hangi ana kategorinin altına eklensin?', type: 'select', options: others.map(x => ({ v: x.name, t: x.name })), value: others[0].name }],
+      okText: 'Çevir',
+      onOk(v){
+        const to = v.to; if(!others.some(x => x.name === to)) return 'Geçerli bir ana kategori seçin.';
+        const used = new Set(categories.filter(c => grpName(c) === to).map(c => low(c.sub || c.name)));
+        g.subs.map(s => s.cat).forEach(c => {
+          let label = c.sub || gname; if(used.has(low(label))) label = label + ' (' + gname + ')';
+          used.add(low(label));
+          if(!c.sub){ if(!c.img && g.img) c.img = g.img; if(!c.icon && g.icon) c.icon = g.icon; }
+          c.grp = to; c.sub = label; c.gv = 3;
+        });
+        groupMeta = groupMeta.filter(m => m.name !== gname); openGrps.delete(gname); openGrps.add(to);
+        showAllProds = false; activeGrp = null; activeCatIndex = categories.indexOf(g.subs[0].cat);
+        menuRender(); saveState(); showToast('“' + gname + '” artık “' + to + '” altında alt kategori.');
+      }
+    });
+  }
   function renameGroup(old, nw){
     menuGroups(categories).forEach((g, i) => gmSet(g.name, { ord: i }));   // mevcut sırayı sabitle
     categories.forEach(c => { if(grpName(c) === old) c.grp = nw; });
@@ -2744,31 +2787,33 @@
   function renderHead(){
     const el = mnEl('menuHead'); if(!el) return;
     const v = curView(), gs = menuGroups(categories), idxs = viewIdxs();
-    let lvl, lvlTxt, title, crumb = '', obj, edit = null, canSub = null, subN = 0;
+    let lvl, lvlTxt, title, crumb = '', obj, edit = null, canSub = null, subN = 0, conv = null;
     if(v.kind === 'all'){ lvl = 'all'; lvlTxt = 'Genel görünüm'; title = 'Tüm Ürünler'; obj = { name: title, icon: '📋', img: '' }; }
-    else if(v.kind === 'grp'){ const g = gs.find(x => x.name === v.grp) || { name: v.grp, icon: '', img: '', subs: [] }; lvl = 'main'; lvlTxt = 'Ana kategori'; title = g.name; subN = g.subs.length; obj = { name: g.name, icon: g.icon, img: g.img }; edit = () => editGroup(g.name); canSub = g.name; }
+    else if(v.kind === 'grp'){ const g = gs.find(x => x.name === v.grp) || { name: v.grp, icon: '', img: '', subs: [] }; lvl = 'main'; lvlTxt = 'Ana kategori'; title = g.name; subN = g.subs.length; obj = { name: g.name, icon: g.icon, img: g.img }; edit = () => editGroup(g.name); canSub = g.name; if(gs.length > 1) conv = { t: '⇩ Alt Kategoriye Çevir', fn: () => mainToSub(g.name) }; }
     else {
       const c = categories[v.idx[0]], gn = grpName(c), g = gs.find(x => x.name === gn) || { name: gn, icon: '', img: '' }, leaf = !c.sub && grpIdx(gn).length === 1;
-      if(leaf){ lvl = 'main'; lvlTxt = 'Ana kategori'; title = g.name; obj = { name: g.name, icon: g.icon, img: g.img }; edit = () => editGroup(g.name); canSub = g.name; }
-      else { lvl = 'sub'; lvlTxt = 'Alt kategori'; crumb = gn; title = c.sub || c.name; obj = { name: title, icon: c.icon || g.icon, img: c.img }; const ci = v.idx[0]; edit = () => editCat(ci); }
+      if(leaf){ lvl = 'main'; lvlTxt = 'Ana kategori'; title = g.name; obj = { name: g.name, icon: g.icon, img: g.img }; edit = () => editGroup(g.name); canSub = g.name; if(gs.length > 1) conv = { t: '⇩ Alt Kategoriye Çevir', fn: () => mainToSub(g.name) }; }
+      else { lvl = 'sub'; lvlTxt = 'Alt kategori'; crumb = gn; title = c.sub || c.name; obj = { name: title, icon: c.icon || g.icon, img: c.img }; const ci = v.idx[0]; edit = () => editCat(ci); conv = { t: '⇧ Ana Kategoriye Çevir', fn: () => subToMain(ci) }; }
     }
     const prices = idxs.flatMap(i => categories[i].products.map(p => p.price)), n = prices.length, st = [];
     if(subN) st.push('<span><b>' + subN + '</b> alt kategori</span>');
     if(n){ st.push('<span><b>' + n + '</b> ürün</span>', '<span>Ort. <b>' + fmtP(prices.reduce((a, b) => a + b, 0) / n) + '</b></span>', '<span><b>' + fmtP(Math.min.apply(null, prices)) + '</b> – <b>' + fmtP(Math.max.apply(null, prices)) + '</b></span>'); }
     else st.push('<span>Henüz ürün yok</span>');
-    headCtx = { edit, canSub, ci: v.kind === 'cat' ? v.idx[0] : (idxs[0] != null ? idxs[0] : activeCatIndex) };
+    headCtx = { edit, canSub, conv, ci: v.kind === 'cat' ? v.idx[0] : (idxs[0] != null ? idxs[0] : activeCatIndex) };
     el.innerHTML =
       '<div class="mh-thumb" data-act="editself"' + (edit ? ' title="Görseli / adı değiştir"' : '') + '>' + visHtml(obj, '', 'v-mh') + (edit ? '<span class="mh-edit">✎</span>' : '') + '</div>' +
       '<div class="mh-txt"><div class="mh-top"><span class="lvl lvl-' + lvl + '">' + lvlTxt + '</span>' + (crumb ? '<span class="mh-crumb">' + esc(crumb) + ' ›</span>' : '') + '</div><h2>' + esc(title) + '</h2><div class="mh-stats">' + st.join('') + '</div></div>' +
       '<div class="mh-actions"><button type="button" class="mbtn pri" data-act="newprod">＋ Yeni Ürün</button>' +
       (canSub ? '<button type="button" class="mbtn" data-act="newsub">↳ Alt Kategori Ekle</button>' : '') +
-      (edit ? '<button type="button" class="mbtn" data-act="editself">✎ ' + (lvl === 'main' ? 'Ana Kategoriyi Düzenle' : 'Alt Kategoriyi Düzenle') + '</button>' : '') + '</div>';
+      (edit ? '<button type="button" class="mbtn" data-act="editself">✎ ' + (lvl === 'main' ? 'Ana Kategoriyi Düzenle' : 'Alt Kategoriyi Düzenle') + '</button>' : '') +
+      (conv ? '<button type="button" class="mbtn" data-act="conv">' + conv.t + '</button>' : '') + '</div>';
   }
   mnEl('menuHead').addEventListener('click', e => {
     const t = e.target.closest('[data-act]'); if(!t) return;
     if(t.dataset.act === 'newprod') openProductForm(null, headCtx.ci);
     else if(t.dataset.act === 'newsub' && headCtx.canSub) addSub(headCtx.canSub);
     else if(t.dataset.act === 'editself' && headCtx.edit) headCtx.edit();
+    else if(t.dataset.act === 'conv' && headCtx.conv) headCtx.conv.fn();
   });
 
   // ---------- ürün listesi + toplu fiyat düzenleme ----------
