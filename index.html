@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="build" content="20261012-11">
+<meta name="build" content="20261013-2">
 <script>(function(){ if(!/^https?:/.test(location.protocol)) return; try{ const now = Date.now(), last = +sessionStorage.getItem('seyirChk') || 0; if(now - last < 600000) return; sessionStorage.setItem('seyirChk', now); const f = new URL(location.href); f.searchParams.set('_t', Date.now());
   fetch(f.toString(), { cache: 'no-store' }).then(r => r.text()).then(t => { const m = t.match(/name="build" content="([^"]+)"/), cur = document.querySelector('meta[name=build]').content;
     if(m && m[1] !== cur && sessionStorage.getItem('seyirReload') !== m[1]){ sessionStorage.setItem('seyirReload', m[1]); const u = new URL(location.href); u.searchParams.set('_v', m[1]); location.replace(u.toString()); } }).catch(() => {}); }catch(e){} })();</script>
@@ -20,9 +20,13 @@
 <meta name="theme-color" content="#cf2e2e">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <title>İŞLETMEM — SEYİR CAFE</title>
+<link rel="preconnect" href="https://adisyon-sistem-818a6-default-rtdb.firebaseio.com" crossorigin>
+<link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+<script>window.__pubP = /^https?:/.test(location.protocol) ? fetch("https://adisyon-sistem-818a6-default-rtdb.firebaseio.com/public.json", { cache: "no-store" }).then(r => r.ok ? r.json() : null).catch(() => null) : Promise.resolve(null);</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Kaushan+Script&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Kaushan+Script&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+<noscript><link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Kaushan+Script&display=swap" rel="stylesheet"></noscript>
 <style>
   :root{
     --bg: #f4f2f0;
@@ -873,6 +877,9 @@
   @keyframes skPulse{ 0%,100%{ opacity:.55 } 50%{ opacity:1 } }
   .vis.v-s{ width:28px; height:28px; border-radius:8px; --fs:1rem; flex:none; margin-right:8px; }
   .vis.v-row{ width:54px; height:54px; border-radius:10px; --fs:1.7rem; flex:none; }
+  .vis.v-sub{ width:34px; height:34px; border-radius:10px; --fs:1.05rem; flex:none; }
+  #customerView .c-subs .c-tab.c-subv{ display:flex !important; align-items:center; gap:7px; padding:4px 13px 4px 4px !important; }
+  #customerView .c-subs .c-tab.c-subv:first-child{ padding-left:13px !important; }
   .vis.v-cat{ width:68px; height:68px; border-radius:18px; --fs:2rem; box-shadow:0 2px 8px rgba(0,0,0,.12); }
   .vis.v-card{ width:100%; aspect-ratio:4/3; border-radius:12px 12px 0 0; --fs:3.2rem; }
   .vis.v-mp{ width:100%; height:92px; border-radius:9px; --fs:2.6rem; }
@@ -1571,8 +1578,7 @@
     </div>
   </div>
 
-<script>window.__pubP = /^https?:/.test(location.protocol) ? fetch("https://adisyon-sistem-818a6-default-rtdb.firebaseio.com/public.json", { cache: "no-store" }).then(r => r.ok ? r.json() : null).catch(() => null) : Promise.resolve(null);</script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script async src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script>
 /* Personel arayüzü müşteri için DOM'dan çıkarılır (okuma modu / ekran okuyucu / sayfa dönüştürücüler göremez); personel girişinde geri takılır. */
 (function(){
@@ -2214,22 +2220,37 @@
   const SEED_GROUPS = ['Mutfak', 'Bar', 'Nargile'];
 
   // ---- ANA KATEGORİ / ALT KATEGORİ (mevcut menü silinmeden gruplanır) ----
-  const MENU_GROUPS = [['Yemekler','🍽️'],['Soğuk İçecekler','🥤'],['Sıcak İçecekler','☕'],['Dondurmalar','🍦'],['Kahveler','☕'],['Nargileler','💨']];
-  const GROUP_OF = {
+  const MENU_GROUPS = [['Kahvaltı & Yumurta','🍳'],['Yemekler','🍽️'],['Tatlı & Atıştırmalık','🍰'],['Kahveler','☕'],['Sıcak İçecekler','🍵'],['Soğuk İçecekler','🥤'],['Nargile','💨']];
+  const OLD_GROUP_OF = {
     'Tost, Burger & Hamur İşleri':['Yemekler'], 'Makarna & Mantı':['Yemekler'], 'Salatalar':['Yemekler'], 'Tatlılar':['Yemekler'], 'Çerez & Atıştırmalık':['Yemekler'],
     'Frozen':['Soğuk İçecekler'], 'Milkshake':['Soğuk İçecekler'], 'Taze Sıkma & Limonata':['Soğuk İçecekler'], 'Soda':['Soğuk İçecekler'], 'Soğuk İçecekler':['Soğuk İçecekler','Hazır İçecekler'],
-    'Sıcak İçecekler':['Sıcak İçecekler','Çaylar & Sıcaklar'], 'Bitki Çayları':['Sıcak İçecekler'],
-    'Dondurma':['Dondurmalar'],
-    'Türk Kahveleri':['Kahveler'], 'Espresso':['Kahveler'], 'Sıcak Kahveler':['Kahveler'], 'Soğuk Kahveler':['Kahveler'],
-    'Nargile':['Nargileler']
+    'Sıcak İçecekler':['Sıcak İçecekler','Çaylar & Sıcaklar'], 'Bitki Çayları':['Sıcak İçecekler'], 'Dondurma':['Dondurmalar'],
+    'Türk Kahveleri':['Kahveler'], 'Espresso':['Kahveler'], 'Sıcak Kahveler':['Kahveler'], 'Soğuk Kahveler':['Kahveler'], 'Nargile':['Nargileler']
   };
+  // [üst kategori, alt kategori etiketi] — sıra aynı zamanda alt kategorilerin görünme sırası
+  const GROUP_OF = {
+    'Kahvaltı':['Kahvaltı & Yumurta','Kahvaltı'], 'Yumurta Çeşitleri':['Kahvaltı & Yumurta','Yumurtalar'],
+    'Çorbalar':['Yemekler','Çorbalar'], 'Salatalar':['Yemekler','Salatalar'], 'Ana Yemekler':['Yemekler','Ana Yemekler'], 'Makarna & Mantı':['Yemekler','Makarna & Mantı'], 'Tost, Burger & Hamur İşleri':['Yemekler','Tost & Hamur İşleri'],
+    'Tatlılar':['Tatlı & Atıştırmalık','Tatlılar'], 'Dondurma':['Tatlı & Atıştırmalık','Dondurma'], 'Çerez & Atıştırmalık':['Tatlı & Atıştırmalık','Çerez & Atıştırmalık'],
+    'Türk Kahveleri':['Kahveler','Türk Kahvesi'], 'Sıcak Kahveler':['Kahveler','Sıcak Kahveler'], 'Espresso':['Kahveler','Espresso'], 'Soğuk Kahveler':['Kahveler','Soğuk Kahveler'],
+    'Sıcak İçecekler':['Sıcak İçecekler','Çaylar & Sıcaklar'], 'Bitki Çayları':['Sıcak İçecekler','Bitki Çayları'],
+    'Frozen':['Soğuk İçecekler','Frozen'], 'Milkshake':['Soğuk İçecekler','Milkshake'], 'Taze Sıkma & Limonata':['Soğuk İçecekler','Taze Sıkma & Limonata'], 'Soda':['Soğuk İçecekler','Soda'], 'Soğuk İçecekler':['Soğuk İçecekler','Hazır İçecekler'],
+    'Nargile':['Nargile']
+  };
+  const SUB_ORDER = Object.keys(GROUP_OF);
   const OLD_IMG = /^https?:\/\/(www\.)?karekodrestaurantmenu\.com\//i;
   const oldImg = u => OLD_IMG.test(u || '');
   function stripOldImgs(cats){ (cats || []).forEach(c => { if(oldImg(c.img)) c.img = ''; (c.products || []).forEach(pr => { if(oldImg(pr.img)) pr.img = ''; }); }); return cats; }
-  function migrateMenuGroups(cats){ (cats || []).forEach(c => { if(!c.grp){ const m = GROUP_OF[c.name]; if(m){ c.grp = m[0]; if(m[1]) c.sub = m[1]; } else { const k = String(c.name).split(' / '); c.grp = k.length > 1 ? k[0] : c.name; if(k.length > 1) c.sub = k.slice(1).join(' / '); } } }); return cats; }
+  function migrateMenuGroups(cats){ (cats || []).forEach(c => {
+    const nm = GROUP_OF[c.name];
+    if(nm){ const o = OLD_GROUP_OF[c.name], og = o ? o[0] : c.name, os = (o && o[1]) || '';
+      if(!c.grp || c.gv !== 2 || (c.grp === og && (c.sub || '') === os)){ c.grp = nm[0]; c.sub = nm[1] || ''; c.gv = 2; } }
+    else if(!c.grp){ const k = String(c.name).split(' / '); c.grp = k.length > 1 ? k[0] : c.name; if(k.length > 1) c.sub = k.slice(1).join(' / '); }
+  }); return cats; }
   function menuGroups(cats){
     migrateMenuGroups(cats); const m = new Map();
     cats.forEach((c, i) => { const g = c.grp || c.name; if(!m.has(g)) m.set(g, { name: g, icon: (MENU_GROUPS.find(x => x[0] === g) || [])[1] || c.icon || '', img: '', subs: [] }); if(c.img && !m.get(g).img) m.get(g).img = c.img; m.get(g).subs.push({ idx: i, label: c.sub || c.name, cat: c }); });
+    m.forEach(g => g.subs.sort((x, y) => { const a = SUB_ORDER.indexOf(x.cat.name), b = SUB_ORDER.indexOf(y.cat.name); return (a < 0 ? 999 : a) - (b < 0 ? 999 : b); }));
     const order = MENU_GROUPS.map(x => x[0]);
     return [...m.values()].sort((a, b) => { const x = order.indexOf(a.name), y = order.indexOf(b.name); return (x < 0 ? 99 : x) - (y < 0 ? 99 : y); });
   }
@@ -2741,7 +2762,7 @@
   function customerData(){
     if(pubData && pubData.categories){
       const tb = arr(pubData.tables);
-      if(pubData.menuVer === MENU_VER) return { categories: arr(pubData.categories).map(c => ({ name: c.name, grp: c.grp, sub: c.sub, icon: c.icon || '', img: oldImg(c.img) ? '' : (c.img || ''), products: arr(c.products).map(pr => oldImg(pr.img) ? Object.assign({}, pr, { img: '' }) : pr) })), tables: tb };
+      if(pubData.menuVer === MENU_VER) return { categories: arr(pubData.categories).map(c => ({ name: c.name, grp: c.grp, sub: c.sub, gv: c.gv || 0, icon: c.icon || '', img: oldImg(c.img) ? '' : (c.img || ''), products: arr(c.products).map(pr => oldImg(pr.img) ? Object.assign({}, pr, { img: '' }) : pr) })), tables: tb };
       return { categories, tables: tb }; // eski sürümden kalan yayın menüsü yok sayılır
     }
     return { categories, tables: regions.flatMap(r => r.tables.map(n => ({ n, label: tableLabels[n] || ('Masa ' + n) }))) };
@@ -2790,7 +2811,7 @@
     setHtml('cTabs', gs.map((g, i) => '<div class="c-tab c-cat' + (i === cTab ? ' active' : '') + '" data-i="' + i + '">' + catVis(g) + '<span class="lb">' + esc(g.name) + '</span></div>').join(''));
     const subsOn = gs[cTab] && gs[cTab].subs.length > 1 && !($id('cSearch').value || '').trim();
     $id('cSubs').style.display = subsOn ? '' : 'none';
-    $id('cSubs').innerHTML = subsOn ? [{ idx: -1, label: 'Tümü' }].concat(gs[cTab].subs).map(sb => '<div class="c-tab' + (sb.idx === cSub ? ' active' : '') + '" data-s="' + sb.idx + '">' + esc(sb.label) + '</div>').join('') : '';
+    $id('cSubs').innerHTML = subsOn ? [{ idx: -1, label: 'Tümü' }].concat(gs[cTab].subs).map(sb => '<div class="c-tab c-subv' + (sb.idx === cSub ? ' active' : '') + '" data-s="' + sb.idx + '">' + (sb.cat ? visHtml({ img: sb.cat.img, icon: sb.cat.icon, name: sb.cat.name }, '', 'v-sub') : '') + '<span>' + esc(sb.label) + '</span></div>').join('') : '';
     const lst = cList();
     setHtml('cItems', lst.length ? lst.map((p, i) => {
       const q = (cCart[p.name] || {}).qty || 0, hdr = (cSub < 0 && cSubOf[i] && cSubOf[i] !== cSubOf[i - 1] && subsOn) ? '<div class="c-subttl">' + esc(cSubOf[i]) + '</div>' : '';
@@ -2885,7 +2906,7 @@
   // ---------------- GARSON PANELİ BAŞLAT ----------------
   function publishPublic(){
     const tables = regions.flatMap(r => r.tables.map(n => ({ n, label: tableLabels[n] || ('Masa ' + n) })));
-    const data = { categories: migrateMenuGroups(stripOldImgs(categories)).map(c => ({ name: c.name, grp: c.grp || c.name, sub: c.sub || '', icon: c.icon || '', img: c.img || '', products: c.products.map(p => ({ name: p.name, icon: p.icon || '', price: p.price, desc: p.desc || '', img: p.img || '' })) })), menuVer: MENU_VER, tables, menuOnly: !!settings.menuOnly, wifiName: settings.wifiName || '', wifiPass: settings.wifiPass || '' };
+    const data = { categories: migrateMenuGroups(stripOldImgs(categories)).map(c => ({ name: c.name, grp: c.grp || c.name, sub: c.sub || '', gv: c.gv || 0, icon: c.icon || '', img: c.img || '', products: c.products.map(p => ({ name: p.name, icon: p.icon || '', price: p.price, desc: p.desc || '', img: p.img || '' })) })), menuVer: MENU_VER, tables, menuOnly: !!settings.menuOnly, wifiName: settings.wifiName || '', wifiPass: settings.wifiPass || '' };
     if(!RT.local && RT.isAdmin && !RT.isAdmin()) return; // yalnızca yönetici hesabı yayınlar
     if(holdImgs) return; // güncel veri gelmeden eski yerel menüyü yayınlayıp müşteriye eski görseli gösterme
     const s = JSON.stringify(data);
@@ -4036,12 +4057,11 @@ ${st('M50 58c-5-6 5-10 0-17', 0)}${st('M60 56c-5-7 5-11 0-19', 1.05)}${st('M70 5
   window.alert = m => showToast(String(m));
   (function(){ let t = 0; const fix = () => { document.querySelectorAll('button:not([aria-label]),[role=button]:not([aria-label])').forEach(b => { const l = (b.getAttribute('title') || b.textContent || '').trim(); if(l) b.setAttribute('aria-label', l.slice(0, 40)); }); };
     new MutationObserver(() => { clearTimeout(t); t = setTimeout(fix, 300); }).observe(document.body, { childList: true, subtree: true }); fix(); })();
-  setInterval(saveState, 1500);
-  window.addEventListener('beforeunload', saveState);
-  document.addEventListener('visibilitychange', saveState);
+  setInterval(() => { if(staffMode) saveState(); }, 1500);
+  window.addEventListener('beforeunload', () => { if(staffMode) saveState(); });
+  document.addEventListener('visibilitychange', () => { if(staffMode) saveState(); });
 
   async function bootApp(){
-    await initRT();
     let liveSeen = false;
     const onPub = (v, live) => {
       if(live) liveSeen = true; else if(liveSeen || !v || !v.categories) return;
@@ -4050,10 +4070,12 @@ ${st('M50 58c-5-6 5-10 0-17', 0)}${st('M60 56c-5-7 5-11 0-19', 1.05)}${st('M70 5
       try{ if(v && v.categories) localStorage.setItem(PUB_CACHE, JSON.stringify(v)); }catch(e){}
       if(!staffMode) renderCustomer();
     };
-    RT.on('public', v => onPub(v, true));
+    // menü verisi (hızlı REST) ve kayıtlı önbellek Firebase SDK'sını BEKLEMEDEN çizilir
     if(window.__pubP) window.__pubP.then(v => onPub(v, false));
-    // yerel mod ya da internet yoksa: 4 sn içinde veri gelmezse yerel menüyle devam et
-    if(RT.local) pubReady = true; else pubTimer = setTimeout(() => {
+    renderCustomer();
+    await initRT();
+    RT.on('public', v => onPub(v, true));
+    if(RT.local) pubReady = true; else if(!pubReady) pubTimer = setTimeout(() => {
       if(staffMode) return;
       if(pubData){ pubReady = true; renderCustomer(); }
       else{ $id('cItems').dataset.sk = '1'; $id('cItems').innerHTML = '<p style="text-align:center;padding:40px 20px;color:var(--ink-faint)">Menü yüklenemedi. Bağlantınızı kontrol edip sayfayı yenileyin.</p>'; }
