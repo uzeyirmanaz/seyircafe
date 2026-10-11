@@ -5109,11 +5109,16 @@ ${st('M50 58c-5-6 5-10 0-17', 0)}${st('M60 56c-5-7 5-11 0-19', 1.05)}${st('M70 5
   // =====================================================================
   var cLang = ''; try{ cLang = localStorage.getItem('cLang') || ''; }catch(e){}
   var AI_LANGS = { en: 'İngilizce', de: 'Almanca', ru: 'Rusça', ar: 'Arapça', fr: 'Fransızca' };
+  var APPCHECK_SITE_KEY = '';   // Firebase Console > App Check > reCAPTCHA v3 SITE anahtarı (herkese açık anahtar) buraya yazılır
   var AI_MODEL = 'gemini-2.5-flash', AIM = { text: null, json: null }, aiChatN = 0, aiChatHist = [], _trC = {};
 
   async function aiInit(){
     if(AIM.text) return;
     if(!window.__fbApp) throw new Error('Firebase bağlantısı yok. İnternetinizi ve Firebase ayarını kontrol edin.');
+    if(APPCHECK_SITE_KEY && !window.__acInit){
+      const { initializeAppCheck, ReCaptchaV3Provider } = await import(window.__fbB + 'firebase-app-check.js');
+      initializeAppCheck(window.__fbApp, { provider: new ReCaptchaV3Provider(APPCHECK_SITE_KEY), isTokenAutoRefreshEnabled: true }); window.__acInit = true;
+    }
     const { getAI, getGenerativeModel, GoogleAIBackend } = await import(window.__fbB + 'firebase-ai.js');
     const ai = getAI(window.__fbApp, { backend: new GoogleAIBackend() });
     AIM.text = getGenerativeModel(ai, { model: AI_MODEL });
@@ -5122,11 +5127,13 @@ ${st('M50 58c-5-6 5-10 0-17', 0)}${st('M60 56c-5-7 5-11 0-19', 1.05)}${st('M70 5
   async function aiAsk(prompt, parts){ await aiInit(); const r = await AIM.text.generateContent(parts ? [prompt].concat(parts) : prompt); return r.response.text().trim(); }
   async function aiJSON(prompt, parts){ await aiInit(); const r = await AIM.json.generateContent(parts ? [prompt].concat(parts) : prompt); return JSON.parse(r.response.text().replace(/```json|```/g, '').trim()); }
   function aiErr(e){
-    const m = String((e && (e.code || e.message)) || e);
-    if(/api.?not.?enabled|403|permission|api_key|forbidden|not.?found.*model/i.test(m)) return 'Yapay zekâ erişimi reddedildi. Firebase Console > AI Logic bölümünü etkinleştirdiniz mi?';
+    const m = String(((e && e.code) ? e.code + ' ' : '') + ((e && e.message) || e || ''));
+    if(/app.?check/i.test(m)) return 'App Check doğrulaması başarısız. Firebase Console > App Check kaydını yapıp dosyadaki APPCHECK_SITE_KEY alanını doldurun.';
+    if(/dynamically imported|importing a module|module script/i.test(m)) return 'Yapay zekâ modülü yüklenemedi (SDK dosyası açılamadı).';
+    if(/api.?not.?enabled|403|permission|api.?key|forbidden/i.test(m)) return 'Yapay zekâ erişimi reddedildi. Firebase Console > AI Logic bölümünü etkinleştirdiniz mi? (' + m.slice(0, 120) + ')';
     if(/quota|429|resource.?exhausted/i.test(m)) return 'Yapay zekâ kotası doldu. Biraz sonra tekrar deneyin.';
-    if(/network|fetch|offline/i.test(m)) return 'İnternet bağlantısı yok.';
-    return 'Yapay zekâ hatası: ' + m.slice(0, 140);
+    if(navigator.onLine === false) return 'İnternet bağlantısı yok.';
+    return 'Yapay zekâ hatası: ' + m.slice(0, 220);
   }
   async function aiRun(btn, fn){
     const t = btn.textContent; btn.disabled = true; btn.textContent = '⏳ Düşünüyor…';
