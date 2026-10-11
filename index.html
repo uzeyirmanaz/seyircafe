@@ -1089,6 +1089,8 @@
   <div class="toast" id="toast"></div>
   <div id="saveBanner" role="status" aria-live="polite"><div class="sb-ic">✓</div><div><div class="sb-t" id="sbT"></div><div class="sb-s" id="sbS"></div></div></div>
 
+  <!-- Personel arayüzü ham HTML'de render edilmez: <template> içinde durur, yalnızca personel girişinden sonra sayfaya takılır -->
+  <template id="staffTpl">
   <div class="top-actions">
     <div class="staff-bar">
       <span class="mode" id="rtMode"></span>
@@ -1739,18 +1741,21 @@
       </div>
     </div>
   </div>
+  </template>
 
 <script async src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script>
-/* Personel arayüzü müşteri için DOM'dan çıkarılır (okuma modu / ekran okuyucu / sayfa dönüştürücüler göremez); personel girişinde geri takılır. */
+/* Personel arayüzü (ciro, raporlar, ayarlar) ham HTML'de <template> içinde durur: okuma modu / sayfa dönüştürücü / ekran okuyucu / çeviri araçları göremez.
+   DOM'a yalnızca personel girişi başarılı olunca takılır. */
 (function(){
-  const holder = document.createElement('div'), marks = [];
-  document.querySelectorAll('.top-actions,.app').forEach(el => { const m = document.createComment('staff'); el.parentNode.insertBefore(m, el); holder.appendChild(el); marks.push([el, m]); });
+  const tpl = document.getElementById('staffTpl'), holder = document.createElement('div'), mark = document.createComment('staff');
+  holder.appendChild(document.importNode(tpl.content, true));
+  tpl.parentNode.insertBefore(mark, tpl); tpl.remove();
   const D = document, g = D.getElementById, q = D.querySelector, qa = D.querySelectorAll;
   D.getElementById = function(id){ return g.call(D, id) || holder.querySelector('#' + CSS.escape(id)); };
   D.querySelector = function(sel){ return q.call(D, sel) || holder.querySelector(sel); };
   D.querySelectorAll = function(sel){ return Array.from(qa.call(D, sel)).concat(Array.from(holder.querySelectorAll(sel))); };
-  window.__staffUI = { show(){ marks.forEach(([el, m]) => m.replaceWith(el)); delete D.getElementById; delete D.querySelector; delete D.querySelectorAll; window.__staffUI = null; } };
+  window.__staffUI = { show(){ while(holder.firstChild) mark.parentNode.insertBefore(holder.firstChild, mark); mark.remove(); delete D.getElementById; delete D.querySelector; delete D.querySelectorAll; window.__staffUI = null; } };
 })();
 </script>
 <script>
@@ -3287,6 +3292,24 @@
     });
   }
   const uiConfirm = m => uiDialog(m, false), uiPrompt = (m, d) => uiDialog(m, true, d);
+  // anahtarlı DOM önbelleği: kategori değişince / sepete ekleyince kartlar ve görseller yeniden oluşturulmaz (titreme ve görsel yeniden belirme biter)
+  const _kc = {};
+  function keyed(name, container, entries, act){
+    const cache = _kc[name] || (_kc[name] = new Map());
+    const nodes = entries.map(e => {
+      let c = cache.get(e.key);
+      if(!c || c.html !== e.html){ const t = document.createElement('template'); t.innerHTML = e.html; c = { html: e.html, node: t.content.firstElementChild }; cache.set(e.key, c); }
+      if(act) act(c.node, e); return c.node;
+    });
+    nodes.forEach((n, i) => { if(container.children[i] !== n) container.insertBefore(n, container.children[i] || null); });
+    while(container.children.length > nodes.length) container.lastElementChild.remove();
+  }
+  let _preDone = false;
+  function preloadMenuImgs(d){
+    if(_preDone) return; _preDone = true;
+    const urls = []; d.categories.forEach(c => { if(/^https:/i.test(c.img || '')) urls.push(c.img); c.products.forEach(p => { if(/^https:/i.test(p.img || '')) urls.push(p.img); }); });
+    (function go(){ urls.splice(0, 6).forEach(u => { const im = new Image(); im.decoding = 'async'; im.referrerPolicy = 'no-referrer'; im.src = u; }); if(urls.length) (window.requestIdleCallback || setTimeout)(go, 250); })();
+  }
   const _lastHtml = {};
   function setHtml(id, html){ if(_lastHtml[id] === html && $id(id).innerHTML) return; _lastHtml[id] = html; $id(id).innerHTML = html; }
   function renderCustomer(){
@@ -3302,17 +3325,27 @@
     const sel = $id('cMasa'), prev = sel.value || qp.get('masa') || '';
     const opts = '<option value="">Masanızı seçin…</option>' + d.tables.map(t => '<option value="' + t.n + '">' + esc(t.label) + '</option>').join('');
     if(sel.innerHTML !== opts){ sel.innerHTML = opts; sel.value = prev; }
-    setHtml('cTabs', gs.map((g, i) => '<div class="c-tab c-cat' + (i === cTab ? ' active' : '') + '" data-i="' + i + '">' + catVis(g) + '<span class="lb">' + esc(g.name) + '</span></div>').join(''));
+    keyed('tabs', $id('cTabs'), gs.map((g, i) => ({ key: 't' + g.name, on: i === cTab, html: '<div class="c-tab c-cat" data-i="' + i + '">' + catVis(g) + '<span class="lb">' + esc(g.name) + '</span></div>' })), (n, e) => { n.classList.toggle('active', e.on); n.dataset.i = e.html.match(/data-i="(\d+)"/)[1]; });
     const subsOn = gs[cTab] && gs[cTab].subs.length > 1 && !($id('cSearch').value || '').trim();
     $id('cSubs').style.display = subsOn ? '' : 'none';
-    $id('cSubs').innerHTML = subsOn ? [{ idx: -1, label: 'Tümü' }].concat(gs[cTab].subs).map(sb => '<div class="c-tab c-subv' + (sb.idx === cSub ? ' active' : '') + '" data-s="' + sb.idx + '">' + (sb.cat ? visHtml({ img: sb.cat.img, icon: sb.cat.icon, name: sb.cat.name }, '', 'v-sub') : '') + '<span>' + esc(sb.label) + '</span></div>').join('') : '';
+    keyed('subs', $id('cSubs'), subsOn ? [{ idx: -1, label: 'Tümü' }].concat(gs[cTab].subs).map(sb => ({ key: 's' + cTab + '|' + sb.idx, on: sb.idx === cSub, html: '<div class="c-tab c-subv" data-s="' + sb.idx + '">' + (sb.cat ? visHtml({ img: sb.cat.img, icon: sb.cat.icon, name: sb.cat.name }, '', 'v-sub') : '') + '<span>' + esc(sb.label) + '</span></div>' })) : [], (n, e) => { n.classList.toggle('active', e.on); });
     const lst = cList();
-    setHtml('cItems', lst.length ? lst.map((p, i) => {
-      const q = (cCart[p.name] || {}).qty || 0, hdr = (cSub < 0 && cSubOf[i] && cSubOf[i] !== cSubOf[i - 1] && subsOn) ? '<div class="c-subttl">' + esc(cSubOf[i]) + '</div>' : '';
-      return hdr + '<div class="c-item card">' + visHtml(p, '', 'v-card') + '<div class="nm"><b>' + esc(p.name) + '</b>' + (p.desc ? '<small>' + esc(p.desc) + '</small>' : '') + '</div><div class="cfoot"><span class="pr">' + fmtTL(p.price) + '</span>' +
-        (mo ? '' : q ? '<div class="qty-ctl"><button class="qbtn" data-p="' + i + '" data-d="-1">−</button><b class="qv">' + q + '</b><button class="qbtn" data-p="' + i + '" data-d="1">+</button></div>'
-           : '<button class="qbtn" data-p="' + i + '" data-d="1">+</button>') + '</div></div>';
-    }).join('') : '<p style="text-align:center;color:var(--ink-faint)">' + (($id('cSearch').value || '').trim() ? 'Ürün bulunamadı.' : 'Menü hazırlanıyor…') + '</p>');
+    if(!lst.length){ $id('cItems').innerHTML = '<p style="text-align:center;color:var(--ink-faint)">' + (($id('cSearch').value || '').trim() ? 'Ürün bulunamadı.' : 'Menü hazırlanıyor…') + '</p>'; }
+    else{
+      const ents = [];
+      lst.forEach((p, i) => {
+        const q = (cCart[p.name] || {}).qty || 0;
+        if(cSub < 0 && cSubOf[i] && cSubOf[i] !== cSubOf[i - 1] && subsOn) ents.push({ key: 'h' + cTab + '|' + cSubOf[i], html: '<div class="c-subttl">' + esc(cSubOf[i]) + '</div>' });
+        const ctl = mo ? '' : q ? '<div class="qty-ctl"><button class="qbtn" data-p="' + i + '" data-d="-1">−</button><b class="qv">' + q + '</b><button class="qbtn" data-p="' + i + '" data-d="1">+</button></div>' : '<button class="qbtn" data-p="' + i + '" data-d="1">+</button>';
+        ents.push({ key: 'p' + p.name, ctl, html: '<div class="c-item card">' + visHtml(p, '', 'v-card') + '<div class="nm"><b>' + esc(p.name) + '</b>' + (p.desc ? '<small>' + esc(p.desc) + '</small>' : '') + '</div><div class="cfoot"><span class="pr">' + fmtTL(p.price) + '</span></div></div>' });
+      });
+      keyed('items', $id('cItems'), ents, (n, e) => {
+        if(e.ctl === undefined || n.dataset.c === e.ctl) return;
+        const f = n.querySelector('.cfoot'); while(f.children.length > 1) f.lastElementChild.remove();
+        f.insertAdjacentHTML('beforeend', e.ctl); n.dataset.c = e.ctl;
+      });
+      preloadMenuImgs(d);
+    }
     const n = cCount(), btn = $id('cSend'); if(!n) cOpen = false;
     $id('cCartList').style.display = cOpen ? 'block' : 'none'; $id('cNote').style.display = cOpen ? '' : 'none';
     $id('cCartList').innerHTML = Object.values(cCart).map(i => '<div class="c-crow"><span>' + esc(i.name) + '</span><div class="qty-ctl"><button class="qbtn cq" data-n="' + esc(i.name) + '" data-d="-1">−</button><b class="qv">' + i.qty + '</b><button class="qbtn cq" data-n="' + esc(i.name) + '" data-d="1">+</button></div></div>').join('');
@@ -3441,8 +3474,8 @@
     ['courier', 'Paket teslimat takibi', 'Paket ve gel-al listesini görme, "yola çıktı / hazır" işaretleme', [0, 1, 0, 1, 1, 0]],
     ['kitchen', 'Mutfak ekranı', 'Mutfak siparişlerini görme, hazır / teslim işaretleme', [1, 0, 1, 1, 0, 1]],
     ['customers', 'Müşteri yönetimi', 'Müşteri ekleme, düzenleme, silme, cari tahsilat', [0, 0, 1, 1, 1, 0]],
-    ['expenses', 'Gider ve zayi işlemleri', 'Gider / masraf ve zayi kaydı', [0, 0, 1, 1, 0, 0]],
-    ['reports', 'Raporlar ve gün sonu', 'Ana sayfa, tüm raporlar, günü kapatma', [0, 0, 1, 1, 0, 0]],
+    ['expenses', 'Gider ve zayi işlemleri', 'Gider / masraf ve zayi kaydı (canlı bağlantıda yalnızca yönetici görür)', [0, 0, 1, 1, 0, 0]],
+    ['reports', 'Raporlar ve gün sonu', 'Ana sayfa, tüm raporlar, günü kapatma (canlı bağlantıda yalnızca yönetici görür)', [0, 0, 1, 1, 0, 0]],
     ['tables', 'Masa ve bölge düzeni', 'Bölge / masa ekleme, silme, yeniden adlandırma', [0, 0, 0, 1, 0, 0]],
     ['menu', 'Menü, ürün ve tanımlar', 'Ürün, kategori, birim, özellik, KDV, indirim, mutfak grubu', [0, 0, 0, 1, 0, 0]],
     ['users', 'Kullanıcı ve yetki yönetimi', 'Kullanıcı ekleme, şifre, yetki tablosu', [0, 0, 0, 1, 0, 0]],
@@ -3461,8 +3494,10 @@
     if(src && typeof src === 'object') Object.keys(p).forEach(k => { if(Array.isArray(src[k])) p[k] = ROLES.map((r, i) => src[k][i] ? 1 : (src[k][i] === 0 ? 0 : p[k][i])); });
     return p;
   }
+  const PRIV_PERMS = ['reports', 'expenses'];   // ciro / rapor / gider: canlı bağlantıda personel hesabına hiçbir zaman açılmaz
   function can(p){
     if(!curUser) return false; if(curUser.admin) return true;
+    if(!RT.local && PRIV_PERMS.indexOf(p) >= 0) return false;
     const i = ROLES.indexOf(curUser.gorev); return i >= 0 && !!(perms[p] && perms[p][i]);
   }
   function canAny(need){ return !need || (Array.isArray(need) ? need.some(can) : can(need)); }
@@ -3612,6 +3647,7 @@
       let remoteErr = false;
       if(!user && !RT.local){
         err.textContent = 'Kontrol ediliyor…';
+        if(!RT.local && RT.staffAuth){ const okA = await RT.staffAuth(false); if(!okA){ err.textContent = 'Önce bu cihazı Firebase personel hesabıyla yetkilendirin.'; return; } }
         const r = await remoteStaff(pw); err.textContent = '';
         if(r === 'err') remoteErr = true;
         else if(r){
@@ -4042,8 +4078,8 @@ ${st('M50 58c-5-6 5-10 0-17', 0)}${st('M60 56c-5-7 5-11 0-19', 1.05)}${st('M70 5
     const key = currentCartKey, title = orderLabel(key);
     paidByKey[key] = Math.round(((paidByKey[key] || 0) + amount) * 100) / 100;
     (paymentHistoryByKey[key] = paymentHistoryByKey[key] || []).push({ method: o.label || method, amount, waive: !!o.waive });
-    if(o.waive) waiveLog.push({ ts: Date.now(), amount, reason: o.reason, label: title, user: uname() });
-    else payLog.push({ ts: Date.now(), amount, method, label: title, user: uname() });
+    if(o.waive) logPriv('waiveLog', { ts: Date.now(), amount, reason: o.reason, label: title, user: uname() });
+    else logPriv('payLog', { ts: Date.now(), amount, method, label: title, user: uname() });
     const nr = remainingForKey(key);
     if(nr <= 0.005) finalizeOrder(key, (o.waive ? 'İkram' : method) + ' ile ' + money(amount) + ' — ödeme tamamlandı.');
     else { updateHomeStats(); renderGunSonu(); renderOrderLines(); renderPaymentPanel(); showToast((o.waive ? 'İkram' : method) + ' ile ' + money(amount) + ' işlendi. Kalan: ' + money(nr)); }
@@ -4051,7 +4087,7 @@ ${st('M50 58c-5-6 5-10 0-17', 0)}${st('M60 56c-5-7 5-11 0-19', 1.05)}${st('M70 5
   }
   function finalizeOrder(key, msg){
     const hist = paymentHistoryByKey[key] || [], wv = hist.filter(h => h.waive).reduce((s, h) => s + h.amount, 0);
-    saleLog.push({ ts: Date.now(), label: orderLabel(key), total: cartTotal(key), gross: grossTotal(key), waived: wv, guests: Math.max(1, parseInt(guestsByKey[key]) || 1), user: uname(),
+    logPriv('saleLog', { ts: Date.now(), label: orderLabel(key), total: cartTotal(key), gross: grossTotal(key), waived: wv, guests: Math.max(1, parseInt(guestsByKey[key]) || 1), user: uname(),
       items: carts[key].map(i => ({ name: i.name, qty: i.qty, unit: i.unit, by: i.by || '', kdv: kdvRateOf(i.name) })) });
     carts[key] = [];
     if(key.startsWith('table_')) delete tableGuest[+key.slice(6)];
@@ -4114,7 +4150,7 @@ ${st('M50 58c-5-6 5-10 0-17', 0)}${st('M60 56c-5-7 5-11 0-19', 1.05)}${st('M70 5
     if(b.dataset.c === 'edit') openCustomerForm(c);
     else if(b.dataset.c === 'del'){ if(await uiConfirm('"' + c.name + '" silinsin mi?' + (c.balance ? ' Müşterinin ' + money(c.balance) + ' bakiyesi var!' : ''))){ customers.splice(customers.indexOf(c), 1); renderCustomers(); saveState(); } }
     else if(b.dataset.c === 'col') openForm({ title: 'Tahsilat — ' + c.name, sub: 'Bakiye: ' + money(c.balance), fields: [{ id: 'a', label: 'Tutar (₺)', type: 'number', step: '0.01', value: c.balance }, { id: 'm', label: 'Ödeme şekli', type: 'select', options: ['Nakit', 'Kredi Kartı'] }],
-      onOk(v){ if(!(v.a > 0)) return 'Geçerli tutar girin.'; if(v.a > c.balance + 0.005) return 'Tutar bakiyeden fazla olamaz.'; c.balance = Math.round((c.balance - v.a) * 100) / 100; colLog.push({ ts: Date.now(), amount: v.a, method: v.m, cust: c.name, user: uname() }); renderCustomers(); renderGunSonu(); saveState(); showToast('Tahsilat alındı.'); } });
+      onOk(v){ if(!(v.a > 0)) return 'Geçerli tutar girin.'; if(v.a > c.balance + 0.005) return 'Tutar bakiyeden fazla olamaz.'; c.balance = Math.round((c.balance - v.a) * 100) / 100; logPriv('colLog', { ts: Date.now(), amount: v.a, method: v.m, cust: c.name, user: uname() }); renderCustomers(); renderGunSonu(); saveState(); showToast('Tahsilat alındı.'); } });
   });
 
   // ---- kullanıcılar ----
@@ -4443,6 +4479,39 @@ ${st('M50 58c-5-6 5-10 0-17', 0)}${st('M60 56c-5-7 5-11 0-19', 1.05)}${st('M70 5
     ['No;Ad Soyad;Telefon;Adres;Açık Hesap;Bakiye'].concat(customers.map(c => [c.no, c.name, c.phone, c.address, c.acikHesap ? 'Evet' : 'Hayır', c.balance].join(';'))).join('\n')));
 
   // ---- durum kaydı, yedek, canlı eşitleme ----
+  // ---- yönetici özel verisi: ciro / ödeme / gider / rapor kayıtları ----
+  // Firebase modunda bu veriler 'state' içine KONMAZ. Yalnızca yönetici cihazında ve yalnızca yönetici hesabının okuyabildiği 'adminState' yolunda tutulur.
+  // Personel cihazları satış/ödeme kaydını 'inbox' kutusuna bırakır (yazılır, okunamaz); yönetici cihazı alıp kendi kaydına işler.
+  const PRIV_KEYS = ['saleLog', 'payLog', 'giderler', 'dayReports', 'closedAt', 'colLog', 'waiveLog', 'cancelLog'];
+  const adminDev = () => RT.local || !!(RT.isAdmin && RT.isAdmin());
+  let adminReady = false, lastPriv = '', lastPrivAt = 0;
+  function privGet(k){ return ({ saleLog, payLog, giderler, dayReports, colLog, waiveLog, cancelLog })[k]; }
+  function privSet(k, v){
+    switch(k){
+      case 'saleLog': saleLog = v; break; case 'payLog': payLog = v; break; case 'giderler': giderler = v; break; case 'dayReports': dayReports = v; break;
+      case 'colLog': colLog = v; break; case 'waiveLog': waiveLog = v; break; case 'cancelLog': cancelLog = v; break; case 'closedAt': closedAt = v; break;
+    }
+  }
+  function privObj(){ const o = {}; PRIV_KEYS.forEach(k => { o[k] = k === 'closedAt' ? closedAt : privGet(k); }); return o; }
+  function logPriv(k, e){
+    if(adminDev()){ if(k === 'cancelLog') cancelLog.unshift(e); else privGet(k).push(e); return; }
+    try{ RT.push('inbox', { k, v: JSON.parse(JSON.stringify(e)), ts: Date.now() }); }catch(_){}
+  }
+  function mergeInbox(v){
+    if(!v || !adminDev()) return;
+    const ids = Object.keys(v), touched = new Set();
+    ids.forEach(id => {
+      const e = v[id]; if(!e || typeof e !== 'object' || !e.v || ['saleLog', 'payLog', 'waiveLog', 'colLog', 'cancelLog'].indexOf(e.k) < 0) return;
+      const a = privGet(e.k); if(a.some(x => x && x.iid === id)) return;
+      a.push(Object.assign({}, e.v, { iid: id })); touched.add(e.k);
+    });
+    if(touched.size){
+      touched.forEach(k => privGet(k).sort((a, b) => k === 'cancelLog' ? (b.ts || 0) - (a.ts || 0) : (a.ts || 0) - (b.ts || 0)));
+      try{ updateHomeStats(); renderGunSonu(); }catch(e){}
+      lastSaved = ''; saveState();
+    }
+    ids.forEach(id => { try{ Promise.resolve(RT.remove('inbox/' + id)).catch(() => {}); }catch(_){} });
+  }
   function snapshot(){
     readSettings();
     return { carts, tableLabels, tableGuest, regions, nextTableNo, orderOpenedAt, categories, groupMeta, menuVer: MENU_VER, paidByKey, paymentHistoryByKey, customers, giderler, mutfakGruplari, adisyonSeq, adisyonNoByKey,
@@ -4457,9 +4526,15 @@ ${st('M50 58c-5-6 5-10 0-17', 0)}${st('M60 56c-5-7 5-11 0-19', 1.05)}${st('M70 5
   function saveState(){
     const full = fullStr(); if(full === lastSaved) return; lastSaved = full;
     const savedAt = Date.now(); lastSavedAt = savedAt;
-    const base = Object.assign(JSON.parse(full), { savedAt, dev: DEV });
+    const base = Object.assign(JSON.parse(full), { savedAt, dev: DEV }), adm = adminDev();
+    if(!adm) PRIV_KEYS.forEach(k => { delete base[k]; });   // personel cihazında yönetici verisi (ciro, gider…) tutulmaz
     try{ localStorage.setItem(STORE_KEY, JSON.stringify(base)); storageOK = true; }catch(e){ storageOK = false; if(!warned){ warned = true; showToast('⚠ Veriler kaydedilemiyor! Ayarlar > Yedek & Sistem’den yedek alın.'); } }
-    if(!RT.local && staffMode){ delete base.staffUsers; delete base.pin; try{ RT.set('state', base); }catch(e){} }
+    if(!RT.local && staffMode){
+      delete base.staffUsers; delete base.pin;
+      const priv = {}; PRIV_KEYS.forEach(k => { if(k in base){ priv[k] = base[k]; delete base[k]; } });
+      try{ RT.set('state', base); }catch(e){}
+      if(adm && adminReady){ const ps = JSON.stringify(priv); if(ps !== lastPriv){ lastPriv = ps; lastPrivAt = savedAt; try{ RT.set('adminState', Object.assign(priv, { savedAt, dev: DEV })); }catch(e){} } }
+    }
     try{ syncStaffDir(); }catch(e){ console.error(e); }
   }
   function applyState(s, persist){
@@ -4474,17 +4549,18 @@ ${st('M50 58c-5-6 5-10 0-17', 0)}${st('M60 56c-5-7 5-11 0-19', 1.05)}${st('M70 5
     if(s.nextTableNo) nextTableNo = s.nextTableNo;
     paidByKey = s.paidByKey || {}; paymentHistoryByKey = s.paymentHistoryByKey || {};
     if(Array.isArray(s.customers)) customers = s.customers;
-    if(Array.isArray(s.giderler)) giderler = s.giderler;
     if(Array.isArray(s.mutfakGruplari) && s.mutfakGruplari.length) mutfakGruplari = s.mutfakGruplari;
     if(seeded) ensureSeedGroups();
-    adisyonSeq = s.adisyonSeq || 0; payLog = s.payLog || []; saleLog = s.saleLog || []; closedAt = s.closedAt || 0;
+    adisyonSeq = s.adisyonSeq || 0;
     if(s.lists) LISTKEYS.forEach(k => { if(Array.isArray(s.lists[k])) lists[k] = s.lists[k]; });
     if(Array.isArray(s.payTypes) && s.payTypes.length) payTypes = s.payTypes;
     if(s.settings) Object.assign(settings, s.settings);
     if(Array.isArray(s.staffUsers)) staffUsers = s.staffUsers;
     if(s.pin) settings.pin = s.pin;
     extOrders = (s.extOrders && typeof s.extOrders === 'object') ? s.extOrders : {}; extSeq = s.extSeq || 0;
-    cancelLog = Array.isArray(s.cancelLog) ? s.cancelLog : cancelLog; waiveLog = s.waiveLog || []; colLog = s.colLog || []; dayReports = s.dayReports || []; perms = normPerms(s.perms);
+    perms = normPerms(s.perms);
+    if(adminDev()){ PRIV_KEYS.forEach(k => { if(s[k] !== undefined) privSet(k, k === 'closedAt' ? (+s[k] || 0) : (Array.isArray(s[k]) ? s[k] : [])); }); }
+    else PRIV_KEYS.forEach(k => privSet(k, k === 'closedAt' ? 0 : []));
     ['paket', 'gelal'].forEach(t => {
       if(carts[t] && carts[t].length){ const key = t + '_' + (++extSeq); extOrders[key] = { type: t, name: 'Eski sipariş', phone: '', address: '', st: 'hazirlaniyor', created: Date.now(), by: '' }; carts[key] = carts[t]; }
       delete carts[t];
@@ -4518,6 +4594,21 @@ ${st('M50 58c-5-6 5-10 0-17', 0)}${st('M60 56c-5-7 5-11 0-19', 1.05)}${st('M70 5
       if(v.dev !== DEV && (v.savedAt || 0) > lastSavedAt) applyState(v, true);
       rel();
     });
+    if(adminDev()){
+      let lastInbox = null;
+      RT.on('adminState', v => {
+        let apply = false;
+        if(v && v.dev !== DEV && (v.savedAt || 0) > lastPrivAt){
+          PRIV_KEYS.forEach(k => privSet(k, k === 'closedAt' ? (+v[k] || 0) : (Array.isArray(v[k]) ? v[k] : [])));
+          lastPrivAt = v.savedAt || 0; lastPriv = JSON.stringify(privObj()); apply = true;
+          try{ updateHomeStats(); renderGunSonu(); renderGiderler(); }catch(e){}
+        }
+        const first = !adminReady; if(first){ adminReady = true; if(!v) lastPriv = ''; }
+        if(first || apply){ lastSaved = ''; saveState(); }
+        if(lastInbox) mergeInbox(lastInbox);
+      });
+      RT.on('inbox', v => { lastInbox = v; if(adminReady) mergeInbox(v); });
+    }
   }
   window.addEventListener('storage', e => { if(e.key === STORE_KEY && e.newValue){ try{ applyState(JSON.parse(e.newValue), false); }catch(err){} } });
   $id('btnBackup').addEventListener('click', () => downloadFile('seyir-yedek-' + new Date().toISOString().slice(0, 10) + '.json', JSON.stringify(Object.assign(JSON.parse(fullStr()), { savedAt: Date.now() })), 'application/json'));
@@ -4590,6 +4681,7 @@ ${st('M50 58c-5-6 5-10 0-17', 0)}${st('M60 56c-5-7 5-11 0-19', 1.05)}${st('M70 5
     RT.staffAuth(!!(curUser && curUser.admin)).then(async ok => {
       if(!ok){ curUser = null; sessionStorage.removeItem('seyirUser'); showToast('Firebase personel girişi gerekli.'); return; }
       if(curUser && curUser.admin) await pullStaffDir();
+      if(!adminDev()){ PRIV_KEYS.forEach(k => privSet(k, k === 'closedAt' ? 0 : [])); try{ localStorage.removeItem('seyirCancelLog'); }catch(_){} lastSaved = ''; saveState(); }
       _enterStaff();
     });
   };
@@ -4608,8 +4700,8 @@ ${st('M50 58c-5-6 5-10 0-17', 0)}${st('M60 56c-5-7 5-11 0-19', 1.05)}${st('M70 5
     const n = parseInt(await uiPrompt('İptal nedeni:\n' + CANCEL_REASONS.map((r, i) => (i + 1) + ' - ' + r).join('\n')), 10);
     if(!(n >= 1 && n <= CANCEL_REASONS.length)) return;
     if(!(await askManagerPin())){ showToast('PIN hatalı, iptal yapılmadı.'); return; }
-    cancelLog.unshift({ ts: Date.now(), key: k, reason: CANCEL_REASONS[n - 1], total: grossTotal(k), by: uname(), items: carts[k].map(i => i.qty + '× ' + i.name) });
-    try{ localStorage.setItem('seyirCancelLog', JSON.stringify(cancelLog.slice(0, 500))); }catch(_){}
+    logPriv('cancelLog', { ts: Date.now(), key: k, reason: CANCEL_REASONS[n - 1], total: grossTotal(k), by: uname(), items: carts[k].map(i => i.qty + '× ' + i.name) });
+    if(adminDev()) try{ localStorage.setItem('seyirCancelLog', JSON.stringify(cancelLog.slice(0, 500))); }catch(_){}
     carts[k] = []; delete discountByKey[k]; delete guestsByKey[k];
     afterOrderChange(); if(extOrders[k]) dropExt(k); showScreen(currentBackScreen); renderSiparisMasa();
     showToast('Adisyon iptal edildi: ' + CANCEL_REASONS[n - 1]);
