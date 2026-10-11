@@ -1138,17 +1138,32 @@
   .order-line .link-btn.mvl{ display:inline-block; margin:4px 0 0 12px; font-size:.78rem; }
 </style>
 <link rel="icon" id="favi" href="data:,">
+<style>
+.ai-st{font-size:.85rem;color:var(--ink-faint);padding:0 4px 6px}
+.ai-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:8px 4px;border-bottom:1px solid var(--line);font-size:.88rem}
+.ai-row input[type=text],.ai-row select{flex:1;min-width:0;padding:7px;border:1px solid var(--line);border-radius:6px;background:var(--panel-2);color:var(--ink);font-family:inherit}
+.ai-out{white-space:pre-wrap;background:var(--panel-2);border:1px solid var(--line);border-radius:10px;padding:12px;margin:10px 4px;font-size:.9rem;line-height:1.5}
+.ai-bub{padding:8px 11px;border-radius:12px;margin:6px 0;max-width:88%;font-size:.92rem;line-height:1.4;white-space:pre-wrap}
+.ai-bub.u{background:var(--red);color:#fff;margin-left:auto}.ai-bub.a{background:var(--panel-2);color:var(--ink);border:1px solid var(--line)}
+.c-langs{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin:0 0 8px}
+.c-langs button{border:1px solid var(--line);background:transparent;color:var(--ink);border-radius:14px;padding:4px 12px;font-weight:700;font-size:.8rem;cursor:pointer}
+.c-langs button.on{background:var(--red);border-color:var(--red);color:#fff}
+.c-aibtn,.c-noteai{width:100%;border:1px dashed var(--red);background:transparent;color:var(--red);border-radius:10px;padding:9px;font-weight:700;font-family:inherit;cursor:pointer;margin:6px 0}
+.c-noteai{margin:0 0 8px;padding:7px;font-size:.85rem}
+</style>
 </head>
 <body data-theme="light">
   <div id="customerView">
     <div class="c-head"><div id="cLogo" class="c-logo"></div><div class="c-social" id="cSocial"></div></div>
+    <div class="c-langs" id="cLang" style="display:none"></div>
     <div class="c-top"><div class="c-masa"><span>🪑 Masa</span><select id="cMasa"></select></div>
     <input id="cSearch" class="c-search" placeholder="🔍 Menüde ara…" autocomplete="off">
+    <button type="button" class="c-aibtn" id="cAiBtn" style="display:none">💬 Menü Asistanı · ne yesem?</button>
     <div class="c-tabs" id="cTabs"></div><div class="c-tabs c-subs" id="cSubs" style="display:none"></div></div>
     <div id="cItems"></div>
     <div class="c-bar"><div class="c-bar-in">
       <div class="c-status" id="cStatus" style="display:none;"></div>
-      <div id="cCartList" style="display:none"></div><input class="c-note" id="cNote" placeholder="Sipariş notu (isteğe bağlı)" style="display:none">
+      <div id="cCartList" style="display:none"></div><input class="c-note" id="cNote" placeholder="Sipariş notu (isteğe bağlı)" style="display:none"><button type="button" class="c-noteai" id="cNoteAi" style="display:none">✨ Notu mutfak için düzenle</button>
       <button class="c-send" id="cSend" disabled>Sepet boş</button>
     </div></div>
   </div>
@@ -1197,6 +1212,7 @@
 
       <div class="nav-item active" data-screen="home"><span class="ic">🏠</span>Ana Sayfa</div>
       <div class="nav-item" data-screen="digitalmenu"><span class="ic">📶</span>Dijital Menü</div>
+      <div class="nav-item" data-screen="ai"><span class="ic">✨</span>Yapay Zekâ</div>
 
       <div class="nav-item" id="navTanimlamalar"><span class="ic">📋</span>Tanımlamalar<span class="chev">▾</span></div>
       <div class="sub-list" id="subTanimlamalar">
@@ -1735,6 +1751,21 @@
             <div class="panel-head"><div class="pi">📉</div><div><h2>Gider / Masraf İşlemleri</h2><p>Toplam: <b id="giderToplam">₺0,00</b></p></div><button class="btn-mini" id="btnGiderEkle">＋ Gider Ekle</button></div>
             <div class="plist" id="giderList"></div>
           </div>
+        </div>
+
+        <div class="screen" id="screen-ai">
+          <div class="panel-card"><div class="panel-head"><div class="pi">✨</div><div><h2>Yapay Zekâ Asistanı</h2><p>Gemini destekli yardımcılar. Çıktılar öneridir; uygulamadan önce kontrol edin.</p></div></div><div id="aiStatus" class="ai-st"></div></div>
+          <div class="panel-card"><div class="panel-head"><div class="pi">📊</div><div><h2>Satış özeti</h2><p>Satış verinizi yorumlar, dikkat çeken noktaları ve önerileri yazar.</p></div></div>
+            <div class="ai-row"><select id="aiSumDays"><option value="1">Bugün</option><option value="7">Son 7 gün</option><option value="30">Son 30 gün</option></select><button class="btn-mini" id="aiSumBtn">✨ Özet çıkar</button></div><div class="ai-out" id="aiSumOut" style="display:none"></div></div>
+          <div class="panel-card"><div class="panel-head"><div class="pi">✍️</div><div><h2>Menü açıklaması yazımı</h2><p>Açıklaması boş ürünler için taslak yazar (her seferinde en fazla 40 ürün). Alerjenler yalnızca isim bazlı tahmindir.</p></div></div>
+            <div class="ai-row"><button class="btn-mini" id="aiDescBtn">✨ Boş açıklamaları yaz</button></div><div id="aiDescOut"></div></div>
+          <div class="panel-card"><div class="panel-head"><div class="pi">🌍</div><div><h2>Menü çevirisi</h2><p>Kategori, ürün adı ve açıklamaları çevirir; müşteri menüsünde dil düğmeleri görünür.</p></div></div>
+            <div class="ai-row"><select id="aiTrLang"><option value="en">İngilizce</option><option value="de">Almanca</option><option value="ru">Rusça</option><option value="ar">Arapça</option><option value="fr">Fransızca</option></select><button class="btn-mini" id="aiTrBtn">✨ Menüyü çevir</button></div><div id="aiTrList"></div></div>
+          <div class="panel-card"><div class="panel-head"><div class="pi">📦</div><div><h2>Stok &amp; fiyat önerisi</h2><p>Son 14 günün satışına bakarak hazırlık miktarı ve fiyat fikirleri verir (maliyet verisi olmadığından kesin değildir).</p></div></div>
+            <div class="ai-row"><button class="btn-mini" id="aiStkBtn">✨ Öneri getir</button></div><div class="ai-out" id="aiStkOut" style="display:none"></div></div>
+          <div class="panel-card"><div class="panel-head"><div class="pi">📷</div><div><h2>Fotoğraftan veri girişi</h2><p>Fiş, fatura veya el yazısı listenin fotoğrafını okur; kontrol edip gider olarak ekleyebilirsiniz.</p></div></div>
+            <div class="ai-row"><input type="file" accept="image/*" id="aiPhoto"><button class="btn-mini" id="aiPhotoBtn">✨ Oku</button></div><div id="aiPhotoOut"></div></div>
+          <div class="panel-card"><div class="panel-head"><div class="pi">💬</div><div><h2>Müşteri asistanı &amp; sipariş notu</h2><p>Müşteri menüsünde “💬 Menü Asistanı” düğmesi, sipariş notlarında ise “✨” düzenleme düğmesi otomatik çalışır. Müşteri başına oturumda en fazla 15 soru sorulabilir.</p></div></div></div>
         </div>
 
         <!-- ZAYİ İŞLEMLERİ -->
@@ -3281,11 +3312,11 @@
     const c = FIREBASE_CONFIG;
     if(!c.apiKey || !c.databaseURL) return;
     try{
-      const B = 'https://www.gstatic.com/firebasejs/10.12.2/';
+      const B = 'https://www.gstatic.com/firebasejs/11.10.0/'; window.__fbB = B;
       const { initializeApp } = await import(B + 'firebase-app.js');
       const { getDatabase, ref, set, push, onValue, remove, get } = await import(B + 'firebase-database.js');
       const { getAuth, signInAnonymously, signInWithEmailAndPassword, signOut } = await import(B + 'firebase-auth.js');
-      const app = initializeApp(c), db = getDatabase(app), auth = getAuth(app);
+      const app = initializeApp(c), db = getDatabase(app), auth = getAuth(app); window.__fbApp = app;
       if(auth.authStateReady) await auth.authStateReady();
       if(!auth.currentUser) await signInAnonymously(auth);
       const AUTH_MSG = { 'auth/invalid-credential': 'E-posta veya şifre hatalı.', 'auth/wrong-password': 'Şifre hatalı.', 'auth/user-not-found': 'Bu e-posta ile hesap yok.', 'auth/invalid-email': 'E-posta biçimi geçersiz.', 'auth/too-many-requests': 'Çok fazla deneme. Biraz bekleyin.', 'auth/network-request-failed': 'İnternet bağlantısı yok.', 'auth/operation-not-allowed': 'Firebase’de E-posta/Şifre girişi açık değil.' };
@@ -3352,7 +3383,7 @@
   function cList(){
     const d = customerData(), q = ($id('cSearch') ? $id('cSearch').value : '').trim().toLocaleLowerCase('tr-TR');
     const gs = menuGroups(d.categories); if(cTab >= gs.length) cTab = 0;
-    if(q){ cSubOf = []; return d.categories.flatMap(c => c.products).filter(p => p.name.toLocaleLowerCase('tr-TR').includes(q)); }
+    if(q){ cSubOf = []; return d.categories.flatMap(c => c.products).filter(p => (p.name + ' ' + T(p.name)).toLocaleLowerCase('tr-TR').includes(q)); }
     const out = []; cSubOf = []; ((gs[cTab] || { subs: [] }).subs).filter(sb => cSub < 0 || sb.idx === cSub).forEach(sb => sb.cat.products.forEach(p => { out.push(p); cSubOf.push(sb.label); }));
     return out;
   }
@@ -3403,24 +3434,24 @@
     }
     $id('customerView').classList.remove('c-loading'); delete $id('cItems').dataset.sk;
     const d = customerData(), mo = isMenuOnly();
-    $id('customerView').classList.toggle('menu-only', mo);
+    $id('customerView').classList.toggle('menu-only', mo); renderLangChips();
     const gs = menuGroups(d.categories); if(cTab >= gs.length) cTab = 0;
     const sel = $id('cMasa'), prev = sel.value || qp.get('masa') || '';
     const opts = '<option value="">Masanızı seçin…</option>' + d.tables.map(t => '<option value="' + t.n + '">' + esc(t.label) + '</option>').join('');
     if(sel.innerHTML !== opts){ sel.innerHTML = opts; sel.value = prev; }
-    keyed('tabs', $id('cTabs'), gs.map((g, i) => ({ key: 't' + g.name, on: i === cTab, html: '<div class="c-tab c-cat" data-i="' + i + '">' + catVis(g) + '<span class="lb">' + esc(g.name) + '</span></div>' })), (n, e) => { n.classList.toggle('active', e.on); n.dataset.i = e.html.match(/data-i="(\d+)"/)[1]; });
+    keyed('tabs', $id('cTabs'), gs.map((g, i) => ({ key: 't' + cLang + g.name, on: i === cTab, html: '<div class="c-tab c-cat" data-i="' + i + '">' + catVis(g) + '<span class="lb">' + esc(T(g.name)) + '</span></div>' })), (n, e) => { n.classList.toggle('active', e.on); n.dataset.i = e.html.match(/data-i="(\d+)"/)[1]; });
     const subsOn = gs[cTab] && gs[cTab].subs.length > 1 && !($id('cSearch').value || '').trim();
     $id('cSubs').style.display = subsOn ? '' : 'none';
-    keyed('subs', $id('cSubs'), subsOn ? [{ idx: -1, label: 'Tümü' }].concat(gs[cTab].subs).map(sb => ({ key: 's' + cTab + '|' + sb.idx, on: sb.idx === cSub, html: '<div class="c-tab c-subv" data-s="' + sb.idx + '">' + (sb.cat ? visHtml({ img: sb.cat.img, icon: sb.cat.icon, name: sb.cat.name }, '', 'v-sub') : '') + '<span>' + esc(sb.label) + '</span></div>' })) : [], (n, e) => { n.classList.toggle('active', e.on); });
+    keyed('subs', $id('cSubs'), subsOn ? [{ idx: -1, label: 'Tümü' }].concat(gs[cTab].subs).map(sb => ({ key: 's' + cLang + cTab + '|' + sb.idx, on: sb.idx === cSub, html: '<div class="c-tab c-subv" data-s="' + sb.idx + '">' + (sb.cat ? visHtml({ img: sb.cat.img, icon: sb.cat.icon, name: sb.cat.name }, '', 'v-sub') : '') + '<span>' + esc(T(sb.label)) + '</span></div>' })) : [], (n, e) => { n.classList.toggle('active', e.on); });
     const lst = cList();
     if(!lst.length){ $id('cItems').innerHTML = '<p style="text-align:center;color:var(--ink-faint)">' + (($id('cSearch').value || '').trim() ? 'Ürün bulunamadı.' : 'Menü hazırlanıyor…') + '</p>'; }
     else{
       const ents = [];
       lst.forEach((p, i) => {
         const q = (cCart[p.name] || {}).qty || 0;
-        if(cSub < 0 && cSubOf[i] && cSubOf[i] !== cSubOf[i - 1] && subsOn) ents.push({ key: 'h' + cTab + '|' + cSubOf[i], html: '<div class="c-subttl">' + esc(cSubOf[i]) + '</div>' });
+        if(cSub < 0 && cSubOf[i] && cSubOf[i] !== cSubOf[i - 1] && subsOn) ents.push({ key: 'h' + cLang + cTab + '|' + cSubOf[i], html: '<div class="c-subttl">' + esc(T(cSubOf[i])) + '</div>' });
         const ctl = mo ? '' : q ? '<div class="qty-ctl"><button class="qbtn" data-p="' + i + '" data-d="-1">−</button><b class="qv">' + q + '</b><button class="qbtn" data-p="' + i + '" data-d="1">+</button></div>' : '<button class="qbtn" data-p="' + i + '" data-d="1">+</button>';
-        ents.push({ key: 'p' + p.name, ctl, html: '<div class="c-item card">' + visHtml(p, '', 'v-card') + '<div class="nm"><b>' + esc(p.name) + '</b>' + (p.desc ? '<small>' + esc(p.desc) + '</small>' : '') + '</div><div class="cfoot"><span class="pr">' + fmtTL(p.price) + '</span></div></div>' });
+        ents.push({ key: 'p' + cLang + p.name, ctl, html: '<div class="c-item card">' + visHtml(p, '', 'v-card') + '<div class="nm"><b>' + esc(T(p.name)) + '</b>' + (p.desc ? '<small>' + esc(T(p.desc)) + '</small>' : '') + '</div><div class="cfoot"><span class="pr">' + fmtTL(p.price) + '</span></div></div>' });
       });
       keyed('items', $id('cItems'), ents, (n, e) => {
         if(e.ctl === undefined || n.dataset.c === e.ctl) return;
@@ -3430,8 +3461,8 @@
       preloadMenuImgs(d);
     }
     const n = cCount(), btn = $id('cSend'); if(!n) cOpen = false;
-    $id('cCartList').style.display = cOpen ? 'block' : 'none'; $id('cNote').style.display = cOpen ? '' : 'none';
-    $id('cCartList').innerHTML = Object.values(cCart).map(i => '<div class="c-crow"><span>' + esc(i.name) + '</span><div class="qty-ctl"><button class="qbtn cq" data-n="' + esc(i.name) + '" data-d="-1">−</button><b class="qv">' + i.qty + '</b><button class="qbtn cq" data-n="' + esc(i.name) + '" data-d="1">+</button></div></div>').join('');
+    $id('cCartList').style.display = cOpen ? 'block' : 'none'; $id('cNote').style.display = cOpen ? '' : 'none'; aiCustUI();
+    $id('cCartList').innerHTML = Object.values(cCart).map(i => '<div class="c-crow"><span>' + esc(T(i.name)) + '</span><div class="qty-ctl"><button class="qbtn cq" data-n="' + esc(i.name) + '" data-d="-1">−</button><b class="qv">' + i.qty + '</b><button class="qbtn cq" data-n="' + esc(i.name) + '" data-d="1">+</button></div></div>').join('');
     if(mo){ $id('cStatus').style.display = 'none'; $id('cCartList').innerHTML = ''; }
     btn.disabled = n === 0;
     btn.textContent = !n ? 'Sepet boş' : (cOpen ? 'Siparişi Garsona Gönder · ' : '🛒 Sepeti Gör · ') + fmtTL(cTotal()) + ' (' + n + ' ürün)';
@@ -3517,7 +3548,7 @@
   // ---------------- GARSON PANELİ BAŞLAT ----------------
   function publishPublic(){
     const tables = regions.flatMap(r => r.tables.map(n => ({ n, label: tableLabels[n] || ('Masa ' + n) })));
-    const data = { categories: migrateMenuGroups(stripOldImgs(categories)).map(c => ({ name: c.name, grp: c.grp || c.name, sub: c.sub || '', gv: c.gv || 0, icon: c.icon || '', img: c.img || '', products: c.products.map(p => ({ name: p.name, icon: p.icon || '', price: p.price, desc: p.desc || '', img: p.img || '' })) })), menuVer: MENU_VER, groupMeta: groupMeta.map(m => ({ name: m.name, icon: m.icon || '', img: m.img || '', ord: typeof m.ord === 'number' ? m.ord : -1 })), tables, menuOnly: !!settings.menuOnly, wifiName: settings.wifiName || '', wifiPass: settings.wifiPass || '' };
+    const data = { categories: migrateMenuGroups(stripOldImgs(categories)).map(c => ({ name: c.name, grp: c.grp || c.name, sub: c.sub || '', gv: c.gv || 0, icon: c.icon || '', img: c.img || '', products: c.products.map(p => ({ name: p.name, icon: p.icon || '', price: p.price, desc: p.desc || '', img: p.img || '' })) })), menuVer: MENU_VER, groupMeta: groupMeta.map(m => ({ name: m.name, icon: m.icon || '', img: m.img || '', ord: typeof m.ord === 'number' ? m.ord : -1 })), tables, menuOnly: !!settings.menuOnly, wifiName: settings.wifiName || '', wifiPass: settings.wifiPass || '', trm: settings.trm || {} };
     if(!RT.local && RT.isAdmin && !RT.isAdmin()) return; // yalnızca yönetici hesabı yayınlar
     if(holdImgs) return; // güncel veri gelmeden eski yerel menüyü yayınlayıp müşteriye eski görseli gösterme
     const s = JSON.stringify(data);
@@ -3569,7 +3600,7 @@
   const SCR_PERM = {
     home: 'reports', 'siparis-masa': 'orders', paketler: ['orders', 'courier'], order: ['orders', 'pay', 'courier'], mutfak: ['kitchen', 'kitchenView'],
     tables: 'tables', urunler: 'menu', birimler: 'menu', ozellikler: 'menu', kdv: 'menu', indirimler: 'menu', mutfakgruplari: 'menu', odenmezler: 'menu',
-    digitalmenu: 'settings', settings: 'settings', musteriler: 'customers', gider: 'expenses', zayi: 'expenses', users: 'users', perms: 'users',
+    digitalmenu: 'settings', ai: 'settings', settings: 'settings', musteriler: 'customers', gider: 'expenses', zayi: 'expenses', users: 'users', perms: 'users',
     'rapor-urun': 'reports', 'rapor-gunsonu': 'reports', 'rapor-vardiya': 'reports', 'rapor-istatistik': 'reports', 'rapor-fire': 'reports'
   };
   function defaultPerms(){ const p = {}; PERM_DEFS.forEach(d => { p[d[0]] = d[3].slice(); }); return p; }
@@ -4132,6 +4163,7 @@ ${st('M50 58c-5-6 5-10 0-17', 0)}${st('M60 56c-5-7 5-11 0-19', 1.05)}${st('M70 5
 
   // ---- sipariş satırı notları (Özellikler) ----
   function editNote(item){
+    setTimeout(() => { try{ aiAttachNoteBtn('ff_extra'); }catch(e){} }, 0);
     const cart = carts[currentCartKey];
     if((item.sent || 0) >= item.qty){ showToast('Bu satır mutfağa gönderildi. Not için ürünü yeniden ekleyip o satıra not yazın.'); return; }
     const opts = (lists.ozellikler || []).map(r => r.name), cur = (item.note || '').split(',').map(s => s.trim()).filter(Boolean);
@@ -5072,6 +5104,190 @@ ${st('M50 58c-5-6 5-10 0-17', 0)}${st('M60 56c-5-7 5-11 0-19', 1.05)}${st('M70 5
   let wakeLock = null;
   async function keepAwake(){ try{ if('wakeLock' in navigator && !wakeLock){ wakeLock = await navigator.wakeLock.request('screen'); wakeLock.addEventListener('release', () => { wakeLock = null; }); } }catch(e){} }
   document.addEventListener('visibilitychange', () => { if(document.visibilityState === 'visible' && document.body.classList.contains('kitchen-only')) keepAwake(); });
+  // =====================================================================
+  // YAPAY ZEKÂ — Firebase AI Logic (Gemini Developer API)
+  // =====================================================================
+  var cLang = ''; try{ cLang = localStorage.getItem('cLang') || ''; }catch(e){}
+  var AI_LANGS = { en: 'İngilizce', de: 'Almanca', ru: 'Rusça', ar: 'Arapça', fr: 'Fransızca' };
+  var AI_MODEL = 'gemini-2.5-flash', AIM = { text: null, json: null }, aiChatN = 0, aiChatHist = [], _trC = {};
+
+  async function aiInit(){
+    if(AIM.text) return;
+    if(!window.__fbApp) throw new Error('Firebase bağlantısı yok. İnternetinizi ve Firebase ayarını kontrol edin.');
+    const { getAI, getGenerativeModel, GoogleAIBackend } = await import(window.__fbB + 'firebase-ai.js');
+    const ai = getAI(window.__fbApp, { backend: new GoogleAIBackend() });
+    AIM.text = getGenerativeModel(ai, { model: AI_MODEL });
+    AIM.json = getGenerativeModel(ai, { model: AI_MODEL, generationConfig: { responseMimeType: 'application/json' } });
+  }
+  async function aiAsk(prompt, parts){ await aiInit(); const r = await AIM.text.generateContent(parts ? [prompt].concat(parts) : prompt); return r.response.text().trim(); }
+  async function aiJSON(prompt, parts){ await aiInit(); const r = await AIM.json.generateContent(parts ? [prompt].concat(parts) : prompt); return JSON.parse(r.response.text().replace(/```json|```/g, '').trim()); }
+  function aiErr(e){
+    const m = String((e && (e.code || e.message)) || e);
+    if(/api.?not.?enabled|403|permission|api_key|forbidden|not.?found.*model/i.test(m)) return 'Yapay zekâ erişimi reddedildi. Firebase Console > AI Logic bölümünü etkinleştirdiniz mi?';
+    if(/quota|429|resource.?exhausted/i.test(m)) return 'Yapay zekâ kotası doldu. Biraz sonra tekrar deneyin.';
+    if(/network|fetch|offline/i.test(m)) return 'İnternet bağlantısı yok.';
+    return 'Yapay zekâ hatası: ' + m.slice(0, 140);
+  }
+  async function aiRun(btn, fn){
+    const t = btn.textContent; btn.disabled = true; btn.textContent = '⏳ Düşünüyor…';
+    try{ return await fn(); }
+    catch(e){ console.error('AI', e); showToast('⚠ ' + aiErr(e), 5000); }
+    finally{ btn.disabled = false; btn.textContent = t; }
+  }
+  function aiRefreshUI(){
+    const el = $id('aiStatus'); if(el) el.textContent = window.__fbApp ? '● Firebase bağlı — yapay zekâ kullanıma hazır (model: ' + AI_MODEL + ')' : '● Yerel mod: yapay zekâ için Firebase bağlantısı gerekir.';
+    renderTrList();
+  }
+  const allProds = () => categories.flatMap(c => c.products.map(p => ({ p, c })));
+  const fixTL = v => Math.round((+v || 0) * 100) / 100;
+
+  // ---- 1) Satış özeti ----
+  function aiSales(days){
+    const from = days === 1 ? dayStart() : Date.now() - days * 864e5, S = saleLog.filter(x => x.ts >= from), m = {}, hrs = {};
+    S.forEach(x => { arr(x.items).forEach(i => { const o = m[i.name] || (m[i.name] = { adet: 0, ciro: 0 }); o.adet += i.qty; o.ciro = fixTL(o.ciro + i.qty * i.unit); }); const h = new Date(x.ts).getHours(); hrs[h] = (hrs[h] || 0) + 1; });
+    const top = Object.entries(m).sort((a, b) => b[1].ciro - a[1].ciro).slice(0, 30).map(([ad, v]) => ({ ad, adet: v.adet, ciro: v.ciro }));
+    const ciro = fixTL(S.reduce((a, x) => a + (x.total || 0), 0));
+    return { donemGun: days, adisyonSayisi: S.length, toplamCiro: ciro, ortalamaAdisyon: S.length ? fixTL(ciro / S.length) : 0, toplamMisafir: S.reduce((a, x) => a + (x.guests || 0), 0), saatlereGoreAdisyon: hrs, urunler: top, toplamGiderKaydi: fixTL(giderler.reduce((a, g) => a + g.amount, 0)) };
+  }
+  $id('aiSumBtn').addEventListener('click', () => aiRun($id('aiSumBtn'), async () => {
+    const d = aiSales(+$id('aiSumDays').value);
+    if(!d.adisyonSayisi){ showToast('Bu dönemde satış kaydı yok.'); return; }
+    const t = await aiAsk('Bir kafenin satış verisini yorumla. Türkçe, sade düz metin yaz (markdown, tablo, ** kullanma; madde için • kullan). Başlıklar: "Genel durum", "En çok satanlar", "Dikkat çeken noktalar", "Önerim (3 madde)". Veride olmayan sayı uydurma; veri azsa bunu belirt.\nVeri: ' + JSON.stringify(d));
+    const o = $id('aiSumOut'); o.style.display = ''; o.textContent = t;
+  }));
+
+  // ---- 2) Menü açıklaması ----
+  var aiDescRes = [];
+  $id('aiDescBtn').addEventListener('click', () => aiRun($id('aiDescBtn'), async () => {
+    const list = allProds().filter(x => !(x.p.desc || '').trim()).slice(0, 40);
+    if(!list.length){ showToast('Tüm ürünlerin açıklaması dolu.'); return; }
+    const out = arr(await aiJSON('Aşağıdaki kafe ürünleri için QR menüde görünecek, iştah açıcı, en fazla 90 karakterlik tek cümlelik Türkçe açıklama yaz. Ürün adında olmayan malzeme, içerik veya menşei UYDURMA; emin değilsen genel ve nötr kal. Ayrıca ürün adından makul biçimde çıkarılabilen olası alerjenleri ("süt","gluten","yumurta","fındık","susam","soya","deniz ürünü" gibi) "alerjen" dizisine yaz; emin değilsen boş bırak. Çıktı: [{"i":0,"aciklama":"...","alerjen":["..."]}] ("i" girdideki sıra numarasıdır).\nÜrünler: ' + JSON.stringify(list.map((x, i) => ({ i, ad: x.p.name, kategori: x.c.name })))));
+    aiDescRes = list.map((x, i) => { const r = out.find(o => o && +o.i === i) || {}; return { p: x.p, desc: String(r.aciklama || '').trim(), al: arr(r.alerjen).map(String) }; }).filter(r => r.desc);
+    const w = $id('aiDescOut');
+    w.innerHTML = aiDescRes.map((r, i) => '<div class="ai-row"><input type="checkbox" data-d="' + i + '" checked><div style="flex:1;min-width:0"><b>' + esc(r.p.name) + '</b><br><input type="text" data-t="' + i + '" value="' + esc(r.desc) + '" style="width:100%">' + (r.al.length ? '<br><small>Olası alerjen: ' + esc(r.al.join(', ')) + '</small>' : '') + '</div></div>').join('') +
+      '<div class="ai-row"><label><input type="checkbox" id="aiDescAl"> Olası alerjen notunu da ekle (taslak, kesin değildir)</label></div><div class="ai-row"><button class="btn-mini" id="aiDescApply">✔ Seçilenleri uygula</button></div>';
+    $id('aiDescApply').onclick = () => {
+      const withAl = $id('aiDescAl').checked; let n = 0;
+      w.querySelectorAll('input[data-d]').forEach(cb => { if(!cb.checked) return; const i = +cb.dataset.d, r = aiDescRes[i], t = (w.querySelector('input[data-t="' + i + '"]').value || '').trim(); if(!t) return; r.p.desc = t + (withAl && r.al.length ? ' · Olası alerjenler: ' + r.al.join(', ') + ' (lütfen garsona sorun)' : ''); n++; });
+      try{ renderCatList(); renderProductGrid(); }catch(e){} saveState(); publishPublic(); w.innerHTML = ''; showToast(n + ' ürün açıklaması uygulandı.');
+    };
+  }));
+
+  // ---- 3) Menü çevirisi ----
+  function renderTrList(){
+    const w = $id('aiTrList'); if(!w) return; const tr = settings.trm || {};
+    w.innerHTML = Object.keys(tr).filter(k => AI_LANGS[k]).map(k => '<div class="ai-row"><span style="flex:1">🌍 ' + AI_LANGS[k] + ' — ' + arr(tr[k]).length + ' metin</span><button class="btn-mini" data-del="' + k + '">Sil</button></div>').join('');
+    w.querySelectorAll('[data-del]').forEach(b => b.onclick = () => { delete settings.trm[b.dataset.del]; saveState(); publishPublic(); renderTrList(); });
+  }
+  $id('aiTrBtn').addEventListener('click', () => aiRun($id('aiTrBtn'), async () => {
+    const code = $id('aiTrLang').value, set = new Set(), btn = $id('aiTrBtn');
+    categories.forEach(c => { [c.name, c.grp, c.sub].forEach(x => x && set.add(String(x))); c.products.forEach(p => { set.add(String(p.name)); if(p.desc) set.add(String(p.desc)); }); });
+    arr(groupMeta).forEach(m => m && m.name && set.add(String(m.name)));
+    const src = [...set].filter(x => x.trim()), res = {};
+    for(let k = 0; k < src.length; k += 50){
+      btn.textContent = '⏳ ' + Math.min(k + 50, src.length) + '/' + src.length;
+      const chunk = src.slice(k, k + 50), out = arr(await aiJSON('Bir kafe menüsündeki metinleri Türkçeden ' + AI_LANGS[code] + ' diline çevir. Ürün adlarını doğal ve iştah açıcı çevir; marka ve özel isimleri (ör. Latte, Tiramisu) olduğu gibi bırak. Anlam ekleme veya çıkarma. Çıktı: [{"i":0,"t":"çeviri"}] ("i" girdideki sıradır).\nMetinler: ' + JSON.stringify(chunk.map((t, i) => ({ i, t })))));
+      chunk.forEach((t, i) => { const r = out.find(o => o && +o.i === i); if(r && typeof r.t === 'string' && r.t.trim()) res[t] = r.t.trim(); });
+    }
+    const n = Object.keys(res).length; if(!n){ showToast('Çeviri alınamadı, tekrar deneyin.'); return; }
+    settings.trm = settings.trm || {}; settings.trm[code] = Object.entries(res);
+    saveState(); publishPublic(); renderTrList(); showToast(AI_LANGS[code] + ': ' + n + '/' + src.length + ' metin çevrildi, müşteri menüsüne eklendi.');
+  }));
+  function trMap(code){
+    const raw = ((pubData && pubData.trm) || settings.trm || {})[code]; if(!raw) return null;
+    if(_trC[code] && _trC[code].raw === raw) return _trC[code].m;
+    const m = {}; arr(raw).forEach(p => { p = arr(p); if(p[0]) m[p[0]] = p[1]; }); _trC[code] = { raw, m }; return m;
+  }
+  function T(x){ if(!cLang || x == null) return x; const m = trMap(cLang); return (m && m[x]) || x; }
+  function renderLangChips(){
+    const el = $id('cLang'); if(!el) return;
+    const codes = Object.keys((pubData && pubData.trm) || settings.trm || {}).filter(k => AI_LANGS[k]);
+    if(cLang && codes.indexOf(cLang) < 0) cLang = '';
+    const h = codes.length ? ['tr'].concat(codes).map(c => '<button type="button" class="' + ((c === 'tr' ? !cLang : c === cLang) ? 'on' : '') + '" data-l="' + c + '">' + c.toUpperCase() + '</button>').join('') : '';
+    if(el.dataset.h !== h){ el.dataset.h = h; el.innerHTML = h; }
+    el.style.display = h ? '' : 'none'; $id('customerView').dir = cLang === 'ar' ? 'rtl' : 'ltr';
+  }
+  $id('cLang').addEventListener('click', e => { const b = e.target.closest('button'); if(!b) return; cLang = b.dataset.l === 'tr' ? '' : b.dataset.l; try{ localStorage.setItem('cLang', cLang); }catch(x){} renderLangChips(); renderCustomer(); });
+
+  // ---- 4) Müşteri menü asistanı ----
+  function aiMenuText(){ return customerData().categories.map(c => c.products.map(p => c.name + ' | ' + p.name + ' | ' + p.price + ' TL' + (p.desc ? ' | ' + p.desc : '')).join('\n')).join('\n').slice(0, 14000); }
+  function openAiChat(){
+    const bg = document.createElement('div'); bg.className = 'modal-bg show'; bg.style.zIndex = 1300;
+    bg.innerHTML = '<div class="modal-box"><h3 style="margin:0 0 6px">💬 Menü Asistanı</h3><div id="aiLog" style="max-height:44vh;overflow:auto"><div class="ai-bub a">Merhaba! Canınız ne çekiyor? Size menüden öneri yapabilirim.</div></div><div style="display:flex;gap:6px;margin-top:8px"><input id="aiQ" type="text" placeholder="Örn: tatlı bir şey, bol sütlü bir kahve…" style="flex:1;padding:10px;border:1px solid var(--line);border-radius:8px;background:var(--panel-2);color:var(--ink)"><button class="btn-save" id="aiSend" style="margin:0;width:auto;padding:0 14px">Gönder</button></div><button class="btn-save" id="aiClose" style="margin:8px 0 0;background:var(--ink-faint)">Kapat</button></div>';
+    document.body.appendChild(bg);
+    const log = bg.querySelector('#aiLog'), q = bg.querySelector('#aiQ'), send = bg.querySelector('#aiSend');
+    const add = (c, t) => { const d = document.createElement('div'); d.className = 'ai-bub ' + c; d.textContent = t; log.appendChild(d); log.scrollTop = log.scrollHeight; };
+    bg.querySelector('#aiClose').onclick = () => bg.remove();
+    const go = async () => {
+      const t = q.value.trim(); if(!t) return; q.value = '';
+      if(aiChatN >= 15){ add('a', 'Soru sınırına ulaştınız. Lütfen garsonumuza danışın.'); return; }
+      aiChatN++; add('u', t); send.disabled = true;
+      try{
+        const hist = aiChatHist.slice(-6).join('\n');
+        const a = await aiAsk('Sen bir kafenin dijital menü asistanısın. SADECE aşağıdaki menüdeki ürünlerden öner; menüde olmayan ürün, malzeme, içerik veya fiyat UYDURMA. Alerji, hassasiyet, helal/vegan gibi kesin bilgi gerektiren sorularda kesin konuşma, garsona sormalarını söyle. Müşterinin yazdığı dilde, en fazla 4 cümleyle, samimi cevap ver. Önerdiğin ürünlerin fiyatını TL olarak yaz. Sipariş alma; müşteri sepete kendisi ekler.\n\nMENÜ (kategori | ürün | fiyat | açıklama):\n' + aiMenuText() + '\n\nÖNCEKİ KONUŞMA:\n' + hist + '\n\nMÜŞTERİ: ' + t);
+        add('a', a); aiChatHist.push('Müşteri: ' + t, 'Asistan: ' + a);
+      }catch(e){ console.error('AI', e); add('a', 'Şu an yanıt veremiyorum, lütfen garsonumuza danışın.'); }
+      send.disabled = false; q.focus();
+    };
+    send.onclick = go; q.addEventListener('keydown', e => { if(e.key === 'Enter') go(); }); q.focus();
+  }
+  function aiCustUI(){ const b = $id('cAiBtn'); if(b) b.style.display = window.__fbApp ? '' : 'none'; const n = $id('cNoteAi'); if(n) n.style.display = (window.__fbApp && $id('cNote').style.display !== 'none') ? '' : 'none'; }
+  $id('cAiBtn').addEventListener('click', openAiChat);
+
+  // ---- 5) Sipariş notu düzenleme ----
+  async function aiCleanNote(t){
+    return (await aiAsk('Bir kafede müşteri/garson sipariş notunu mutfak ekranı için düzenle: kısa, net, virgülle ayrılmış olsun; gereksiz kelimeleri at; YENİ BİLGİ EKLEME, anlamı değiştirme. Alerji veya hassasiyet varsa mutlaka koru ve notu "ALERJİ:" ile başlat. Yalnızca düzenlenmiş notu yaz, tırnak veya açıklama ekleme.\nNot: ' + JSON.stringify(t))).replace(/^["'`]+|["'`]+$/g, '').slice(0, 200);
+  }
+  $id('cNoteAi').addEventListener('click', () => { const el = $id('cNote'), v = el.value.trim(); if(v.length < 4) return; aiRun($id('cNoteAi'), async () => { el.value = await aiCleanNote(v); }); });
+  function aiAttachNoteBtn(id){
+    const el = $id(id); if(!el || el.dataset.ai || !window.__fbApp) return; el.dataset.ai = '1';
+    const b = document.createElement('button'); b.type = 'button'; b.className = 'btn-mini'; b.textContent = '✨ Mutfak için düzenle'; b.style.marginTop = '6px';
+    b.onclick = () => { const v = el.value.trim(); if(!v){ showToast('Önce notu yazın.'); return; } aiRun(b, async () => { el.value = await aiCleanNote(v); }); };
+    el.insertAdjacentElement('afterend', b);
+  }
+
+  // ---- 6) Stok & fiyat önerisi ----
+  $id('aiStkBtn').addEventListener('click', () => aiRun($id('aiStkBtn'), async () => {
+    const from = Date.now() - 14 * 864e5, S = saleLog.filter(x => x.ts >= from), m = {}, days = new Set();
+    S.forEach(x => { days.add(new Date(x.ts).toDateString()); arr(x.items).forEach(i => { const o = m[i.name] || (m[i.name] = { adet: 0, ciro: 0 }); o.adet += i.qty; o.ciro = fixTL(o.ciro + i.qty * i.unit); }); });
+    if(!S.length){ showToast('Son 14 günde satış kaydı yok.'); return; }
+    const price = {}; allProds().forEach(x => { price[x.p.name] = x.p.price; });
+    const sold = Object.entries(m).sort((a, b) => b[1].adet - a[1].adet).slice(0, 40).map(([ad, v]) => ({ ad, adet: v.adet, ciro: v.ciro, fiyat: price[ad] }));
+    const unsold = allProds().filter(x => !m[x.p.name]).slice(0, 25).map(x => ({ ad: x.p.name, fiyat: x.p.price }));
+    const t = await aiAsk('Bir kafe için satış verisine göre öneri hazırla. Türkçe, sade düz metin (markdown, tablo, ** yok; madde için •). Başlıklar: "Hazırlık / stok önerisi" (çok satanlar için günlük ortalama ve haftalık tahmini adet; veride kaç günlük kayıt olduğunu hesaba kat), "Az satanlar" (menüden çıkarma, kampanya veya yeniden konumlandırma fikri), "Fiyat fikirleri" (en fazla 5 madde, küçük ve gerekçeli; maliyet verisi yok, bunu belirt). Kesin karar verme, öneri dili kullan; veride olmayan sayı uydurma.\nKayıtlı gün sayısı: ' + days.size + '\nSatılanlar: ' + JSON.stringify(sold) + '\nSon 14 günde hiç satılmayanlar: ' + JSON.stringify(unsold));
+    const o = $id('aiStkOut'); o.style.display = ''; o.textContent = t + '\n\n⚠ Bunlar tahmindir; maliyet, sezon ve stok durumunuzu kendiniz değerlendirin.';
+  }));
+
+  // ---- 7) Fotoğraftan veri girişi ----
+  function aiFilePart(file){
+    return new Promise((res, rej) => {
+      const fr = new FileReader(); fr.onerror = () => rej(new Error('Dosya okunamadı'));
+      fr.onload = () => { const im = new Image(); im.onerror = () => rej(new Error('Görsel açılamadı'));
+        im.onload = () => { const k = Math.min(1, 1600 / Math.max(im.width, im.height)), cv = document.createElement('canvas'); cv.width = Math.round(im.width * k); cv.height = Math.round(im.height * k); cv.getContext('2d').drawImage(im, 0, 0, cv.width, cv.height); res({ inlineData: { data: cv.toDataURL('image/jpeg', 0.85).split(',')[1], mimeType: 'image/jpeg' } }); };
+        im.src = fr.result; };
+      fr.readAsDataURL(file);
+    });
+  }
+  $id('aiPhotoBtn').addEventListener('click', () => aiRun($id('aiPhotoBtn'), async () => {
+    const f = $id('aiPhoto').files[0]; if(!f){ showToast('Önce bir fotoğraf seçin.'); return; }
+    const r = await aiJSON('Bu görsel bir kafe/işletme fişi, faturası veya el yazısı listesidir. İçindekileri oku. Okuyamadığın veya emin olmadığın alanı boş ("") ya da 0 bırak, UYDURMA. Çıktı: {"tedarikci":"","tarih":"gg.aa.yyyy","toplam":0,"kalemler":[{"ad":"","adet":0,"birimFiyat":0,"tutar":0}]}', [await aiFilePart(f)]);
+    const kal = arr(r.kalemler), sum = fixTL(kal.reduce((a, k) => a + (+k.tutar || 0), 0)), tot = +r.toplam || sum, o = $id('aiPhotoOut');
+    o.innerHTML = '<div class="ai-row"><b>Gider adı</b><input type="text" id="aiPhName" value="' + esc(r.tedarikci ? r.tedarikci + ' — fiş/fatura' : 'Fiş / Fatura') + '"></div>' +
+      '<div class="ai-row"><b>Tutar (₺)</b><input type="text" id="aiPhAmt" inputmode="decimal" value="' + tot + '"></div>' +
+      '<div class="ai-row"><b>Tarih</b><input type="text" id="aiPhDate" placeholder="gg.aa.yyyy" value="' + esc(r.tarih || '') + '"></div>' +
+      kal.map(k => '<div class="ai-row"><span style="flex:1">' + esc(k.ad || '?') + ' · ' + (+k.adet || 0) + ' × ' + (+k.birimFiyat || 0) + '</span><b>₺' + (+k.tutar || 0) + '</b></div>').join('') +
+      '<div class="ai-row"><small style="flex:1">Okunan rakamları mutlaka kontrol edin; gerekirse yukarıdaki alanları düzeltin.</small><button class="btn-mini" id="aiPhAdd">＋ Gider olarak ekle</button></div>';
+    $id('aiPhAdd').onclick = () => {
+      const name = $id('aiPhName').value.trim(), amount = parseFloat(String($id('aiPhAmt').value).replace(',', '.')), dt = $id('aiPhDate').value.trim();
+      if(!name || !(amount > 0)){ showToast('Gider adı ve geçerli bir tutar gerekli.'); return; }
+      giderler.push({ name, amount: fixTL(amount), date: /^\d{1,2}\.\d{1,2}\.\d{4}$/.test(dt) ? dt : new Date().toLocaleDateString('tr-TR') });
+      renderGiderler(); saveState(); o.innerHTML = ''; $id('aiPhoto').value = ''; showToast(name + ' gider olarak eklendi.');
+    };
+  }));
+
+  document.querySelectorAll('.nav-item[data-screen="ai"]').forEach(el => el.addEventListener('click', aiRefreshUI));
+  aiRefreshUI();
+
   smFullApply('siparis-masa');
   bootApp();
 </script>
