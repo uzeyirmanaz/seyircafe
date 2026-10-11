@@ -5109,15 +5109,16 @@ ${st('M50 58c-5-6 5-10 0-17', 0)}${st('M60 56c-5-7 5-11 0-19', 1.05)}${st('M70 5
   // =====================================================================
   var cLang = ''; try{ cLang = localStorage.getItem('cLang') || ''; }catch(e){}
   var AI_LANGS = { en: 'İngilizce', de: 'Almanca', ru: 'Rusça', ar: 'Arapça', fr: 'Fransızca' };
-  var APPCHECK_SITE_KEY = '';   // Firebase Console > App Check > reCAPTCHA v3 SITE anahtarı (herkese açık anahtar) buraya yazılır
+  var APPCHECK_SITE_KEY = '6Lf9ieotAAAAACBfihhPp2eobnFTq1ZfvPfO-g_V';   // reCAPTCHA SITE (herkese açık) anahtarı
+  var APPCHECK_ENTERPRISE = false;   // Firebase App Check'te sağlayıcı 'reCAPTCHA Enterprise' ise true yapın; 'reCAPTCHA v3' ise false kalsın
   var AI_MODEL = 'gemini-2.5-flash', AIM = { text: null, json: null }, aiChatN = 0, aiChatHist = [], _trC = {};
 
   async function aiInit(){
     if(AIM.text) return;
     if(!window.__fbApp) throw new Error('Firebase bağlantısı yok. İnternetinizi ve Firebase ayarını kontrol edin.');
     if(APPCHECK_SITE_KEY && !window.__acInit){
-      const { initializeAppCheck, ReCaptchaV3Provider } = await import(window.__fbB + 'firebase-app-check.js');
-      initializeAppCheck(window.__fbApp, { provider: new ReCaptchaV3Provider(APPCHECK_SITE_KEY), isTokenAutoRefreshEnabled: true }); window.__acInit = true;
+      const AC = await import(window.__fbB + 'firebase-app-check.js');
+      AC.initializeAppCheck(window.__fbApp, { provider: APPCHECK_ENTERPRISE ? new AC.ReCaptchaEnterpriseProvider(APPCHECK_SITE_KEY) : new AC.ReCaptchaV3Provider(APPCHECK_SITE_KEY), isTokenAutoRefreshEnabled: true }); window.__acInit = true;
     }
     const { getAI, getGenerativeModel, GoogleAIBackend } = await import(window.__fbB + 'firebase-ai.js');
     const ai = getAI(window.__fbApp, { backend: new GoogleAIBackend() });
