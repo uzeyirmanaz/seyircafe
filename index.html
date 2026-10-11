@@ -1057,6 +1057,85 @@
 
   .ol-by{ color:var(--ink-faint); font-size:.74rem; font-weight:700; }
   .oc-by{ font-size:.74rem; color:var(--ink-dim); font-weight:700; margin:4px 0 0; }
+
+  /* ===== v5: masa renkleri, tam ekran, mutfak, ödeme, taşıma ===== */
+  .sm-pill,.plain-table-cell{ background:#fff; color:#1b1b1b; }
+  [data-theme="dark"] .sm-pill.t-free,[data-theme="dark"] .plain-table-cell.t-free{ background:#f1efe9; }
+  .sm-pill.t-blink,.plain-table-cell.t-blink{ animation:tblink 1s infinite; }
+  @keyframes tblink{ 50%{ opacity:.45; } }
+  .sm-pill.t-blink,.plain-table-cell.t-blink,.sm-pill.t-wait,.plain-table-cell.t-wait{ background:#d93025; border-color:#a8231a; color:#fff; }
+  .sm-pill.t-ok,.plain-table-cell.t-ok{ background:#2e9d57; border-color:#217a42; color:#fff; }
+  .t-blink .amt,.t-blink .bn,.plain-table-cell.t-blink .pencil,.sm-pill.t-wait .amt,.sm-pill.t-ok .amt,.plain-table-cell.t-wait .amt,.plain-table-cell.t-ok .amt,.plain-table-cell.t-wait .pencil,.plain-table-cell.t-ok .pencil,.t-wait .bn,.t-ok .bn{ color:#fff; }
+  .sm-ic{ position:relative; user-select:none; }
+  .sm-ic .cdot{ position:absolute; top:4px; right:4px; width:10px; height:10px; border-radius:50%; background:#9a9a9a; border:2px solid var(--panel); }
+  .sm-ic .cdot.ok{ background:#2e9d57; } .sm-ic .cdot.bad{ background:#d93025; } .sm-ic .cdot.loc{ background:#e0a340; }
+  .sm-ic.on{ background:var(--red); color:#fff; border-color:var(--red); }
+  .spin{ animation:smspin .7s linear; } @keyframes smspin{ to{ transform:rotate(360deg); } }
+  .sm-size{ display:none; gap:8px; } body.sm-full .sm-size{ display:flex; }
+  body.sm-full .sidebar, body.sm-full .topbar, body.sm-full .top-actions{ display:none !important; }
+  body.sm-full .content{ max-width:none; padding:14px 18px; }
+  body.sm-full .sm-pill-grid{ grid-template-columns:repeat(auto-fill,minmax(var(--tsz,230px),1fr)); grid-auto-rows:var(--tsh,140px); }
+  body.sm-full .sm-pill{ display:flex; flex-direction:column; align-items:center; justify-content:center; font-size:calc(var(--tsz,230px)/10); line-height:1.15; border-radius:14px; }
+  body.sm-full .sm-pill .amt{ font-size:.6em; }
+  body.sm-full .region-tab{ font-size:1rem; padding:10px 18px; }
+  body.kitchen-only .sidebar, body.kitchen-only .topbar, body.kitchen-only .eye-toggle, body.kitchen-only #btnCO, body.kitchen-only #btnKitchen, body.kitchen-only #rtMode, body.kitchen-only #screen-mutfak .panel-head{ display:none !important; }
+  body.kitchen-only .content{ max-width:none; padding:62px 16px 30px; }
+  .k-card.new{ border:2px solid #d93025; background:rgba(217,48,37,.08); animation:kpulse 1s infinite; }
+  @keyframes kpulse{ 50%{ box-shadow:0 0 0 7px rgba(217,48,37,.28); } }
+  .k-card .acts button.b-read{ background:#d93025; font-size:1.05rem; padding:16px; }
+  .k-card .tag.who{ background:var(--red); color:#fff; }
+  .k-card .k-st{ margin-top:8px; font-size:.82rem; font-weight:700; color:var(--ink-dim); }
+  .k-alert{ grid-column:1/-1; background:#d93025; color:#fff; border-radius:10px; padding:12px 16px; font-weight:800; animation:kpulse 1s infinite; }
+  #restName{ pointer-events:none; user-select:none; background:transparent; border:0; }
+  /* ödeme */
+  #paymentPanel .pp-head{ background:transparent; border:0; max-width:600px; margin:0 auto; padding:18px 16px 4px; }
+  #paymentPanel .pp-head b{ font-size:1.2rem; font-weight:800; }
+  .pp-hero{ text-align:center; background:linear-gradient(160deg,#1f1b18,#3a2c25); color:#fff; border-radius:20px; padding:22px 18px 18px; box-shadow:0 10px 28px rgba(0,0,0,.18); }
+  .pp-hero .pp-rem-lbl{ font-size:.78rem; letter-spacing:.12em; text-transform:uppercase; opacity:.7; font-weight:700; }
+  .pp-hero #ppSummaryRemaining{ display:block; font-size:2.7rem; font-weight:900; margin:4px 0 12px; letter-spacing:-.02em; color:#fff; }
+  .pp-prog{ height:8px; border-radius:99px; background:rgba(255,255,255,.18); overflow:hidden; }
+  .pp-prog i{ display:block; height:100%; width:0; background:#4cd07d; border-radius:99px; transition:width .3s; }
+  .pp-mini{ display:flex; justify-content:space-between; margin-top:12px; font-size:.86rem; opacity:.9; }
+  .pp-mini b{ font-weight:800; color:#fff; }
+  .pp-card{ background:var(--panel); border:1px solid var(--line); border-radius:16px; padding:16px; margin-bottom:14px; box-shadow:var(--shadow); }
+  .pp-lbl{ font-size:.74rem; font-weight:800; letter-spacing:.08em; text-transform:uppercase; color:var(--ink-faint); margin-bottom:8px; }
+  .pp-amt{ display:flex; align-items:center; gap:8px; background:var(--panel-2); border:2px solid var(--line); border-radius:14px; padding:6px 14px; }
+  .pp-amt:focus-within{ border-color:var(--sage); }
+  .pp-amt span{ font-size:1.6rem; font-weight:800; color:var(--ink-faint); }
+  #paymentPanel .pp-amt input{ border:0; background:transparent; font-size:2rem; font-weight:900; width:100%; color:var(--ink); padding:8px 0; text-align:left; outline:none; margin:0; }
+  .pp-chips{ display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin-top:12px; }
+  .pp-chip{ border:1px solid var(--line); background:var(--panel-2); color:var(--ink); border-radius:999px; padding:9px 16px; font-weight:700; font-size:.88rem; cursor:pointer; font-family:inherit; }
+  .pp-chip:hover{ border-color:var(--sage); color:var(--sage); }
+  .pp-stepper{ display:flex; align-items:center; gap:6px; margin-left:auto; background:var(--panel-2); border:1px solid var(--line); border-radius:999px; padding:3px; }
+  .pp-stepper button{ width:32px; height:32px; border-radius:50%; border:0; background:var(--panel); color:var(--ink); font-size:1.1rem; font-weight:800; cursor:pointer; }
+  #paymentPanel .pp-stepper input{ width:34px; border:0; background:transparent; text-align:center; font-weight:800; font-size:1rem; padding:0; margin:0; color:var(--ink); -moz-appearance:textfield; }
+  .pp-stepper input::-webkit-outer-spin-button,.pp-stepper input::-webkit-inner-spin-button{ -webkit-appearance:none; margin:0; }
+  #paymentPanel .pp-split-row{ background:var(--panel); border:1px solid var(--line); border-radius:16px; padding:14px 16px; margin-bottom:14px; }
+  #paymentPanel .pp-split-controls select{ flex:1; padding:10px; border-radius:10px; border:1px solid var(--line); background:var(--panel-2); color:var(--ink); font:inherit; }
+  #paymentPanel .pp-methods{ display:grid; grid-template-columns:repeat(2,1fr); gap:12px; }
+  #paymentPanel .pp-method{ display:flex; flex-direction:column; align-items:center; gap:6px; padding:18px 10px; border:0; border-radius:16px; color:#fff; font-weight:800; font-size:1rem; box-shadow:0 6px 16px rgba(0,0,0,.14); transition:transform .1s; }
+  #paymentPanel .pp-method:hover{ color:#fff; filter:brightness(1.07); } #paymentPanel .pp-method:active{ transform:scale(.97); }
+  #paymentPanel .pp-method .mi{ font-size:1.8rem; line-height:1; }
+  .pp-method.m-nakit{ background:linear-gradient(135deg,#2e9d57,#1f7a41); }
+  .pp-method.m-kart{ background:linear-gradient(135deg,#3b6fd8,#2a50a8); }
+  .pp-method.m-acik{ background:linear-gradient(135deg,#e0a340,#b97d1c); }
+  .pp-method.m-diger{ background:linear-gradient(135deg,#6b5b95,#4a3d70); }
+  #paymentPanel #btnWaive{ grid-column:1/-1; background:transparent; color:var(--ink-dim); border:1px dashed var(--line); box-shadow:none; flex-direction:row; justify-content:center; padding:12px; font-size:.9rem; }
+  #paymentPanel #btnWaive:hover{ color:var(--ink); filter:none; }
+  #paymentPanel .pp-history{ background:var(--panel); border:1px solid var(--line); border-radius:16px; padding:6px 16px; margin-top:14px; }
+  #paymentPanel .pp-history:empty{ display:none; }
+  /* masa taşıma */
+  .mvd-top{ display:flex; align-items:center; margin-bottom:12px; } .mvd-top h3{ margin:0; flex:1; } .mvd-top span{ cursor:pointer; font-size:20px; }
+  .mvd-seg{ display:flex; background:var(--panel-2); border-radius:12px; padding:4px; margin-bottom:12px; }
+  .mvd-seg button{ flex:1; border:0; background:transparent; color:var(--ink-dim); font:inherit; font-weight:800; padding:10px; border-radius:9px; cursor:pointer; }
+  .mvd-seg button.on{ background:var(--red); color:#fff; }
+  .mvd-list{ max-height:44vh; overflow:auto; }
+  .mvd-row{ display:flex; align-items:center; gap:10px; padding:10px 12px; border:1px solid var(--line); border-radius:12px; margin-bottom:8px; background:var(--panel-2); opacity:.6; }
+  .mvd-row.sel{ opacity:1; border-color:var(--red); }
+  .mvd-row .nm{ flex:1; min-width:0; } .mvd-row .nm b{ display:block; } .mvd-row .nm small{ color:var(--ink-faint); font-weight:700; }
+  .mvd-q{ font-weight:900; color:var(--red); font-size:1.1rem; }
+  .mvd-go{ margin-top:10px; } .mvd-go:disabled{ opacity:.45; }
+  .order-line .link-btn.mvl{ display:inline-block; margin:4px 0 0 12px; font-size:.78rem; }
 </style>
 <link rel="icon" id="favi" href="data:,">
 </head>
@@ -1113,7 +1192,7 @@
         <div class="name">Adisyon</div>
       </div>
       <div class="brand-sub">
-        <input id="restName" class="editable-inline name-inline" value="SEYİR CAFE" spellcheck="false">
+        <input id="restName" class="name-inline" value="SEYİR CAFE" spellcheck="false" readonly tabindex="-1" aria-readonly="true">
       </div>
 
       <div class="nav-item active" data-screen="home"><span class="ic">🏠</span>Ana Sayfa</div>
@@ -1368,33 +1447,33 @@
 
             <div class="order-total"><span>Toplam Tutar</span><span id="orderTotalValue">₺0,00</span></div>
             <button class="btn-save" id="btnSaveOrder">KAYDET</button>
-            <div class="mv-hint" id="mvHint">Yanlış girilen ürünleri soldaki kutudan işaretleyip başka masaya taşıyabilirsiniz. Hiçbir şey işaretlemezseniz tüm adisyon taşınır.</div>
-            <div class="order-add-row"><button class="btn-mini" id="btnMoveTable">⇄ Masa Taşı / Birleştir</button><button class="btn-mini" id="btnCancelOrder">✕ Adisyonu İptal Et</button></div>
+            <div class="mv-hint" id="mvHint" style="display:none"></div>
+            <div class="order-add-row"><button class="btn-mini" id="btnMoveTable">⇄ Ürün / Masa Taşı</button><button class="btn-mini" id="btnCancelOrder">✕ Adisyonu İptal Et</button></div>
 
             <button class="btn-pay" id="btnTogglePayment">💳 Ödeme Al</button>
             <div class="payment-panel" id="paymentPanel" style="display:none;">
               <div class="pp-head"><b>💳 Ödeme — <span id="ppTitle"></span></b><button class="mp-x" id="ppClose" aria-label="Kapat">✕</button></div>
               <div class="pp-body">
-              <div class="pp-summary pp-sum-card">
-                <div class="pp-row"><span>Toplam</span><b id="ppSummaryTotal">₺0,00</b></div>
-                <div class="pp-row"><span>Ödenen</span><b id="ppSummaryPaid">₺0,00</b></div>
-                <div class="pp-row pp-remaining"><span>Kalan</span><b id="ppSummaryRemaining">₺0,00</b></div>
+              <div class="pp-sum-card pp-hero">
+                <div class="pp-rem-lbl">Kalan Tutar</div>
+                <b id="ppSummaryRemaining">₺0,00</b>
+                <div class="pp-prog"><i id="ppProg"></i></div>
+                <div class="pp-mini"><span>Toplam <b id="ppSummaryTotal">₺0,00</b></span><span>Ödenen <b id="ppSummaryPaid">₺0,00</b></span></div>
               </div>
               <div class="pp-split-row"><label>İndirim</label><div class="pp-split-controls"><select id="ppDiscSel"></select><span class="link-btn" id="btnDiscApply">Uygula</span></div></div>
-              <div class="pp-split-row">
-                <label>Hesabı Böl</label>
-                <div class="pp-split-controls">
-                  <input id="ppSplitCount" type="number" min="1" step="1" value="2">
-                  <span>kişi</span>
-                  <span class="link-btn" id="btnSplitCalc">Payı Hesapla</span>
+              <div class="pp-card">
+                <div class="pp-lbl">Ödenecek Tutar</div>
+                <div class="pp-amt"><span>₺</span><input id="ppAmountInput" type="number" inputmode="decimal" min="0" step="0.01"></div>
+                <div class="pp-chips">
+                  <button class="pp-chip" id="ppAll">Tamamı</button>
+                  <button class="pp-chip" id="ppHalf">Yarısı</button>
+                  <div class="pp-stepper"><button id="ppSplitMinus" aria-label="Kişi azalt">−</button><input id="ppSplitCount" type="number" min="1" step="1" value="2" aria-label="Kişi sayısı"><button id="ppSplitPlus" aria-label="Kişi artır">+</button><span style="font-size:.8rem;color:var(--ink-dim);padding:0 6px 0 2px">kişi</span></div>
+                  <button class="pp-chip" id="btnSplitCalc">Böl</button>
                 </div>
               </div>
-              <div class="pp-amount-row">
-                <label for="ppAmountInput">Ödenecek Tutar</label>
-                <input id="ppAmountInput" type="number" min="0" step="0.01">
-              </div>
+              <div class="pp-lbl" style="margin:4px 4px 8px">Ödeme Yöntemi</div>
               <div class="pp-methods" id="ppMethods"></div>
-              <div class="pp-methods" style="margin-top:10px;"><button class="pp-method" id="btnWaive">🚫 Ödenmez / İkram</button></div>
+              <div class="pp-methods" style="margin-top:12px;"><button class="pp-method" id="btnWaive">🚫 Ödenmez / İkram</button></div>
               <div class="pp-history" id="ppHistory"></div>
               </div>
             </div>
@@ -1623,7 +1702,9 @@
               <div class="sm-switch-btn" id="smTabSiparisler">🧾 Siparişler</div>
             </div>
             <div class="sm-icons">
-              <span class="sm-ic" id="smIconWifi" title="Bağlantı">📶</span>
+              <span class="sm-ic" id="smIconFull" title="Tam ekran masa görünümü">⛶</span>
+              <span class="sm-size" id="smSizeBtns"><span class="sm-ic" id="smSzMinus" title="Masaları küçült">−</span><span class="sm-ic" id="smSzPlus" title="Masaları büyüt">+</span></span>
+              <span class="sm-ic" id="smIconWifi" title="Bağlantı durumu"><i class="cdot" id="smConnDot"></i>📶</span>
                             <span class="sm-ic" id="smIconRefresh" title="Yenile">↻</span>
                           </div>
           </div>
@@ -1869,7 +1950,7 @@
       const total = cartTotal(key);
       const isBusy = carts[key] && carts[key].length > 0;
       const cell = document.createElement('div');
-      cell.className = 'plain-table-cell';
+      cell.className = 'plain-table-cell t-' + tableState(n);
       cell.innerHTML = '<span class="pencil" data-n="' + n + '">✎</span>' +
         cellName(n) +
         (isBusy ? '<span class="amt">₺' + total.toLocaleString('tr-TR', {minimumFractionDigits:2}) + '</span>' : '');
@@ -1965,7 +2046,7 @@
       const isBusy = carts[key] && carts[key].length > 0;
       const label = tname(n);
       const cell = document.createElement('div');
-      cell.className = 'sm-pill';
+      cell.className = 'sm-pill t-' + tableState(n);
       cell.innerHTML = cellName(n) + (isBusy ? '<span class="amt">₺' + total.toLocaleString('tr-TR', {minimumFractionDigits:2}) + '</span>' : '');
       cell.addEventListener('click', () => openOrder(key, label, 'siparis-masa'));
       grid.appendChild(cell);
@@ -2004,8 +2085,8 @@
     smSearch = e.target.value;
     renderSmKanban();
   });
-  document.getElementById('smIconRefresh').addEventListener('click', () => { renderSiparisMasa(); showToast('Yenilendi.'); });
-  document.getElementById('smIconWifi').addEventListener('click', () => showToast(RT.local ? 'Yerel mod: yalnızca bu tarayıcı (Firebase ayarlanmamış).' : 'Canlı bağlantı aktif.'));
+  document.getElementById('smIconRefresh').addEventListener('click', () => { refreshNow(); });
+  document.getElementById('smIconWifi').addEventListener('click', () => showConnInfo());
   setInterval(() => {
     if(document.getElementById('smSiparislerView').style.display === 'none') return;
     document.querySelectorAll('[data-timer-key]').forEach(el => {
@@ -2053,12 +2134,12 @@
       const line = document.createElement('div');
       line.className = 'order-line';
       const mvOn = can('move') && key.startsWith('table_');
-      line.innerHTML = (mvOn ? '<input type="checkbox" class="mv-ck" title="Taşımak için işaretle"' + (mvSel.has(item) ? ' checked' : '') + '>' : '') +
+      line.innerHTML = '' +
         '<div class="qty-ctl"><button class="qbtn" data-d="-1">−</button><b class="qv">' + item.qty + '</b><button class="qbtn" data-d="1">+</button></div>' +
         '<div><div class="name">' + esc(item.name) + '</div><div class="sub">' + esc(item.sub) + ' · ' + fmtTL(item.unit) + (item.sent ? ' · ✔ mutfakta' : '') + '</div>' +
         (item.by ? '<div class="sub ol-by">👤 ' + esc(item.by) + (item.at ? ' · ' + hhmm(item.at) : '') + '</div>' : '') +
         (item.note ? '<div class="sub" style="color:var(--red);">📝 ' + esc(item.note) + '</div>' : '') +
-        (ed ? '<span class="link-btn nt">📝 ' + (item.note ? 'Notu düzenle' : 'Not / özellik') + '</span>' : '') + '</div>' +
+        (ed ? '<span class="link-btn nt">📝 ' + (item.note ? 'Notu düzenle' : 'Not / özellik') + '</span>' : '') + (mvOn ? '<span class="link-btn mvl">⇄ Başka masaya taşı</span>' : '') + '</div>' +
         '<div class="price">' + fmtTL(item.unit * item.qty) + '</div>' +
         '<button class="del-btn" title="Satırı sil">🗑</button>';
       line.querySelectorAll('.qbtn').forEach(btn => btn.addEventListener('click', () => {
@@ -2078,7 +2159,7 @@
         afterOrderChange();
       });
       const nt = line.querySelector('.nt'); if(nt) nt.addEventListener('click', () => editNote(item));
-      const mc = line.querySelector('.mv-ck'); if(mc) mc.addEventListener('change', () => { if(mc.checked) mvSel.add(item); else mvSel.delete(item); });
+      const mvl = line.querySelector('.mvl'); if(mvl) mvl.addEventListener('click', () => openMoveDialog(item));
       container.appendChild(line);
     });
     if(cart.length && !adisyonNoByKey[key]) adisyonNoByKey[key] = (parseInt(settings.firstOrderNo) || 1) + (adisyonSeq++);
@@ -2195,9 +2276,10 @@
 
   function renderPaymentMethods(){
     const wrap = document.getElementById('ppMethods');
+    const cls = t => /nakit/i.test(t) ? 'm-nakit' : /a[cç][iı]k/i.test(t) ? 'm-acik' : /kart|multinet|ticket|setcard/i.test(t) ? 'm-kart' : 'm-diger';
     wrap.innerHTML = getActivePaymentTypes().map(t =>
-      '<button class="pp-method" data-method="' + t.replace(/"/g,'&quot;') + '">' +
-      (paymentIcons[t] || '💳') + ' ' + t + '</button>'
+      '<button class="pp-method ' + cls(t) + '" data-method="' + t.replace(/"/g,'&quot;') + '"><span class="mi">' +
+      (paymentIcons[t] || (/a[cç][iı]k/i.test(t) ? '📒' : '💳')) + '</span><span>' + esc(t) + '</span></button>'
     ).join('');
   }
 
@@ -2212,11 +2294,12 @@
     document.getElementById('ppSummaryRemaining').textContent = '₺' + remaining.toLocaleString('tr-TR', {minimumFractionDigits:2});
     document.getElementById('ppAmountInput').value = remaining.toFixed(2);
     document.getElementById('ppSplitCount').value = 2;
+    const pg = document.getElementById('ppProg'); if(pg) pg.style.width = (total > 0 ? Math.min(100, Math.round(paid / total * 100)) : 0) + '%';
     renderPaymentMethods();
     fillDiscSel();
     const hist = paymentHistoryByKey[key] || [];
     document.getElementById('ppHistory').innerHTML = hist.map(h =>
-      '<div class="pp-hist-item"><span>' + h.method + '</span><span>₺' + h.amount.toLocaleString('tr-TR', {minimumFractionDigits:2}) + '</span></div>'
+      '<div class="pp-hist-item"><span>✓ ' + esc(h.method) + '</span><span>₺' + h.amount.toLocaleString('tr-TR', {minimumFractionDigits:2}) + '</span></div>'
     ).join('');
   }
 
@@ -2291,7 +2374,7 @@
     document.getElementById('btnRefresh').addEventListener('click', () => {
     document.getElementById('btnRefresh').style.transform = 'rotate(360deg)';
     setTimeout(() => { document.getElementById('btnRefresh').style.transform = ''; }, 300);
-    renderAll(); showToast('Veriler yenilendi.');
+    refreshNow();
   });
 
   // ---- settings: Güncelle ----
@@ -3450,12 +3533,13 @@
       pend.forEach(([id]) => { if(!coSeen.has(id)){ coSeen.add(id); fresh++; } });
       if(fresh && !coFirst){ beep(); showToast('🔔 Yeni müşteri siparişi: ' + pend[pend.length - 1][1].label); }
       if(coFirst && pend.length) showToast('🔔 ' + pend.length + ' bekleyen müşteri siparişi var.');
-      coFirst = false; renderCO(); try{ renderSmKanban(); }catch(e){}
+      coFirst = false; renderCO(); try{ renderSmKanban(); renderSmTableGrid(); renderTableGrid(); }catch(e){}
     });
+    RT.on('.info/connected', v => { if(RT.local) setConn('loc'); else { setConn(v ? 'ok' : 'bad'); if(v) markSync(); } });
     RT.on('kitchen', v => {
       kitchenData = v || {};
-      Object.keys(kitchenData).forEach(id => { if(!kSeen.has(id)){ kSeen.add(id); if(!kFirst) beep(); } });
-      kFirst = false; renderKitchen();
+      Object.keys(kitchenData).forEach(id => kSeen.add(id));
+      kFirst = false; markSync(); renderKitchen(); try{ renderSmTableGrid(); renderTableGrid(); }catch(e){}
     });
     startStateSync(); publishPublic(); setInterval(publishPublic, 3000);
     applyPerms(); goHome();
@@ -3472,7 +3556,8 @@
     ['cancel', 'İptal yetkisi', 'Adisyon iptali ve mutfağa gitmiş ürünü silme / azaltma', [0, 0, 1, 1, 0, 0]],
     ['move', 'Masa taşıma / birleştirme', 'Adisyonu başka masaya taşıma', [1, 0, 1, 1, 1, 0]],
     ['courier', 'Paket teslimat takibi', 'Paket ve gel-al listesini görme, "yola çıktı / hazır" işaretleme', [0, 1, 0, 1, 1, 0]],
-    ['kitchen', 'Mutfak ekranı', 'Mutfak siparişlerini görme, hazır / teslim işaretleme', [1, 0, 1, 1, 0, 1]],
+    ['kitchen', 'Mutfak ekranı (işlem yapabilir)', '"Okudum anladım", hazır / teslim işaretleme ve sesli uyarı', [0, 0, 0, 1, 0, 1]],
+    ['kitchenView', 'Mutfak ekranını görme (müdahale edemez)', 'Mutfak siparişlerini yalnızca izler; işaretleme yapamaz, uyarı sesi çıkmaz', [0, 0, 1, 1, 0, 1]],
     ['customers', 'Müşteri yönetimi', 'Müşteri ekleme, düzenleme, silme, cari tahsilat', [0, 0, 1, 1, 1, 0]],
     ['expenses', 'Gider ve zayi işlemleri', 'Gider / masraf ve zayi kaydı (canlı bağlantıda yalnızca yönetici görür)', [0, 0, 1, 1, 0, 0]],
     ['reports', 'Raporlar ve gün sonu', 'Ana sayfa, tüm raporlar, günü kapatma (canlı bağlantıda yalnızca yönetici görür)', [0, 0, 1, 1, 0, 0]],
@@ -3482,7 +3567,7 @@
     ['settings', 'Ayarlar, yedek ve dijital menü', 'Restoran ayarları, ödeme tipleri, yedekleme, QR menü', [0, 0, 0, 1, 0, 0]]
   ];
   const SCR_PERM = {
-    home: 'reports', 'siparis-masa': 'orders', paketler: ['orders', 'courier'], order: ['orders', 'pay', 'courier'], mutfak: 'kitchen',
+    home: 'reports', 'siparis-masa': 'orders', paketler: ['orders', 'courier'], order: ['orders', 'pay', 'courier'], mutfak: ['kitchen', 'kitchenView'],
     tables: 'tables', urunler: 'menu', birimler: 'menu', ozellikler: 'menu', kdv: 'menu', indirimler: 'menu', mutfakgruplari: 'menu', odenmezler: 'menu',
     digitalmenu: 'settings', settings: 'settings', musteriler: 'customers', gider: 'expenses', zayi: 'expenses', users: 'users', perms: 'users',
     'rapor-urun': 'reports', 'rapor-gunsonu': 'reports', 'rapor-vardiya': 'reports', 'rapor-istatistik': 'reports', 'rapor-fire': 'reports'
@@ -3492,6 +3577,10 @@
   function normPerms(src){
     const p = defaultPerms();
     if(src && typeof src === 'object') Object.keys(p).forEach(k => { if(Array.isArray(src[k])) p[k] = ROLES.map((r, i) => src[k][i] ? 1 : (src[k][i] === 0 ? 0 : p[k][i])); });
+    if(src && typeof src === 'object' && !Array.isArray(src.kitchenView) && Array.isArray(src.kitchen)){   // eski kayıt: mutfak izni yalnızca Müdür/Mutfak'ta işlem, diğerleri izleme
+      p.kitchenView = ROLES.map((r, i) => src.kitchen[i] ? 1 : 0);
+      p.kitchen = ROLES.map((r, i) => (src.kitchen[i] && (r === 'Müdür' || r === 'Mutfak')) ? 1 : 0);
+    }
     return p;
   }
   const PRIV_PERMS = ['reports', 'expenses'];   // ciro / rapor / gider: canlı bağlantıda personel hesabına hiçbir zaman açılmaz
@@ -3512,7 +3601,10 @@
       $id(n).style.display = any ? '' : 'none'; sub.style.display = any ? '' : 'none';
     });
     $id('btnCO').style.display = can('orders') ? '' : 'none';
-    $id('btnKitchen').style.display = can('kitchen') ? '' : 'none';
+    $id('btnKitchen').style.display = canAny(['kitchen', 'kitchenView']) ? '' : 'none';
+    const kOnly = !!curUser && !curUser.admin && screenAllowed('mutfak') && !Object.keys(SCR_PERM).filter(k => k !== 'mutfak').some(screenAllowed);
+    document.body.classList.toggle('kitchen-only', kOnly);
+    if(kOnly) keepAwake();
     if($id('rtMode') && curUser) $id('rtMode').textContent = '👤 ' + curUser.ad + ' · ' + curUser.gorev + '   ' + (RT.local ? '● Yerel mod' : '● Canlı');
   }
   function goHome(){
@@ -3534,11 +3626,12 @@
     const isT = key.startsWith('table_');
     $id('btnRenameTable').style.display = (ed && isT) ? '' : 'none';
     $id('mpRename').style.display = (ed && isT) ? '' : 'none';
-    $id('mvHint').style.display = (can('move') && isT) ? '' : 'none';
     if(!ed) $id('menuPicker').style.display = 'none';
   }
   function onScreen(n){
     $id('sidebar').classList.remove('open');
+    try{ smFullApply(n); }catch(e){}
+    try{ setTimeout(kAlarmSync, 0); }catch(e){}
     if(n === 'paketler') renderPaketler();
     if(n === 'perms') renderPerms();
     if(n === 'users'){ fillBolge(); renderUsers(); }
@@ -3904,24 +3997,34 @@ ${st('M50 58c-5-6 5-10 0-17', 0)}${st('M60 56c-5-7 5-11 0-19', 1.05)}${st('M70 5
     gs.forEach(g => RT.push('kitchen', { table: key, label, grp: g, items: by[g], ts: Date.now(), status: 'hazirlaniyor', src: 'garson', by: uname() }));
     showToast('Yeni ürünler mutfağa iletildi' + (gs.length > 1 ? ' (' + gs.length + ' gruba ayrıldı).' : '.'));
   }
+  const isUnread = k => !!k && k.status === 'hazirlaniyor' && !k.ack;
   function renderKitchen(){
     const list = Object.entries(kitchenData || {}).filter(([, k]) => k).sort((a, b) => a[1].ts - b[1].ts);
     const open = list.filter(([, k]) => k.status === 'hazirlaniyor').length;
-    const kb = $id('kBadge'); kb.textContent = open; kb.classList.toggle('on', open > 0);
+    const kb = $id('kBadge'); if(kb){ kb.textContent = open; kb.classList.toggle('on', open > 0); }
     const names = mutfakGruplari.map(g => g.name);
     $id('kTabs').innerHTML = ['Tümü'].concat(names).map(n => '<div class="region-tab' + ((n === 'Tümü' ? '' : n) === kGrp ? ' active' : '') + '" data-g="' + esc(n === 'Tümü' ? '' : n) + '">' + esc(n) + '</div>').join('');
     const f = list.filter(([, k]) => !kGrp || (k.grp || defGroup()) === kGrp), kc = can('kitchen');
-    $id('kitchenList').innerHTML = f.length ? f.map(([id, k]) =>
-      '<div class="k-card ' + (k.status === 'hazir' ? 'hazir' : '') + '"><b>' + esc(k.label) + '</b> <span class="tag">' + esc(k.grp || '') + '</span> <span class="tag">' + esc(k.src || '') + '</span><span style="float:right;color:var(--ink-faint);font-size:.8rem;">' + hhmm(k.ts) + '</span>' +
-      arr(k.items).map(i => '<div style="font-size:1.05rem;margin-top:4px;">' + i.qty + '× ' + esc(i.name) + (i.note ? '<div style="font-size:.82rem;color:var(--red);">📝 ' + esc(i.note) + '</div>' : '') + '</div>').join('') +
-      (k.note ? '<div style="margin-top:6px;color:var(--ink-dim);font-size:.85rem;">📝 ' + esc(k.note) + '</div>' : '') +
-      (kc ? '<div class="acts">' + (k.status === 'hazir' ? '<button class="b-no" data-id="' + id + '" data-a="del">Teslim Edildi</button>' : '<button class="b-ok" data-id="' + id + '" data-a="ready">✔ Hazır</button>') + '</div>' : '') + '</div>'
-    ).join('') : '<p style="color:var(--ink-faint);">Bekleyen mutfak siparişi yok.</p>';
+    const nUn = f.filter(([, k]) => isUnread(k)).length;
+    $id('kitchenList').innerHTML = f.length ? (kc && nUn ? '<div class="k-alert">🔔 ' + nUn + ' yeni sipariş — "Okudum Anladım" a basana kadar uyarı sesi devam eder</div>' : '') + f.map(([id, k]) => {
+      const un = isUnread(k), who = k.src === 'müşteri' ? 'Müşteri (QR)' : (k.by || 'Personel');
+      const acts = !kc ? '<div class="k-st">' + (un ? '⏳ Henüz okunmadı' : k.status === 'hazir' ? '✔ Hazır' : '👁 Okundu · hazırlanıyor') + '</div>'
+        : '<div class="acts">' + (un ? '<button class="b-read" data-id="' + id + '" data-a="ack">👁 Okudum Anladım</button>' : k.status === 'hazir' ? '<button class="b-no" data-id="' + id + '" data-a="del">Teslim Edildi</button>' : '<button class="b-ok" data-id="' + id + '" data-a="ready">✔ Hazır</button>') + '</div>';
+      return '<div class="k-card ' + (k.status === 'hazir' ? 'hazir ' : '') + (un ? 'new' : '') + '"><b>' + esc(k.label) + '</b> <span class="tag">' + esc(k.grp || '') + '</span> <span class="tag who">👤 ' + esc(who) + '</span><span style="float:right;color:var(--ink-faint);font-size:.8rem;">' + hhmm(k.ts) + '</span>' +
+        arr(k.items).map(i => '<div style="font-size:1.05rem;margin-top:4px;">' + i.qty + '× ' + esc(i.name) + (i.note ? '<div style="font-size:.82rem;color:var(--red);">📝 ' + esc(i.note) + '</div>' : '') + '</div>').join('') +
+        (k.note ? '<div style="margin-top:6px;color:var(--ink-dim);font-size:.85rem;">📝 ' + esc(k.note) + '</div>' : '') + acts + '</div>';
+    }).join('') : '<p style="color:var(--ink-faint);">Bekleyen mutfak siparişi yok.</p>';
+    kAlarmSync();
   }
   $id('kTabs').addEventListener('click', e => { const t = e.target.closest('.region-tab'); if(!t) return; kGrp = t.dataset.g; renderKitchen(); });
   $id('kitchenList').addEventListener('click', e => {
     const b = e.target.closest('button'); if(!b || !can('kitchen')) return;
-    if(b.dataset.a === 'ready') RT.set('kitchen/' + b.dataset.id + '/status', 'hazir'); else RT.remove('kitchen/' + b.dataset.id);
+    const id = b.dataset.id, a = b.dataset.a, safe = p => { try{ Promise.resolve(p).catch(() => {}); }catch(_){} };
+    if(a === 'ack'){
+      const ts = Date.now(); if(kitchenData[id]){ kitchenData[id].ack = ts; kitchenData[id].ackBy = uname(); }
+      safe(RT.set('kitchen/' + id + '/ack', ts)); safe(RT.set('kitchen/' + id + '/ackBy', uname())); renderKitchen(); return;
+    }
+    if(a === 'ready') safe(RT.set('kitchen/' + id + '/status', 'hazir')); else if(a === 'del') safe(RT.remove('kitchen/' + id));
   });
   function approveCO(id, o){
     const key = 'table_' + o.table;
@@ -3933,7 +4036,7 @@ ${st('M50 58c-5-6 5-10 0-17', 0)}${st('M60 56c-5-7 5-11 0-19', 1.05)}${st('M70 5
       else carts[key].push({ name: it.name, sub: it.sub || 'tam', unit: it.unit, qty: it.qty, sent: it.qty, by: 'Müşteri (QR)', at: Date.now() });
       const g = grpOf(it.name); (by[g] = by[g] || []).push({ name: it.name, qty: it.qty });
     });
-    Object.keys(by).forEach(g => RT.push('kitchen', { table: key, label: o.label, grp: g, items: by[g], note: o.note || '', ts: Date.now(), status: 'hazirlaniyor', src: 'müşteri' }));
+    Object.keys(by).forEach(g => RT.push('kitchen', { table: key, label: o.label, grp: g, items: by[g], note: o.note || '', ts: Date.now(), status: 'hazirlaniyor', src: 'müşteri', by: uname() }));
     RT.set('customerOrders/' + id + '/status', 'onaylandi');
     renderTableGrid(); renderSiparisMasa(); updateHomeStats(); saveState();
     showToast(o.label + ' siparişi onaylandı, mutfağa iletildi.');
@@ -4444,18 +4547,7 @@ ${st('M50 58c-5-6 5-10 0-17', 0)}${st('M60 56c-5-7 5-11 0-19', 1.05)}${st('M70 5
     if(!carts[k].length){ openOrder(tk, orderLabel(tk), currentBackScreen); } else { renderOrderLines(); }
     afterOrderChange(); showToast('Ürünler ' + tlabel + ' masasına taşındı' + (busy ? ' (dolu masaya eklendi).' : '.'));
   }
-  $id('btnMoveTable').addEventListener('click', () => {
-    const k = currentCartKey;
-    if(!k.startsWith('table_')){ showToast('Yalnız masa adisyonları taşınabilir.'); return; }
-    const cart = carts[k] || []; if(!cart.length){ showToast('Taşınacak ürün yok.'); return; }
-    const sel = cart.filter(i => mvSel.has(i)), items = sel.length ? sel : cart.slice();
-    const go = picks => pickTargetTable(k, t => doMove(k, picks, t));
-    if(sel.length && sel.some(i => i.qty > 1)){
-      openForm({ title: 'Kaç adet taşınsın?', fields: sel.map((i, ix) => ({ id: 'q' + ix, label: i.name + ' (adisyonda ' + i.qty + ')', type: 'number', step: '1', value: i.qty })), okText: 'Devam',
-        onOk(v){ const picks = []; for(let ix = 0; ix < sel.length; ix++){ const q = Math.round(v['q' + ix]); if(!(q >= 0) || q > sel[ix].qty) return sel[ix].name + ' için 0 ile ' + sel[ix].qty + ' arası girin.'; if(q > 0) picks.push({ item: sel[ix], qty: q }); }
-          if(!picks.length) return 'En az bir ürün taşınmalı.'; setTimeout(() => go(picks), 0); } });
-    } else go(items.map(i => ({ item: i, qty: i.qty })));
-  });
+  $id('btnMoveTable').addEventListener('click', () => openMoveDialog(null));
 
   // ---- dijital menü: gerçek QR ----
   function renderDigitalMenu(){
@@ -4826,6 +4918,161 @@ ${st('M50 58c-5-6 5-10 0-17', 0)}${st('M60 56c-5-7 5-11 0-19', 1.05)}${st('M70 5
     });
     fix();
   })();
+
+  // ======================= EKLER v5 =======================
+  // ---- masa rengi: boş = beyaz, sipariş bekleyen = kırmızı, siparişi alınmış / verilmiş = yeşil ----
+  function tableState(n){
+    const cart = carts['table_' + n] || [];
+    let pend = false; try{ pend = pendingCO().some(([, o]) => String(o.table) === String(n)); }catch(e){}
+    if(pend) return 'blink';   // müşteriden geldi, onay bekliyor: kırmızı yanıp söner
+    if(!cart.length) return 'free';
+    if(cart.some(i => (i.qty || 0) > (i.sent || 0))) return 'wait';
+    const kOpen = Object.values(kitchenData || {}).some(k => k && k.table === 'table_' + n && (k.status === 'hazirlaniyor' || k.status === 'hazir'));
+    return kOpen ? 'wait' : 'ok';   // mutfakta teslim edilmemiş sipariş varsa kırmızı sabit, teslim edilince yeşil
+  }
+
+  // ---- bağlantı durumu ve gerçek yenileme ----
+  let connState = 'unk', lastSyncAt = 0;
+  function setConn(st){ connState = st; const d = $id('smConnDot'); if(d) d.className = 'cdot ' + (st === 'ok' ? 'ok' : st === 'bad' ? 'bad' : st === 'loc' ? 'loc' : ''); }
+  function markSync(){ lastSyncAt = Date.now(); }
+  window.addEventListener('offline', () => setConn('bad'));
+  async function refreshNow(){
+    const btns = [$id('smIconRefresh'), $id('btnRefresh')].filter(Boolean);
+    btns.forEach(b => { b.classList.remove('spin'); void b.offsetWidth; b.classList.add('spin'); });
+    let ok = true;
+    try{
+      if(!RT.local){
+        const [st, co, kt] = await Promise.all([RT.get('state'), RT.get('customerOrders'), RT.get('kitchen')]);
+        if(st && st.dev !== DEV && (st.savedAt || 0) > lastSavedAt) applyState(st, true);
+        coData = co || {}; kitchenData = kt || {}; markSync(); setConn('ok');
+      }
+    }catch(e){ ok = false; setConn('bad'); console.error(e); }
+    try{ renderAll(); renderCO(); renderSmKanban(); renderKitchen(); }catch(e){ console.error(e); }
+    setTimeout(() => btns.forEach(b => b.classList.remove('spin')), 800);
+    showToast(ok ? (RT.local ? 'Yenilendi (yerel mod).' : '✓ Canlı veriler güncellendi · ' + new Date().toLocaleTimeString('tr-TR')) : '⚠ Sunucuya ulaşılamadı. İnternet bağlantısını kontrol edin.');
+    return ok;
+  }
+  function showConnInfo(){
+    const info = RT.local ? ['#e0a340', 'Yerel mod', 'Firebase ayarlı değil; sistem yalnızca bu cihazda çalışıyor.']
+      : connState === 'ok' ? ['#2e9d57', 'Canlı bağlantı', 'Siparişler ve mutfak diğer cihazlarla anlık eşleşiyor.']
+      : connState === 'bad' ? ['#d93025', 'Bağlantı yok', 'İnternet gelince sistem kendiliğinden yeniden bağlanır. "Şimdi Yenile" ile elle de deneyebilirsiniz.']
+      : ['#9a9a9a', 'Bağlanıyor…', 'Sunucuyla bağlantı kuruluyor.'];
+    const bg = document.createElement('div'); bg.className = 'modal-bg show'; bg.style.zIndex = 1100;
+    bg.innerHTML = '<div class="modal-box"><div style="display:flex;align-items:center;gap:10px;"><span style="width:14px;height:14px;border-radius:50%;background:' + info[0] + ';display:inline-block"></span><h3 style="margin:0;flex:1">' + info[1] + '</h3></div>' +
+      '<p style="color:var(--ink-dim);margin:10px 0">' + info[2] + '</p>' +
+      '<p style="color:var(--ink-faint);font-size:.85rem;margin:0 0 12px">Son veri: ' + (lastSyncAt ? new Date(lastSyncAt).toLocaleTimeString('tr-TR') : '—') + '</p>' +
+      '<div style="display:flex;gap:8px"><button class="btn-save" id="ciGo" style="margin:0">↻ Şimdi Yenile</button><button class="btn-save" id="ciNo" style="margin:0;background:var(--ink-faint)">Kapat</button></div></div>';
+    document.body.appendChild(bg);
+    bg.querySelector('#ciNo').onclick = () => bg.remove(); bg.addEventListener('mousedown', e => { if(e.target === bg) bg.remove(); });
+    bg.querySelector('#ciGo').onclick = async () => { bg.remove(); await refreshNow(); };
+  }
+
+  // ---- PC'de tam ekran masa görünümü (ayar hatırlanır) ----
+  const SM_SIZES = [140, 180, 230, 300, 380];
+  let smFullPref = false, smSize = 2, smFsTried = false;
+  try{ smFullPref = localStorage.getItem('seyirSmFull') === '1'; const v = parseInt(localStorage.getItem('seyirSmSize')); if(!isNaN(v)) smSize = Math.min(4, Math.max(0, v)); }catch(e){}
+  let smScreen = 'siparis-masa';
+  function smFullApply(name){
+    if(name) smScreen = name;
+    const on = smFullPref && smScreen === 'siparis-masa' && window.innerWidth > 860;
+    document.body.classList.toggle('sm-full', on);
+    document.body.style.setProperty('--tsz', SM_SIZES[smSize] + 'px');
+    document.body.style.setProperty('--tsh', Math.round(SM_SIZES[smSize] * 0.62) + 'px');
+    const b = $id('smIconFull'); if(b) b.classList.toggle('on', smFullPref);
+  }
+  function smSave(){ try{ localStorage.setItem('seyirSmFull', smFullPref ? '1' : '0'); localStorage.setItem('seyirSmSize', String(smSize)); }catch(e){} }
+  $id('smIconFull').addEventListener('click', () => {
+    smFullPref = !smFullPref; smSave(); smFullApply();
+    try{
+      if(smFullPref && document.documentElement.requestFullscreen && !document.fullscreenElement) document.documentElement.requestFullscreen().catch(() => {});
+      else if(!smFullPref && document.fullscreenElement) document.exitFullscreen();
+    }catch(e){}
+    if(smFullPref && window.innerWidth <= 860) showToast('Tam ekran masa düzeni bilgisayar / geniş ekran içindir.');
+  });
+  $id('smSzMinus').addEventListener('click', () => { smSize = Math.max(0, smSize - 1); smSave(); smFullApply(); });
+  $id('smSzPlus').addEventListener('click', () => { smSize = Math.min(4, smSize + 1); smSave(); smFullApply(); });
+  window.addEventListener('resize', () => smFullApply());
+  document.addEventListener('pointerdown', () => {   // kayıtlı tercih açıksa ilk dokunuşta tarayıcı tam ekranına da geç
+    if(smFullPref && !smFsTried && document.body.classList.contains('sm-full') && !document.fullscreenElement){ smFsTried = true; try{ document.documentElement.requestFullscreen().catch(() => {}); }catch(e){} }
+  }, true);
+
+  // ---- masa / ürün taşıma ----
+  function openMoveDialog(pre){
+    const k = currentCartKey;
+    if(!can('move') || !k.startsWith('table_')){ showToast('Yalnız masa adisyonları taşınabilir.'); return; }
+    const cart = (carts[k] || []).filter(i => i.qty > 0);
+    if(!cart.length){ showToast('Taşınacak ürün yok.'); return; }
+    let mode = pre ? 'pick' : 'all';
+    const q = cart.map(i => (pre && i === pre) ? i.qty : 0);
+    const bg = document.createElement('div'); bg.className = 'modal-bg show'; bg.style.zIndex = 1100;
+    const box = document.createElement('div'); box.className = 'modal-box'; bg.appendChild(box);
+    function draw(){
+      const st = box.querySelector('.mvd-list') ? box.querySelector('.mvd-list').scrollTop : 0;
+      const total = mode === 'all' ? cart.reduce((a, i) => a + i.qty, 0) : q.reduce((a, x) => a + x, 0);
+      box.innerHTML = '<div class="mvd-top"><h3>⇄ ' + esc(orderLabel(k)) + ' · Taşı</h3><span id="mvdX">✕</span></div>' +
+        '<div class="mvd-seg"><button data-m="all" class="' + (mode === 'all' ? 'on' : '') + '">Tüm adisyon</button><button data-m="pick" class="' + (mode === 'pick' ? 'on' : '') + '">Ürün seç</button></div>' +
+        '<div class="mvd-list">' + cart.map((i, ix) => '<div class="mvd-row' + ((mode === 'all' || q[ix] > 0) ? ' sel' : '') + '"><div class="nm"><b>' + esc(i.name) + '</b><small>adisyonda ' + i.qty + (i.by ? ' · ' + esc(i.by) : '') + '</small></div>' +
+          (mode === 'all' ? '<span class="mvd-q">' + i.qty + '</span>' : '<div class="qty-ctl"><button class="qbtn" data-ix="' + ix + '" data-d="-1">−</button><b class="qv">' + q[ix] + '</b><button class="qbtn" data-ix="' + ix + '" data-d="1">+</button></div>') + '</div>').join('') + '</div>' +
+        '<button class="btn-save mvd-go" id="mvdGo"' + (total ? '' : ' disabled') + '>' + (total ? total + ' ürün · Masa Seç →' : 'Taşınacak ürünü seçin') + '</button>';
+      const l = box.querySelector('.mvd-list'); if(l) l.scrollTop = st;
+    }
+    box.addEventListener('click', e => {
+      if(e.target.closest('#mvdX')){ bg.remove(); return; }
+      const m = e.target.closest('.mvd-seg button'); if(m){ mode = m.dataset.m; draw(); return; }
+      const qb = e.target.closest('.qbtn[data-ix]'); if(qb){ const ix = +qb.dataset.ix; q[ix] = Math.max(0, Math.min(cart[ix].qty, q[ix] + (+qb.dataset.d))); draw(); return; }
+      if(e.target.closest('#mvdGo')){
+        const picks = cart.map((i, ix) => ({ item: i, qty: mode === 'all' ? i.qty : q[ix] })).filter(p => p.qty > 0);
+        if(!picks.length) return; bg.remove(); pickTargetTable(k, t => doMove(k, picks, t));
+      }
+    });
+    bg.addEventListener('mousedown', e => { if(e.target === bg) bg.remove(); });
+    document.body.appendChild(bg); draw();
+  }
+
+  // ---- ödeme: hızlı tutar düğmeleri ----
+  function ppSetAmount(v){ $id('ppAmountInput').value = (Math.max(0, Math.round(v * 100) / 100)).toFixed(2); }
+  $id('ppAll').addEventListener('click', () => ppSetAmount(remainingForKey(currentCartKey)));
+  $id('ppHalf').addEventListener('click', () => ppSetAmount(remainingForKey(currentCartKey) / 2));
+  const ppStep = d => { const el = $id('ppSplitCount'); const n = Math.max(1, (parseInt(el.value) || 1) + d); el.value = n; ppSetAmount(remainingForKey(currentCartKey) / n); };
+  $id('ppSplitMinus').addEventListener('click', () => ppStep(-1));
+  $id('ppSplitPlus').addEventListener('click', () => ppStep(1));
+
+  // ---- mutfak: okudum anladım bitene kadar uyarı sesi (en yüksek sesle başlar, azalarak sürer) ----
+  const KAlarm = (() => {
+    let ctx = null, timer = 0, vol = 1, last = 0;
+    const MIN = 0.2, STEP = 0.8, EVERY = 1600;
+    function unlock(){ try{ if(!ctx) ctx = new (window.AudioContext || window.webkitAudioContext)(); if(ctx.state === 'suspended') ctx.resume(); }catch(e){} return ctx; }
+    function tone(v){
+      const c = unlock(); if(!c) return;
+      [[0, 880], [0.3, 1175]].forEach(([d, f]) => {
+        const o = c.createOscillator(), g = c.createGain(), t = c.currentTime + d;
+        o.type = 'square'; o.frequency.value = f; o.connect(g); g.connect(c.destination);
+        g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(Math.max(0.02, v), t + 0.03); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.26);
+        o.start(t); o.stop(t + 0.28);
+      });
+    }
+    function tick(){ tone(vol); try{ if(navigator.vibrate) navigator.vibrate([250, 120, 250]); }catch(e){} vol = Math.max(MIN, vol * STEP); }
+    function set(n){
+      if(n > 0){
+        if(!timer){ vol = 1; tick(); timer = setInterval(tick, EVERY); }
+        else if(n > last) vol = 1;
+      } else if(timer){ clearInterval(timer); timer = 0; }
+      last = n;
+    }
+    return { set, unlock };
+  })();
+  document.addEventListener('pointerdown', () => KAlarm.unlock(), true);
+  function kAlarmSync(){
+    try{
+      const scr = $id('screen-mutfak'), on = staffMode && can('kitchen') && scr && scr.classList.contains('show');
+      const n = on ? Object.values(kitchenData || {}).filter(k => isUnread(k) && (!kGrp || (k.grp || defGroup()) === kGrp)).length : 0;
+      KAlarm.set(n);
+    }catch(e){ /* sayfa yüklenirken alarm henüz hazır değil */ }
+  }
+  let wakeLock = null;
+  async function keepAwake(){ try{ if('wakeLock' in navigator && !wakeLock){ wakeLock = await navigator.wakeLock.request('screen'); wakeLock.addEventListener('release', () => { wakeLock = null; }); } }catch(e){} }
+  document.addEventListener('visibilitychange', () => { if(document.visibilityState === 'visible' && document.body.classList.contains('kitchen-only')) keepAwake(); });
+  smFullApply('siparis-masa');
   bootApp();
 </script>
 </body>
