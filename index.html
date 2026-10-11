@@ -2799,7 +2799,7 @@
         if(!v.name) return 'Ana kategori adı gerekli.';
         if(menuGroups(categories).some(g => g.name.toLocaleLowerCase('tr-TR') === v.name.toLocaleLowerCase('tr-TR'))) return 'Bu adda bir ana kategori zaten var.';
         categories.push({ name: v.name, grp: v.name, sub: '', gv: 2, icon: v.icon, img: v.imgf || '', products: [] });
-        gmSet(v.name, { icon: v.icon, img: v.imgf || '' });
+        gmSet(v.name, { icon: v.icon, img: v.imgf || '' }); try{ imgQueue('grp', v.name); }catch(e){}
         showAllProds = false; activeGrp = null; activeCatIndex = categories.length - 1; openGrps.add(v.name);
         menuRender(); saveState(); showToast('Ana kategori eklendi: ' + v.name);
       }
@@ -2823,7 +2823,7 @@
           Object.keys(groupMeta.find(m => m.name === gname) || {}).forEach(k => { const m = groupMeta.find(x => x.name === gname); if(m[k] === undefined) delete m[k]; });
           Object.assign(c0, { name: gname + ' / ' + v.name, sub: v.name, gv: 2, icon: v.icon, img: v.imgf || '' }); activeCatIndex = gix[0];
         } else { categories.push({ name: gname + ' / ' + v.name, grp: gname, sub: v.name, gv: 2, icon: v.icon, img: v.imgf || '', products: [] }); activeCatIndex = categories.length - 1; }
-        showAllProds = false; activeGrp = null; openGrps.add(gname);
+        showAllProds = false; activeGrp = null; openGrps.add(gname); try{ imgQueue('cat', categories[activeCatIndex]); }catch(e){}
         menuRender(); saveState(); showToast('Alt kategori eklendi: ' + v.name);
       }
     });
@@ -2854,7 +2854,7 @@
           if(activeGrp === g.name) activeGrp = nm;
         }
         gmSet(nm, { icon: v.icon, img });
-        plain.forEach(c => { c.icon = v.icon; c.img = img; });
+        plain.forEach(c => { c.icon = v.icon; c.img = img; }); try{ imgQueue('grp', nm); }catch(e){}
         let moved = 0; if(v.dept) cats.forEach(c => c.products.forEach(pr => { pr.kg = v.dept; moved++; }));
         menuRender(); saveState();
         showToast(moved ? moved + ' ürün “' + v.dept + '” departmanına bağlandı.' : 'Ana kategori güncellendi.');
@@ -2876,7 +2876,7 @@
         if(!v.name) return 'Alt kategori adı gerekli.';
         const lnk = normImgUrl(v.img); if(lnk === null) return 'Görsel adresi geçerli bir bağlantı olmalı (https://...).';
         if(c.sub) c.sub = v.name; else c.name = v.name;
-        c.icon = v.icon; c.img = v.imgf || lnk;
+        c.icon = v.icon; c.img = v.imgf || lnk; try{ imgQueue('cat', c); }catch(e){}
         let moved = 0; if(v.dept) c.products.forEach(pr => { pr.kg = v.dept; moved++; });
         menuRender(); saveState();
         showToast(moved ? moved + ' ürün “' + v.dept + '” departmanına bağlandı.' : 'Alt kategori güncellendi.');
@@ -3981,7 +3981,7 @@ ${st('M50 58c-5-6 5-10 0-17', 0)}${st('M60 56c-5-7 5-11 0-19', 1.05)}${st('M70 5
         Object.assign(obj, { name: v.name, portion: v.portion || 'Tam', price: Math.round(v.price * 100) / 100, kdv: (p && p.kdv) || defKdvName(), birim: v.birim, kg: v.kg, desc: (v.desc || '').trim(), img: v.imgf || '', icon: (p && p.icon) || '' });
         if(!p){ categories[ni].products.push(obj); showAllProds = false; }
         else if(ni !== ci){ const a = categories[ci].products; a.splice(a.indexOf(p), 1); categories[ni].products.push(obj); }
-        activeCatIndex = ni; activeGrp = null; if(categories[ni]) openGrps.add(categories[ni].grp || categories[ni].name); renderCatList(); renderProductGrid(); saveState(); showToast(v.name + ' kaydedildi.'); try{ if(!imgOk(obj.img)) autoProductImage(obj, categories[ni]); }catch(e){}
+        activeCatIndex = ni; activeGrp = null; if(categories[ni]) openGrps.add(categories[ni].grp || categories[ni].name); renderCatList(); renderProductGrid(); saveState(); showToast(v.name + ' kaydedildi.'); try{ imgQueue('prod', obj, categories[ni]); }catch(e){}
       }
     });
   }
@@ -5373,46 +5373,161 @@ ${st('M50 58c-5-6 5-10 0-17', 0)}${st('M60 56c-5-7 5-11 0-19', 1.05)}${st('M70 5
   }
   $id('btnAsk').addEventListener('click', openAskAdmin);
 
-  // ---- otomatik ürün görseli: önce yapay zekâ ile üret, olmazsa ürüne uygun çizim kalır ----
-  let imgGenQ = Promise.resolve();
+  // ---- OTOMATİK GÖRSEL: ürün / alt kategori / ana kategori kaydedilirken görsel yoksa üretilir ----
+  // Zincir: Gemini görsel modelleri -> Imagen -> Pollinations (yapay zekâ) -> Wikimedia Commons (gerçek fotoğraf, yapay zekâ doğrulamalı)
+  // Hiçbiri çalışmazsa ürüne uygun çizim JPEG olarak KAYDEDİLİR (alan asla boş kalmaz) ve arka planda 10 dk'da bir gerçek görsel yeniden denenir.
+  const IMGLOG = [], provDead = {}, imgQ = [], imgProm = new Map(), imgTry = new Map(); let imgBusy = false;
+  const sigOf = x => (x || '').length + ':' + (x || '').slice(-40);
+  const wt = (pr, ms, l) => Promise.race([pr, new Promise((_, rj) => setTimeout(() => rj(new Error(l + ' zaman aşımı')), ms))]);
+  function imgNote(m){ IMGLOG.unshift(new Date().toLocaleTimeString('tr-TR') + ' · ' + m); IMGLOG.length = Math.min(IMGLOG.length, 40); console.warn('[görsel]', m); }
+  function blobToThumb(blob, max){
+    return new Promise(res => { const u = URL.createObjectURL(blob), im = new Image(); im.onerror = () => { URL.revokeObjectURL(u); res(''); };
+      im.onload = () => { let d = ''; try{ const k = Math.min(1, max / Math.max(im.width, im.height)), c = document.createElement('canvas'); c.width = Math.round(im.width * k); c.height = Math.round(im.height * k); c.getContext('2d').drawImage(im, 0, 0, c.width, c.height); d = c.toDataURL('image/jpeg', 0.78); }catch(e){} URL.revokeObjectURL(u); res(d); }; im.src = u; });
+  }
   function dataUrlToThumb(dataUrl, max){
-    return new Promise(res => { const im = new Image(); im.onerror = () => res(''); im.onload = () => { const k = Math.min(1, max / Math.max(im.width, im.height)), c = document.createElement('canvas'); c.width = Math.round(im.width * k); c.height = Math.round(im.height * k); c.getContext('2d').drawImage(im, 0, 0, c.width, c.height); res(c.toDataURL('image/jpeg', 0.72)); }; im.src = dataUrl; });
+    return new Promise(res => { const im = new Image(); im.onerror = () => res(''); im.onload = () => { try{ const k = Math.min(1, max / Math.max(im.width, im.height)), c = document.createElement('canvas'); c.width = Math.round(im.width * k); c.height = Math.round(im.height * k); c.getContext('2d').drawImage(im, 0, 0, c.width, c.height); res(c.toDataURL('image/jpeg', 0.78)); }catch(e){ res(''); } }; im.src = dataUrl; });
   }
-  async function aiMakeImage(name, catName){
-    await aiInit();
-    const { ResponseModality } = await import(window.__fbB + 'firebase-ai.js');
-    const m = AIM.gm(AIM.ai, { model: 'gemini-2.5-flash-image', generationConfig: { responseModalities: [ResponseModality.TEXT, ResponseModality.IMAGE] } });
-    const r = await m.generateContent('Iştah açıcı, profesyonel bir kafe menüsü ürün fotoğrafı: "' + name + '"' + (catName ? ' (kategori: ' + catName + ')' : '') + '. Üstten veya hafif açılı çekim, sade açık renk zemin, yumuşak doğal ışık, tek ürün ön planda. Görselde yazı, logo, filigran veya insan olmasın.');
-    const parts = r.response.inlineDataParts ? r.response.inlineDataParts() : [];
-    if(!parts || !parts.length) throw new Error('Görsel üretilemedi');
-    return dataUrlToThumb('data:' + (parts[0].inlineData.mimeType || 'image/png') + ';base64,' + parts[0].inlineData.data, 360);
+  async function pGemini(model, prompt){
+    await aiInit(); const m = AIM.gm(AIM.ai, { model, generationConfig: { responseModalities: ['TEXT', 'IMAGE'] } });
+    const r = await wt(m.generateContent(prompt), 70000, model);
+    for(const c of (r.response.candidates || [])) for(const pt of ((c.content || {}).parts || [])) if(pt.inlineData && pt.inlineData.data){ const d = await dataUrlToThumb('data:' + (pt.inlineData.mimeType || 'image/png') + ';base64,' + pt.inlineData.data, 420); if(d) return d; }
+    throw new Error('yanıtta görsel yok' + (r.response.promptFeedback && r.response.promptFeedback.blockReason ? ' (' + r.response.promptFeedback.blockReason + ')' : ''));
   }
-  function autoProductImage(prod, cat){
-    if(!window.__fbApp || !prod || imgOk(prod.img)) return Promise.resolve(false);
-    imgGenQ = imgGenQ.then(async () => {
-      if(imgOk(prod.img)) return false;
-      showToast('🎨 “' + prod.name + '” için görsel hazırlanıyor…', 3000);
-      try{
-        const d = await aiMakeImage(prod.name, cat && (cat.sub || cat.name));
-        if(!d) throw new Error('boş');
-        prod.img = d; menuRender(); saveState(); publishPublic(); showToast('✔ “' + prod.name + '” görseli oluşturuldu.'); return true;
-      }catch(e){
-        console.error('Görsel üretimi', e);
-        showToast('Yapay zekâ görseli üretilemedi; “' + prod.name + '” için ürüne uygun çizim kullanılıyor.', 3500); return false;
-      }
+  async function pImagen(model, prompt){
+    await aiInit(); const mod = await import(window.__fbB + 'firebase-ai.js');
+    const m = mod.getImagenModel(AIM.ai, { model, generationConfig: { numberOfImages: 1, aspectRatio: '1:1' } });
+    const r = await wt(m.generateImages(prompt), 70000, model), im = (r.images || [])[0];
+    if(!im) throw new Error('görsel yok' + (r.filteredReason ? ' (' + r.filteredReason + ')' : ''));
+    const d = await dataUrlToThumb('data:' + (im.mimeType || 'image/png') + ';base64,' + im.bytesBase64Encoded, 420); if(!d) throw new Error('görsel okunamadı'); return d;
+  }
+  async function pPollinations(prompt){
+    const r = await wt(fetch('https://image.pollinations.ai/prompt/' + encodeURIComponent(prompt) + '?width=512&height=512&nologo=true&model=flux&seed=' + Math.floor(Math.random() * 1e6)), 70000, 'pollinations');
+    if(!r.ok) throw new Error('HTTP ' + r.status); const b = await r.blob();
+    if(!/^image\//.test(b.type) || b.size < 4000) throw new Error('geçersiz yanıt'); const d = await blobToThumb(b, 420); if(!d) throw new Error('görsel okunamadı'); return d;
+  }
+  async function pCommons(en, name){
+    const api = 'https://commons.wikimedia.org/w/api.php?action=query&generator=search&gsrnamespace=6&gsrlimit=10&gsrsearch=' + encodeURIComponent(en + ' filetype:bitmap') + '&prop=imageinfo&iiprop=url|mime|size&iiurlwidth=600&format=json&origin=*';
+    const j = await (await wt(fetch(api), 20000, 'commons')).json();
+    const pages = Object.values((j.query || {}).pages || {}).sort((a, b) => a.index - b.index); let tried = 0;
+    for(const pg of pages){
+      const ii = (pg.imageinfo || [])[0]; if(!ii || !/jpeg/.test(ii.mime) || ii.width < 400 || !ii.thumburl) continue; if(++tried > 5) break;
+      let d = ''; try{ const rb = await wt(fetch(ii.thumburl), 25000, 'foto'); if(!rb.ok) continue; d = await blobToThumb(await rb.blob(), 420); }catch(e){ continue; } if(!d) continue;
+      try{ const ans = await aiAsk('Bu görsel, bir kafe menüsünde "' + name + '" (' + en + ') için kullanılabilecek, doğru ve iştah açıcı bir ürün fotoğrafı mı? İçinde insan yüzü, yazı veya alakasız konu varsa HAYIR de. Yalnızca EVET veya HAYIR yaz.', [{ inlineData: { data: d.split(',')[1], mimeType: 'image/jpeg' } }]); if(!/^\s*evet/i.test(ans)) continue; }catch(e){ /* doğrulama yapılamadıysa ilk uygun fotoğraf kabul edilir */ }
+      return d;
+    }
+    throw new Error('uygun fotoğraf bulunamadı');
+  }
+  function rasterFallback(name, icon){
+    return new Promise(res => {
+      const c = document.createElement('canvas'); c.width = 420; c.height = 315; const x = c.getContext('2d'), h = artHue(name), g = x.createLinearGradient(0, 0, 420, 315);
+      g.addColorStop(0, 'hsl(' + h + ',90%,91%)'); g.addColorStop(1, 'hsl(' + ((h + 40) % 360) + ',85%,82%)'); x.fillStyle = g; x.fillRect(0, 0, 420, 315);
+      const done = () => { try{ res(c.toDataURL('image/jpeg', 0.8)); }catch(e){ res(''); } };
+      const emo = () => { x.font = '140px sans-serif'; x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillText(icon || '🍽️', 210, 158); done(); };
+      const src = illus(name); if(!src){ emo(); return; }
+      const im = new Image(); im.onload = () => { x.drawImage(im, 60, 20, 300, 225); done(); }; im.onerror = emo; im.src = src;
     });
-    return imgGenQ;
   }
-  // toplu: görseli olmayan ürünler (her seferinde en fazla 10)
+  async function enName(j){
+    try{ const t = await aiAsk('Bir kafe menüsündeki "' + j.name + '" (' + j.ctx + ') için görsel arama/üretimi amacıyla kısa İngilizce karşılık yaz (en fazla 6 kelime, örn. "turkish black olives in a bowl"). Yalnızca karşılığı yaz.'); return t.replace(/["'`\n]/g, '').slice(0, 80) || j.name; }catch(e){ return j.name; }
+  }
+  const imgPrompt = (j, en) => j.kind === 'prod'
+    ? 'Professional appetizing food photography of ' + en + ', served at a cafe, 45 degree angle, soft natural light, clean light neutral background, single subject centered, photorealistic, no text, no logo, no watermark, no people'
+    : 'Professional appetizing food and drink photography representing the menu category "' + en + '", a styled arrangement on a table, soft natural light, clean light background, photorealistic, no text, no logo, no watermark, no people';
+  function provList(en, name, prompt){
+    return [
+      { key: 'gem1', label: 'Gemini görsel (2.5 flash image)', fn: () => pGemini('gemini-2.5-flash-image', prompt) },
+      { key: 'gem2', label: 'Gemini görsel (preview)', fn: () => pGemini('gemini-2.5-flash-image-preview', prompt) },
+      { key: 'img1', label: 'Imagen 4 fast', fn: () => pImagen('imagen-4.0-fast-generate-001', prompt) },
+      { key: 'img2', label: 'Imagen 4', fn: () => pImagen('imagen-4.0-generate-001', prompt) },
+      { key: 'poll', label: 'Pollinations (yapay zekâ)', fn: () => pPollinations(prompt) },
+      { key: 'comm', label: 'Wikimedia Commons (gerçek fotoğraf)', fn: () => pCommons(en, name) }
+    ];
+  }
+  const jobTarget = j => {
+    if(j.kind === 'grp'){ const g = menuGroups(categories).find(x => x.name === j.name), m = groupMeta.find(x => x.name === j.name) || {}; return { img: g ? g.img : '', auto: m.imgAuto, ok: !!g }; }
+    return { img: j.obj.img, auto: j.obj.imgAuto, ok: categories.some(c => c === j.obj || c.products.indexOf(j.obj) >= 0) };
+  };
+  const jobKey = j => j.kind + ':' + (j.kind === 'grp' ? j.name : (j.obj.name + '|' + (j.obj.sub || '')));
+  function applyImg(j, d, real){
+    const sig = real ? undefined : sigOf(d);
+    if(j.kind === 'grp'){
+      gmSet(j.name, { img: d, imgAuto: sig }); if(real){ const m = groupMeta.find(x => x.name === j.name); if(m) delete m.imgAuto; }
+      categories.forEach(c => { if(grpName(c) === j.name && !c.sub){ c.img = d; if(real) delete c.imgAuto; else c.imgAuto = sig; } });
+    } else { j.obj.img = d; if(real) delete j.obj.imgAuto; else j.obj.imgAuto = sig; }
+    menuRender(); saveState(); publishPublic();
+  }
+  async function imgRun(j){
+    const t = jobTarget(j); if(!t.ok) return false;
+    if(imgOk(t.img) && !(t.auto && t.auto === sigOf(t.img))) return true;   // arada görsel yüklendiyse dokunma
+    let d = '', via = '';
+    if(window.__fbApp){
+      showToast('🎨 “' + j.name + '” için görsel hazırlanıyor…', 4000);
+      const en = await enName(j), prompt = imgPrompt(j, en);
+      for(const pv of provList(en, j.name, prompt)){
+        if((provDead[pv.key] || 0) > Date.now()) continue;
+        try{ d = await pv.fn(); if(d){ via = pv.label; break; } }
+        catch(e){ const m = String((e && e.message) || e).replace(/https?:\/\/\S+/g, '').slice(0, 160); imgNote(j.name + ' · ' + pv.label + ' ✖ ' + m); provDead[pv.key] = Date.now() + (/404|not.?found|permission|403|billing|quota|429|not supported|invalid|app.?check/i.test(m) ? 20 * 60000 : 2 * 60000); }
+      }
+    }
+    const real = !!d;
+    if(!d) d = await rasterFallback(j.name, j.obj && j.obj.icon);
+    if(!d){ imgNote(j.name + ' · hiçbir görsel üretilemedi'); return false; }
+    // kullanıcı bu sırada kendi görselini yüklediyse ezme
+    const t2 = jobTarget(j); if(imgOk(t2.img) && !(t2.auto && t2.auto === sigOf(t2.img))) return true;
+    applyImg(j, d, real);
+    showToast(real ? '✔ “' + j.name + '” görseli oluşturuldu' + (via ? ' (' + via + ')' : '') + '.' : '“' + j.name + '” için geçici görsel kaydedildi; gerçek görsel arka planda yeniden denenecek.', 3500);
+    return real;
+  }
+  async function imgPump(){
+    if(imgBusy) return; imgBusy = true;
+    try{ while(imgQ.length){ const j = imgQ.shift(); let ok = false; try{ ok = await imgRun(j); }catch(e){ imgNote(j.name + ' · iş hatası: ' + ((e && e.message) || e)); } imgProm.delete(jobKey(j)); j.res(ok); await new Promise(r => setTimeout(r, 700)); } }
+    finally{ imgBusy = false; }
+  }
+  function imgQueue(kind, target, ctxCat, retry){
+    let j;
+    if(kind === 'cat' && !target.sub){ kind = 'grp'; target = grpName(target); }
+    if(kind === 'grp') j = { kind, name: target, ctx: 'ana kategori' };
+    else if(kind === 'cat') j = { kind, obj: target, name: target.sub || target.name, ctx: grpName(target) };
+    else j = { kind: 'prod', obj: target, name: target.name, ctx: ctxCat ? catLabel(ctxCat) : '' };
+    const t = jobTarget(j); if(!t.ok) return Promise.resolve(false);
+    if(imgOk(t.img) && !(retry && t.auto && t.auto === sigOf(t.img))) return Promise.resolve(true);
+    const k = jobKey(j); if(imgProm.has(k)) return imgProm.get(k);
+    const pr = new Promise(res => { j.res = res; }); imgProm.set(k, pr); imgQ.push(j); imgPump(); return pr;
+  }
+  // geçici (çizim) görselli öğeler 10 dakikada bir gerçek görsel için yeniden denenir
+  function imgRetryScan(){
+    if(!staffMode || !window.__fbApp || !can('menu')) return;
+    const due = k => { const n = Date.now(); if(n - (imgTry.get(k) || 0) < 10 * 60000) return false; imgTry.set(k, n); return true; }, auto = o => o && o.imgAuto && o.imgAuto === sigOf(o.img);
+    categories.forEach(c => { if(c.sub && auto(c) && due('c' + c.name)) imgQueue('cat', c, null, true); c.products.forEach(pr => { if(auto(pr) && due('p' + pr.name)) imgQueue('prod', pr, c, true); }); });
+    groupMeta.forEach(m => { if(auto(m) && due('g' + m.name)) imgQueue('grp', m.name, null, true); });
+  }
+  setInterval(imgRetryScan, 60000); setTimeout(imgRetryScan, 20000);
+
+  // ---- Yapay Zekâ ekranı: toplu üretim + tanılama ----
   (function(){
     const card = document.createElement('div'); card.className = 'panel-card';
-    card.innerHTML = '<div class="panel-head"><div class="pi">🎨</div><div><h2>Ürün görseli üretimi</h2><p>Fotoğrafı olmayan ürünler için yapay zekâ ile görsel üretir (her seferinde en fazla 10 ürün). Yeni eklenen ürünlerde otomatik çalışır.</p></div></div><div class="ai-row"><button class="btn-mini" id="aiImgBtn">✨ Eksik görselleri üret</button><span id="aiImgSt" class="ai-st"></span></div>';
-    const host = $id('screen-ai'); host.appendChild(card);
+    card.innerHTML = '<div class="panel-head"><div class="pi">🎨</div><div><h2>Görsel üretimi</h2><p>Yeni ürün / alt kategori / ana kategori kaydedilirken görseli yoksa otomatik hazırlanır. Buradan eksikleri toplu üretebilir ve hangi kaynağın çalıştığını test edebilirsiniz.</p></div></div>' +
+      '<div class="ai-row"><button class="btn-mini" id="aiImgBtn">✨ Eksik görselleri üret (10’ar)</button><button class="btn-mini" id="aiImgTest">🧪 Görsel üretim testi</button><span id="aiImgSt" class="ai-st"></span></div><div class="ai-out" id="aiImgDiag" style="display:none"></div>';
+    $id('screen-ai').appendChild(card);
     $id('aiImgBtn').addEventListener('click', () => aiRun($id('aiImgBtn'), async () => {
-      const miss = allProds().filter(x => !imgOk(x.p.img)), list = miss.slice(0, 10);
-      if(!list.length){ showToast('Tüm ürünlerin görseli var.'); return; }
-      let ok = 0; for(const x of list){ $id('aiImgSt').textContent = (ok + 1) + '/' + list.length + ' — ' + x.p.name; try{ if(await autoProductImage(x.p, x.c)) ok++; }catch(e){} }
-      $id('aiImgSt').textContent = ok + ' görsel üretildi, ' + (miss.length - ok) + ' ürün kaldı.';
+      const miss = [];
+      menuGroups(categories).forEach(g => { if(!imgOk(g.img)) miss.push(['grp', g.name]); g.subs.forEach(sb => { if(sb.cat.sub && !imgOk(sb.cat.img)) miss.push(['cat', sb.cat]); }); });
+      categories.forEach(c => c.products.forEach(pr => { if(!imgOk(pr.img)) miss.push(['prod', pr, c]); }));
+      const list = miss.slice(0, 10); if(!list.length){ showToast('Tüm ürün ve kategorilerin görseli var.'); return; }
+      let ok = 0; for(let i = 0; i < list.length; i++){ const x = list[i]; $id('aiImgSt').textContent = (i + 1) + '/' + list.length; if(await imgQueue(x[0], x[1], x[2])) ok++; }
+      $id('aiImgSt').textContent = ok + ' gerçek görsel eklendi, ' + (list.length - ok) + ' tanesi geçici görselle kaldı (arka planda yeniden denenecek); toplam eksik: ' + (miss.length - list.length);
+    }));
+    $id('aiImgTest').addEventListener('click', () => aiRun($id('aiImgTest'), async () => {
+      const o = $id('aiImgDiag'); o.style.display = ''; o.innerHTML = '⏳ Test ediliyor…'; let html = '', first = '';
+      const en = 'turkish black olives in a bowl', pr = imgPrompt({ kind: 'prod' }, en);
+      for(const pv of provList(en, 'Kırmızı Zeytin', pr)){
+        const t0 = Date.now();
+        try{ const d = await pv.fn(); html += '✔ ' + pv.label + ' — ' + Math.round((Date.now() - t0) / 1000) + ' sn\n'; if(!first) first = d; }
+        catch(e){ html += '✖ ' + pv.label + ' — ' + String((e && e.message) || e).replace(/https?:\/\/\S+/g, '').slice(0, 220) + '\n'; }
+        o.textContent = html + '…';
+      }
+      o.textContent = html + (IMGLOG.length ? '\nSon hatalar:\n' + IMGLOG.slice(0, 8).join('\n') : '');
+      if(first){ const im = document.createElement('img'); im.src = first; im.style.cssText = 'display:block;margin-top:10px;max-width:220px;border-radius:10px'; o.appendChild(im); }
     }));
   })();
 
