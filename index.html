@@ -5127,12 +5127,20 @@ ${st('M50 58c-5-6 5-10 0-17', 0)}${st('M60 56c-5-7 5-11 0-19', 1.05)}${st('M70 5
     const { getAI, getGenerativeModel, GoogleAIBackend } = await import(window.__fbB + 'firebase-ai.js');
     AIM.ai = getAI(window.__fbApp, { backend: new GoogleAIBackend() }); AIM.gm = getGenerativeModel; aiBuild();
   }
-  // model kapatılmışsa (404) listedeki bir sonraki modele otomatik geçer
+  // 404: model kapatılmış -> sonraki modele geç. 500/503 (yoğunluk): kısa beklemeyle 2 kez tekrar dene, olmazsa sonraki modele geç
   async function aiGen(kind, c){
-    await aiInit();
+    await aiInit(); let tries = 0;
     for(;;){
       try{ return (await AIM[kind].generateContent(c)).response.text(); }
-      catch(e){ if(/404|not.?found|no longer available|not supported/i.test(String((e && e.message) || e)) && AIM.i < AI_MODELS.length - 1){ AIM.i++; aiBuild(); continue; } throw e; }
+      catch(e){
+        const m = String((e && e.message) || e), last = AIM.i >= AI_MODELS.length - 1;
+        if(/404|not.?found|no longer available|not supported/i.test(m) && !last){ AIM.i++; aiBuild(); tries = 0; continue; }
+        if(/\[\s*(500|502|503|504)\s*\]|high demand|overload|unavailable|try again later/i.test(m)){
+          if(tries < 2){ await new Promise(r => setTimeout(r, 1500 * (tries + 1))); tries++; continue; }
+          if(!last){ AIM.i++; aiBuild(); tries = 0; continue; }
+        }
+        throw e;
+      }
     }
   }
   async function aiAsk(prompt, parts){ return (await aiGen('text', parts ? [prompt].concat(parts) : prompt)).trim(); }
@@ -5141,6 +5149,7 @@ ${st('M50 58c-5-6 5-10 0-17', 0)}${st('M60 56c-5-7 5-11 0-19', 1.05)}${st('M70 5
     const m = String(((e && e.code) ? e.code + ' ' : '') + ((e && e.message) || e || '')).replace(/https?:\/\/\S+/g, '').replace(/\s+/g, ' ');
     if(/app.?check/i.test(m)) return 'App Check doğrulaması başarısız. Firebase Console > App Check kaydını yapıp dosyadaki APPCHECK_SITE_KEY alanını doldurun.';
     if(/dynamically imported|importing a module|module script/i.test(m)) return 'Yapay zekâ modülü yüklenemedi (SDK dosyası açılamadı).';
+    if(/\[\s*(500|502|503|504)\s*\]|high demand|overload|unavailable/i.test(m)) return 'Yapay zekâ şu an çok yoğun (Google tarafında geçici). Birkaç dakika sonra tekrar deneyin.';
     if(/404|not.?found|no longer available/i.test(m)) return 'Yapay zekâ modeli bulunamadı veya kapatılmış. Ayrıntı: ' + m.slice(0, 200);
     if(/api.?not.?enabled|403|permission|api.?key|forbidden/i.test(m)) return 'Yapay zekâ erişimi reddedildi. Firebase Console > AI Logic bölümünü etkinleştirdiniz mi? (' + m.slice(0, 120) + ')';
     if(/quota|429|resource.?exhausted/i.test(m)) return 'Yapay zekâ kotası doldu. Biraz sonra tekrar deneyin.';
@@ -5237,7 +5246,7 @@ ${st('M50 58c-5-6 5-10 0-17', 0)}${st('M60 56c-5-7 5-11 0-19', 1.05)}${st('M70 5
   function aiMenuText(){ return customerData().categories.map(c => c.products.map(p => c.name + ' | ' + p.name + ' | ' + p.price + ' TL' + (p.desc ? ' | ' + p.desc : '')).join('\n')).join('\n').slice(0, 14000); }
   function openAiChat(){
     const bg = document.createElement('div'); bg.className = 'modal-bg show'; bg.style.zIndex = 1300;
-    bg.innerHTML = '<div class="modal-box"><h3 style="margin:0 0 6px">💬 Menü Asistanı</h3><div id="aiLog" style="max-height:44vh;overflow:auto"><div class="ai-bub a">Merhaba! Canınız ne çekiyor? Size menüden öneri yapabilirim.</div></div><div style="display:flex;gap:6px;margin-top:8px"><input id="aiQ" type="text" placeholder="Örn: tatlı bir şey, bol sütlü bir kahve…" style="flex:1;padding:10px;border:1px solid var(--line);border-radius:8px;background:var(--panel-2);color:var(--ink)"><button class="btn-save" id="aiSend" style="margin:0;width:auto;padding:0 14px">Gönder</button></div><button class="btn-save" id="aiClose" style="margin:8px 0 0;background:var(--ink-faint)">Kapat</button></div>';
+    bg.innerHTML = '<div class="modal-box"><h3 style="margin:0 0 6px">💬 Menü Asistanı</h3><div id="aiLog" style="max-height:44vh;overflow:auto"><div class="ai-bub a">Merhaba, hoş geldiniz! 😊 Bugün canınız ne çekiyor, nasıl bir şey arıyorsunuz? Birlikte bakalım.</div></div><div style="display:flex;gap:6px;margin-top:8px"><input id="aiQ" type="text" placeholder="Örn: tatlı bir şey, bol sütlü bir kahve…" style="flex:1;padding:10px;border:1px solid var(--line);border-radius:8px;background:var(--panel-2);color:var(--ink)"><button class="btn-save" id="aiSend" style="margin:0;width:auto;padding:0 14px">Gönder</button></div><button class="btn-save" id="aiClose" style="margin:8px 0 0;background:var(--ink-faint)">Kapat</button></div>';
     document.body.appendChild(bg);
     const log = bg.querySelector('#aiLog'), q = bg.querySelector('#aiQ'), send = bg.querySelector('#aiSend');
     const add = (c, t) => { const d = document.createElement('div'); d.className = 'ai-bub ' + c; d.textContent = t; log.appendChild(d); log.scrollTop = log.scrollHeight; };
@@ -5248,7 +5257,7 @@ ${st('M50 58c-5-6 5-10 0-17', 0)}${st('M60 56c-5-7 5-11 0-19', 1.05)}${st('M70 5
       aiChatN++; add('u', t); send.disabled = true;
       try{
         const hist = aiChatHist.slice(-6).join('\n');
-        const a = await aiAsk('Sen bir kafenin dijital menü asistanısın. SADECE aşağıdaki menüdeki ürünlerden öner; menüde olmayan ürün, malzeme, içerik veya fiyat UYDURMA. Alerji, hassasiyet, helal/vegan gibi kesin bilgi gerektiren sorularda kesin konuşma, garsona sormalarını söyle. Müşterinin yazdığı dilde, en fazla 4 cümleyle, samimi cevap ver. Önerdiğin ürünlerin fiyatını TL olarak yaz. Sipariş alma; müşteri sepete kendisi ekler.\n\nMENÜ (kategori | ürün | fiyat | açıklama):\n' + aiMenuText() + '\n\nÖNCEKİ KONUŞMA:\n' + hist + '\n\nMÜŞTERİ: ' + t);
+        const a = await aiAsk('Sen bir kafenin güler yüzlü, samimi dijital menü asistanısın. Birinci amacın satış yapmak DEĞİL, müşteriyi anlamak: canının ne çektiğini, keyfini, kiminle geldiğini, damak tadını ve acelesi olup olmadığını anlamaya çalış. İsteği belirsizse önce sıcak, tek ve kısa bir soru sor (örn. "Tatlı mı, ferah bir şey mi?"). Yeterince anladığında menüden 1-2 uygun ürün öner ve nedenini kısaca söyle. Asla baskı yapma, pahalı veya fazla ürün itme; müşteri bir şey almak istemezse de nazikçe saygı göster. SADECE aşağıdaki menüdeki ürünlerden öner; menüde olmayan ürün, malzeme, içerik veya fiyat UYDURMA. Alerji, hassasiyet, helal/vegan gibi kesin bilgi gerektiren konularda kesin konuşma, garsona sormalarını söyle. Müşterinin yazdığı dilde, en fazla 3-4 kısa cümleyle, sıcak ve doğal konuş (uygunsa tek bir emoji). Ürün önerirsen fiyatını TL olarak belirt. Sipariş alma; müşteri sepete kendisi ekler.\n\nMENÜ (kategori | ürün | fiyat | açıklama):\n' + aiMenuText() + '\n\nÖNCEKİ KONUŞMA:\n' + hist + '\n\nMÜŞTERİ: ' + t);
         add('a', a); aiChatHist.push('Müşteri: ' + t, 'Asistan: ' + a);
       }catch(e){ console.error('AI', e); add('a', (staffMode || /debug/.test(location.search)) ? 'Hata: ' + aiErr(e) : 'Şu an yanıt veremiyorum, lütfen garsonumuza danışın.'); }
       send.disabled = false; q.focus();
