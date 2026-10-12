@@ -113,33 +113,14 @@
 
   /* sidebar */
   .sidebar{
-    width: 300px;
-    flex-shrink:0;
-    background: var(--panel);
-    border-right: 1px solid var(--line);
-    padding: 20px 0 40px;
-    overflow-y:auto;
+    width: 276px; flex-shrink:0; background: var(--panel); border-right: 1px solid var(--line);
+    display:flex; flex-direction:column; position:sticky; top:0; height:100vh; align-self:flex-start; overflow:hidden;
   }
-  .brand{
-    display:flex; align-items:center; gap:12px;
-    padding: 4px 22px 18px;
-  }
-  .brand .logo{
-    width:38px; height:38px; border-radius: 9px;
-    background: var(--red);
-    display:flex; align-items:center; justify-content:center;
-    font-family: 'Nunito', serif; font-weight:800; font-size:18px; color:#fff;
-  }
-  .brand .name{ font-weight:800; font-size:1.05rem; letter-spacing: 0.02em; }
-  .brand-sub{
-    display:flex; align-items:center; gap:7px;
-    padding: 0 22px 16px;
-    color: var(--ink-faint);
-    font-size: 0.78rem;
-    letter-spacing: .02em;
-    border-bottom: 1px solid var(--line);
-    margin-bottom: 6px;
-  }
+  .sb-top{ padding:16px 14px 12px; border-bottom:1px solid var(--line); flex-shrink:0; }
+  .brand{ display:flex; align-items:center; gap:12px; padding:0 6px 12px; }
+  .brand .name{ font-weight:800; font-size:1.05rem; letter-spacing:.02em; line-height:1.1; }
+  .brand-sub{ padding:0; margin:0; border:0; display:block; color:var(--ink-faint); font-size:.78rem; }
+  .brand-sub .name-inline{ padding:0; }
   .editable-inline{
     border: none; background: transparent; color: var(--ink-faint);
     font-family: inherit; font-size: 0.78rem; letter-spacing: .02em;
@@ -148,33 +129,57 @@
   .editable-inline:hover{ background: var(--panel-2); }
   .editable-inline:focus{ background: var(--panel-2); color: var(--ink); box-shadow: 0 0 0 1px var(--line); }
   .name-inline{ width: 100%; font-weight:700; }
+  .cust-lock{
+    display:flex; align-items:center; gap:10px; width:100%; text-align:left; cursor:pointer; font-family:inherit; color:var(--ink);
+    padding:10px 12px; border-radius:12px; border:1px solid var(--line); background:var(--panel-2);
+  }
+  .cust-lock:hover{ border-color:var(--ink-faint); }
+  .cust-lock .cl-ic{ font-size:20px; width:34px; height:34px; border-radius:10px; display:flex; align-items:center; justify-content:center; background:#fdecc8; flex-shrink:0; }
+  .cust-lock .cl-tx{ flex:1; min-width:0; display:flex; flex-direction:column; line-height:1.25; }
+  .cust-lock .cl-tx b{ font-size:.82rem; }
+  .cust-lock .cl-tx small{ font-size:.72rem; color:var(--ink-dim); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .cust-lock .cl-act{ font-size:.72rem; font-weight:800; color:var(--red); }
+  .cust-lock.on{ border-color:#7cc99a; }
+  .cust-lock.on .cl-ic{ background:#d6f2e1; }
+  .sb-nav{ flex:1; overflow-y:auto; padding:6px 10px 10px; }
+  .nav-label{ font-size:.66rem; font-weight:800; letter-spacing:.09em; text-transform:uppercase; color:var(--ink-faint); padding:11px 12px 4px; }
   .nav-item{
-    display:flex; align-items:center; gap: 13px;
-    padding: 12px 22px;
-    cursor: pointer;
-    color: var(--ink);
-    font-weight: 600;
-    font-size: 0.93rem;
-    position: relative;
+    display:flex; align-items:center; gap:11px; padding:8px 12px; margin:1px 0; border-radius:10px; cursor:pointer;
+    color:var(--ink); font-weight:600; font-size:.9rem; position:relative; line-height:1.2;
   }
   .nav-item:hover{ background: var(--panel-2); }
-  .nav-item.active{ background: var(--sidebar-active); }
-  .nav-item .ic{ font-size: 16px; width:20px; text-align:center; }
-  .nav-item .chev{ margin-left:auto; color: var(--ink-faint); font-size:11px; transition: transform .15s; }
-  .nav-item.open .chev{ transform: rotate(180deg); }
-  .sub-list{ display:none; }
-  .sub-list.show{ display:block; }
-  .sub-item{
-    display:flex; align-items:center; gap:12px;
-    padding: 10px 22px 10px 50px;
-    cursor:pointer;
-    color: var(--ink-dim);
-    font-size: 0.87rem;
-    font-weight: 600;
-  }
-  .sub-item:hover{ background: var(--panel-2); color: var(--ink); }
-  .sub-item.active{ background: var(--sidebar-active); color: var(--ink); }
-  .sub-item .ic{ font-size:13px; width:16px; text-align:center; }
+  .nav-item.active{ background: color-mix(in srgb, var(--red) 11%, transparent); color:var(--red-dark); font-weight:800; }
+  [data-theme="dark"] .nav-item.active{ color:#ffb3b3; }
+  .nav-item.active::before{ content:""; position:absolute; left:-10px; top:8px; bottom:8px; width:4px; border-radius:0 4px 4px 0; background:var(--red); }
+  .nav-item .ic{ font-size:16px; width:22px; text-align:center; flex-shrink:0; }
+  .nav-item .nb{ margin-left:auto; display:none; min-width:20px; height:20px; padding:0 6px; border-radius:999px; background:var(--red); color:#fff; font-size:.72rem; font-weight:800; align-items:center; justify-content:center; }
+  .nav-item .nb.on{ display:flex; }
+  .nav-fold > .nav-item .chev{ margin-left:auto; color:var(--ink-faint); font-size:11px; transition:transform .15s; }
+  .nav-fold.open > .nav-item .chev{ transform:rotate(180deg); }
+  .nav-fold > .nav-item{ color:var(--ink-dim); }
+  .nav-sub{ display:none; margin:0 0 4px 21px; padding-left:8px; border-left:2px solid var(--line); }
+  .nav-fold.open > .nav-sub{ display:block; }
+  .nav-sub .nav-item{ font-size:.85rem; padding:7px 10px; font-weight:600; color:var(--ink-dim); }
+  .nav-sub .nav-item.active{ color:var(--red-dark); }
+  .nav-sub .nav-item.active::before{ left:-10px; top:6px; bottom:6px; }
+  .sb-foot{ flex-shrink:0; display:flex; align-items:center; gap:10px; padding:10px 14px; border-top:1px solid var(--line); background:var(--panel); }
+  .sb-foot .av{ width:34px; height:34px; border-radius:50%; background:var(--red); color:#fff; font-weight:800; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+  .sb-foot .who{ flex:1; min-width:0; display:flex; flex-direction:column; line-height:1.2; }
+  .sb-foot .who b{ font-size:.85rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .sb-foot .who small{ font-size:.72rem; color:var(--ink-faint); }
+  .sb-foot button{ border:1px solid var(--line); background:var(--panel-2); color:var(--ink); border-radius:9px; height:34px; padding:0 12px; cursor:pointer; font-size:.8rem; font-weight:700; font-family:inherit; }
+  .sb-foot button:hover{ background:var(--sidebar-active); }
+  /* müşteri ekranı şifre kapısı */
+  #custGate{ position:fixed; inset:0; z-index:1500; display:none; align-items:center; justify-content:center; padding:20px; background:var(--bg); }
+  #custGate.show{ display:flex; }
+  #custGate .cg-box{ width:100%; max-width:360px; text-align:center; background:var(--panel); color:var(--ink); border:1px solid var(--line); border-radius:20px; padding:26px 22px; box-shadow:0 18px 50px rgba(0,0,0,.14); }
+  #custGate .cg-logo{ width:84px; margin:0 auto 10px; }
+  #custGate .cg-logo svg{ width:100%; height:auto; display:block; }
+  #custGate h2{ margin:4px 0 4px; font-size:1.15rem; }
+  #custGate p{ margin:0 0 14px; font-size:.85rem; color:var(--ink-dim); }
+  #custGate input{ width:100%; box-sizing:border-box; text-align:center; letter-spacing:.12em; font-size:1.15rem; padding:13px; border:1px solid var(--line); border-radius:12px; background:var(--panel-2); color:var(--ink); font-family:inherit; }
+  #custGate button.go{ width:100%; margin-top:10px; padding:13px; border:0; border-radius:12px; background:var(--red); color:#fff; font-weight:800; font-size:1rem; cursor:pointer; font-family:inherit; }
+  #custGate .cg-err{ min-height:16px; margin-top:8px; font-size:.82rem; color:var(--red); }
 
   /* main */
   .main{ flex:1; min-width:0; }
@@ -657,7 +662,7 @@
   .order-line .link-btn.nt{ display:inline-block; margin-top:4px; font-size:.78rem; }
   @media (max-width: 860px){
     #btnMenu{ display:flex; }
-    .sidebar{ position:fixed !important; top:0; bottom:0; left:0; z-index:700; transform:translateX(-105%); transition:transform .2s; max-width:84vw; }
+    .sidebar{ position:fixed !important; top:0; bottom:0; height:auto !important; left:0; z-index:700; transform:translateX(-105%); transition:transform .2s; max-width:84vw; }
     .sidebar.open{ transform:none; box-shadow:6px 0 30px rgba(0,0,0,.35); }
     .content{ padding:18px 14px 90px !important; } .topbar{ padding:12px 14px !important; }
     .eye-toggle .track, #eyeLabel{ display:none; }
@@ -1203,56 +1208,80 @@
   <div class="app">
     <!-- SIDEBAR -->
     <div class="sidebar" id="sidebar">
-      <div class="brand">
-        <div class="sb-logo" id="sbLogo"></div>
-        <div class="name">Adisyon</div>
-      </div>
-      <div class="brand-sub">
-        <input id="restName" class="name-inline" value="SEYİR CAFE" spellcheck="false" readonly tabindex="-1" aria-readonly="true">
-      </div>
-
-      <div class="nav-item active" data-screen="home"><span class="ic">🏠</span>Ana Sayfa</div>
-      <div class="nav-item" data-screen="digitalmenu"><span class="ic">📶</span>Dijital Menü</div>
-      <div class="nav-item" data-screen="ai"><span class="ic">✨</span>Yapay Zekâ</div>
-
-      <div class="nav-item" id="navTanimlamalar"><span class="ic">📋</span>Tanımlamalar<span class="chev">▾</span></div>
-      <div class="sub-list" id="subTanimlamalar">
-        <div class="sub-item" data-screen="tables"><span class="ic">▦</span>Masa / Bölgeler</div>
-        <div class="sub-item" data-screen="urunler"><span class="ic">🍴</span>Menü / Ürünler</div>
-        <div class="sub-item" data-screen="birimler"><span class="ic">📖</span>Birimler</div>
-        <div class="sub-item" data-screen="ozellikler"><span class="ic">☰</span>Özellikler</div>
-        <div class="sub-item" data-screen="kdv"><span class="ic">%</span>Kdv Oranları</div>
-        <div class="sub-item" data-screen="indirimler"><span class="ic">🏷️</span>İndirimler</div>
-        <div class="sub-item" data-screen="mutfakgruplari"><span class="ic">📺</span>Mutfak Grupları</div>
-                <div class="sub-item" data-screen="musteriler"><span class="ic">👤</span>Müşteriler</div>
-        <div class="sub-item" data-screen="odenmezler"><span class="ic">🚫</span>Ödenmezler</div>
+      <div class="sb-top">
+        <div class="brand">
+          <div class="sb-logo" id="sbLogo"></div>
+          <div>
+            <div class="name">Adisyon</div>
+            <div class="brand-sub"><input id="restName" class="name-inline" value="SEYİR CAFE" spellcheck="false" readonly tabindex="-1" aria-readonly="true"></div>
+          </div>
+        </div>
+        <button class="cust-lock" id="custLockCard" type="button" aria-label="Müşteri ekranı şifresi">
+          <span class="cl-ic" id="clIc">🔓</span>
+          <span class="cl-tx"><b>Müşteri şifresi</b><small id="clState">Kapalı · menü herkese açık</small></span>
+          <span class="cl-act" id="clAct">Ayarla</span>
+        </button>
       </div>
 
-      <div class="nav-item" data-screen="siparis-masa"><span class="ic">🛒</span>Sipariş</div>
-      <div class="nav-item" data-screen="paketler"><span class="ic">📦</span>Paket / Gel-Al</div>
+      <nav class="sb-nav">
+        <div class="nav-sec">
+          <div class="nav-label">Günlük işler</div>
+          <div class="nav-item active" data-screen="home"><span class="ic">🏠</span>Ana Sayfa</div>
+          <div class="nav-item" data-screen="siparis-masa"><span class="ic">🛒</span>Masalar / Sipariş</div>
+          <div class="nav-item" data-screen="paketler"><span class="ic">📦</span>Paket / Gel-Al</div>
+          <div class="nav-item" data-screen="mutfak"><span class="ic">👨‍🍳</span>Mutfak Ekranı<span class="nb" id="sbK">0</span></div>
+          <div class="nav-item" id="navCO" role="button"><span class="ic">🔔</span>Müşteri Siparişleri<span class="nb" id="sbCO">0</span></div>
+        </div>
 
-      <div class="nav-item" id="navIslemler"><span class="ic">🗂️</span>İşlemler<span class="chev">▾</span></div>
-      <div class="sub-list" id="subIslemler">
-        <div class="sub-item" data-screen="gider"><span class="ic">📉</span>Gider / Masraf İşlemleri</div>
-        <div class="sub-item" data-screen="zayi"><span class="ic">📈</span>Zayi İşlemleri</div>
+        <div class="nav-sec">
+          <div class="nav-label">Menü ve müşteri</div>
+          <div class="nav-item" data-screen="urunler"><span class="ic">🍴</span>Menü / Ürünler</div>
+          <div class="nav-item" data-screen="digitalmenu"><span class="ic">📶</span>Dijital Menü / QR</div>
+          <div class="nav-item" data-screen="musteriler"><span class="ic">👤</span>Müşteriler / Açık Hesap</div>
+        </div>
+
+        <div class="nav-sec">
+          <div class="nav-label">Kasa ve raporlar</div>
+          <div class="nav-item" data-screen="rapor-gunsonu"><span class="ic">💲</span>Gün Sonu</div>
+          <div class="nav-item" data-screen="gider"><span class="ic">📉</span>Gider / Masraf</div>
+          <div class="nav-item" data-screen="zayi"><span class="ic">🗑️</span>Zayi Kayıtları</div>
+          <div class="nav-fold" data-fold="rapor">
+            <div class="nav-item" role="button"><span class="ic">📊</span>Diğer Raporlar<span class="chev">▾</span></div>
+            <div class="nav-sub">
+              <div class="nav-item" data-screen="rapor-urun"><span class="ic">📈</span>Ürün Satışları</div>
+              <div class="nav-item" data-screen="rapor-vardiya"><span class="ic">📄</span>Vardiya Satışları</div>
+              <div class="nav-item" data-screen="rapor-istatistik"><span class="ic">◐</span>İstatistikler</div>
+              <div class="nav-item" data-screen="rapor-fire"><span class="ic">🔥</span>Fire Raporu</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="nav-sec">
+          <div class="nav-label">Yönetim</div>
+          <div class="nav-item" data-screen="tables"><span class="ic">▦</span>Masa / Bölgeler</div>
+          <div class="nav-item" data-screen="users"><span class="ic">👥</span>Kullanıcılar</div>
+          <div class="nav-item" data-screen="perms"><span class="ic">🛡️</span>Yetkiler</div>
+          <div class="nav-item" data-screen="ai"><span class="ic">✨</span>Yapay Zekâ</div>
+          <div class="nav-item" data-screen="settings"><span class="ic">⚙️</span>Ayarlar</div>
+          <div class="nav-fold" data-fold="tanim">
+            <div class="nav-item" role="button"><span class="ic">📋</span>Menü Tanımları<span class="chev">▾</span></div>
+            <div class="nav-sub">
+              <div class="nav-item" data-screen="birimler"><span class="ic">📖</span>Birimler</div>
+              <div class="nav-item" data-screen="ozellikler"><span class="ic">☰</span>Sipariş Notları</div>
+              <div class="nav-item" data-screen="kdv"><span class="ic">%</span>KDV Oranları</div>
+              <div class="nav-item" data-screen="indirimler"><span class="ic">🏷️</span>İndirimler</div>
+              <div class="nav-item" data-screen="mutfakgruplari"><span class="ic">📺</span>Mutfak Grupları</div>
+              <div class="nav-item" data-screen="odenmezler"><span class="ic">🚫</span>İkram Gerekçeleri</div>
+            </div>
+          </div>
+        </div>
+      </nav>
+
+      <div class="sb-foot">
+        <span class="av" id="sbAv">?</span>
+        <span class="who"><b id="sbUserName">—</b><small id="sbUserRole">—</small></span>
+        <button id="sbLogout" type="button" title="Çıkış" aria-label="Çıkış">Çıkış</button>
       </div>
-
-      <div class="nav-item" id="navKullanicilar"><span class="ic">👥</span>Kullanıcılar<span class="chev">▾</span></div>
-      <div class="sub-list" id="subKullanicilar">
-        <div class="sub-item" data-screen="users"><span class="ic">👥</span>Kullanıcılar</div>
-        <div class="sub-item" data-screen="perms"><span class="ic">🛡️</span>Yetkiler</div>
-              </div>
-
-      <div class="nav-item" id="navRaporlar"><span class="ic">📊</span>Raporlar<span class="chev">▾</span></div>
-      <div class="sub-list" id="subRaporlar">
-        <div class="sub-item" data-screen="rapor-urun"><span class="ic">📈</span>Ürün Satış Raporu</div>
-        <div class="sub-item" data-screen="rapor-gunsonu"><span class="ic">💲</span>Gün Sonu Raporu</div>
-        <div class="sub-item" data-screen="rapor-vardiya"><span class="ic">📄</span>Vardiya Satış Raporu</div>
-        <div class="sub-item" data-screen="rapor-istatistik"><span class="ic">◐</span>Restaurant İstatistikleri</div>
-        <div class="sub-item" data-screen="rapor-fire"><span class="ic">🔥</span>Fire Raporu</div>
-      </div>
-
-      <div class="nav-item" data-screen="settings" style="margin-top:8px;"><span class="ic">⚙️</span>Ayarlar</div>
     </div>
 
     <!-- MAIN -->
@@ -1885,19 +1914,14 @@
     try{ localStorage.setItem('seyirTheme', isDark ? 'light' : 'dark'); }catch(e){}
   });
 
-  // expandable groups
-  function wireGroup(navId, subId){
-    const nav = document.getElementById(navId);
-    const sub = document.getElementById(subId);
-    nav.addEventListener('click', () => {
-      nav.classList.toggle('open');
-      sub.classList.toggle('show');
-    });
-  }
-  wireGroup('navTanimlamalar','subTanimlamalar');
-  wireGroup('navIslemler','subIslemler');
-  wireGroup('navKullanicilar','subKullanicilar');
-  wireGroup('navRaporlar','subRaporlar');
+  // açılır gruplar (durum hatırlanır)
+  const FOLD_KEY = 'seyirFolds';
+  function foldState(){ try{ return JSON.parse(localStorage.getItem(FOLD_KEY) || '{}'); }catch(e){ return {}; } }
+  function foldSave(k, v){ try{ const st = foldState(); st[k] = v ? 1 : 0; localStorage.setItem(FOLD_KEY, JSON.stringify(st)); }catch(e){} }
+  document.querySelectorAll('.nav-fold').forEach(f => {
+    if(foldState()[f.dataset.fold]) f.classList.add('open');
+    f.querySelector(':scope > .nav-item').addEventListener('click', () => { f.classList.toggle('open'); foldSave(f.dataset.fold, f.classList.contains('open')); });
+  });
 
   // screen switching
   const titles = {
@@ -1922,6 +1946,7 @@
     if(el) el.classList.add('show');
     document.getElementById('topTitle').textContent = titles[name] || name;
     document.querySelectorAll('.nav-item, .sub-item').forEach(n => n.classList.remove('active'));
+    document.querySelectorAll('.sidebar .nav-item[data-screen="' + name + '"]').forEach(n => { n.classList.add('active'); const f = n.closest('.nav-fold'); if(f) f.classList.add('open'); });
     if(name === 'urunler'){ try{ renderCatList(); renderProductGrid(); }catch(e){} }
     if(typeof onScreen === 'function') onScreen(name);
   }
@@ -3435,6 +3460,7 @@
       if(!$id('cItems').dataset.sk){ $id('cItems').dataset.sk = '1'; $id('cTabs').innerHTML = ''; $id('cItems').innerHTML = Array(6).fill('<div class="c-item card c-sk"><div class="vis v-card"></div><div class="nm"><b>&nbsp;</b></div></div>').join(''); }
       return;
     }
+    if(!staffMode && custGateNeeded()){ showCustGate(); return; } hideCustGate();
     $id('customerView').classList.remove('c-loading'); delete $id('cItems').dataset.sk;
     const d = customerData(), mo = isMenuOnly();
     $id('customerView').classList.toggle('menu-only', mo); renderLangChips();
@@ -3551,7 +3577,7 @@
   // ---------------- GARSON PANELİ BAŞLAT ----------------
   function publishPublic(){
     const tables = regions.flatMap(r => r.tables.map(n => ({ n, label: tableLabels[n] || ('Masa ' + n) })));
-    const data = { categories: migrateMenuGroups(stripOldImgs(categories)).map(c => ({ name: c.name, grp: c.grp || c.name, sub: c.sub || '', gv: c.gv || 0, icon: c.icon || '', img: c.img || '', products: c.products.map(p => ({ name: p.name, icon: p.icon || '', price: p.price, desc: p.desc || '', img: p.img || '' })) })), menuVer: MENU_VER, groupMeta: groupMeta.map(m => ({ name: m.name, icon: m.icon || '', img: m.img || '', ord: typeof m.ord === 'number' ? m.ord : -1 })), tables, menuOnly: !!settings.menuOnly, wifiName: settings.wifiName || '', wifiPass: settings.wifiPass || '', trm: settings.trm || {} };
+    const data = { categories: migrateMenuGroups(stripOldImgs(categories)).map(c => ({ name: c.name, grp: c.grp || c.name, sub: c.sub || '', gv: c.gv || 0, icon: c.icon || '', img: c.img || '', products: c.products.map(p => ({ name: p.name, icon: p.icon || '', price: p.price, desc: p.desc || '', img: p.img || '' })) })), menuVer: MENU_VER, groupMeta: groupMeta.map(m => ({ name: m.name, icon: m.icon || '', img: m.img || '', ord: typeof m.ord === 'number' ? m.ord : -1 })), tables, menuOnly: !!settings.menuOnly, custPw: settings.custPw ? custHashOf(settings.custPw) : '', wifiName: settings.wifiName || '', wifiPass: settings.wifiPass || '', trm: settings.trm || {} };
     if(!RT.local && RT.isAdmin && !RT.isAdmin()) return; // yalnızca yönetici hesabı yayınlar
     if(holdImgs) return; // güncel veri gelmeden eski yerel menüyü yayınlayıp müşteriye eski görseli gösterme
     const s = JSON.stringify(data);
@@ -3629,11 +3655,16 @@
   function regionAllowed(r){ return !curUser || curUser.admin || !curUser.bolge || curUser.bolge === '—' || curUser.bolge === r.name; }
 
   function applyPerms(){
-    document.querySelectorAll('.nav-item[data-screen], .sub-item[data-screen]').forEach(el => { el.style.display = screenAllowed(el.dataset.screen) ? '' : 'none'; });
-    [['navTanimlamalar', 'subTanimlamalar'], ['navIslemler', 'subIslemler'], ['navKullanicilar', 'subKullanicilar'], ['navRaporlar', 'subRaporlar']].forEach(([n, s]) => {
-      const sub = $id(s), any = [...sub.querySelectorAll('.sub-item')].some(x => x.style.display !== 'none');
-      $id(n).style.display = any ? '' : 'none'; sub.style.display = any ? '' : 'none';
+    document.querySelectorAll('.sidebar .nav-item[data-screen]').forEach(el => { el.style.display = screenAllowed(el.dataset.screen) ? '' : 'none'; });
+    const coOk = can('orders'); $id('navCO').style.display = coOk ? '' : 'none';
+    document.querySelectorAll('.sidebar .nav-fold').forEach(f => { f.style.display = [...f.querySelectorAll('.nav-item[data-screen]')].some(x => x.style.display !== 'none') ? '' : 'none'; });
+    document.querySelectorAll('.sidebar .nav-sec').forEach(sec => {
+      const vis = [...sec.querySelectorAll('.nav-item[data-screen], #navCO')].some(x => x.style.display !== 'none' && (!x.closest('.nav-fold') || x.closest('.nav-fold').style.display !== 'none'));
+      sec.style.display = vis ? '' : 'none';
     });
+    $id('custLockCard').style.display = can('settings') ? '' : 'none';
+    if(curUser){ $id('sbAv').textContent = (curUser.ad || '?').trim().charAt(0).toLocaleUpperCase('tr-TR') || '?'; $id('sbUserName').textContent = curUser.ad; $id('sbUserRole').textContent = curUser.gorev + ' · ' + (RT.local ? 'Yerel mod' : 'Canlı bağlantı'); }
+    try{ custLockRender(); }catch(e){}
     $id('btnCO').style.display = can('orders') ? '' : 'none';
     $id('btnKitchen').style.display = canAny(['kitchen', 'kitchenView']) ? '' : 'none';
     const kOnly = !!curUser && !curUser.admin && screenAllowed('mutfak') && !Object.keys(SCR_PERM).filter(k => k !== 'mutfak').some(screenAllowed);
@@ -5532,6 +5563,63 @@ ${st('M50 58c-5-6 5-10 0-17', 0)}${st('M60 56c-5-7 5-11 0-19', 1.05)}${st('M70 5
       if(first){ const im = document.createElement('img'); im.src = first; im.style.cssText = 'display:block;margin-top:10px;max-width:220px;border-radius:10px'; o.appendChild(im); }
     }));
   })();
+
+
+  // =====================================================================
+  // MÜŞTERİ EKRANI ŞİFRESİ + YENİ KENAR MENÜ İŞLEVLERİ
+  // Not: şifre kapısı arayüz düzeyindedir (menüyü yalnızca masadakilere göstermek / sahte siparişi azaltmak için); veritabanı kuralı değildir.
+  // =====================================================================
+  const custHashOf = pw => sha256('seyirmusteri|' + pw);
+  const CU_KEY = 'seyirCustOK'; let custOKmem = '', custFails = 0, custLockUntil = 0;
+  function custPwHash(){ if(pubData) return pubData.custPw || ''; return (typeof RT !== 'undefined' && RT.local && settings.custPw) ? custHashOf(settings.custPw) : ''; }
+  function custGateNeeded(){
+    const h = custPwHash(); if(!h) return false;
+    let ok = custOKmem; try{ ok = localStorage.getItem(CU_KEY) || ok; }catch(e){}
+    return ok !== h;
+  }
+  function ensureGate(){
+    let g = $id('custGate'); if(g) return g;
+    g = document.createElement('div'); g.id = 'custGate';
+    g.innerHTML = '<div class="cg-box"><div class="cg-logo" id="cgLogo"></div><h2>' + esc(settings.restName || 'Menü') + '</h2><p>Menüyü görmek için masanızdaki şifreyi girin.</p><input id="cgPw" type="password" inputmode="text" autocomplete="off" placeholder="Şifre"><div class="cg-err" id="cgErr"></div><button class="go" id="cgGo" type="button">Menüyü Aç</button></div>';
+    document.body.appendChild(g);
+    try{ $id('cgLogo').innerHTML = $id('cLogo').innerHTML; }catch(e){}
+    $id('cgLogo').addEventListener('click', () => onLogoTap());   // personel girişi: logoya 4 dokunuş
+    const go = () => {
+      const err = $id('cgErr'), now = Date.now();
+      if(now < custLockUntil){ err.textContent = Math.ceil((custLockUntil - now) / 1000) + ' sn bekleyin.'; return; }
+      const v = $id('cgPw').value.trim(), h = custPwHash(); if(!v) return;
+      if(custHashOf(v) === h){ custOKmem = h; try{ localStorage.setItem(CU_KEY, h); }catch(e){} custFails = 0; $id('cgPw').value = ''; err.textContent = ''; renderCustomer(); }
+      else{ custFails++; if(custFails >= 5){ custFails = 0; custLockUntil = Date.now() + 30000; err.textContent = 'Çok fazla deneme. 30 sn bekleyin.'; } else err.textContent = 'Şifre hatalı.'; $id('cgPw').select(); }
+    };
+    $id('cgGo').addEventListener('click', go); $id('cgPw').addEventListener('keydown', e => { if(e.key === 'Enter') go(); });
+    return g;
+  }
+  function showCustGate(){ const g = ensureGate(); g.classList.add('show'); document.body.classList.add('cust-locked'); }
+  function hideCustGate(){ const g = $id('custGate'); if(g) g.classList.remove('show'); document.body.classList.remove('cust-locked'); }
+
+  function custLockRender(){
+    const on = !!settings.custPw, c = $id('custLockCard'); if(!c) return;
+    c.classList.toggle('on', on); $id('clIc').textContent = on ? '🔒' : '🔓';
+    $id('clState').textContent = on ? 'Korumalı · müşteri şifre girer' : 'Kapalı · menü herkese açık';
+    $id('clAct').textContent = on ? 'Değiştir' : 'Ayarla';
+  }
+  function openCustPw(){
+    if(!can('settings')){ showToast('Bu işlem için yetkiniz yok.'); return; }
+    const bg = document.createElement('div'); bg.className = 'modal-bg show'; bg.style.zIndex = 3000;
+    bg.innerHTML = '<div class="modal-box" role="dialog" aria-modal="true"><h3 style="margin:0 0 4px">🔒 Müşteri ekranı şifresi</h3><p style="margin:0 0 12px;font-size:.84rem;color:var(--ink-dim);line-height:1.45">Şifre belirlerseniz müşteriler QR ile menüyü açtığında önce bu şifreyi girer. Şifreyi masalara yazabilir veya garsonlarla paylaşabilirsiniz. Şifreyi değiştirdiğinizde herkesten yeniden istenir.</p><div style="display:flex;gap:6px"><input id="cpIn" type="text" maxlength="24" autocomplete="off" placeholder="En az 3 karakter" style="flex:1"><button class="btn-mini" id="cpRnd" type="button">🎲 Rastgele</button></div><div id="cpErr" style="color:var(--red);font-size:.82rem;min-height:18px;margin-top:6px"></div><div style="display:flex;gap:8px;margin-top:6px"><button class="btn-save" id="cpSave" style="margin:0;flex:1">Kaydet</button>' + (settings.custPw ? '<button class="btn-save" id="cpOff" style="margin:0;flex:1;background:var(--ink-faint)">Şifreyi Kaldır</button>' : '') + '<button class="btn-save" id="cpNo" style="margin:0;flex:1;background:var(--ink-faint)">Kapat</button></div></div>';
+    document.body.appendChild(bg); const inp = bg.querySelector('#cpIn'); inp.value = settings.custPw || ''; setTimeout(() => inp.focus(), 30);
+    const done = () => bg.remove();
+    bg.querySelector('#cpNo').onclick = done; bg.addEventListener('click', e => { if(e.target === bg) done(); });
+    bg.querySelector('#cpRnd').onclick = () => { const w = 'ABCDEFGHJKLMNPRSTUVYZ', n = '23456789'; inp.value = w[Math.random() * w.length | 0] + w[Math.random() * w.length | 0] + n[Math.random() * n.length | 0] + n[Math.random() * n.length | 0] + n[Math.random() * n.length | 0]; };
+    const save = () => { const v = inp.value.trim(); if(v.length < 3){ bg.querySelector('#cpErr').textContent = 'En az 3 karakter girin.'; return; } settings.custPw = v; finish('Müşteri ekranı şifresi kaydedildi.'); };
+    const finish = m => { custLockRender(); publishPublic(); saveState(); showToast(m); done(); };
+    bg.querySelector('#cpSave').onclick = save; inp.addEventListener('keydown', e => { if(e.key === 'Enter') save(); });
+    const off = bg.querySelector('#cpOff'); if(off) off.onclick = () => { settings.custPw = ''; finish('Şifre kaldırıldı: menü herkese açık.'); };
+  }
+  $id('custLockCard').addEventListener('click', openCustPw);
+  $id('navCO').addEventListener('click', () => { $id('sidebar').classList.remove('open'); $id('btnCO').click(); });
+  $id('sbLogout').addEventListener('click', () => $id('btnLogout').click());
+  setInterval(() => { [['coBadge', 'sbCO'], ['kBadge', 'sbK']].forEach(([a, b]) => { const x = $id(a), y = $id(b); if(x && y){ y.textContent = x.textContent; y.classList.toggle('on', x.classList.contains('on')); } }); if(staffMode) custLockRender(); }, 1000);
 
   smFullApply('siparis-masa');
   bootApp();
