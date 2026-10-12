@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
+<style>html.restoring #customerView{display:none!important}</style><script>try{if(sessionStorage.getItem('seyirUser')){document.documentElement.classList.add('restoring');setTimeout(function(){document.documentElement.classList.remove('restoring')},10000)}}catch(e){}</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="build" content="20261013-2">
@@ -1523,7 +1524,7 @@ button,input,select,textarea{ font-family:inherit; }
   </div>
   <div class="modal-bg" id="loginModal"><div class="modal-box">
     <h3 style="margin:0;">Personel Girişi</h3>
-    <input id="loginName" type="text" placeholder="İsim (yönetici PIN'i için boş bırakın)" autocomplete="username" autocapitalize="words">
+    <input id="loginName" type="text" placeholder="İsim (yönetici: boş bırakın veya Yönetici yazın)" autocomplete="username" autocapitalize="words">
     <input id="loginPass" type="password" placeholder="Şifre" autocomplete="current-password">
     <div id="loginErr" style="color:var(--red);font-size:.85rem;min-height:18px;"></div>
     <div style="display:flex;gap:8px;"><button class="btn-save" id="loginOk" style="margin:0;">Giriş</button><button class="btn-save" id="loginCancel" style="margin:0;background:var(--ink-faint);">Vazgeç</button></div>
@@ -1747,7 +1748,6 @@ button,input,select,textarea{ font-family:inherit; }
         <div class="screen" id="screen-users">
           <div class="panel-card">
             <div class="panel-head"><div class="pi">👥</div><div><h2>Kullanıcılar</h2><p>Kayıtlı kullanıcılar</p></div></div>
-            <div id="legacyBox" style="margin:0 0 10px;font-size:.85rem;color:var(--ink-faint);"></div>
             <div class="plist" id="usersList">
               
             </div>
@@ -2345,6 +2345,7 @@ button,input,select,textarea{ font-family:inherit; }
     document.querySelectorAll('.sidebar .nav-item[data-screen="' + name + '"]').forEach(n => { n.classList.add('active'); const f = n.closest('.nav-fold'); if(f) f.classList.add('open'); const ac = n.closest('.nav-acc'); if(ac) accOpen(ac); });
     if(name === 'urunler'){ try{ renderCatList(); renderProductGrid(); }catch(e){} }
     if(typeof onScreen === 'function') onScreen(name);
+    try{ if(document.body.classList.contains('staff')) sessionStorage.setItem('seyirScreen', name); }catch(e){}
   }
   document.querySelectorAll('[data-screen]').forEach(el => {
     el.addEventListener('click', (e) => {
@@ -3970,7 +3971,7 @@ button,input,select,textarea{ font-family:inherit; }
   $id('loginOk').addEventListener('click', () => tryLogin());
   $id('loginPass').addEventListener('keydown', e => { if(e.key === 'Enter') tryLogin(); });
   $id('loginName').addEventListener('keydown', e => { if(e.key === 'Enter') $id('loginPass').focus(); });
-  $id('btnLogout').addEventListener('click', async () => { try{ if(curUser && curUser.uid && RT.staffLogout) await RT.staffLogout(); }catch(e){} sessionStorage.removeItem('seyirUser'); sessionStorage.removeItem('seyirStaff'); location.reload(); });
+  $id('btnLogout').addEventListener('click', async () => { try{ if(curUser && curUser.uid && RT.staffLogout) await RT.staffLogout(); }catch(e){} sessionStorage.removeItem('seyirUser'); sessionStorage.removeItem('seyirStaff'); sessionStorage.removeItem('seyirScreen'); location.reload(); });
 
   // ---------------- GARSON: gelen müşteri siparişleri ----------------
   let coData = {}, coSeen = new Set(), coFirst = true, kitchenData = {}, kSeen = new Set(), kFirst = true, lastPub = '';
@@ -4028,7 +4029,7 @@ button,input,select,textarea{ font-family:inherit; }
       kFirst = false; markSync(); renderKitchen(); try{ renderSmTableGrid(); renderTableGrid(); }catch(e){}
     });
     startStateSync(); publishPublic(); setInterval(publishPublic, 3000);
-    applyPerms(); goHome();
+    applyPerms(); goLastScreen();
   }
   // ======================================================================
   // BÖLÜM 2 — roller/yetkiler, paket & gel-al adisyonları, mutfak grupları,
@@ -4098,6 +4099,12 @@ button,input,select,textarea{ font-family:inherit; }
     if(kOnly) keepAwake();
     if($id('rtMode') && curUser) $id('rtMode').textContent = '👤 ' + curUser.ad + ' · ' + curUser.gorev + '   ' + (RT.local ? '● Yerel mod' : '● Canlı');
   }
+  // sayfa yenilenince kalınan ekrana dön (sipariş/adisyon ekranı bağlam istediği için hariç)
+  function goLastScreen(){
+    let n = null; try{ n = sessionStorage.getItem('seyirScreen'); }catch(e){}
+    if(n && n !== 'order' && document.getElementById('screen-' + n) && screenAllowed(n)){ showScreen(n); if(n === 'siparis-masa'){ try{ renderSiparisMasa(); }catch(e){} } }
+    else goHome();
+  }
   function goHome(){
     const first = ['home', 'siparis-masa', 'paketler', 'mutfak'].find(screenAllowed);
     if(first){ showScreen(first); if(first === 'siparis-masa') renderSiparisMasa(); }
@@ -4164,6 +4171,7 @@ button,input,select,textarea{ font-family:inherit; }
     const m = { 'ç': 'c', 'ğ': 'g', 'ı': 'i', 'İ': 'i', 'ö': 'o', 'ş': 's', 'ü': 'u', 'Ç': 'c', 'Ğ': 'g', 'Ö': 'o', 'Ş': 's', 'Ü': 'u', 'I': 'i' };
     return String(s || '').replace(/[çğıİöşüÇĞÖŞÜI]/g, ch => m[ch]).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 40);
   }
+  function endRestoring(){ document.documentElement.classList.remove('restoring'); }
   function staffEmail(n, v){ return n + (v > 1 ? '.' + v : '') + '@personel.seyir'; }
   const pwHash = s => sha256('seyir|' + s);
   const pinOK = pw => !!pw && !!settings.pin && (settings.pin === pwHash(pw) || settings.pin === pw);
@@ -4251,7 +4259,7 @@ button,input,select,textarea{ font-family:inherit; }
           else known = !!r.known;
         }
         // 2) eski yol (geçiş dönemi): yalnızca şifresi henüz taşınmamış kişiler ve yönetici PIN doğrulaması
-        if(!user && (!nmN || (legacyOn && !known))){
+        if(!user && nmN && (nmN === 'yonetici' || (legacyOn && !known))){
           const hh = pwHash(pw), mt = x => !x.uid && (!nmN || normName(x.ad) === nmN) && ((x.h && x.h === hh) || (x.sifre && x.sifre === pw));
           const u = legacyOn ? staffUsers.find(x => !x.blocked && mt(x)) : null;
           if(u){ if(u.sifre){ u.h = pwHash(pw); delete u.sifre; } user = { ad: u.ad, gorev: u.gorev, bolge: u.bolge || '', admin: false, h: u.h }; }
@@ -4295,7 +4303,7 @@ button,input,select,textarea{ font-family:inherit; }
         else err.textContent = LOGIN_GEN;
         return;
       }
-      loginFails = 0; curUser = user; sessionStorage.setItem('seyirUser', JSON.stringify(user));
+      loginFails = 0; curUser = user; sessionStorage.setItem('seyirUser', JSON.stringify(user)); sessionStorage.removeItem('seyirScreen');
       $id('loginModal').classList.remove('show'); $id('loginPass').value = ''; if($id('loginName')) $id('loginName').value = ''; enterStaff(); saveState();
     } finally { loginBusy = false; }
   }
@@ -4328,6 +4336,7 @@ button,input,select,textarea{ font-family:inherit; }
       }
       curUser = u; enterStaff();
     }catch(e){ console.error(e); }
+    finally{ if(!curUser) endRestoring(); }
   }
   async function remoteStaff0(h){ try{ return await RT.get(SD + h); }catch(e){ return null; } }
 
@@ -4825,33 +4834,14 @@ ${st('M50 58c-5-6 5-10 0-17', 0)}${st('M60 56c-5-7 5-11 0-19', 1.05)}${st('M70 5
         Object.assign(u, { uid: id, v: x.v || 1, ad: x.ad, gorev: x.gorev, bolge: x.bolge || '', blocked: x.blocked === true }); delete u.h; delete u.sifre;
       });
       staffUsers = staffUsers.filter(u => u.uid ? !!r[u.uid] : !staffUsers.some(o => o.uid && normName(o.ad) === normName(u.ad)));
-      try{ legacyOffCache = (await RT.get('staffMeta/legacyOff')) === true; }catch(e){}
       renderUsers(); saveState();
     }catch(e){ console.error('staffRoles okunamadı:', e); }
   }
-  function renderLegacyBox(){
-    const el = $id('legacyBox'); if(!el) return;
-    if(RT.local || !(RT.isAdmin && RT.isAdmin())){ el.innerHTML = ''; return; }
-    const left = staffUsers.filter(u => !u.uid).length, off = legacyOffCache === true;
-    el.innerHTML = '<b>Giriş yolu:</b> ' + (off ? 'eski yol KAPALI' : 'geçiş dönemi (eski yol açık)') + (left && !off ? ' · şifresi belirlenmemiş: ' + left + ' kişi (“Şifre” ile belirleyin)' : '') + ' · <span class="link-btn" id="btnLegacyToggle">' + (off ? 'Eski yolu aç' : 'Eski yolu kapat') + '</span>';
-  }
-  $id('legacyBox').addEventListener('click', async e => {
-    if(e.target.id !== 'btnLegacyToggle' || !can('users')) return;
-    const off = legacyOffCache === true;
-    if(!off){
-      const left = staffUsers.filter(u => !u.uid);
-      if(left.length){ showToast('Önce şifrelerini belirleyin: ' + left.map(u => u.ad).join(', ')); return; }
-      if(!await uiConfirm('Eski giriş yolu (ortak Firebase şifresi) kapatılsın mı? Taşınmamış kimse kalmadı.')) return;
-    }
-    try{ await RT.set('staffMeta/legacyOff', !off); legacyOffCache = !off; renderLegacyBox(); showToast(off ? 'Eski yol açıldı.' : 'Eski yol kapatıldı. Rules Aşama 2’yi yayınlayarak kesin kapatın.'); }
-    catch(err){ showToast('Yazılamadı: ' + fbErr(err)); }
-  });
   function fillBolge(){ const cur = $id('selBolge').value; $id('selBolge').innerHTML = '<option>—</option>' + regions.map(r => '<option>' + esc(r.name) + '</option>').join(''); if(cur) $id('selBolge').value = cur; }
   function renderUsers(){
     $id('usersList').innerHTML = staffUsers.map((u, i) => '<div class="prow" style="flex-wrap:wrap;gap:4px;"><span class="pic">👤</span><div class="pmain" style="flex:1;min-width:150px;"><b>' + esc(u.ad) + (u.blocked ? ' <span class="badge">Engelli</span>' : '') + (!RT.local && !u.uid ? ' <span class="badge">Eski giriş</span>' : '') + '</b><span>' + esc(u.gorev) + (u.bolge && u.bolge !== '—' ? ' · ' + esc(u.bolge) : '') + (u.tel ? ' · ' + esc(u.tel) : '') + '</span></div>' +
       '<span class="link-btn" data-ua="role" data-i="' + i + '">Görev</span><span class="link-btn" data-ua="pw" data-i="' + i + '">Şifre</span><span class="link-btn" data-ua="blk" data-i="' + i + '">' + (u.blocked ? 'Engeli kaldır' : 'Engelle') + '</span><span class="link-btn" data-ua="del" data-i="' + i + '">🗑</span></div>').join('') ||
       '<p style="color:var(--ink-faint);padding:8px;">Kullanıcı yok. Yönetici girişi için Ayarlar’daki Yönetici PIN kullanılır.</p>';
-    renderLegacyBox();
   }
   $id('usersList').addEventListener('click', async e => {
     const b = e.target.closest('[data-ua]'); if(!b || !can('users')) return;
@@ -4882,6 +4872,7 @@ ${st('M50 58c-5-6 5-10 0-17', 0)}${st('M60 56c-5-7 5-11 0-19', 1.05)}${st('M70 5
     const fb = !RT.local && !!RT.createStaff, minL = fb ? 6 : 4;
     if(!ad || !sifre){ fail('Ad Soyad ve Şifre zorunludur.'); return; }
     if(!normName(ad)){ fail('İsim en az bir harf veya rakam içermeli.'); return; }
+    if(normName(ad) === 'yonetici'){ fail('Bu isim yönetici için ayrılmış, başka bir isim yazın.'); return; }
     if(sifre.length < minL){ fail('Şifre en az ' + minL + ' karakter olmalı' + (fb ? ' (Firebase hesabı için gerekli).' : '.')); return; }
     if(staffUsers.some(u => normName(u.ad) === normName(ad))){ fail('Bu isimde bir kullanıcı var.'); return; }
     if(pinOK(sifre)){ fail('Şifre yönetici PIN\'i ile aynı olamaz.'); return; }
@@ -5432,13 +5423,13 @@ ${st('M50 58c-5-6 5-10 0-17', 0)}${st('M60 56c-5-7 5-11 0-19', 1.05)}${st('M70 5
   const _enterStaff = enterStaff;
   enterStaff = function(){
     if(staffMode) return;
-    if(RT.local || !RT.staffAuth){ dirReady = true; _enterStaff(); return; }
+    if(RT.local || !RT.staffAuth){ dirReady = true; _enterStaff(); endRestoring(); return; }
     RT.staffAuth(!!(curUser && curUser.admin)).then(async ok => {
-      if(!ok){ curUser = null; sessionStorage.removeItem('seyirUser'); showToast('Firebase personel girişi gerekli.'); return; }
+      if(!ok){ curUser = null; sessionStorage.removeItem('seyirUser'); showToast('Firebase personel girişi gerekli.'); endRestoring(); return; }
       if(curUser && curUser.admin) await pullStaffDir();
       watchRole();
       if(!adminDev()){ PRIV_KEYS.forEach(k => privSet(k, k === 'closedAt' ? 0 : [])); try{ localStorage.removeItem('seyirCancelLog'); }catch(_){} lastSaved = ''; saveState(); }
-      _enterStaff();
+      _enterStaff(); endRestoring();
     });
   };
   // 1) İptal: neden + yönetici PIN'i + kayıt
