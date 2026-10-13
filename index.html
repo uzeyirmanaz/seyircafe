@@ -4090,6 +4090,7 @@ button,input,select,textarea{ font-family:inherit; }
       sec.style.display = vis ? '' : 'none';
     });
     $id('custLockCard').style.display = can('settings') ? '' : 'none';
+    { const pf = $id('setPin') && $id('setPin').closest('.field'); if(pf) pf.style.display = (curUser && curUser.admin) ? '' : 'none'; }
     if(curUser){ $id('sbAv').textContent = (curUser.ad || '?').trim().charAt(0).toLocaleUpperCase('tr-TR') || '?'; $id('sbUserName').textContent = curUser.ad; $id('sbUserRole').textContent = curUser.gorev + ' · ' + (RT.local ? 'Yerel mod' : 'Canlı bağlantı'); }
     try{ custLockRender(); }catch(e){}
     $id('btnCO').style.display = can('orders') ? '' : 'none';
@@ -5542,6 +5543,7 @@ ${st('M50 58c-5-6 5-10 0-17', 0)}${st('M60 56c-5-7 5-11 0-19', 1.05)}${st('M70 5
   ['urunFrom', 'urunTo'].forEach(i => $id(i).addEventListener('change', () => renderReports()));
   ['fireFrom', 'fireTo'].forEach(i => $id(i).addEventListener('change', renderFire));
   $id('btnGuncelle').addEventListener('click', () => {
+    if(!(curUser && curUser.admin)){ showToast('Yönetici PIN\'ini yalnızca yönetici değiştirebilir.'); return; }
     const p = $id('setPin').value.trim(); if(!p) return;
     if(p.length < 4 || /\s/.test(p)){ showToast('PIN en az 4 karakter olmalı, boşluk içermemeli.'); return; }
     if(staffUsers.some(u => (u.h && u.h === pwHash(p)) || (u.sifre && u.sifre === p))){ showToast('Bu şifre bir personelde kullanılıyor, farklı bir PIN seçin.'); return; }
