@@ -1725,6 +1725,8 @@ button,input,select,textarea{ font-family:inherit; }
               <div class="field"><label>İlk adisyon numarası</label><div class="val" id="setFirstOrderNo" contenteditable="true">101</div></div>
               <div class="field"><label>Wi-Fi adı (müşteri menüsündeki Wi-Fi butonu)</label><div class="val" id="setWifiName" contenteditable="true"></div></div>
               <div class="field"><label>Wi-Fi şifresi (butona dokununca kopyalanır)</label><div class="val" id="setWifiPass" contenteditable="true"></div></div>
+              <div class="field" id="ownerPwField"><label>Şifremi değiştir (Yönetici hesabı; yeni şifre en az 6 karakter)</label><input type="password" class="val" id="ownerOldPw" autocomplete="current-password" placeholder="Eski şifre" style="width:100%;border:0;background:transparent;font:inherit;color:inherit"><input type="password" class="val" id="ownerNewPw" autocomplete="new-password" placeholder="Yeni şifre" style="width:100%;border:0;background:transparent;font:inherit;color:inherit;margin-top:6px"><button class="btn-update" id="btnOwnerPw" style="margin-top:8px;">🔑 Şifremi değiştir</button></div>
+              <div class="field" id="ownerAccField"><label>Yönetici hesabı (Firebase) — şifre belirle / sıfırla (en az 6 karakter; Yönetici girişi: isim "Yönetici" + bu şifre)</label><input type="password" class="val" id="setOwnerPw" autocomplete="new-password" placeholder="Yönetici için yeni şifre" style="width:100%;border:0;background:transparent;font:inherit;color:inherit"><button class="btn-update" id="btnOwnerAcc" style="margin-top:8px;">🔑 Yönetici hesabını kaydet</button></div>
               <div class="field" id="supPinField"><label>Admin PIN (yalnızca Admin değiştirir; en az 6 karakter. Giriş: isim "Admin")</label><input type="password" class="val" id="setSupPin" autocomplete="new-password" placeholder="Admin PIN'i belirlemek/değiştirmek için yazın" style="width:100%;border:0;background:transparent;font:inherit;color:inherit"></div>
               <div class="field"><label>Yönetici PIN (personel girişi, bu cihaz)</label><input type="password" class="val" id="setPin" autocomplete="new-password" placeholder="Değiştirmek için yeni PIN yazın (en az 4 hane)" style="width:100%;border:0;background:transparent;font:inherit;color:inherit"></div>
             </div>
@@ -3742,7 +3744,7 @@ button,input,select,textarea{ font-family:inherit; }
       const B = 'https://www.gstatic.com/firebasejs/11.10.0/'; window.__fbB = B;
       const { initializeApp } = await import(B + 'firebase-app.js');
       const { getDatabase, ref, set, push, onValue, remove, get } = await import(B + 'firebase-database.js');
-      const { getAuth, signInAnonymously, signInWithEmailAndPassword, signOut, createUserWithEmailAndPassword } = await import(B + 'firebase-auth.js');
+      const { getAuth, signInAnonymously, signInWithEmailAndPassword, signOut, createUserWithEmailAndPassword, updatePassword, reauthenticateWithCredential, EmailAuthProvider } = await import(B + 'firebase-auth.js');
       const app = initializeApp(c), db = getDatabase(app), auth = getAuth(app); window.__fbApp = app;
       if(auth.authStateReady) await auth.authStateReady();
       if(!auth.currentUser) await signInAnonymously(auth);
@@ -3751,9 +3753,12 @@ button,input,select,textarea{ font-family:inherit; }
       const rtErr = (op, p, e) => { const c = (e && e.code) || 'hata'; console.error('Firebase ' + op + ' hatası (' + p + '):', c); const k = op + p + c; if(_rtSeen[k] && Date.now() - _rtSeen[k] < 60000) return; _rtSeen[k] = Date.now();
         try{ showToast('⚠ Senkron ' + op + ' hatası: ' + p.split('/')[0] + ' (' + c + ')' + (/permission/i.test(c) ? ' — bu cihaz Firebase personel hesabıyla bağlı değil veya kurallar eşleşmiyor' : '')); }catch(_){} };
       const isAdminAcc = () => !!(auth.currentUser && !auth.currentUser.isAnonymous && (auth.currentUser.email || '').toLowerCase() === FIREBASE_ADMIN_EMAIL.toLowerCase());
+      let ownerUid = null;   // Yönetici (işletme sahibi) hesabının uid'si; yalnızca giriş/oturum geri yükleme sırasında işaretlenir
+      const isOwnerAcc = () => !!(ownerUid && auth.currentUser && !auth.currentUser.isAnonymous && auth.currentUser.uid === ownerUid);
+      const isAdminAny = () => isAdminAcc() || isOwnerAcc();
       const staffAuth = async (needAdmin) => {
         if(auth.currentUser && !auth.currentUser.isAnonymous){
-          if(!needAdmin || isAdminAcc()) return true;
+          if(!needAdmin || isAdminAny()) return true;
           try{ await signOut(auth); await signInAnonymously(auth); }catch(e){}
         }
         let err = needAdmin ? 'Yönetici girişi için yönetici Firebase hesabını girin.' : '';
@@ -3768,7 +3773,7 @@ button,input,select,textarea{ font-family:inherit; }
       };
       // ---- isim + şifre ile personel girişi (sentetik e-posta; personel e-postayı görmez) ----
       const uid = () => (auth.currentUser && !auth.currentUser.isAnonymous) ? auth.currentUser.uid : null;
-      const toAnon = async () => { try{ await signOut(auth); await signInAnonymously(auth); }catch(e){} };
+      const toAnon = async () => { ownerUid = null; try{ await signOut(auth); await signInAnonymously(auth); }catch(e){} };
       const staffLogin = async (name, pw) => {
         const n = normName(name); if(!n) return { code: 'bad', known: false };
         let v = 1, known = false;
@@ -3778,6 +3783,7 @@ button,input,select,textarea{ font-family:inherit; }
           let role = null; try{ role = await get(ref(db, 'staffRoles/' + cr.user.uid)).then(s => s.val()); }catch(e){}
           if(!role || !role.ad){ await toAnon(); return { code: 'bad', known: true }; }
           if(role.blocked === true){ await toAnon(); return { code: 'blocked' }; }
+          ownerUid = role.owner === true ? cr.user.uid : null;
           return { code: 'ok', uid: cr.user.uid, role };
         }catch(e){
           const c = (e && e.code) || '';
@@ -3787,6 +3793,13 @@ button,input,select,textarea{ font-family:inherit; }
         }
       };
       const staffLogout = () => toAnon();
+      const changePassword = async (oldPw, newPw) => {
+        const u = auth.currentUser; if(!u || u.isAnonymous || !u.email) return { code: 'bad' };
+        try{ await reauthenticateWithCredential(u, EmailAuthProvider.credential(u.email, oldPw)); }
+        catch(e){ const c = (e && e.code) || ''; return { code: c === 'auth/too-many-requests' ? 'limit' : c === 'auth/network-request-failed' ? 'net' : 'wrong' }; }
+        try{ await updatePassword(u, newPw); return { code: 'ok' }; }
+        catch(e){ return { code: (e && e.code) === 'auth/weak-password' ? 'weak' : 'err' }; }
+      };
       let secApp = null;
       const createStaff = async (email, pw) => {
         if(!secApp) secApp = initializeApp(c, 'seyirSec');
@@ -3796,7 +3809,7 @@ button,input,select,textarea{ font-family:inherit; }
       };
       const clean = v => (v === null ? null : JSON.parse(JSON.stringify(v)));
       RT = {
-        local: false, staffAuth, isAdmin: isAdminAcc, uid, staffLogin, staffLogout, createStaff,
+        local: false, staffAuth, isAdmin: isAdminAny, isRoot: isAdminAcc, changePassword, setOwner: u => { ownerUid = u || null; }, uid, staffLogin, staffLogout, createStaff,
         set: (p, v) => set(ref(db, p), clean(v)).catch(e => { rtErr('yazma', p, e); throw e; }),
         push: (p, v) => { const r = push(ref(db, p)); set(r, clean(v)).catch(e => rtErr('yazma', p, e)); return r.key; },
         remove: p => remove(ref(db, p)).catch(e => { rtErr('silme', p, e); throw e; }),
@@ -4082,6 +4095,7 @@ button,input,select,textarea{ font-family:inherit; }
   function uname(){ return curUser ? curUser.ad : ''; }
   function regionAllowed(r){ return !curUser || curUser.admin || !curUser.bolge || curUser.bolge === '—' || curUser.bolge === r.name; }
 
+  const roleLabel = u => u.sup ? 'Admin' : u.admin ? 'Yönetici' : u.gorev;
   function applyPerms(){
     document.querySelectorAll('.sidebar .nav-item[data-screen]').forEach(el => { el.style.display = screenAllowed(el.dataset.screen) ? '' : 'none'; });
     const coOk = can('orders'); $id('navCO').style.display = coOk ? '' : 'none';
@@ -4091,16 +4105,18 @@ button,input,select,textarea{ font-family:inherit; }
       sec.style.display = vis ? '' : 'none';
     });
     $id('custLockCard').style.display = can('settings') ? '' : 'none';
-    { const pf = $id('setPin') && $id('setPin').closest('.field'); if(pf) pf.style.display = (curUser && curUser.admin) ? '' : 'none';
+    { const pf = $id('setPin') && $id('setPin').closest('.field'); if(pf) pf.style.display = (curUser && curUser.admin && !curUser.owner) ? '' : 'none';
+      const op = $id('ownerPwField'); if(op) op.style.display = (curUser && curUser.owner && !RT.local) ? '' : 'none';
+      const of = $id('ownerAccField'); if(of) of.style.display = (curUser && curUser.sup && !RT.local) ? '' : 'none';
       const sf = $id('supPinField'); if(sf) sf.style.display = (curUser && curUser.admin && !RT.local && (curUser.sup || (!supExists && !isHash(settings.supPin)))) ? '' : 'none'; }
-    if(curUser){ $id('sbAv').textContent = (curUser.ad || '?').trim().charAt(0).toLocaleUpperCase('tr-TR') || '?'; $id('sbUserName').textContent = curUser.ad; $id('sbUserRole').textContent = curUser.gorev + ' · ' + (RT.local ? 'Yerel mod' : 'Canlı bağlantı'); }
+    if(curUser){ $id('sbAv').textContent = (curUser.ad || '?').trim().charAt(0).toLocaleUpperCase('tr-TR') || '?'; $id('sbUserName').textContent = curUser.ad; $id('sbUserRole').textContent = roleLabel(curUser) + ' · ' + (RT.local ? 'Yerel mod' : 'Canlı bağlantı'); }
     try{ custLockRender(); }catch(e){}
     $id('btnCO').style.display = can('orders') ? '' : 'none';
     $id('btnKitchen').style.display = canAny(['kitchen', 'kitchenView']) ? '' : 'none';
     const kOnly = !!curUser && !curUser.admin && screenAllowed('mutfak') && !Object.keys(SCR_PERM).filter(k => k !== 'mutfak').some(screenAllowed);
     document.body.classList.toggle('kitchen-only', kOnly);
     if(kOnly) keepAwake();
-    if($id('rtMode') && curUser) $id('rtMode').textContent = '👤 ' + curUser.ad + ' · ' + curUser.gorev + '   ' + (RT.local ? '● Yerel mod' : '● Canlı');
+    if($id('rtMode') && curUser) $id('rtMode').textContent = '👤 ' + curUser.ad + ' · ' + roleLabel(curUser) + '   ' + (RT.local ? '● Yerel mod' : '● Canlı');
   }
   // sayfa yenilenince kalınan ekrana dön (sipariş/adisyon ekranı bağlam istediği için hariç)
   function goLastScreen(){
@@ -4203,7 +4219,7 @@ button,input,select,textarea{ font-family:inherit; }
     return dir;
   }
   function syncStaffDir(){
-    if(RT.local || !dirReady || !(curUser && curUser.admin) || (RT.isAdmin && !RT.isAdmin())) return;
+    if(RT.local || !dirReady || !(curUser && curUser.admin) || (RT.isRoot && !RT.isRoot())) return;
     const dir = buildDir(), sig = JSON.stringify(dir); if(sig === lastDirSig) return;
     lastDirSig = sig;
     Promise.resolve().then(async () => {
@@ -4263,7 +4279,7 @@ button,input,select,textarea{ font-family:inherit; }
         if(nmN && RT.staffLogin){
           err.textContent = 'Kontrol ediliyor…';
           const r = await RT.staffLogin(nm, pw.trim()); err.textContent = '';
-          if(r.code === 'ok') user = { ad: r.role.ad, gorev: r.role.gorev, bolge: r.role.bolge || '', admin: false, uid: r.uid };
+          if(r.code === 'ok') user = { ad: r.role.ad, gorev: r.role.gorev, bolge: r.role.bolge || '', admin: r.role.owner === true, owner: r.role.owner === true, uid: r.uid };
           else if(r.code === 'blocked'){ err.textContent = 'Bu kullanıcının girişi engellenmiş.'; return; }
           else if(r.code === 'limit'){ err.textContent = 'Çok fazla deneme. Biraz bekleyin.'; return; }
           else if(r.code === 'net'){ err.textContent = 'İnternet bağlantısı yok.'; return; }
@@ -4323,19 +4339,20 @@ button,input,select,textarea{ font-family:inherit; }
   function watchRole(){
     if(!curUser || !curUser.uid || RT.local) return;
     RT.on('staffRoles/' + curUser.uid, v => {
-      if(!v || v.blocked === true){ try{ RT.staffLogout && RT.staffLogout(); }catch(e){} sessionStorage.removeItem('seyirUser'); showToast('Erişiminiz kapatıldı.'); setTimeout(() => location.reload(), 800); }
+      if(!v || v.blocked === true || (curUser && curUser.owner && v.owner !== true)){ try{ RT.staffLogout && RT.staffLogout(); }catch(e){} sessionStorage.removeItem('seyirUser'); showToast('Erişiminiz kapatıldı.'); setTimeout(() => location.reload(), 800); }
       else if(curUser){ curUser.gorev = v.gorev; curUser.bolge = v.bolge || ''; }
     });
   }
   async function restoreSession(){
     try{
       const u = JSON.parse(sessionStorage.getItem('seyirUser') || 'null'); if(!u) return;
-      if(!u.admin){
+      if(!u.admin || u.owner){
         if(u.uid){
           if(RT.local || !RT.uid || RT.uid() !== u.uid){ sessionStorage.removeItem('seyirUser'); return; }
           let r = null; try{ r = await RT.get('staffRoles/' + u.uid); }catch(e){}
           if(!r || r.blocked === true){ sessionStorage.removeItem('seyirUser'); try{ RT.staffLogout && RT.staffLogout(); }catch(e){} return; }
           u.ad = r.ad; u.gorev = r.gorev; u.bolge = r.bolge || '';
+          if(u.owner){ if(r.owner !== true){ sessionStorage.removeItem('seyirUser'); try{ RT.staffLogout && RT.staffLogout(); }catch(e){} return; } RT.setOwner && RT.setOwner(u.uid); }
         } else {
           const rec = staffUsers.find(x => x.ad === u.ad || (u.h && x.h === u.h));
           if(rec){ if(rec.blocked){ sessionStorage.removeItem('seyirUser'); return; } u.gorev = rec.gorev; u.bolge = rec.bolge || ''; }
@@ -4840,7 +4857,7 @@ ${st('M50 58c-5-6 5-10 0-17', 0)}${st('M60 56c-5-7 5-11 0-19', 1.05)}${st('M70 5
     try{
       const r = await RT.get('staffRoles') || {};
       Object.keys(r).forEach(id => {
-        const x = r[id]; if(!x || !x.ad) return;
+        const x = r[id]; if(!x || !x.ad || x.owner === true) return;
         let u = staffUsers.find(s => s.uid === id) || staffUsers.find(s => normName(s.ad) === normName(x.ad));
         if(!u){ u = { ad: x.ad, tel: '', email: '' }; staffUsers.push(u); }
         Object.assign(u, { uid: id, v: x.v || 1, ad: x.ad, gorev: x.gorev, bolge: x.bolge || '', blocked: x.blocked === true }); delete u.h; delete u.sifre;
@@ -5553,8 +5570,42 @@ ${st('M50 58c-5-6 5-10 0-17', 0)}${st('M60 56c-5-7 5-11 0-19', 1.05)}${st('M70 5
   $id('btnGsCsv').addEventListener('click', () => downloadFile('gun-sonu.csv', csvOf([['Kalem', 'Değer']].concat([...document.querySelectorAll('#screen-rapor-gunsonu .panel-card:first-child .prow')].map(r => [r.querySelector('b').textContent, r.querySelector('.pval').textContent])))));
   ['urunFrom', 'urunTo'].forEach(i => $id(i).addEventListener('change', () => renderReports()));
   ['fireFrom', 'fireTo'].forEach(i => $id(i).addEventListener('change', renderFire));
+  $id('btnOwnerPw').addEventListener('click', async () => {
+    if(!(curUser && curUser.owner) || RT.local || !RT.changePassword){ showToast('Bu işlem yalnızca Yönetici hesabı içindir.'); return; }
+    const o = $id('ownerOldPw').value, n = $id('ownerNewPw').value.trim();
+    if(!o){ showToast('Eski şifreyi yazın.'); return; }
+    if(n.length < 6 || /\s/.test(n)){ showToast('Yeni şifre en az 6 karakter olmalı, boşluk içermemeli.'); return; }
+    if(n === o){ showToast('Yeni şifre eskisinden farklı olmalı.'); return; }
+    const btn = $id('btnOwnerPw'); btn.disabled = true;
+    try{
+      const r = await RT.changePassword(o, n);
+      if(r.code === 'ok'){ $id('ownerOldPw').value = ''; $id('ownerNewPw').value = ''; showToast('Şifreniz değiştirildi.'); }
+      else showToast({ wrong: 'Eski şifre hatalı.', weak: 'Yeni şifre çok zayıf (en az 6 karakter).', limit: 'Çok fazla deneme, biraz bekleyin.', net: 'İnternet bağlantısı yok.' }[r.code] || 'Şifre değiştirilemedi, tekrar deneyin.');
+    } finally { btn.disabled = false; }
+  });
+  $id('btnOwnerAcc').addEventListener('click', async () => {
+    if(!(curUser && curUser.sup) || RT.local || !(RT.isRoot && RT.isRoot()) || !RT.createStaff){ showToast('Bu işlem için Admin olarak Firebase hesabıyla bağlı olmalısınız.'); return; }
+    const pw = $id('setOwnerPw').value.trim();
+    if(pw.length < 6 || /\s/.test(pw)){ showToast('Şifre en az 6 karakter olmalı, boşluk içermemeli.'); return; }
+    const btn = $id('btnOwnerAcc'); btn.disabled = true;
+    try{
+      let cur = 0; try{ cur = +(await RT.get('staffVer/yonetici')) || 0; }catch(e){ showToast('Firebase okunamadı: ' + fbErr(e)); return; }
+      let v = cur + 1, nid = null, tries = 0;
+      while(!nid && tries++ < 6){
+        try{ nid = await RT.createStaff(staffEmail('yonetici', v), pw); }
+        catch(e){ if(e && e.code === 'auth/email-already-in-use'){ v++; continue; } showToast(fbErr(e)); return; }
+      }
+      if(!nid){ showToast('Hesap açılamadı, tekrar deneyin.'); return; }
+      try{
+        await RT.set('staffRoles/' + nid, { ad: 'Yönetici', gorev: 'Müdür', bolge: '', owner: true, v });
+        await RT.set('staffVer/yonetici', v);
+      }catch(e){ try{ await RT.remove('staffRoles/' + nid); }catch(_){} showToast('Kayıt yazılamadı: ' + fbErr(e) + ' (Rules yayınlandı mı?)'); return; }
+      try{ const all = await RT.get('staffRoles') || {}; for(const k of Object.keys(all)){ if(k !== nid && all[k] && all[k].owner === true) await RT.remove('staffRoles/' + k); } }catch(e){ console.error(e); }
+      $id('setOwnerPw').value = ''; showToast('Yönetici hesabı hazır. Giriş: isim "Yönetici" + yeni şifre.');
+    } finally { btn.disabled = false; }
+  });
   $id('btnGuncelle').addEventListener('click', () => {
-    if(!(curUser && curUser.admin)){ showToast('PIN\'i yalnızca yönetici değiştirebilir.'); return; }
+    if(!(curUser && curUser.admin) || curUser.owner){ showToast('PIN\'i yalnızca eski PIN ile giren yönetici/Admin değiştirebilir. Yönetici şifresi için "Şifremi değiştir" alanını kullanın.'); return; }
     const p = $id('setPin').value.trim(), sp = $id('setSupPin') ? $id('setSupPin').value.trim() : '';
     if(!p && !sp) return;
     const chk = (x, min) => {
