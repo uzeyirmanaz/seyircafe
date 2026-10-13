@@ -1524,7 +1524,7 @@ button,input,select,textarea{ font-family:inherit; }
   </div>
   <div class="modal-bg" id="loginModal"><div class="modal-box">
     <h3 style="margin:0;">Personel Girişi</h3>
-    <input id="loginName" type="text" placeholder="İsim (yönetici: boş bırakın veya Yönetici yazın)" autocomplete="username" autocapitalize="words">
+    <input id="loginName" type="text" placeholder="İsim (yönetici: boş bırakın / Yönetici · admin: Admin)" autocomplete="username" autocapitalize="words">
     <input id="loginPass" type="password" placeholder="Şifre" autocomplete="current-password">
     <div id="loginErr" style="color:var(--red);font-size:.85rem;min-height:18px;"></div>
     <div style="display:flex;gap:8px;"><button class="btn-save" id="loginOk" style="margin:0;">Giriş</button><button class="btn-save" id="loginCancel" style="margin:0;background:var(--ink-faint);">Vazgeç</button></div>
@@ -1725,6 +1725,7 @@ button,input,select,textarea{ font-family:inherit; }
               <div class="field"><label>İlk adisyon numarası</label><div class="val" id="setFirstOrderNo" contenteditable="true">101</div></div>
               <div class="field"><label>Wi-Fi adı (müşteri menüsündeki Wi-Fi butonu)</label><div class="val" id="setWifiName" contenteditable="true"></div></div>
               <div class="field"><label>Wi-Fi şifresi (butona dokununca kopyalanır)</label><div class="val" id="setWifiPass" contenteditable="true"></div></div>
+              <div class="field" id="supPinField"><label>Admin PIN (yalnızca Admin değiştirir; en az 6 karakter. Giriş: isim "Admin")</label><input type="password" class="val" id="setSupPin" autocomplete="new-password" placeholder="Admin PIN'i belirlemek/değiştirmek için yazın" style="width:100%;border:0;background:transparent;font:inherit;color:inherit"></div>
               <div class="field"><label>Yönetici PIN (personel girişi, bu cihaz)</label><input type="password" class="val" id="setPin" autocomplete="new-password" placeholder="Değiştirmek için yeni PIN yazın (en az 4 hane)" style="width:100%;border:0;background:transparent;font:inherit;color:inherit"></div>
             </div>
             <div id="tab-sistem" style="display:none;">
@@ -4090,7 +4091,8 @@ button,input,select,textarea{ font-family:inherit; }
       sec.style.display = vis ? '' : 'none';
     });
     $id('custLockCard').style.display = can('settings') ? '' : 'none';
-    { const pf = $id('setPin') && $id('setPin').closest('.field'); if(pf) pf.style.display = (curUser && curUser.admin) ? '' : 'none'; }
+    { const pf = $id('setPin') && $id('setPin').closest('.field'); if(pf) pf.style.display = (curUser && curUser.admin) ? '' : 'none';
+      const sf = $id('supPinField'); if(sf) sf.style.display = (curUser && curUser.admin && !RT.local && (curUser.sup || (!supExists && !isHash(settings.supPin)))) ? '' : 'none'; }
     if(curUser){ $id('sbAv').textContent = (curUser.ad || '?').trim().charAt(0).toLocaleUpperCase('tr-TR') || '?'; $id('sbUserName').textContent = curUser.ad; $id('sbUserRole').textContent = curUser.gorev + ' · ' + (RT.local ? 'Yerel mod' : 'Canlı bağlantı'); }
     try{ custLockRender(); }catch(e){}
     $id('btnCO').style.display = can('orders') ? '' : 'none';
@@ -4191,19 +4193,26 @@ button,input,select,textarea{ font-family:inherit; }
   // ---- personel dizini: kullanıcılar Firebase'e yazılır, her cihazdan giriş yapılabilir ----
   // Kayıt anahtarı = şifre özeti (SHA-256). Liste halinde okunamaz; giriş sırasında yalnızca yazılan şifrenin kaydı sorgulanır.
   const SD = 'staffDir/';
-  let dirReady = false, lastDirSig = '', dirWarned = false;
+  let dirReady = false, lastDirSig = '', dirWarned = false, supExists = false;
   const isHash = x => /^[0-9a-f]{64}$/.test(x || '');
   function buildDir(){
     const dir = {};
     staffUsers.forEach(u => { if(u.sifre && !u.h){ u.h = pwHash(u.sifre); } if(u.h) dir[u.h] = { ad: u.ad, gorev: u.gorev, bolge: u.bolge || '', tel: u.tel || '', email: u.email || '', blocked: !!u.blocked, admin: false }; });
     if(isHash(settings.pin)) dir[settings.pin] = { ad: 'Yönetici', gorev: 'Müdür', bolge: '', tel: '', email: '', blocked: false, admin: true };
+    if(isHash(settings.supPin)) dir[settings.supPin] = { ad: 'Admin', gorev: 'Müdür', bolge: '', tel: '', email: '', blocked: false, admin: true, sup: true };
     return dir;
   }
   function syncStaffDir(){
     if(RT.local || !dirReady || !(curUser && curUser.admin) || (RT.isAdmin && !RT.isAdmin())) return;
     const dir = buildDir(), sig = JSON.stringify(dir); if(sig === lastDirSig) return;
     lastDirSig = sig;
-    Promise.resolve().then(() => RT.set('staffDir', dir)).then(() => RT.set('staffMeta/ready', true)).catch(e => {
+    Promise.resolve().then(async () => {
+      // bu cihazın bilmediği kademeyi (Admin veya Yönetici) Firebase'deki kayıttan koru
+      const cur = await RT.get('staffDir'), vals = Object.values(dir);
+      const hasSup = vals.some(e => e && e.sup), hasOwn = vals.some(e => e && e.admin && !e.sup);
+      Object.keys(cur || {}).forEach(h => { const e = cur[h]; if(!e || dir[h]) return; if(e.sup && !hasSup) dir[h] = e; else if(e.admin && !e.sup && !hasOwn) dir[h] = e; });
+      return RT.set('staffDir', dir);
+    }).then(() => RT.set('staffMeta/ready', true)).catch(e => {
       lastDirSig = '';
       if(!dirWarned){ dirWarned = true; showToast('⚠ Personel listesi Firebase’e yazılamadı (' + ((e && e.code) || 'hata') + '). Firebase Rules ayarını kontrol edin.'); }
     });
@@ -4213,7 +4222,8 @@ button,input,select,textarea{ font-family:inherit; }
       const d = await RT.get('staffDir');
       if(d && typeof d === 'object' && Object.keys(d).length){
         staffUsers = Object.keys(d).filter(h => d[h] && !d[h].admin).map(h => ({ ad: d[h].ad, gorev: d[h].gorev, bolge: d[h].bolge || '', tel: d[h].tel || '', email: d[h].email || '', blocked: !!d[h].blocked, h })).concat(staffUsers.filter(u => u.uid));
-        const adm = Object.keys(d).find(h => d[h] && d[h].admin); if(adm && !isHash(settings.pin)) settings.pin = adm;
+        const adm = Object.keys(d).find(h => d[h] && d[h].admin && !d[h].sup); if(adm && (!isHash(settings.pin) || (curUser && curUser.sup))) settings.pin = adm;
+        supExists = Object.keys(d).some(h => d[h] && d[h].sup);
         lastDirSig = JSON.stringify(buildDir());
       }
       dirReady = true; if(!(d && Object.keys(d).length)) syncStaffDir(); else Promise.resolve().then(() => RT.set('staffMeta/ready', true)).catch(() => {}); renderUsers(); saveState(); await pullStaffRoles();
@@ -4236,7 +4246,7 @@ button,input,select,textarea{ font-family:inherit; }
     const now = Date.now(), err = $id('loginErr');
     if(now < loginLockUntil){ err.textContent = 'Çok fazla hatalı deneme. ' + Math.ceil((loginLockUntil - now) / 1000) + ' sn bekleyin.'; return; }
     const pw = $id('loginPass').value; if(!pw) return;
-    const nm = $id('loginName') ? $id('loginName').value.trim() : '', nmN = normName(nm), adminTry = !nmN || nmN === 'yonetici';
+    const nm = $id('loginName') ? $id('loginName').value.trim() : '', nmN = normName(nm), adminTry = !nmN || nmN === 'yonetici', supTry = nmN === 'admin';
     loginBusy = true; err.textContent = '';
     try{
       let user = null, remoteErr = false;
@@ -4260,7 +4270,7 @@ button,input,select,textarea{ font-family:inherit; }
           else known = !!r.known;
         }
         // 2) eski yol (geçiş dönemi): yalnızca şifresi henüz taşınmamış kişiler ve yönetici PIN doğrulaması
-        if(!user && nmN && (nmN === 'yonetici' || (legacyOn && !known))){
+        if(!user && nmN && (nmN === 'yonetici' || nmN === 'admin' || (legacyOn && !known))){
           const hh = pwHash(pw), mt = x => !x.uid && (!nmN || normName(x.ad) === nmN) && ((x.h && x.h === hh) || (x.sifre && x.sifre === pw));
           const u = legacyOn ? staffUsers.find(x => !x.blocked && mt(x)) : null;
           if(u){ if(u.sifre){ u.h = pwHash(pw); delete u.sifre; } user = { ad: u.ad, gorev: u.gorev, bolge: u.bolge || '', admin: false, h: u.h }; }
@@ -4273,8 +4283,9 @@ button,input,select,textarea{ font-family:inherit; }
             if(r === 'err') remoteErr = true;
             else if(r){
               if(r.blocked){ err.textContent = 'Bu kullanıcının girişi engellenmiş.'; return; }
-              if(r.admin){ if(adminTry){ settings.pin = r.h; user = { ad: 'Yönetici', gorev: 'Müdür', admin: true }; } }
-              else if(legacyOn && (!nmN || normName(r.ad) === nmN)) user = { ad: r.ad, gorev: r.gorev, bolge: r.bolge || '', admin: false, h: r.h };
+              if(r.admin && r.sup){ if(supTry){ settings.supPin = r.h; supExists = true; user = { ad: 'Admin', gorev: 'Müdür', admin: true, sup: true }; } }
+              else if(r.admin){ if(adminTry){ settings.pin = r.h; user = { ad: 'Yönetici', gorev: 'Müdür', admin: true }; } }
+              else if(legacyOn && !r.admin && (!nmN || normName(r.ad) === nmN)) user = { ad: r.ad, gorev: r.gorev, bolge: r.bolge || '', admin: false, h: r.h };
             }
           }
         }
@@ -4873,7 +4884,7 @@ ${st('M50 58c-5-6 5-10 0-17', 0)}${st('M60 56c-5-7 5-11 0-19', 1.05)}${st('M70 5
     const fb = !RT.local && !!RT.createStaff, minL = fb ? 6 : 4;
     if(!ad || !sifre){ fail('Ad Soyad ve Şifre zorunludur.'); return; }
     if(!normName(ad)){ fail('İsim en az bir harf veya rakam içermeli.'); return; }
-    if(normName(ad) === 'yonetici'){ fail('Bu isim yönetici için ayrılmış, başka bir isim yazın.'); return; }
+    if(normName(ad) === 'yonetici' || normName(ad) === 'admin'){ fail('Bu isim yönetici için ayrılmış, başka bir isim yazın.'); return; }
     if(sifre.length < minL){ fail('Şifre en az ' + minL + ' karakter olmalı' + (fb ? ' (Firebase hesabı için gerekli).' : '.')); return; }
     if(staffUsers.some(u => normName(u.ad) === normName(ad))){ fail('Bu isimde bir kullanıcı var.'); return; }
     if(pinOK(sifre)){ fail('Şifre yönetici PIN\'i ile aynı olamaz.'); return; }
@@ -5262,7 +5273,7 @@ ${st('M50 58c-5-6 5-10 0-17', 0)}${st('M60 56c-5-7 5-11 0-19', 1.05)}${st('M70 5
   function snapshot(){
     readSettings();
     return { carts, tableLabels, tableGuest, regions, nextTableNo, orderOpenedAt, categories, groupMeta, menuVer: MENU_VER, paidByKey, paymentHistoryByKey, customers, giderler, mutfakGruplari, adisyonSeq, adisyonNoByKey,
-      lists, payTypes, payLog, saleLog, closedAt, guestsByKey, discountByKey, extOrders, extSeq, perms, waiveLog, colLog, dayReports, cancelLog, settings: Object.assign({}, settings, { pin: undefined }) };
+      lists, payTypes, payLog, saleLog, closedAt, guestsByKey, discountByKey, extOrders, extSeq, perms, waiveLog, colLog, dayReports, cancelLog, settings: Object.assign({}, settings, { pin: undefined, supPin: undefined }) };
   }
   const localExtra = () => ({ staffUsers, pin: settings.pin });
   function fullStr(){ return JSON.stringify(Object.assign({}, snapshot(), localExtra())); }
@@ -5543,11 +5554,27 @@ ${st('M50 58c-5-6 5-10 0-17', 0)}${st('M60 56c-5-7 5-11 0-19', 1.05)}${st('M70 5
   ['urunFrom', 'urunTo'].forEach(i => $id(i).addEventListener('change', () => renderReports()));
   ['fireFrom', 'fireTo'].forEach(i => $id(i).addEventListener('change', renderFire));
   $id('btnGuncelle').addEventListener('click', () => {
-    if(!(curUser && curUser.admin)){ showToast('Yönetici PIN\'ini yalnızca yönetici değiştirebilir.'); return; }
-    const p = $id('setPin').value.trim(); if(!p) return;
-    if(p.length < 4 || /\s/.test(p)){ showToast('PIN en az 4 karakter olmalı, boşluk içermemeli.'); return; }
-    if(staffUsers.some(u => (u.h && u.h === pwHash(p)) || (u.sifre && u.sifre === p))){ showToast('Bu şifre bir personelde kullanılıyor, farklı bir PIN seçin.'); return; }
-    settings.pin = pwHash(p); $id('setPin').value = ''; saveState(); showToast('PIN güncellendi.');
+    if(!(curUser && curUser.admin)){ showToast('PIN\'i yalnızca yönetici değiştirebilir.'); return; }
+    const p = $id('setPin').value.trim(), sp = $id('setSupPin') ? $id('setSupPin').value.trim() : '';
+    if(!p && !sp) return;
+    const chk = (x, min) => {
+      if(x.length < min || /\s/.test(x)){ showToast('PIN en az ' + min + ' karakter olmalı, boşluk içermemeli.'); return false; }
+      if(staffUsers.some(u => (u.h && u.h === pwHash(x)) || (u.sifre && u.sifre === x))){ showToast('Bu şifre bir personelde kullanılıyor, farklı bir PIN seçin.'); return false; }
+      return true;
+    };
+    if(p && !chk(p, 4)) return;
+    if(sp){
+      if(RT.local || !(curUser.sup || (!supExists && !isHash(settings.supPin)))){ showToast('Admin PIN\'ini yalnızca Admin değiştirebilir.'); return; }
+      if(!chk(sp, 6)) return;
+      if(sp === p || pwHash(sp) === settings.pin){ showToast('Admin PIN\'i Yönetici PIN\'inden farklı olmalı.'); return; }
+    }
+    if(p){
+      if(settings.supPin && pwHash(p) === settings.supPin){ showToast('Yönetici PIN\'i Admin PIN\'inden farklı olmalı.'); return; }
+      settings.pin = pwHash(p);
+    }
+    if(sp){ settings.supPin = pwHash(sp); supExists = true; }
+    $id('setPin').value = ''; if($id('setSupPin')) $id('setSupPin').value = '';
+    saveState(); applyPerms(); showToast((p && sp) ? 'PIN\'ler güncellendi.' : sp ? 'Admin PIN güncellendi.' : 'PIN güncellendi.');
   });
   $id('btnBackup').addEventListener('click', () => { settings.lastBackup = Date.now(); });
   setInterval(() => { if(staffMode && curUser && curUser.admin && !window._bkWarned && Date.now() - (settings.lastBackup || 0) > 7 * 864e5){ window._bkWarned = 1; showToast('⚠ Son yedek 7 günden eski. Ayarlar > Yedek & Sistem\'den yedek indirin.'); } }, 60000);
