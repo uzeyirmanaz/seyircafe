@@ -1524,7 +1524,7 @@ button,input,select,textarea{ font-family:inherit; }
   </div>
   <div class="modal-bg" id="loginModal"><div class="modal-box">
     <h3 style="margin:0;">Personel Girişi</h3>
-    <input id="loginName" type="text" placeholder="İsim (yönetici: boş bırakın / Yönetici · admin: Admin)" autocomplete="username" autocapitalize="words">
+    <input id="loginName" type="text" placeholder="İsim" autocomplete="username" autocapitalize="words">
     <input id="loginPass" type="password" placeholder="Şifre" autocomplete="current-password">
     <div id="loginErr" style="color:var(--red);font-size:.85rem;min-height:18px;"></div>
     <div style="display:flex;gap:8px;"><button class="btn-save" id="loginOk" style="margin:0;">Giriş</button><button class="btn-save" id="loginCancel" style="margin:0;background:var(--ink-faint);">Vazgeç</button></div>
@@ -3761,7 +3761,7 @@ button,input,select,textarea{ font-family:inherit; }
           if(!needAdmin || isAdminAny()) return true;
           try{ await signOut(auth); await signInAnonymously(auth); }catch(e){}
         }
-        let err = needAdmin ? 'Yönetici girişi için yönetici Firebase hesabını girin.' : '';
+        let err = needAdmin ? 'Devam etmek için Firebase hesabını girin.' : '';
         for(;;){
           const c = await askCred(err); if(!c) return false;
           try{
@@ -4234,6 +4234,7 @@ button,input,select,textarea{ font-family:inherit; }
     });
   }
   async function pullStaffDir(){
+    if(!RT.local && RT.isRoot && !RT.isRoot()){ dirReady = true; await pullStaffRoles(); return; }   // Yönetici hesabı staffDir'i okuyamaz; yalnızca personel kayıtlarını çeker
     try{
       const d = await RT.get('staffDir');
       if(d && typeof d === 'object' && Object.keys(d).length){
@@ -4294,7 +4295,7 @@ button,input,select,textarea{ font-family:inherit; }
           if(!user){
             err.textContent = 'Kontrol ediliyor…';
             const okA = RT.staffAuth ? await RT.staffAuth(false) : false;
-            if(!okA){ err.textContent = 'Önce bu cihazı Firebase hesabıyla yetkilendirin.'; return; }
+            if(!okA){ err.textContent = LOGIN_GEN; return; }
             const r = await remoteStaff(pw); err.textContent = '';
             if(r === 'err') remoteErr = true;
             else if(r){
@@ -4313,13 +4314,13 @@ button,input,select,textarea{ font-family:inherit; }
         if(rdy !== null) firstOk = false;
       }
       if(firstOk){
-        if(pw.length < 4){ err.textContent = 'İlk kurulum: en az 4 haneli bir yönetici PIN\'i yazın.'; return; }
+        if(pw.length < 4){ err.textContent = 'İlk kurulum: en az 4 haneli bir PIN yazın.'; return; }
         if(!RT.local){
           err.textContent = 'Firebase kontrol ediliyor…';
           const okA = RT.staffAuth ? await RT.staffAuth(true) : false; err.textContent = '';
           if(!okA) return;
           let d = null; try{ d = await RT.get('staffDir'); }catch(e){ err.textContent = 'Firebase okunamadı. Rules ayarını kontrol edin.'; return; }
-          if(d && Object.keys(d).length){ err.textContent = 'Yönetici PIN\'i zaten belirlenmiş. Doğru şifreyi yazın.'; return; }
+          if(d && Object.keys(d).length){ err.textContent = LOGIN_GEN; return; }
         }
         if(!await uiConfirm('İlk kurulum: yazdığınız şifre yönetici PIN\'i olarak kaydedilsin mi?')) return;
         settings.pin = pwHash(pw); user = { ad: 'Yönetici', gorev: 'Müdür', admin: true };
@@ -4870,7 +4871,7 @@ ${st('M50 58c-5-6 5-10 0-17', 0)}${st('M60 56c-5-7 5-11 0-19', 1.05)}${st('M70 5
   function renderUsers(){
     $id('usersList').innerHTML = staffUsers.map((u, i) => '<div class="prow" style="flex-wrap:wrap;gap:4px;"><span class="pic">👤</span><div class="pmain" style="flex:1;min-width:150px;"><b>' + esc(u.ad) + (u.blocked ? ' <span class="badge">Engelli</span>' : '') + (!RT.local && !u.uid ? ' <span class="badge">Eski giriş</span>' : '') + '</b><span>' + esc(u.gorev) + (u.bolge && u.bolge !== '—' ? ' · ' + esc(u.bolge) : '') + (u.tel ? ' · ' + esc(u.tel) : '') + '</span></div>' +
       '<span class="link-btn" data-ua="role" data-i="' + i + '">Görev</span><span class="link-btn" data-ua="pw" data-i="' + i + '">Şifre</span><span class="link-btn" data-ua="blk" data-i="' + i + '">' + (u.blocked ? 'Engeli kaldır' : 'Engelle') + '</span><span class="link-btn" data-ua="del" data-i="' + i + '">🗑</span></div>').join('') ||
-      '<p style="color:var(--ink-faint);padding:8px;">Kullanıcı yok. Yönetici girişi için Ayarlar’daki Yönetici PIN kullanılır.</p>';
+      '<p style="color:var(--ink-faint);padding:8px;">Kullanıcı yok.</p>';
   }
   $id('usersList').addEventListener('click', async e => {
     const b = e.target.closest('[data-ua]'); if(!b || !can('users')) return;
