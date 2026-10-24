@@ -25,7 +25,7 @@
 <style>html.restoring #customerView{display:none!important}</style><script>try{if(sessionStorage.getItem('posUser')){document.documentElement.classList.add('restoring');setTimeout(function(){document.documentElement.classList.remove('restoring')},10000)}}catch(e){}</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="build" content="20261013-2">
+<meta name="build" content="20261024-2">
 <script>(function(){ if(!/^https?:/.test(location.protocol)) return; try{ const now = Date.now(), last = +sessionStorage.getItem('posChk') || 0; if(now - last < 600000) return; sessionStorage.setItem('posChk', now); const f = new URL(location.href); f.searchParams.set('_t', Date.now());
   fetch(f.toString(), { cache: 'no-store' }).then(r => r.text()).then(t => { const m = t.match(/name="build" content="([^"]+)"/), cur = document.querySelector('meta[name=build]').content;
     if(m && m[1] !== cur && sessionStorage.getItem('posReload') !== m[1]){ sessionStorage.setItem('posReload', m[1]); const u = new URL(location.href); u.searchParams.set('_v', m[1]); location.replace(u.toString()); } }).catch(() => {}); }catch(e){} })();</script>
@@ -201,7 +201,7 @@
   #custGate{ position:fixed; inset:0; z-index:1500; display:none; align-items:center; justify-content:center; padding:20px; background:var(--bg); }
   #custGate.show{ display:flex; }
   #custGate .cg-box{ width:100%; max-width:360px; text-align:center; background:var(--panel); color:var(--ink); border:1px solid var(--line); border-radius:20px; padding:26px 22px; box-shadow:0 18px 50px rgba(0,0,0,.14); }
-  #custGate .cg-logo{ width:84px; margin:0 auto 10px; }
+  #custGate .cg-logo{ width:min(190px,60vw); margin:0 auto 12px; }
   #custGate .cg-logo svg{ width:100%; height:auto; display:block; }
   #custGate h2{ margin:4px 0 4px; font-size:1.15rem; }
   #custGate p{ margin:0 0 14px; font-size:.85rem; color:var(--ink-dim); }
@@ -848,6 +848,9 @@
   .lg-hb{transform-box:fill-box;transform-origin:center;animation:lgBeat 2.8s ease-in-out infinite}
   @keyframes lgBeat{0%,38%,100%{transform:scale(1)}10%{transform:scale(1.16)}20%{transform:scale(1)}28%{transform:scale(1.1)}}
   @media (prefers-reduced-motion:reduce){.lg-hb{animation:none}}
+  .lg-ring{transform-box:fill-box;transform-origin:center;opacity:0;animation:lgRing 2.8s ease-out infinite}
+  @keyframes lgRing{0%{opacity:.45;transform:scale(.7)}24%{opacity:0;transform:scale(1.6)}100%{opacity:0;transform:scale(1.6)}}
+  @media (prefers-reduced-motion:reduce){.lg-ring{animation:none}}
   body[data-theme="dark"] .c-logo svg{filter:drop-shadow(0 3px 10px rgba(255,40,24,.28))}
   /* ---- hafif zemin: kasma yok ---- */
   body:not(.staff){background:#fbeef2!important;animation:none!important;background-attachment:scroll!important}
@@ -1463,7 +1466,7 @@ button,input,select,textarea{ font-family:inherit; }
 /* Kenar çubuğu markası: logo, kenar çubuğunun kendi zemininde; sabit ve uyumlu */
 .sidebar .brand{ padding:4px 6px 2px; }
 .sidebar .sb-logo{ width:auto; height:auto; background:transparent; padding:0; border-radius:0; display:block; perspective:none; }
-.sidebar .sb-logo svg{ animation:none !important; transform-style:flat; filter:none; width:auto; height:52px; max-height:none; margin:0; overflow:visible; }
+.sidebar .sb-logo svg{ animation:none !important; transform-style:flat; filter:none; width:auto; height:56px; max-height:none; margin:0; overflow:visible; }
 .sb-top{ padding:18px 16px 16px; }
 .brand-sub[hidden]{ display:none !important; }
 /* Müşteri şifresi: Dijital Menü ekranında */
@@ -4545,8 +4548,11 @@ ${st('M50 58c-5-6 5-10 0-17', 0)}${st('M60 56c-5-7 5-11 0-19', 1.05)}${st('M70 5
     if(a){ const c = accentFix(a); cv.style.setProperty('--red', c); cv.style.setProperty('--red-dark', mixC(c, '#000000', .2)); cv.style.setProperty('--soc-b1', mixC(c, '#000000', .5)); cv.style.setProperty('--soc-b2', mixC(c, '#000000', .72)); cv.style.setProperty('--soc-ic', mixC(c, '#ffffff', .62)); cv.style.setProperty('--soc-bd', mixC(c, '#ffffff', .4)); }
     else ['--red', '--red-dark', '--soc-b1', '--soc-b2', '--soc-ic', '--soc-bd'].forEach(k => cv.style.removeProperty(k));
   }
+  // ---- işletmeye özel logo: config.js içinde APP_CONFIG.brand.logo = { full: '<svg…>', mark: '<svg…>' } verilmişse o kullanılır ----
+  const cfgLogo = (b, ov, mode) => { if(ov || b.custom) return ''; const L = (window.APP_CONFIG && APP_CONFIG.brand && APP_CONFIG.brand.logo) || null, s = L && (mode === 'mark' ? L.mark : L.full); return (typeof s === 'string' && /^<svg[\s>]/.test(s)) ? s : ''; };
   function logoSVG(mode, ov){
     const b = brandEff(ov), ea = x => String(x).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    const cl = cfgLogo(b, ov, mode); if(cl) return cl;
     const fx = BR_FONTS.find(f => f.k === b.font) || BR_FONTS[0], lab = ea(b.name || b.l1), c1 = b.color || '#d9a441';
     const st = b.cstyle === 'solid' ? [c1, c1, c1] : b.cstyle === 'two' ? [c1, mixC(c1, b.color2 || '#8a5a12', .5), b.color2 || '#8a5a12'] : (b.color ? [mixC(c1, '#ffffff', .38), c1, mixC(c1, '#000000', .3)] : ['#f4d98c', '#d9a441', '#b57d1e']);
     const D = '<linearGradient id="lgR" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="0" y2="140"><stop offset="0" stop-color="' + st[0] + '"/><stop offset=".55" stop-color="' + st[1] + '"/><stop offset="1" stop-color="' + st[2] + '"/></linearGradient>';
@@ -5245,7 +5251,7 @@ ${st('M50 58c-5-6 5-10 0-17', 0)}${st('M60 56c-5-7 5-11 0-19', 1.05)}${st('M70 5
     $id('setDayStart').textContent = settings.dayStart; $id('setFirstOrderNo').textContent = settings.firstOrderNo;
     $id('setPin').value = ''; $id('setShift').textContent = settings.shiftSplit || '15:00';
     $id('setWifiName').textContent = settings.wifiName || ''; $id('setWifiPass').textContent = settings.wifiPass || ''; try{ applySocialUI(); }catch(e){} try{ applyBrandUI(); }catch(e){}
-    document.title = 'İŞLETMEM — ' + settings.restName; uiReady = true;
+    document.title = settings.restName || APP_CONFIG.brand.name; uiReady = true;
   }
   $id('restName').addEventListener('input', e => { $id('setRestName').textContent = e.target.value; });
 
