@@ -1,31 +1,51 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-<style>html.restoring #customerView{display:none!important}</style><script>try{if(sessionStorage.getItem('seyirUser')){document.documentElement.classList.add('restoring');setTimeout(function(){document.documentElement.classList.remove('restoring')},10000)}}catch(e){}</script>
+<script src="config.js"></script>
+<script>(function(){
+  var C = window.APP_CONFIG = window.APP_CONFIG || {}, B = C.brand = C.brand || {};
+  B.name = String(B.name || 'İŞLETMEM'); var w = B.name.trim().split(/\s+/);
+  if(!B.line1) B.line1 = w[0]; if(B.line2 == null) B.line2 = w.slice(1).join(' ');
+  if(!B.initials) B.initials = (w.length > 1 ? w[0].charAt(0) + w[1].charAt(0) : B.name.slice(0, 2)).toLocaleUpperCase('tr-TR');
+  C.firebase = C.firebase || {}; C.adminEmail = C.adminEmail || '';
+  // Aynı alan adında (örn. kullanici.github.io) birden çok işletme çalışabilir: yerel kayıtlar işletmeye özel önekle ayrılır
+  var ns = String(C.firebase.projectId || '').replace(/[^A-Za-z0-9_-]/g, '') || ('p' + location.pathname.replace(/[^A-Za-z0-9]/g, ''));
+  window.__nsk = function(k){ return /^pos[A-Z]/.test(k) ? ns + ':' + k : k; };
+  try{ var P = Storage.prototype, g0 = P.getItem, s0 = P.setItem, r0 = P.removeItem;
+    P.getItem = function(k){ return g0.call(this, window.__nsk(k)); }; P.setItem = function(k, v){ return s0.call(this, window.__nsk(k), v); }; P.removeItem = function(k){ return r0.call(this, window.__nsk(k)); }; }catch(e){}
+  document.title = B.name;
+  document.addEventListener('DOMContentLoaded', function(){
+    var set = function(sel, v){ var e = document.querySelector(sel); if(e) e.setAttribute('content', v); };
+    set('meta[name="description"]', B.name + ' dijital menü ve sipariş sistemi'); set('meta[property="og:title"]', B.name + ' — Dijital Menü'); set('meta[name="apple-mobile-web-app-title"]', B.name);
+  });
+  var u = String(C.firebase.databaseURL || '').replace(/\/$/, '');
+  if(u){ var l = document.createElement('link'); l.rel = 'preconnect'; l.href = u; l.crossOrigin = 'anonymous'; document.head.appendChild(l); }
+  window.__pubP = (u && /^https?:/.test(location.protocol)) ? fetch(u + '/public.json', { cache: 'no-store' }).then(function(r){ return r.ok ? r.json() : null; }).catch(function(){ return null; }) : Promise.resolve(null);
+})();</script>
+<style>html.restoring #customerView{display:none!important}</style><script>try{if(sessionStorage.getItem('posUser')){document.documentElement.classList.add('restoring');setTimeout(function(){document.documentElement.classList.remove('restoring')},10000)}}catch(e){}</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="build" content="20261013-2">
-<script>(function(){ if(!/^https?:/.test(location.protocol)) return; try{ const now = Date.now(), last = +sessionStorage.getItem('seyirChk') || 0; if(now - last < 600000) return; sessionStorage.setItem('seyirChk', now); const f = new URL(location.href); f.searchParams.set('_t', Date.now());
+<script>(function(){ if(!/^https?:/.test(location.protocol)) return; try{ const now = Date.now(), last = +sessionStorage.getItem('posChk') || 0; if(now - last < 600000) return; sessionStorage.setItem('posChk', now); const f = new URL(location.href); f.searchParams.set('_t', Date.now());
   fetch(f.toString(), { cache: 'no-store' }).then(r => r.text()).then(t => { const m = t.match(/name="build" content="([^"]+)"/), cur = document.querySelector('meta[name=build]').content;
-    if(m && m[1] !== cur && sessionStorage.getItem('seyirReload') !== m[1]){ sessionStorage.setItem('seyirReload', m[1]); const u = new URL(location.href); u.searchParams.set('_v', m[1]); location.replace(u.toString()); } }).catch(() => {}); }catch(e){} })();</script>
-<meta name="description" content="SEYİR CAFE dijital menü ve sipariş sistemi">
-<meta property="og:title" content="SEYİR CAFE — Dijital Menü"><meta property="og:description" content="Menüyü inceleyin, masanızdan sipariş verin."><meta property="og:type" content="website">
-<meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="SEYİR CAFE"><meta name="apple-mobile-web-app-status-bar-style" content="default">
+    if(m && m[1] !== cur && sessionStorage.getItem('posReload') !== m[1]){ sessionStorage.setItem('posReload', m[1]); const u = new URL(location.href); u.searchParams.set('_v', m[1]); location.replace(u.toString()); } }).catch(() => {}); }catch(e){} })();</script>
+<meta name="description" content="Dijital menü ve sipariş sistemi">
+<meta property="og:title" content="Dijital Menü"><meta property="og:description" content="Menüyü inceleyin, masanızdan sipariş verin."><meta property="og:type" content="website">
+<meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Menü"><meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="apple-touch-icon" id="appleIcon" href="data:,">
 <script>(function(){ try{ const c = document.createElement('canvas'); c.width = c.height = 192; const x = c.getContext('2d');
-  x.fillStyle = '#0F1A2C'; x.fillRect(0,0,192,192); x.fillStyle = '#fff'; x.font = '800 92px system-ui,sans-serif'; x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillText('SC', 96, 100);
+  x.fillStyle = '#0F1A2C'; x.fillRect(0,0,192,192); x.fillStyle = '#fff'; x.font = '800 92px system-ui,sans-serif'; x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillText(APP_CONFIG.brand.initials, 96, 100);
   const u = c.toDataURL('image/png'); document.getElementById('appleIcon').href = u;
-  if(/^https?:/.test(location.protocol)){ const m = { name:'SEYİR CAFE', short_name:'SEYİR', start_url: location.pathname, scope: location.pathname, display:'standalone', background_color:'#ffffff', theme_color:'#0F1A2C', lang:'tr', icons:[{ src:u, sizes:'192x192', type:'image/png', purpose:'any' }] };
+  if(/^https?:/.test(location.protocol)){ const m = { name:APP_CONFIG.brand.name, short_name:String(APP_CONFIG.brand.line1 || APP_CONFIG.brand.name).slice(0, 12), start_url: location.origin + location.pathname, scope: location.origin + location.pathname.replace(/[^\/]*$/, ''), display:'standalone', background_color:'#ffffff', theme_color:'#0F1A2C', lang:'tr', icons:[{ src:u, sizes:'192x192', type:'image/png', purpose:'any' }] };
     const l = document.createElement('link'); l.rel = 'manifest'; l.href = URL.createObjectURL(new Blob([JSON.stringify(m)], { type:'application/manifest+json' })); document.head.appendChild(l); }
 }catch(e){} })();</script>
 <meta name="theme-color" content="#0F1A2C">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<title>İŞLETMEM — SEYİR CAFE</title>
-<link rel="preconnect" href="https://adisyon-sistem-818a6-default-rtdb.firebaseio.com" crossorigin>
+<title>İŞLETMEM</title>
 <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
-<script>window.__pubP = /^https?:/.test(location.protocol) ? fetch("https://adisyon-sistem-818a6-default-rtdb.firebaseio.com/public.json", { cache: "no-store" }).then(r => r.ok ? r.json() : null).catch(() => null) : Promise.resolve(null);</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Cormorant+Garamond:wght@600;700&family=Dancing+Script:wght@600;700&family=Lobster&family=Montserrat:wght@500;700&family=Oswald:wght@500;600&family=Pacifico&family=Playfair+Display:wght@600;700&family=Poppins:wght@500;600&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
 <noscript><link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"></noscript>
 <style>
@@ -817,12 +837,12 @@
   .c-logo svg{animation-name:lgFloat2}
   @keyframes lgFloat2{0%,100%{transform:translateY(0) rotateY(-5deg) rotateX(2deg)}50%{transform:translateY(-3px) rotateY(5deg) rotateX(-1deg)}}
   .c-social{display:flex;gap:14px;justify-content:center;align-items:center;margin-top:2px}
-  .c-social a,.c-social button{width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:1px solid rgba(233,196,106,.55);background:linear-gradient(145deg,#2d1a10,#150a05);color:#f4d27a;box-shadow:0 3px 8px rgba(0,0,0,.3),inset 0 1px 0 rgba(255,255,255,.15);cursor:pointer;padding:0;text-decoration:none;transition:transform .15s}
+  .c-social a,.c-social button{width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:1px solid var(--soc-bd,rgba(233,196,106,.55));background:linear-gradient(145deg,var(--soc-b1,#2d1a10),var(--soc-b2,#150a05));color:var(--soc-ic,#f4d27a);box-shadow:0 3px 8px rgba(0,0,0,.3),inset 0 1px 0 rgba(255,255,255,.15);cursor:pointer;padding:0;text-decoration:none;transition:transform .15s}
   .c-social a:active,.c-social button:active{transform:scale(.92)} .c-social svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
   .c-social .fl{fill:currentColor;stroke:none}
   @keyframes lgFloat{0%,100%{transform:translateY(0) rotateY(-11deg) rotateX(4deg)}50%{transform:translateY(-4px) rotateY(11deg) rotateX(-2deg)}}
   @media (prefers-reduced-motion:reduce){.c-logo svg,.sb-logo svg{animation:none}}
-  /* ---- yeni marka logosu: kırmızı, SEYİR CAFE yan yana, kalp atışı ---- */
+  /* ---- marka logosu: yan yana, kalp atışı ---- */
   .c-logo svg{filter:drop-shadow(0 4px 8px rgba(120,10,10,.22))}
   @keyframes lgFloat2{0%,100%{transform:translateY(0)}50%{transform:translateY(-2px)}}
   .lg-hb{transform-box:fill-box;transform-origin:center;animation:lgBeat 2.8s ease-in-out infinite}
@@ -1444,10 +1464,6 @@ button,input,select,textarea{ font-family:inherit; }
 .sidebar .brand{ padding:4px 6px 2px; }
 .sidebar .sb-logo{ width:auto; height:auto; background:transparent; padding:0; border-radius:0; display:block; perspective:none; }
 .sidebar .sb-logo svg{ animation:none !important; transform-style:flat; filter:none; width:auto; height:52px; max-height:none; margin:0; overflow:visible; }
-/* Harfler kırmızı ve sabit; yalnızca kalp atar */
-#lgRsb stop:nth-child(1){ stop-color:#ff3a27; }
-#lgRsb stop:nth-child(2){ stop-color:#e5271b; }
-.sidebar .sb-logo .lg-hb path{ stroke:#ff3a27; }
 .sb-top{ padding:18px 16px 16px; }
 .brand-sub[hidden]{ display:none !important; }
 /* Müşteri şifresi: Dijital Menü ekranında */
@@ -1524,7 +1540,7 @@ button,input,select,textarea{ font-family:inherit; }
   </div>
   <div class="modal-bg" id="loginModal"><div class="modal-box">
     <h3 style="margin:0;">Personel Girişi</h3>
-    <input id="loginName" type="text" placeholder="İsim" autocomplete="username" autocapitalize="words">
+    <input id="loginName" type="text" placeholder="Ad Soyad (kayıttaki gibi)" autocomplete="username" autocapitalize="words">
     <input id="loginPass" type="password" placeholder="Şifre" autocomplete="current-password">
     <div id="loginErr" style="color:var(--red);font-size:.85rem;min-height:18px;"></div>
     <div style="display:flex;gap:8px;"><button class="btn-save" id="loginOk" style="margin:0;">Giriş</button><button class="btn-save" id="loginCancel" style="margin:0;background:var(--ink-faint);">Vazgeç</button></div>
@@ -1562,7 +1578,7 @@ button,input,select,textarea{ font-family:inherit; }
       <div class="sb-top">
         <div class="brand">
           <div class="sb-logo" id="sbLogo"></div>
-          <div class="brand-sub" hidden><input id="restName" class="name-inline" value="SEYİR CAFE" spellcheck="false" readonly tabindex="-1" aria-readonly="true"></div>
+          <div class="brand-sub" hidden><input id="restName" class="name-inline" value="" spellcheck="false" readonly tabindex="-1" aria-readonly="true"></div>
         </div>
       </div>
 
@@ -1590,7 +1606,7 @@ button,input,select,textarea{ font-family:inherit; }
         <div class="nav-sec nav-acc">
           <div class="nav-label" role="button" tabindex="0"><span>Kasa ve raporlar</span><span class="chev">▾</span></div>
           <div class="nav-accbody">
-          <div class="nav-item" data-screen="stok"><span class="ic">📦</span>Stok Yönetimi<span class="nb" id="sbStk">0</span></div>
+          <div class="nav-item" data-screen="stok"><span class="ic">📦</span>Stok<span class="nb" id="sbStk">0</span></div>
           <div class="nav-item" data-screen="ciro"><span class="ic">📈</span>Ciro Takibi</div>
           <div class="nav-item" data-screen="rapor-gunsonu"><span class="ic">💲</span>Gün Sonu</div>
           <div class="nav-item" data-screen="gider"><span class="ic">📉</span>Gider / Masraf</div>
@@ -1716,20 +1732,23 @@ button,input,select,textarea{ font-family:inherit; }
               <div class="tab active" data-tab="genel">Genel Ayarlar</div>
               <div class="tab" data-tab="odeme">Ödeme Tipleri</div>
               <div class="tab" data-tab="sistem">Yedek &amp; Sistem</div>
+              <div class="tab" data-tab="marka" id="tabMarka" style="display:none">🎨 Marka &amp; Logo</div>
             </div>
 
             <div id="tab-genel">
-              <div class="field"><label>Restaurant Adı</label><div class="val" id="setRestName" contenteditable="true">SEYİR CAFE</div></div>
+              <div class="field"><label>Restaurant Adı</label><div class="val" id="setRestName" contenteditable="true"></div></div>
               <div class="field"><label>Gün Başlangıç (gün sonu raporu bu saatte başlar)</label><div class="val" id="setDayStart" contenteditable="true">05:00</div></div>
               <div class="field"><label>Vardiya değişim saati (sabah / akşam ayrımı)</label><div class="val" id="setShift" contenteditable="true">15:00</div></div>
               <div class="field"><label>İlk adisyon numarası</label><div class="val" id="setFirstOrderNo" contenteditable="true">101</div></div>
-              <div class="field"><label>Wi-Fi adı (müşteri menüsündeki Wi-Fi butonu)</label><div class="val" id="setWifiName" contenteditable="true"></div></div>
-              <div class="field"><label>Wi-Fi şifresi (butona dokununca kopyalanır)</label><div class="val" id="setWifiPass" contenteditable="true"></div></div>
+              <div class="field" id="wifiBlock"><label>Wi-Fi — müşteri menüsünde göster</label><div class="toggle-row" style="border:0;padding:6px 0"><div class="mini-toggle on" id="wifiOnTgl" role="switch" aria-checked="true" tabindex="0" style="cursor:pointer"><span class="k"></span></div><div class="name">Menüde Wi-Fi butonu görünsün</div></div><label style="margin-top:8px">Ağ adı</label><div class="val" id="setWifiName" contenteditable="true"></div><label style="margin-top:8px">Şifre (menüde görünür ve müşteri tek dokunuşla kopyalar)</label><div class="val" id="setWifiPass" contenteditable="true"></div><button class="btn-update" id="btnWifiSave" type="button" style="margin-top:10px">📶 Wi-Fi'yi güncelle</button></div>
+              <div class="field" id="socialBlock"><label>Sosyal medya — hesabınız varsa açın, kullanıcı adını yazın; menüde simge olarak görünür, dokununca hesabınıza gider</label><div id="socRows"><div class="toggle-row"><div class="mini-toggle off" data-soc-t="instagram" role="switch" aria-checked="false" tabindex="0" style="cursor:pointer"><span class="k"></span></div><div class="name" style="flex:0 0 130px">Instagram</div><input class="val" data-soc-v="instagram" placeholder="kullanıcı adı" autocomplete="off" style="flex:1;min-width:0;border:0;background:transparent;font:inherit;color:inherit"></div><div class="toggle-row"><div class="mini-toggle off" data-soc-t="tiktok" role="switch" aria-checked="false" tabindex="0" style="cursor:pointer"><span class="k"></span></div><div class="name" style="flex:0 0 130px">TikTok</div><input class="val" data-soc-v="tiktok" placeholder="kullanıcı adı" autocomplete="off" style="flex:1;min-width:0;border:0;background:transparent;font:inherit;color:inherit"></div><div class="toggle-row"><div class="mini-toggle off" data-soc-t="facebook" role="switch" aria-checked="false" tabindex="0" style="cursor:pointer"><span class="k"></span></div><div class="name" style="flex:0 0 130px">Facebook</div><input class="val" data-soc-v="facebook" placeholder="sayfa adı" autocomplete="off" style="flex:1;min-width:0;border:0;background:transparent;font:inherit;color:inherit"></div><div class="toggle-row"><div class="mini-toggle off" data-soc-t="x" role="switch" aria-checked="false" tabindex="0" style="cursor:pointer"><span class="k"></span></div><div class="name" style="flex:0 0 130px">X (Twitter)</div><input class="val" data-soc-v="x" placeholder="kullanıcı adı" autocomplete="off" style="flex:1;min-width:0;border:0;background:transparent;font:inherit;color:inherit"></div><div class="toggle-row"><div class="mini-toggle off" data-soc-t="youtube" role="switch" aria-checked="false" tabindex="0" style="cursor:pointer"><span class="k"></span></div><div class="name" style="flex:0 0 130px">YouTube</div><input class="val" data-soc-v="youtube" placeholder="kanal adı" autocomplete="off" style="flex:1;min-width:0;border:0;background:transparent;font:inherit;color:inherit"></div><div class="toggle-row"><div class="mini-toggle off" data-soc-t="whatsapp" role="switch" aria-checked="false" tabindex="0" style="cursor:pointer"><span class="k"></span></div><div class="name" style="flex:0 0 130px">WhatsApp</div><input class="val" data-soc-v="whatsapp" placeholder="telefon (905xxxxxxxxx)" autocomplete="off" style="flex:1;min-width:0;border:0;background:transparent;font:inherit;color:inherit"></div><div class="toggle-row"><div class="mini-toggle off" data-soc-t="maps" role="switch" aria-checked="false" tabindex="0" style="cursor:pointer"><span class="k"></span></div><div class="name" style="flex:0 0 130px">Konum (Harita)</div><input class="val" data-soc-v="maps" placeholder="Google Haritalar bağlantısı veya adres" autocomplete="off" style="flex:1;min-width:0;border:0;background:transparent;font:inherit;color:inherit"></div><div class="toggle-row"><div class="mini-toggle off" data-soc-t="web" role="switch" aria-checked="false" tabindex="0" style="cursor:pointer"><span class="k"></span></div><div class="name" style="flex:0 0 130px">Web sitesi</div><input class="val" data-soc-v="web" placeholder="www.siteniz.com" autocomplete="off" style="flex:1;min-width:0;border:0;background:transparent;font:inherit;color:inherit"></div></div><button class="btn-update" id="btnSocSave" type="button" style="margin-top:10px">🔗 Sosyal medyayı güncelle</button></div>
               <div class="field" id="ownerPwField"><label>Şifremi değiştir (Yönetici hesabı; yeni şifre en az 6 karakter)</label><input type="password" class="val" id="ownerOldPw" autocomplete="current-password" placeholder="Eski şifre" style="width:100%;border:0;background:transparent;font:inherit;color:inherit"><input type="password" class="val" id="ownerNewPw" autocomplete="new-password" placeholder="Yeni şifre" style="width:100%;border:0;background:transparent;font:inherit;color:inherit;margin-top:6px"><button class="btn-update" id="btnOwnerPw" style="margin-top:8px;">🔑 Şifremi değiştir</button></div>
               <div class="field" id="ownerAccField"><label>Yönetici hesabı (Firebase) — şifre belirle / sıfırla (en az 6 karakter; Yönetici girişi: isim "Yönetici" + bu şifre)</label><input type="password" class="val" id="setOwnerPw" autocomplete="new-password" placeholder="Yönetici için yeni şifre" style="width:100%;border:0;background:transparent;font:inherit;color:inherit"><button class="btn-update" id="btnOwnerAcc" style="margin-top:8px;">🔑 Yönetici hesabını kaydet</button></div>
               <div class="field" id="supPinField"><label>Admin PIN (yalnızca Admin değiştirir; en az 6 karakter. Giriş: isim "Admin")</label><input type="password" class="val" id="setSupPin" autocomplete="new-password" placeholder="Admin PIN'i belirlemek/değiştirmek için yazın" style="width:100%;border:0;background:transparent;font:inherit;color:inherit"></div>
               <div class="field"><label>Yönetici PIN (personel girişi, bu cihaz)</label><input type="password" class="val" id="setPin" autocomplete="new-password" placeholder="Değiştirmek için yeni PIN yazın (en az 4 hane)" style="width:100%;border:0;background:transparent;font:inherit;color:inherit"></div>
             </div>
+            <div id="tab-marka" style="display:none;"><div class="brSec"><h4>🎯 Hazır tasarımlar</h4><p>Birine dokunun, yazı tipi ve renkler otomatik ayarlansın. Sonra isteğinize göre değiştirin.</p><div id="brPresets" class="brRow" style="margin-top:0"></div></div><div class="brSec"><h4>Logo türü</h4><select id="brMode" class="brIn"><option value="text">Yazı logosu — isim yaz, yazı tipi ve renk seç</option><option value="img">Görsel logosu — kendi logo resmini yükle</option></select></div><div id="brTextBox"><div class="brSec"><h4>Yazı</h4><input id="brL1" class="brIn" placeholder="Büyük yazı (örn. KAFE ADI)" autocomplete="off"><input id="brL2" class="brIn" placeholder="Küçük yazı (örn. COFFEE) — isteğe bağlı" autocomplete="off"><select id="brFont" class="brIn"></select><select id="brW" class="brIn"><option value="500">Yazı kalınlığı: Normal</option><option value="700">Yazı kalınlığı: Kalın</option></select><select id="brCase" class="brIn"><option value="auto">Harf: otomatik</option><option value="upper">HEPSİ BÜYÜK</option><option value="lower">hepsi küçük</option><option value="title">Baş Harfler Büyük</option><option value="none">Yazdığım gibi</option></select><select id="brCStyle" class="brIn"><option value="auto">Renk: yumuşak geçiş (tek renkten)</option><option value="solid">Renk: düz tek renk</option><option value="two">Renk: iki renk geçişi</option></select><div class="brRow"><span>Yazı rengi</span><input type="color" id="brColor" value="#d9a441" style="width:48px;height:34px;border:0;padding:0;background:none"></div><div id="brColor2Row"><div class="brRow"><span>İkinci renk</span><input type="color" id="brColor2" value="#8a5a12" style="width:48px;height:34px;border:0;padding:0;background:none"></div></div><div class="brRow"><div class="mini-toggle on" id="brSpread" role="switch" aria-checked="true" tabindex="0" style="cursor:pointer"><span class="k"></span></div><div class="name">Harfleri genişçe yay (kısa isimlerde şık durur)</div></div><div class="brRow"><div class="mini-toggle on" id="brRule" role="switch" aria-checked="true" tabindex="0" style="cursor:pointer"><span class="k"></span></div><div class="name">Büyük ve küçük yazı arasında ince çizgi</div></div><div id="brAlignRow"><select id="brAlign" class="brIn"><option value="start">Hizalama: sola</option><option value="middle">Hizalama: ortaya</option></select></div></div><div class="brSec"><h4>Simge</h4><select id="brEmblem" class="brIn"><option value="auto">Varsayılan simge</option><option value="cup">Fincan</option><option value="letter">İlk harf rozeti</option><option value="img">Kendi simge görselim</option><option value="none">Simge yok (sadece yazı)</option></select><div id="brEmbImgRow" class="brRow"><input type="file" id="brEmbFile" accept="image/*"><span id="brEmbInfo" style="font-size:.8rem;color:var(--ink-dim)"></span></div></div></div><div id="brImgBox" style="display:none"><div class="brSec"><h4>Görsel logo</h4><p>Şeffaf arka planlı PNG en iyi sonucu verir. Büyük görseller otomatik küçültülür.</p><input type="file" id="brFile" accept="image/*"><div id="brImgInfo" style="font-size:.82rem;color:var(--ink-dim);margin-top:6px"></div><div class="brRow"><span>Boyut</span><input type="range" id="brScale" min="40" max="100" value="100" style="flex:1"></div><select id="brShape" class="brIn"><option value="none">Çerçeve: yok</option><option value="round">Çerçeve: yuvarlatılmış köşe</option><option value="circle">Çerçeve: daire (kırpar)</option></select><select id="brBg" class="brIn"><option value="none">Logo zemini: şeffaf</option><option value="white">Logo zemini: beyaz</option><option value="dark">Logo zemini: koyu lacivert</option><option value="custom">Logo zemini: özel renk</option></select><div id="brBgColorRow"><div class="brRow"><span>Zemin rengi</span><input type="color" id="brBgColor" value="#ffffff" style="width:48px;height:34px;border:0;padding:0;background:none"></div></div></div></div><div class="brSec"><h4>Menü rengi (müşteri menüsü)</h4><p>Düğmeler ve vurgular bu renkle boyanır. Otomatik açıkken logonuzun rengi kullanılır, uğraşmanız gerekmez.</p><div class="brRow"><div class="mini-toggle on" id="brAccAuto" role="switch" aria-checked="true" tabindex="0" style="cursor:pointer"><span class="k"></span></div><div class="name">Menü rengini logodan otomatik al</div></div><div id="brAccRow"><div class="brRow"><span>Menü rengi (elle)</span><input type="color" id="brAccent" value="#cf2e2e" style="width:48px;height:34px;border:0;padding:0;background:none"></div></div><div id="brPal" class="brRow"></div><div id="brAccSw" style="font-size:.85rem;margin-top:8px"></div></div><div class="brSec"><h4>Uygulama ikonu</h4><p>Telefon ana ekranına eklenince ve tarayıcı sekmesinde görünen küçük simgenin zemin rengi.</p><div class="brRow"><span>Zemin rengi</span><input type="color" id="brIconBg" value="#0F1A2C" style="width:48px;height:34px;border:0;padding:0;background:none"></div></div><div class="brSec"><h4>👁 Önizleme</h4><div class="brPre" id="brPrevL" style="background:#fff"></div><div class="brPre" id="brPrevD" style="background:#0F1A2C"></div><div class="brRow"><div id="brPrevI"></div><button type="button" id="brPrevBtn" style="border:0;border-radius:999px;padding:10px 18px;font:600 .9rem inherit;cursor:default">Sepete ekle</button></div></div><div class="brRow"><button class="btn-update" id="btnBrandSave" type="button">🎨 Logo ve markayı güncelle</button><button class="btn-mini" id="btnBrandReset" type="button">Varsayılana dön</button><button class="btn-mini" id="btnBrandExp" type="button">⬇ Ayarları indir</button><button class="btn-mini" id="btnBrandImp" type="button">⬆ Ayarları yükle</button><input type="file" id="brImpFile" accept=".json" style="display:none"></div></div>
+
             <div id="tab-sistem" style="display:none;">
               <div class="field"><label>Durum</label><div class="val" id="sysStatus"></div></div>
               <div class="link-row" style="margin-top:14px;"><button class="btn-mini" id="btnBackup">⬇ Yedeği İndir</button><button class="btn-mini" id="btnRestore">⬆ Yedekten Yükle</button><button class="btn-mini" id="btnWipe" style="background:var(--red);">Tüm Verileri Sıfırla</button></div>
@@ -2171,11 +2190,16 @@ button,input,select,textarea{ font-family:inherit; }
 
         <!-- ÜRÜN SATIŞ RAPORU -->
         <div class="screen" id="screen-stok">
-          <div class="panel-card">
-            <div class="panel-head"><div class="pi">📦</div><div><h2>Stok Yönetimi</h2><p>Malzeme stokları, reçeteler, fire ve tüketim raporları</p></div>
-              <div class="stk-head-btns"><button class="btn-mini" data-a="in">＋ Mal Kabul</button><button class="btn-mini" data-a="bulk">Toplu Giriş</button><button class="btn-mini" data-a="fire">Fire İşle</button><button class="btn-mini" data-a="new">＋ Malzeme</button></div></div>
-            <div class="tabs" id="stkTabs"><div class="tab active" data-t="stok">Stok</div><div class="tab" data-t="recete">Reçeteler ve maliyet</div><div class="tab" data-t="rapor">Tüketim raporu</div><div class="tab" data-t="hareket">Hareketler</div></div>
-            <div id="stkBody"></div>
+          <div class="panel-card stk2">
+            <div class="panel-head"><div class="pi">📦</div><div><h2>Stok</h2><p id="stkSub">Ürünlerinizin canlı adet stoğu</p></div>
+              <div class="stk-head-btns" id="stkHeadLive"><button class="btn-mini" data-sa="vis">⚙ Görünürlük</button><button class="sk-primary" data-sa="add" style="padding:8px 16px">＋ Stok ekle</button></div>
+              <div class="stk-head-btns" id="stkHeadAdv" style="display:none"><button class="btn-mini" data-a="in">＋ Mal Kabul</button><button class="btn-mini" data-a="bulk">Toplu Giriş</button><button class="btn-mini" data-a="fire">Fire İşle</button><button class="btn-mini" data-a="new">＋ Malzeme</button></div></div>
+            <div class="sk-seg" id="stkModes"><button class="on" data-sm="live">Ürün stoğu</button><button data-sm="log">Hareketler</button><button data-sm="adv">Malzeme &amp; reçete</button></div>
+            <div id="stkLive"></div>
+            <div id="stkAdv" style="display:none">
+              <div class="tabs" id="stkTabs"><div class="tab active" data-t="stok">Stok</div><div class="tab" data-t="recete">Reçeteler ve maliyet</div><div class="tab" data-t="rapor">Tüketim raporu</div><div class="tab" data-t="hareket">Hareketler</div></div>
+              <div id="stkBody"></div>
+            </div>
           </div>
         </div>
 
@@ -2304,7 +2328,7 @@ button,input,select,textarea{ font-family:inherit; }
     body.setAttribute('data-theme', isDark ? 'light' : 'dark');
     eyeIcon.textContent = isDark ? '☀️' : '🌙';
     eyeLabel.textContent = isDark ? 'Göz dinlendirme' : 'Karanlık mod açık';
-    try{ localStorage.setItem('seyirTheme', isDark ? 'light' : 'dark'); }catch(e){}
+    try{ localStorage.setItem('posTheme', isDark ? 'light' : 'dark'); }catch(e){}
   });
 
   // ana gruplar: yalnızca biri açık kalır (akordeon)
@@ -2314,7 +2338,7 @@ button,input,select,textarea{ font-family:inherit; }
     h.addEventListener('click', tg); h.addEventListener('keydown', e => { if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); tg(); } });
   });
   // açılır alt gruplar (durum hatırlanır)
-  const FOLD_KEY = 'seyirFolds';
+  const FOLD_KEY = 'posFolds';
   function foldState(){ try{ return JSON.parse(localStorage.getItem(FOLD_KEY) || '{}'); }catch(e){ return {}; } }
   function foldSave(k, v){ try{ const st = foldState(); st[k] = v ? 1 : 0; localStorage.setItem(FOLD_KEY, JSON.stringify(st)); }catch(e){} }
   document.querySelectorAll('.nav-fold').forEach(f => {
@@ -2348,7 +2372,7 @@ button,input,select,textarea{ font-family:inherit; }
     document.querySelectorAll('.sidebar .nav-item[data-screen="' + name + '"]').forEach(n => { n.classList.add('active'); const f = n.closest('.nav-fold'); if(f) f.classList.add('open'); const ac = n.closest('.nav-acc'); if(ac) accOpen(ac); });
     if(name === 'urunler'){ try{ renderCatList(); renderProductGrid(); }catch(e){} }
     if(typeof onScreen === 'function') onScreen(name);
-    try{ if(document.body.classList.contains('staff')) sessionStorage.setItem('seyirScreen', name); }catch(e){}
+    try{ if(document.body.classList.contains('staff')) sessionStorage.setItem('posScreen', name); }catch(e){}
   }
   document.querySelectorAll('[data-screen]').forEach(el => {
     el.addEventListener('click', (e) => {
@@ -2368,7 +2392,7 @@ button,input,select,textarea{ font-family:inherit; }
   let payLog = [], saleLog = [], closedAt = 0, lists = {}, payTypes = [], uiReady = false;
   let cancelLog = [];
   let extOrders = {}, extSeq = 0, perms = {}, waiveLog = [], colLog = [], dayReports = [], curUser = null;
-  let settings = { restName:'SEYİR CAFE', dayStart:'05:00', firstOrderNo:'101', pin:'' };
+  let settings = { restName: APP_CONFIG.brand.name, dayStart:'05:00', firstOrderNo:'101', pin:'' };
   const tableLabels = {};
   const tableGuest = {};
   const tname = n => tableGuest[n] || tableLabels[n] || ('Masa ' + n);
@@ -2651,7 +2675,7 @@ button,input,select,textarea{ font-family:inherit; }
     mpList = q ? categories.flatMap(c => c.products).filter(p => p.name.toLocaleLowerCase('tr-TR').includes(q)) : g0.subs.filter(sb => mpSub < 0 || sb.idx === mpSub).flatMap(sb => sb.cat.products);
     const grid = mpEl('mpGrid'), st = grid.scrollTop;
     grid.innerHTML = mpList.map((p, i) => { const d = mpDraft.find(it => it.name === p.name && it.unit === p.price), n = d ? d.qty : 0, sv = saved.filter(it => it.name === p.name && it.unit === p.price).reduce((s, it) => s + it.qty, 0);
-      return '<div class="mp-card' + (n ? ' in' : '') + '" data-i="' + i + '">' + visHtml(p, '', 'v-mp') + '<b>' + esc(p.name) + '</b>' + (p.desc ? '<small>' + esc(p.desc) + '</small>' : '') + '<span class="pr">' + fmtTL(p.price) + '</span>' + (sv ? '<span class="mp-ex">adisyonda: ' + sv + '</span>' : '') + '<div class="ctl">' +
+      return '<div class="mp-card' + (n ? ' in' : '') + '" data-i="' + i + '">' + visHtml(p, '', 'v-mp') + '<b>' + esc(p.name) + '</b>' + (p.desc ? '<small>' + esc(p.desc) + '</small>' : '') + '<span class="pr">' + fmtTL(p.price) + '</span>' + skChip(p.name) + (sv ? '<span class="mp-ex">adisyonda: ' + sv + '</span>' : '') + '<div class="ctl">' +
         (n ? '<button class="mn" aria-label="Azalt">−</button><span class="q">' + n + '</span>' : '<span></span><span></span>') + '<button class="pl" aria-label="Ekle">+</button></div></div>'; }).join('') || '<p style="color:var(--ink-faint);padding:12px">Ürün bulunamadı.</p>';
     grid.scrollTop = st;
     const cnt = draftCount(), tot = cartTotal(currentCartKey);
@@ -2662,6 +2686,7 @@ button,input,select,textarea{ font-family:inherit; }
   function mpChange(p, d){
     if(!can('orders')){ showToast('Sipariş ekleme yetkiniz yok.'); return; }
     const x = mpDraft.find(i => i.name === p.name && i.unit === p.price);
+    if(d > 0 && STK.pset.block && stkTracked(p.name) && stkAvail(p.name) - (x ? x.qty : 0) <= 0){ showToast(p.name + (stkAvail(p.name) <= 0 ? ' tükendi.' : ': stokta yeterli adet yok.')); return; }
     if(d > 0){ if(x) x.qty++; else mpDraft.push({ name: p.name, sub: (p.portion || 'tam').toLowerCase(), unit: p.price, qty: 1 }); }
     else if(x){ x.qty--; if(x.qty <= 0) mpDraft.splice(mpDraft.indexOf(x), 1); }
     renderMenuPicker();
@@ -2784,7 +2809,7 @@ button,input,select,textarea{ font-family:inherit; }
       document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
       tab.classList.add('active');
       const which = tab.getAttribute('data-tab');
-      ['genel','odeme','sistem'].forEach(t => document.getElementById('tab-' + t).style.display = which === t ? 'block' : 'none');
+      ['genel','odeme','sistem','marka'].forEach(t => document.getElementById('tab-' + t).style.display = which === t ? 'block' : 'none');
       if(which === 'sistem') updateSysStatus();
     });
   });
@@ -2905,7 +2930,7 @@ button,input,select,textarea{ font-family:inherit; }
   // ======================================================================
   // MENÜ / ÜRÜNLER — categories with product cards
   // ======================================================================
-  // ---- SEYİR CAFE hazır menü: [kategori, ikon, mutfak grubu, [[ürün, ikon, fiyat TL], ...]] ----
+  // ---- hazır örnek menü: [kategori, ikon, mutfak grubu, [[ürün, ikon, fiyat TL], ...]] ----
   const SEED_MENU = [
     ["Kahvaltı","🍳","Mutfak",[["Serpme Kahvaltı (2 Kişilik)","🍽️",950],["Kahvaltı Tabağı","🍳",400],["Peynir Tabağı","🧀",250],["Söğüş Tabağı","🥒",100],["Zeytin","🫒",80],["Bal Kaymak","🍯",250],["Reçeller","🍓",100],["Sosis Tava","🌭",220]]],
     ["Yumurta Çeşitleri","🥚","Mutfak",[["Sahanda Yumurta","🍳",150],["Peynirli Omlet","🧀",180],["Sucuklu Yumurta","🥓",230],["Kavurmalı Yumurta","🥩",300],["Menemen","🍅",220],["Kavurmalı Menemen","🥩",300],["Kaşarlı Menemen","🧀",250],["Sucuklu Menemen","🥓",270],["Kaşarlı Sucuklu Menemen","🧀",300]]],
@@ -3024,7 +3049,7 @@ button,input,select,textarea{ font-family:inherit; }
     r.onload = () => { const im = new Image(); im.onload = () => { const k = Math.min(1, max / Math.max(im.width, im.height)), c = document.createElement('canvas'); c.width = Math.round(im.width * k); c.height = Math.round(im.height * k); c.getContext('2d').drawImage(im, 0, 0, c.width, c.height); cb(c.toDataURL('image/jpeg', 0.72)); }; im.onerror = () => cb(''); im.src = r.result; };
     r.onerror = () => cb(''); r.readAsDataURL(file);
   }
-  const MENU_VER = 2; // bu sürümden eski kayıtlardaki menü silinir, yerine SEYİR CAFE menüsü konur
+  const MENU_VER = 2; // yalnızca bilgi amaçlı; sürüm değişse bile mevcut menü ASLA silinmez
   function buildSeedMenu(){ return migrateMenuGroups(SEED_MENU.map(c => ({ name: c[0], icon: c[1], products: c[3].map(p => ({ name: p[0], icon: p[1], portion: 'Tam', price: p[2], kg: c[2] })) }))); }
   function ensureSeedGroups(){ SEED_GROUPS.forEach(n => { if(!mutfakGruplari.some(g => g.name === n)) mutfakGruplari.push({ name: n, durum: 'Hazırlanıyor ve Hazırlandı' }); }); }
   let categories = buildSeedMenu();
@@ -3708,14 +3733,12 @@ button,input,select,textarea{ font-family:inherit; }
   // Aşağıdaki bilgileri Firebase Console > Proje Ayarları > Web uygulaması bölümünden doldurun.
   // Boş bırakılırsa sistem "yerel mod"da (aynı tarayıcıdaki sekmeler arasında) çalışır.
   // ======================================================================
-  const FIREBASE_ADMIN_EMAIL = 'uzeyirmanaz@gmail.com'; // yalnızca bu Firebase hesabı menüyü yayınlar ve personel dizinini yazar
-  const FIREBASE_CONFIG = {
-    apiKey: "AIzaSyBrUigTh0e3BxPzGS_ofmgAdi0Xl8PVJc0", authDomain: "adisyon-sistem-818a6.firebaseapp.com", databaseURL: "https://adisyon-sistem-818a6-default-rtdb.firebaseio.com", projectId: "adisyon-sistem-818a6", appId: "1:422273915069:web:899482bfb023397856bfd4"
-  };
+  const FIREBASE_ADMIN_EMAIL = APP_CONFIG.adminEmail || ''; // yalnızca bu Firebase hesabı menüyü yayınlar ve personel dizinini yazar
+  const FIREBASE_CONFIG = APP_CONFIG.firebase || {};
   const ADMIN_PIN = '';  // varsayılan PIN yok: ilk girişte yönetici PIN'i belirlenir
 
   const LocalRT = (() => {
-    const K = 'seyirRT', L = [];
+    const K = 'posRT', L = [];
     const rd = () => { try{ return JSON.parse(localStorage.getItem(K)) || {}; }catch(e){ return {}; } };
     const get = (t, p) => { const v = p.split('/').filter(Boolean).reduce((o, k) => (o == null ? o : o[k]), t); return v === undefined ? null : v; };
     const fire = () => { const t = rd(); L.forEach(l => l.cb(get(t, l.p))); };
@@ -3725,7 +3748,7 @@ button,input,select,textarea{ font-family:inherit; }
       if(v === null) delete o[ks[ks.length - 1]]; else o[ks[ks.length - 1]] = v;
       localStorage.setItem(K, JSON.stringify(t)); fire();
     };
-    window.addEventListener('storage', e => { if(e.key === K) fire(); });
+    window.addEventListener('storage', e => { if(e.key === window.__nsk(K)) fire(); });
     return {
       local: true,
       set: (p, v) => put(p, v),
@@ -3802,7 +3825,7 @@ button,input,select,textarea{ font-family:inherit; }
       };
       let secApp = null;
       const createStaff = async (email, pw) => {
-        if(!secApp) secApp = initializeApp(c, 'seyirSec');
+        if(!secApp) secApp = initializeApp(c, 'posSec');
         const a = getAuth(secApp);
         try{ const cr = await createUserWithEmailAndPassword(a, email, pw); return cr.user.uid; }
         finally{ try{ await signOut(a); }catch(_){} }
@@ -3834,8 +3857,8 @@ button,input,select,textarea{ font-family:inherit; }
   }
   const arr = x => Array.isArray(x) ? x.filter(Boolean) : Object.values(x || {});
   let pubData = null, staffMode = false, pubReady = false, pubTimer = 0;
-  const PUB_CACHE = 'seyirPubCache';
-  try{ const c = JSON.parse(localStorage.getItem(PUB_CACHE) || 'null'); if(c && c.categories && c.menuVer === MENU_VER){ pubData = c; pubReady = true; } }catch(e){}
+  const PUB_CACHE = 'posPubCache';
+  try{ const c = JSON.parse(localStorage.getItem(PUB_CACHE) || 'null'); if(c && c.categories){ pubData = c; pubReady = true; } }catch(e){}
 
   // ---------------- MÜŞTERİ DİJİTAL MENÜ ----------------
   let cCart = {}, cTab = 0, cSub = -1, cSubOf = [], myOrderId = null, cOpen = false;
@@ -3843,7 +3866,7 @@ button,input,select,textarea{ font-family:inherit; }
   function customerData(){
     if(pubData && pubData.categories){
       const tb = arr(pubData.tables);
-      if(pubData.menuVer === MENU_VER){ const cc = arr(pubData.categories).map(c => ({ name: c.name, grp: c.grp, sub: c.sub, gv: c.gv || 0, icon: c.icon || '', img: oldImg(c.img) ? '' : (c.img || ''), products: arr(c.products).map(pr => oldImg(pr.img) ? Object.assign({}, pr, { img: '' }) : pr) })); cc._gm = arr(pubData.groupMeta).filter(Boolean); return { categories: cc, tables: tb }; }
+      if(pubData.categories){ const cc = arr(pubData.categories).map(c => ({ name: c.name, grp: c.grp, sub: c.sub, gv: c.gv || 0, icon: c.icon || '', img: oldImg(c.img) ? '' : (c.img || ''), products: arr(c.products).map(pr => oldImg(pr.img) ? Object.assign({}, pr, { img: '' }) : pr) })); cc._gm = arr(pubData.groupMeta).filter(Boolean); return { categories: cc, tables: tb }; }
       return { categories, tables: tb }; // eski sürümden kalan yayın menüsü yok sayılır
     }
     return { categories, tables: regions.flatMap(r => r.tables.map(n => ({ n, label: tableLabels[n] || ('Masa ' + n) }))) };
@@ -3895,6 +3918,7 @@ button,input,select,textarea{ font-family:inherit; }
   const _lastHtml = {};
   function setHtml(id, html){ if(_lastHtml[id] === html && $id(id).innerHTML) return; _lastHtml[id] = html; $id(id).innerHTML = html; }
   function renderCustomer(){
+    try{ refreshBrandUI(); }catch(e){}
     if(!pubReady && !staffMode){
       $id('customerView').classList.add('c-loading');
       if(!$id('cItems').dataset.sk){ $id('cItems').dataset.sk = '1'; $id('cTabs').innerHTML = ''; $id('cItems').innerHTML = Array(6).fill('<div class="c-item card c-sk"><div class="vis v-card"></div><div class="nm"><b>&nbsp;</b></div></div>').join(''); }
@@ -3919,8 +3943,8 @@ button,input,select,textarea{ font-family:inherit; }
       lst.forEach((p, i) => {
         const q = (cCart[p.name] || {}).qty || 0;
         if(cSub < 0 && cSubOf[i] && cSubOf[i] !== cSubOf[i - 1] && subsOn) ents.push({ key: 'h' + cLang + cTab + '|' + cSubOf[i], html: '<div class="c-subttl">' + esc(T(cSubOf[i])) + '</div>' });
-        const ctl = mo ? '' : q ? '<div class="qty-ctl"><button class="qbtn" data-p="' + i + '" data-d="-1">−</button><b class="qv">' + q + '</b><button class="qbtn" data-p="' + i + '" data-d="1">+</button></div>' : '<button class="qbtn" data-p="' + i + '" data-d="1">+</button>';
-        ents.push({ key: 'p' + cLang + p.name, ctl, html: '<div class="c-item card">' + visHtml(p, '', 'v-card') + '<div class="nm"><b>' + esc(T(p.name)) + '</b>' + (p.desc ? '<small>' + esc(T(p.desc)) + '</small>' : '') + '</div><div class="cfoot"><span class="pr">' + fmtTL(p.price) + '</span></div></div>' });
+        const sk = custStk(p.name), ctl = mo ? '' : (sk && sk.out && sk.b) ? '<span class="c-soldout">Tükendi</span>' : q ? '<div class="qty-ctl"><button class="qbtn" data-p="' + i + '" data-d="-1">−</button><b class="qv">' + q + '</b><button class="qbtn" data-p="' + i + '" data-d="1">+</button></div>' : '<button class="qbtn" data-p="' + i + '" data-d="1">+</button>';
+        ents.push({ key: 'p' + cLang + p.name, ctl, html: '<div class="c-item card' + (sk && sk.out ? ' c-out' : '') + '">' + visHtml(p, '', 'v-card') + '<div class="nm"><b>' + esc(T(p.name)) + '</b>' + (p.desc ? '<small>' + esc(T(p.desc)) + '</small>' : '') + (sk ? (sk.out ? '<span class="c-stk out">Tükendi</span>' : '<span class="c-stk low">Son ' + sk.left + ' adet</span>') : '') + '</div><div class="cfoot"><span class="pr">' + fmtTL(p.price) + '</span></div></div>' });
       });
       keyed('items', $id('cItems'), ents, (n, e) => {
         if(e.ctl === undefined || n.dataset.c === e.ctl) return;
@@ -3943,13 +3967,14 @@ button,input,select,textarea{ font-family:inherit; }
     const b = e.target.closest('.qbtn'); if(!b) return;
     const p = cList()[+b.dataset.p]; if(!p) return;
     const cur = cCart[p.name] || { name: p.name, unit: p.price, qty: 0 };
+    if(+b.dataset.d > 0){ const sk = custStk(p.name); if(sk && sk.b){ const av = sk.out ? 0 : sk.left; if(cur.qty + 1 > av){ showToast(av <= 0 ? 'Bu ürün tükendi.' : 'Stokta yalnızca ' + av + ' adet kaldı.'); return; } } }
     cur.qty += +b.dataset.d;
     if(cur.qty <= 0) delete cCart[p.name]; else cCart[p.name] = cur;
     renderCustomer();
   });
   $id('cMasa').addEventListener('change', renderCustomer);
   $id('cSearch').addEventListener('input', renderCustomer);
-  $id('cCartList').addEventListener('click', e => { const b = e.target.closest('.cq'); if(!b) return; const it = cCart[b.dataset.n]; if(!it) return; it.qty += +b.dataset.d; if(it.qty <= 0) delete cCart[b.dataset.n]; renderCustomer(); });
+  $id('cCartList').addEventListener('click', e => { const b = e.target.closest('.cq'); if(!b) return; const it = cCart[b.dataset.n]; if(!it) return; if(+b.dataset.d > 0){ const sk = custStk(it.name); if(sk && sk.b){ const av = sk.out ? 0 : sk.left; if(it.qty + 1 > av){ showToast(av <= 0 ? 'Bu ürün tükendi.' : 'Stokta yalnızca ' + av + ' adet kaldı.'); return; } } } it.qty += +b.dataset.d; if(it.qty <= 0) delete cCart[b.dataset.n]; renderCustomer(); });
   const coText = {
     bekliyor: '⏳ Siparişiniz garsona iletildi, onay bekleniyor…',
     onaylandi: '✅ Siparişiniz onaylandı, hazırlanıyor 👨‍🍳',
@@ -3985,7 +4010,7 @@ button,input,select,textarea{ font-family:inherit; }
   $id('loginOk').addEventListener('click', () => tryLogin());
   $id('loginPass').addEventListener('keydown', e => { if(e.key === 'Enter') tryLogin(); });
   $id('loginName').addEventListener('keydown', e => { if(e.key === 'Enter') $id('loginPass').focus(); });
-  $id('btnLogout').addEventListener('click', async () => { try{ if(curUser && curUser.uid && RT.staffLogout) await RT.staffLogout(); }catch(e){} sessionStorage.removeItem('seyirUser'); sessionStorage.removeItem('seyirStaff'); sessionStorage.removeItem('seyirScreen'); location.reload(); });
+  $id('btnLogout').addEventListener('click', async () => { try{ if(curUser && curUser.uid && RT.staffLogout) await RT.staffLogout(); }catch(e){} sessionStorage.removeItem('posUser'); sessionStorage.removeItem('posStaff'); sessionStorage.removeItem('posScreen'); location.reload(); });
 
   // ---------------- GARSON: gelen müşteri siparişleri ----------------
   let coData = {}, coSeen = new Set(), coFirst = true, kitchenData = {}, kSeen = new Set(), kFirst = true, lastPub = '';
@@ -4018,8 +4043,8 @@ button,input,select,textarea{ font-family:inherit; }
   // ---------------- GARSON PANELİ BAŞLAT ----------------
   function publishPublic(){
     const tables = regions.flatMap(r => r.tables.map(n => ({ n, label: tableLabels[n] || ('Masa ' + n) })));
-    const data = { categories: migrateMenuGroups(stripOldImgs(categories)).map(c => ({ name: c.name, grp: c.grp || c.name, sub: c.sub || '', gv: c.gv || 0, icon: c.icon || '', img: c.img || '', products: c.products.map(p => ({ name: p.name, icon: p.icon || '', price: p.price, desc: p.desc || '', img: p.img || '' })) })), menuVer: MENU_VER, groupMeta: groupMeta.map(m => ({ name: m.name, icon: m.icon || '', img: m.img || '', ord: typeof m.ord === 'number' ? m.ord : -1 })), tables, menuOnly: !!settings.menuOnly, custPw: settings.custPw ? custHashOf(settings.custPw) : '', wifiName: settings.wifiName || '', wifiPass: settings.wifiPass || '', trm: settings.trm || {} };
-    if(!RT.local && RT.isAdmin && !RT.isAdmin()) return; // yalnızca yönetici hesabı yayınlar
+    const data = { categories: migrateMenuGroups(stripOldImgs(categories)).map(c => ({ name: c.name, grp: c.grp || c.name, sub: c.sub || '', gv: c.gv || 0, icon: c.icon || '', img: c.img || '', products: c.products.map(p => ({ name: p.name, icon: p.icon || '', price: p.price, desc: p.desc || '', img: p.img || '' })) })), menuVer: MENU_VER, groupMeta: groupMeta.map(m => ({ name: m.name, icon: m.icon || '', img: m.img || '', ord: typeof m.ord === 'number' ? m.ord : -1 })), tables, menuOnly: !!settings.menuOnly, custPw: settings.custPw ? custHashOf(settings.custPw) : '', wifiName: settings.wifiName || '', wifiPass: settings.wifiPass || '', wifiOn: settings.wifiOn !== false, brand: settings.brand || null, stock: (function(){ try{ return stkPublic(); }catch(e){ return null; } })(), social: (function(){ try{ return socialList(); }catch(e){ return []; } })(), trm: settings.trm || {} };
+    if(!RT.local && RT.isAdmin && !RT.isAdmin()){ if(curUser && curUser.admin && Date.now() - (window.__pubWarn || 0) > 60000){ window.__pubWarn = Date.now(); showToast('Menü yayınlanamadı: çıkış yapıp isim "Yönetici" + şifre ile giriş yapın.'); } return; } // yalnızca yönetici hesabı yayınlar
     if(holdImgs) return; // güncel veri gelmeden eski yerel menüyü yayınlayıp müşteriye eski görseli gösterme
     const s = JSON.stringify(data);
     if(s !== lastPub){ lastPub = s; RT.set('public', data); }
@@ -4061,6 +4086,7 @@ button,input,select,textarea{ font-family:inherit; }
     ['kitchenView', 'Mutfak ekranını görme (müdahale edemez)', 'Mutfak siparişlerini yalnızca izler; işaretleme yapamaz, uyarı sesi çıkmaz', [0, 0, 1, 1, 0, 1]],
     ['customers', 'Müşteri yönetimi', 'Müşteri ekleme, düzenleme, silme, cari tahsilat', [0, 0, 1, 1, 1, 0]],
     ['expenses', 'Gider ve zayi işlemleri', 'Gider / masraf ve zayi kaydı (canlı bağlantıda yalnızca yönetici görür)', [0, 0, 1, 1, 0, 0]],
+    ['stock', 'Stok yönetimi', 'Ürün stoğunu görme, adet ekleme ve sayım yapma', [0, 0, 1, 1, 0, 0]],
     ['reports', 'Raporlar ve gün sonu', 'Ana sayfa, tüm raporlar, günü kapatma (canlı bağlantıda yalnızca yönetici görür)', [0, 0, 1, 1, 0, 0]],
     ['tables', 'Masa ve bölge düzeni', 'Bölge / masa ekleme, silme, yeniden adlandırma', [0, 0, 0, 1, 0, 0]],
     ['menu', 'Menü, ürün ve tanımlar', 'Ürün, kategori, birim, özellik, KDV, indirim, mutfak grubu', [0, 0, 0, 1, 0, 0]],
@@ -4108,7 +4134,8 @@ button,input,select,textarea{ font-family:inherit; }
     { const pf = $id('setPin') && $id('setPin').closest('.field'); if(pf) pf.style.display = (curUser && curUser.admin && !curUser.owner) ? '' : 'none';
       const op = $id('ownerPwField'); if(op) op.style.display = (curUser && curUser.owner && !RT.local) ? '' : 'none';
       const of = $id('ownerAccField'); if(of) of.style.display = (curUser && curUser.sup && !RT.local) ? '' : 'none';
-      const sf = $id('supPinField'); if(sf) sf.style.display = (curUser && curUser.admin && !RT.local && (curUser.sup || (!supExists && !isHash(settings.supPin)))) ? '' : 'none'; }
+      const bt = $id('tabMarka'), bp = $id('tab-marka'), okb = !!(curUser && (curUser.sup || (RT.local && curUser.admin))); if(bt) bt.style.display = okb ? '' : 'none'; if(!okb && bp && bp.style.display === 'block'){ const g = document.querySelector('.tab[data-tab="genel"]'); if(g) g.click(); }
+      const sf = $id('supPinField'); if(sf) sf.style.display = (curUser && curUser.admin && !RT.local && (curUser.sup || (!supExists && !isHash(settings.supPin) && location.hash === '#kurulum'))) ? '' : 'none'; }
     if(curUser){ $id('sbAv').textContent = (curUser.ad || '?').trim().charAt(0).toLocaleUpperCase('tr-TR') || '?'; $id('sbUserName').textContent = curUser.ad; $id('sbUserRole').textContent = roleLabel(curUser) + ' · ' + (RT.local ? 'Yerel mod' : 'Canlı bağlantı'); }
     try{ custLockRender(); }catch(e){}
     $id('btnCO').style.display = can('orders') ? '' : 'none';
@@ -4120,7 +4147,7 @@ button,input,select,textarea{ font-family:inherit; }
   }
   // sayfa yenilenince kalınan ekrana dön (sipariş/adisyon ekranı bağlam istediği için hariç)
   function goLastScreen(){
-    let n = null; try{ n = sessionStorage.getItem('seyirScreen'); }catch(e){}
+    let n = null; try{ n = sessionStorage.getItem('posScreen'); }catch(e){}
     if(n && n !== 'order' && document.getElementById('screen-' + n) && screenAllowed(n)){ showScreen(n); if(n === 'siparis-masa'){ try{ renderSiparisMasa(); }catch(e){} } }
     else goHome();
   }
@@ -4191,8 +4218,8 @@ button,input,select,textarea{ font-family:inherit; }
     return String(s || '').replace(/[çğıİöşüÇĞÖŞÜI]/g, ch => m[ch]).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 40);
   }
   function endRestoring(){ document.documentElement.classList.remove('restoring'); }
-  function staffEmail(n, v){ return n + (v > 1 ? '.' + v : '') + '@personel.seyir'; }
-  const pwHash = s => sha256('seyir|' + s);
+  function staffEmail(n, v){ return n + (v > 1 ? '.' + v : '') + '@personel.pos'; }
+  const pwHash = s => sha256('pos|' + s);
   const pinOK = pw => !!pw && !!settings.pin && (settings.pin === pwHash(pw) || settings.pin === pw);
   function askSecret(msg){
     return new Promise(res => {
@@ -4263,18 +4290,19 @@ button,input,select,textarea{ font-family:inherit; }
     const now = Date.now(), err = $id('loginErr');
     if(now < loginLockUntil){ err.textContent = 'Çok fazla hatalı deneme. ' + Math.ceil((loginLockUntil - now) / 1000) + ' sn bekleyin.'; return; }
     const pw = $id('loginPass').value; if(!pw) return;
-    const nm = $id('loginName') ? $id('loginName').value.trim() : '', nmN = normName(nm), adminTry = !nmN || nmN === 'yonetici', supTry = nmN === 'admin';
+    let nm = $id('loginName') ? $id('loginName').value.trim() : '', nmN = normName(nm); const adminTry = !nmN || nmN === 'yonetici', supTry = nmN === 'admin';
     loginBusy = true; err.textContent = '';
     try{
-      let user = null, remoteErr = false;
-      if(adminTry && pinOK(pw)) user = { ad: 'Yönetici', gorev: 'Müdür', admin: true };
+      let user = null, remoteErr = false, ownerExists = false;
+      if(!RT.local){ try{ ownerExists = (await RT.get('staffVer/yonetici')) != null; }catch(e){} if(ownerExists && !nmN){ nm = 'Yönetici'; nmN = 'yonetici'; } }
+      if(adminTry && !ownerExists && pinOK(pw)) user = { ad: 'Yönetici', gorev: 'Müdür', admin: true };
       else if(RT.local){
         const mt = x => (!nmN || normName(x.ad) === nmN) && ((x.h && x.h === pwHash(pw)) || (x.sifre && x.sifre === pw));
         const u = staffUsers.find(x => !x.blocked && mt(x));
         if(u){ if(u.sifre){ u.h = pwHash(pw); delete u.sifre; } user = { ad: u.ad, gorev: u.gorev, bolge: u.bolge || '', admin: false, h: u.h }; }
         else if(staffUsers.some(x => x.blocked && mt(x))){ err.textContent = 'Bu kullanıcının girişi engellenmiş.'; return; }
       } else {
-        let legacyOn = true; try{ legacyOn = (await RT.get('staffMeta/legacyOff')) !== true; }catch(e){}
+        let legacyOn = false; try{ legacyOn = (await RT.get('staffMeta/legacyOn')) === true; }catch(e){}
         let known = false;
         // 1) yeni yol: isim + şifre -> kişiye özel Firebase hesabı
         if(nmN && RT.staffLogin){
@@ -4287,7 +4315,7 @@ button,input,select,textarea{ font-family:inherit; }
           else known = !!r.known;
         }
         // 2) eski yol (geçiş dönemi): yalnızca şifresi henüz taşınmamış kişiler ve yönetici PIN doğrulaması
-        if(!user && nmN && (nmN === 'yonetici' || nmN === 'admin' || (legacyOn && !known))){
+        if(!user && nmN && !(ownerExists && nmN === 'yonetici') && (nmN === 'yonetici' || nmN === 'admin' || (legacyOn && !known))){
           const hh = pwHash(pw), mt = x => !x.uid && (!nmN || normName(x.ad) === nmN) && ((x.h && x.h === hh) || (x.sifre && x.sifre === pw));
           const u = legacyOn ? staffUsers.find(x => !x.blocked && mt(x)) : null;
           if(u){ if(u.sifre){ u.h = pwHash(pw); delete u.sifre; } user = { ad: u.ad, gorev: u.gorev, bolge: u.bolge || '', admin: false, h: u.h }; }
@@ -4307,7 +4335,7 @@ button,input,select,textarea{ font-family:inherit; }
           }
         }
       }
-      let firstOk = !user && adminTry && !settings.pin && !remoteErr;
+      let firstOk = !user && adminTry && !settings.pin && !remoteErr && !ownerExists;
       if(firstOk && !RT.local){
         // dizin daha önce kurulduysa (bayrak var) yanlış şifre sayılır; ilk kurulum yalnızca bayrak yokken sunulur
         let rdy = 'err'; try{ rdy = await RT.get('staffMeta/ready'); }catch(e){}
@@ -4332,7 +4360,7 @@ button,input,select,textarea{ font-family:inherit; }
         else err.textContent = LOGIN_GEN;
         return;
       }
-      loginFails = 0; curUser = user; sessionStorage.setItem('seyirUser', JSON.stringify(user)); sessionStorage.removeItem('seyirScreen');
+      loginFails = 0; curUser = user; sessionStorage.setItem('posUser', JSON.stringify(user)); sessionStorage.removeItem('posScreen');
       $id('loginModal').classList.remove('show'); $id('loginPass').value = ''; if($id('loginName')) $id('loginName').value = ''; enterStaff(); saveState();
     } finally { loginBusy = false; }
   }
@@ -4340,28 +4368,28 @@ button,input,select,textarea{ font-family:inherit; }
   function watchRole(){
     if(!curUser || !curUser.uid || RT.local) return;
     RT.on('staffRoles/' + curUser.uid, v => {
-      if(!v || v.blocked === true || (curUser && curUser.owner && v.owner !== true)){ try{ RT.staffLogout && RT.staffLogout(); }catch(e){} sessionStorage.removeItem('seyirUser'); showToast('Erişiminiz kapatıldı.'); setTimeout(() => location.reload(), 800); }
+      if(!v || v.blocked === true || (curUser && curUser.owner && v.owner !== true)){ try{ RT.staffLogout && RT.staffLogout(); }catch(e){} sessionStorage.removeItem('posUser'); showToast('Erişiminiz kapatıldı.'); setTimeout(() => location.reload(), 800); }
       else if(curUser){ curUser.gorev = v.gorev; curUser.bolge = v.bolge || ''; }
     });
   }
   async function restoreSession(){
     try{
-      const u = JSON.parse(sessionStorage.getItem('seyirUser') || 'null'); if(!u) return;
+      const u = JSON.parse(sessionStorage.getItem('posUser') || 'null'); if(!u) return;
       if(!u.admin || u.owner){
         if(u.uid){
-          if(RT.local || !RT.uid || RT.uid() !== u.uid){ sessionStorage.removeItem('seyirUser'); return; }
+          if(RT.local || !RT.uid || RT.uid() !== u.uid){ sessionStorage.removeItem('posUser'); return; }
           let r = null; try{ r = await RT.get('staffRoles/' + u.uid); }catch(e){}
-          if(!r || r.blocked === true){ sessionStorage.removeItem('seyirUser'); try{ RT.staffLogout && RT.staffLogout(); }catch(e){} return; }
+          if(!r || r.blocked === true){ sessionStorage.removeItem('posUser'); try{ RT.staffLogout && RT.staffLogout(); }catch(e){} return; }
           u.ad = r.ad; u.gorev = r.gorev; u.bolge = r.bolge || '';
-          if(u.owner){ if(r.owner !== true){ sessionStorage.removeItem('seyirUser'); try{ RT.staffLogout && RT.staffLogout(); }catch(e){} return; } RT.setOwner && RT.setOwner(u.uid); }
+          if(u.owner){ if(r.owner !== true){ sessionStorage.removeItem('posUser'); try{ RT.staffLogout && RT.staffLogout(); }catch(e){} return; } RT.setOwner && RT.setOwner(u.uid); }
         } else {
           const rec = staffUsers.find(x => x.ad === u.ad || (u.h && x.h === u.h));
-          if(rec){ if(rec.blocked){ sessionStorage.removeItem('seyirUser'); return; } u.gorev = rec.gorev; u.bolge = rec.bolge || ''; }
+          if(rec){ if(rec.blocked){ sessionStorage.removeItem('posUser'); return; } u.gorev = rec.gorev; u.bolge = rec.bolge || ''; }
           else if(!RT.local && u.h){
             const r = await remoteStaff0(u.h);
-            if(!r || r.blocked){ sessionStorage.removeItem('seyirUser'); return; }
+            if(!r || r.blocked){ sessionStorage.removeItem('posUser'); return; }
             u.gorev = r.gorev; u.bolge = r.bolge || '';
-          } else { sessionStorage.removeItem('seyirUser'); return; }
+          } else { sessionStorage.removeItem('posUser'); return; }
         }
       }
       curUser = u; enterStaff();
@@ -4406,32 +4434,234 @@ button,input,select,textarea{ font-family:inherit; }
 ${st('M50 58c-5-6 5-10 0-17', 0)}${st('M60 56c-5-7 5-11 0-19', 1.05)}${st('M70 58c-5-6 5-10 0-17', 2.1)}
 <g clip-path="url(#${k}p)"><path d="M10 40Q60 -10 110 40Q60 22 10 40z" fill="url(#${k}h)"/><g transform="rotate(20 60 60)"><rect x="-40" y="-20" width="20" height="160" fill="url(#${k}s)"><animate attributeName="x" values="-40;150;150" keyTimes="0;.3;1" dur="5.5s" repeatCount="indefinite"/></rect></g></g>`;
   }
-  function logoSVG(mode){
-    const HEART = 'M0 13C-24-2-14-18-6-15 -2-13.500 0-9 0-9 0-9 2-13.500 6-15 14-18 24-2 0 13Z';
-    if(mode === 'mark') return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" role="img" aria-label="Seyir Cafe"><rect width="100" height="100" rx="24" fill="#1c0c0c"/><path d="M345 127.5H381V131.2H372.5Q370 131.4 370 135V270Q370 273.6 373 273.8H385V277.5H341V273.8H353Q356 273.6 356 270V135Q356 131.4 353.5 131.2H345Z" fill="#e8261c" transform="translate(50 44) scale(.3) translate(-363 -127)"/><g transform="translate(50 29) rotate(-10) scale(.7)"><path d="' + HEART + '" fill="none" stroke="#e8261c" stroke-width="5" stroke-linejoin="round"/></g></svg>';
-    return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="1 80 867 211" role="img" aria-label="Seyir Cafe"><defs><linearGradient id="lgR" gradientUnits="userSpaceOnUse" x1="0" y1="120" x2="0" y2="285"><stop offset="0" stop-color="#ff3a27"/><stop offset="1" stop-color="#df1a10"/></linearGradient></defs><g fill="url(#lgR)"><path d="M690.5 168.3 689.3 169.8 688.4 172.5 685.9 185.5 684.3 191.0 679.6 213.5 677.8 220.5 677.4 223.8 673.8 239.5 672.4 244.5 667.6 268.0 667.0 270.0 666.4 270.9 665.2 271.5 662.0 272.4 661.3 273.0 661.3 273.7 662.5 274.5 665.0 274.9 684.0 274.5 685.2 274.3 685.9 273.7 685.9 272.8 685.0 271.9 681.5 271.7 678.0 271.0 677.0 270.5 675.8 269.5 674.6 268.0 674.1 266.8 673.8 264.2 673.8 260.8 674.6 251.5 676.9 240.0 678.9 231.8 680.8 226.5 681.9 220.8 684.3 212.5 685.2 210.5 686.1 209.5 687.3 208.9 693.5 208.8 696.2 209.1 697.5 209.8 698.5 211.2 701.7 220.8 703.5 227.2 705.0 231.0 707.2 238.2 708.1 242.5 709.3 244.5 710.1 247.8 711.9 252.2 713.0 257.0 714.7 260.8 716.6 268.0 716.4 270.2 715.2 271.6 712.0 271.5 710.5 271.9 709.8 272.5 710.0 273.4 711.0 274.1 713.0 274.2 728.8 274.0 732.2 273.4 732.7 272.8 732.2 271.8 727.5 268.7 724.8 265.7 723.2 262.5 721.0 256.5 716.6 241.8 715.0 238.5 714.4 235.2 713.0 231.0 711.5 227.5 705.1 206.5 702.3 199.2 697.5 183.2 696.1 180.0 693.7 172.0 691.9 168.8 691.2 168.2ZM690.8 190.0 691.6 190.4 692.3 191.8 694.6 202.0 694.1 204.0 693.2 204.7 692.2 205.0 689.8 205.0 688.5 204.7 687.5 203.7 687.1 202.5 688.1 196.8 689.5 191.8 690.0 190.6ZM793.4 167.4 792.8 167.2 792.0 167.7 790.5 171.0 789.7 171.8 788.7 172.1 784.0 172.5 769.0 172.7 761.0 172.5 748.0 172.8 746.5 173.1 745.9 173.8 745.8 174.4 746.3 175.1 750.5 176.2 752.5 177.6 753.6 180.8 754.1 185.8 754.3 222.8 754.5 226.0 754.5 242.2 755.0 253.8 754.9 268.2 754.3 269.7 753.2 270.7 752.2 270.9 749.5 270.8 748.0 271.4 747.2 272.7 747.8 273.6 763.8 273.8 774.8 273.5 776.5 273.1 777.5 272.4 777.3 271.3 776.0 270.6 771.2 270.7 766.5 269.9 765.3 268.5 763.7 264.8 763.3 257.2 763.2 234.2 762.8 222.2 762.8 208.5 763.2 205.8 764.0 204.7 765.0 204.3 768.8 204.9 772.0 207.3 773.4 208.8 774.1 210.5 775.8 220.2 776.6 220.9 777.3 220.4 777.7 219.5 778.0 216.8 778.2 208.0 777.7 187.3 777.3 186.4 776.5 186.0 775.6 186.4 775.1 187.3 775.2 197.0 774.9 198.2 774.2 199.3 772.8 200.0 771.2 200.2 766.0 200.2 764.0 199.5 762.9 198.2 762.5 195.0 762.3 177.8 762.7 176.8 763.5 175.9 764.8 175.4 766.0 175.3 777.8 176.1 784.7 178.0 787.6 181.0 789.0 183.2 790.5 187.8 791.4 193.0 791.7 196.8 792.6 198.1 793.6 198.4 794.2 197.7 794.5 196.5 794.2 188.5 794.5 185.0 794.2 169.2 794.0 168.0ZM652.0 167.3 650.3 167.2 649.2 168.1 648.9 170.2 649.4 174.5 648.8 175.9 647.7 176.4 646.8 176.3 644.0 175.0 635.8 172.5 631.2 171.6 627.0 171.3 614.2 171.6 604.5 173.6 601.0 174.9 595.2 177.6 588.3 181.9 581.6 187.6 575.5 194.8 571.4 201.5 569.4 206.2 567.1 214.0 566.3 219.5 566.0 226.0 566.1 229.2 567.4 237.8 570.0 246.0 572.9 251.8 575.3 255.7 581.1 262.4 589.5 269.1 598.8 274.3 608.5 277.2 615.0 278.2 621.8 278.2 633.5 276.9 645.0 272.3 652.7 267.6 656.3 264.0 656.7 262.5 655.5 261.0 653.8 261.0 647.0 266.3 641.5 269.9 636.2 272.0 631.5 273.4 628.0 274.0 619.2 274.2 614.2 273.7 608.5 272.1 601.8 269.3 596.8 266.2 592.3 262.8 588.1 258.5 584.4 254.0 579.4 245.5 577.1 239.5 575.2 233.2 574.5 223.8 574.6 216.0 575.2 212.2 576.4 209.2 577.2 206.0 578.7 202.2 581.9 196.2 587.3 189.3 594.0 183.3 599.8 179.9 604.0 178.0 610.0 176.4 615.8 175.5 624.5 175.3 631.2 176.2 638.0 178.7 640.5 180.1 643.9 183.5 646.0 187.0 647.2 190.0 648.9 196.0 650.0 205.2 650.8 207.0 651.7 207.1 652.3 206.5 652.5 205.2 652.3 176.2 653.0 170.5 652.7 168.0ZM857.2 166.6 856.6 166.5 856.0 166.9 855.2 169.5 854.4 170.7 852.5 171.4 825.2 171.9 812.5 171.8 811.0 172.0 810.2 172.8 810.2 173.5 810.8 174.3 815.5 176.0 816.7 176.8 817.3 177.8 818.2 181.8 818.5 192.2 818.5 213.8 819.4 267.2 818.7 268.7 816.8 270.1 812.8 270.6 811.6 271.0 811.3 271.7 812.0 272.5 819.5 273.0 853.8 272.5 855.5 272.9 856.3 273.4 857.5 276.0 858.3 277.0 859.1 277.2 859.7 276.5 860.0 274.5 859.5 261.5 859.8 255.5 859.5 245.5 859.2 244.0 858.5 243.3 857.3 243.5 856.6 244.8 855.9 255.8 854.5 261.2 852.7 264.0 849.5 266.8 845.8 268.2 838.8 269.4 829.8 269.9 828.5 269.4 827.8 268.5 827.5 263.8 826.8 205.5 827.4 204.1 828.5 203.3 829.8 203.1 833.5 204.0 835.7 205.2 837.8 207.5 839.0 209.8 839.9 214.0 840.1 218.5 840.8 219.8 841.7 220.0 842.5 219.4 842.9 218.2 843.0 216.8 842.5 207.0 842.7 198.8 842.3 194.8 842.0 186.3 841.0 185.3 840.4 185.5 839.9 186.3 839.7 196.0 839.4 197.2 838.7 198.1 837.2 198.9 834.0 199.4 829.2 199.4 828.3 199.0 827.2 198.0 826.8 196.5 826.8 176.3 827.4 175.4 828.5 174.8 834.2 174.5 844.8 175.6 849.0 177.2 851.9 180.0 853.0 182.0 855.1 187.5 856.0 196.2 856.6 197.3 857.5 197.5 858.3 196.9 858.6 196.0 858.7 175.5 858.2 168.3 857.9 167.3ZM321.5 131.1 318.8 130.8 302.8 131.2 291.2 131.1 290.0 131.4 289.2 132.1 288.9 133.5 290.0 134.9 297.5 136.6 299.0 137.6 300.0 140.5 299.4 145.2 298.2 149.8 296.5 153.5 295.2 157.5 288.4 173.8 281.6 188.0 278.3 195.7 277.2 197.1 276.0 197.6 274.7 196.7 243.6 139.0 243.6 137.0 245.0 135.9 251.0 135.7 254.5 135.2 255.3 134.0 254.9 132.6 253.7 131.9 252.2 131.8 221.5 132.0 218.8 132.5 217.4 133.6 217.6 134.7 219.5 136.1 224.0 137.7 228.2 139.9 233.7 146.0 237.9 153.2 248.8 174.2 251.0 177.8 257.0 189.5 259.8 194.2 260.7 196.8 262.8 199.8 265.0 204.2 267.0 209.2 267.5 213.2 267.9 269.5 266.9 271.4 265.0 272.3 256.2 272.5 254.0 273.0 253.2 273.6 252.9 274.5 253.0 275.4 253.8 276.1 255.8 276.5 264.5 276.3 269.8 276.5 294.8 276.0 296.0 275.7 296.9 274.7 297.1 274.0 296.8 273.3 295.2 272.2 288.0 271.9 283.3 270.7 282.1 269.5 280.4 265.8 279.8 259.0 279.4 209.0 282.5 200.5 288.2 187.8 289.1 185.0 294.5 173.5 302.3 154.8 310.1 137.5 311.1 136.1 312.3 135.4 316.5 134.8 320.5 134.7 321.7 134.3 322.5 133.7 322.7 132.7 322.3 131.8ZM395.9 130.4 395.4 131.0 395.4 132.0 395.9 132.9 396.8 133.6 398.0 134.0 402.2 134.2 405.2 135.5 406.4 136.3 408.5 140.5 409.0 143.5 409.0 163.2 409.5 176.8 409.5 201.8 410.0 223.8 410.0 240.0 410.5 253.8 410.5 267.0 409.9 269.0 408.7 270.2 407.0 270.7 400.8 271.0 398.7 272.3 398.5 273.0 398.9 273.6 401.2 274.5 411.2 274.7 421.2 274.3 437.0 274.5 438.7 274.1 439.9 273.2 440.4 271.8 439.5 270.7 437.0 270.1 430.8 270.0 427.5 269.4 425.8 268.2 423.6 265.5 422.5 259.8 422.3 244.0 422.9 242.1 423.8 241.6 424.8 241.4 426.2 241.9 432.2 245.6 435.0 246.9 446.0 253.1 460.5 260.2 472.0 265.1 483.8 269.5 493.8 272.3 503.5 274.5 512.5 275.5 520.8 275.5 524.8 275.0 526.5 274.5 531.4 272.1 532.0 271.2 532.1 270.5 531.6 269.6 530.7 269.2 523.0 270.4 520.8 270.5 512.8 269.5 503.5 266.8 489.8 261.3 486.5 259.5 471.2 252.5 468.8 251.1 467.9 250.0 468.3 248.9 469.8 248.1 477.8 246.7 482.5 245.6 488.2 243.4 495.5 239.4 502.2 234.8 507.0 230.7 512.1 225.5 517.0 218.5 520.5 212.2 523.8 203.0 525.4 195.2 525.7 188.0 525.5 180.0 524.9 176.2 523.6 170.2 521.1 163.8 519.2 159.8 514.8 153.0 509.4 146.6 506.0 143.4 503.3 141.6 501.5 139.8 496.5 136.5 492.5 134.3 484.8 130.9 477.5 129.1 469.2 127.8 461.0 127.5 453.8 128.3 449.2 129.2 442.8 131.1 436.2 133.9 431.2 136.5 425.0 140.4 423.0 141.1 421.8 140.8 421.0 139.7 420.6 132.0 419.9 130.6 418.7 129.8 416.2 129.5 397.8 129.8 396.5 129.9ZM450.2 134.9 460.0 134.3 467.5 135.1 473.2 136.1 476.8 137.2 487.5 142.6 495.7 149.3 502.5 156.5 508.0 165.5 510.3 170.8 512.0 175.8 513.7 185.8 513.7 196.0 512.9 202.2 511.9 206.5 510.6 209.8 509.6 213.5 507.1 218.2 502.6 224.8 499.7 228.2 492.5 234.9 487.5 237.9 483.0 240.0 478.8 241.6 474.2 242.8 464.5 243.7 459.5 243.4 450.5 241.5 444.2 239.0 433.5 233.6 428.0 230.0 423.3 228.0 422.5 227.2 422.1 226.2 421.8 220.8 421.5 182.0 421.0 162.8 421.0 154.8 421.3 153.0 422.9 149.8 426.5 146.1 436.2 139.2 442.0 136.8ZM90.0 125.6 89.0 125.7 88.3 126.5 87.8 127.8 87.5 131.0 86.2 132.2 84.8 132.2 80.5 130.8 75.8 129.9 69.2 129.8 62.5 131.1 57.8 132.9 55.3 134.4 48.9 139.5 45.5 144.0 43.1 149.0 42.0 153.2 41.5 156.5 41.8 163.2 43.0 168.5 45.4 174.0 49.8 180.2 53.0 182.8 56.0 185.9 62.2 190.2 69.8 194.4 72.0 196.0 82.8 201.7 95.5 209.7 99.6 213.1 102.6 216.3 105.9 220.8 109.0 227.2 109.7 229.5 110.5 235.2 110.2 241.0 109.5 245.2 107.8 250.8 104.2 257.2 99.0 263.7 94.8 267.2 90.2 270.4 83.5 273.9 74.8 276.4 72.2 276.6 69.0 277.2 61.2 277.2 58.2 276.9 50.5 275.1 43.5 272.0 37.2 267.8 33.3 264.4 30.5 261.2 26.3 255.8 23.5 250.2 21.7 244.2 20.9 240.2 20.5 233.0 21.3 225.0 23.2 218.0 25.5 213.5 29.9 206.8 33.8 203.3 38.8 200.7 43.2 199.4 45.2 199.3 52.5 199.5 59.7 203.1 63.9 207.3 65.7 210.0 67.2 214.0 67.2 218.2 66.7 221.8 65.0 225.2 63.5 226.8 58.6 230.0 57.8 231.5 58.0 233.0 59.0 233.8 60.8 234.4 66.0 234.3 71.7 231.4 74.7 228.0 77.5 222.0 77.9 219.2 77.7 214.0 76.7 209.8 75.8 207.8 73.2 203.6 70.5 201.1 65.0 197.5 59.8 195.4 55.2 194.4 50.2 193.8 42.8 194.2 39.5 195.0 33.5 197.1 26.8 201.2 20.7 207.0 17.9 210.2 15.6 213.8 11.6 222.8 10.1 230.2 10.1 240.8 12.0 249.8 13.9 254.8 15.6 257.5 16.7 260.2 20.8 265.2 25.0 269.5 31.2 274.2 37.0 277.3 42.2 279.7 48.5 281.6 54.8 282.5 62.8 283.0 67.2 283.0 75.2 282.2 84.8 279.8 93.0 276.2 98.7 273.0 108.2 265.1 110.8 261.8 112.9 259.9 117.8 251.0 120.7 241.2 121.0 239.2 121.0 232.8 120.7 228.0 119.8 224.5 118.1 219.0 112.4 210.0 108.5 205.8 102.7 201.1 83.0 189.5 79.2 187.7 67.8 180.7 60.2 175.3 55.0 170.0 51.5 164.5 50.2 160.5 49.4 154.5 50.1 149.2 53.6 143.3 57.0 139.8 58.5 138.6 62.2 136.7 65.8 135.9 72.0 135.8 76.2 136.7 80.0 139.2 81.7 140.8 85.6 146.8 88.1 155.8 88.7 163.0 88.5 178.0 88.9 179.0 89.5 179.8 90.5 180.1 91.4 179.7 92.1 178.7 92.2 177.2 92.0 137.5 91.7 127.8 91.1 126.5ZM203.7 124.0 202.5 124.0 201.5 124.8 201.1 126.0 201.2 128.8 201.0 130.2 200.0 131.6 198.2 132.2 195.5 132.5 140.0 133.0 135.3 133.4 134.3 133.9 133.6 134.8 133.7 135.9 134.8 136.7 141.8 137.9 144.5 139.3 145.7 140.8 146.5 142.5 147.5 147.2 147.5 163.2 148.0 176.2 148.3 220.8 148.7 234.0 149.0 271.2 148.2 273.0 146.8 273.9 139.2 274.0 137.5 274.5 136.6 275.1 136.2 276.0 136.3 276.7 137.0 277.2 139.2 277.5 174.0 277.5 198.8 277.1 204.5 277.7 206.0 277.5 206.6 276.9 206.6 237.2 206.0 234.3 205.0 233.4 204.0 233.5 203.3 233.9 202.3 235.8 202.5 239.0 201.7 249.8 200.1 259.5 197.6 264.2 195.2 267.3 189.5 270.5 180.5 272.4 175.0 273.2 169.0 273.5 163.2 273.4 162.0 272.8 161.3 272.0 160.8 269.8 160.5 234.0 159.8 192.2 160.1 179.8 160.8 178.3 162.0 177.6 163.5 177.5 166.8 178.0 169.0 178.8 172.2 180.6 175.5 183.5 176.5 185.2 177.8 190.5 178.4 194.8 178.9 202.0 179.8 203.0 181.2 203.0 182.1 202.0 182.5 199.2 182.2 175.0 182.5 170.5 182.2 153.2 181.4 151.3 180.0 150.7 178.6 151.3 178.0 152.8 178.0 165.2 178.4 168.8 178.1 170.0 177.5 170.9 176.5 171.6 175.2 172.0 163.8 172.2 161.8 172.1 160.2 171.0 159.6 169.5 159.3 165.5 159.3 139.0 160.3 137.6 162.0 136.8 172.2 137.0 184.8 138.1 190.5 140.0 191.8 140.6 195.4 144.0 198.1 148.5 200.2 156.0 201.4 169.0 202.4 170.9 203.0 171.3 203.7 171.3 204.9 170.2 205.4 168.5 205.5 156.5 205.2 141.0 204.8 137.0 205.1 127.0 204.8 125.0Z" fill-rule="evenodd"/><path d="M345 127.5H381V131.2H372.5Q370 131.4 370 135V270Q370 273.6 373 273.8H385V277.5H341V273.8H353Q356 273.6 356 270V135Q356 131.4 353.5 131.2H345Z"/></g><g transform="translate(363 106) rotate(-10) scale(.9)"><g class="lg-hb"><path d="${HEART}" fill="none" stroke="#e8261c" stroke-width="4.4" stroke-linejoin="round"/></g></g></svg>`;
-  }
-
-  // ---- sosyal medya + Wi-Fi (müşteri başlığı) ----
-  const SOCIAL = [
-    { t: 'Instagram', u: 'https://www.instagram.com/seyircafe.21', i: '<svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle class="fl" cx="17.3" cy="6.7" r="1.1"/></svg>' },
-    { t: 'TikTok', u: 'https://www.tiktok.com/@seyircafe21', i: '<svg viewBox="0 0 24 24"><path d="M14 3v11.2a3.6 3.6 0 1 1-3.6-3.6"/><path d="M14 3c.3 2.6 2 4.4 4.8 4.6"/></svg>' },
-    { t: 'Konum (Harita)', u: 'https://maps.app.goo.gl/E2nL5DAqECA42zja8', i: '<svg viewBox="0 0 24 24"><path d="M12 21s-6.5-6.2-6.5-11a6.5 6.5 0 0 1 13 0c0 4.8-6.5 11-6.5 11z"/><circle cx="12" cy="10" r="2.4"/></svg>' }
+  // ---- sosyal medya + Wi-Fi (müşteri başlığı) — Ayarlar'dan açılıp kapatılır ----
+  const SOC = [
+    { k: 'instagram', t: 'Instagram', ph: 'kullanıcı adı', mk: u => 'https://www.instagram.com/' + u, i: '<svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle class="fl" cx="17.3" cy="6.7" r="1.1"/></svg>' },
+    { k: 'tiktok', t: 'TikTok', ph: 'kullanıcı adı', mk: u => 'https://www.tiktok.com/@' + u, i: '<svg viewBox="0 0 24 24"><path d="M14 3v11.2a3.6 3.6 0 1 1-3.6-3.6"/><path d="M14 3c.3 2.6 2 4.4 4.8 4.6"/></svg>' },
+    { k: 'facebook', t: 'Facebook', ph: 'sayfa adı', mk: u => 'https://www.facebook.com/' + u, i: '<svg viewBox="0 0 24 24"><path d="M15 3h-2.5A4.5 4.5 0 0 0 8 7.5V10H5v4h3v7h4v-7h3l1-4h-4V7.5c0-.3.2-.5.5-.5H15z"/></svg>' },
+    { k: 'x', t: 'X (Twitter)', ph: 'kullanıcı adı', mk: u => 'https://x.com/' + u, i: '<svg viewBox="0 0 24 24"><path d="M4 4l16 16M20 4L4 20"/></svg>' },
+    { k: 'youtube', t: 'YouTube', ph: 'kanal adı', mk: u => 'https://www.youtube.com/@' + u, i: '<svg viewBox="0 0 24 24"><rect x="2.5" y="5.5" width="19" height="13" rx="4"/><path class="fl" d="M10 9.5v5l4.5-2.5z"/></svg>' },
+    { k: 'whatsapp', t: 'WhatsApp', ph: 'telefon (905xxxxxxxxx)', mk: u => 'https://wa.me/' + u, i: '<svg viewBox="0 0 24 24"><path d="M3.5 20.5l1.3-4.2A8.5 8.5 0 1 1 8 19.3z"/><path d="M9 9c0 3 3 6 6 6l1-1.5-2-1-1 .7c-1-.4-1.8-1.2-2.2-2.2l.7-1-1-2z"/></svg>' },
+    { k: 'maps', t: 'Konum (Harita)', ph: 'Google Haritalar bağlantısı veya adres', mk: u => 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(u), i: '<svg viewBox="0 0 24 24"><path d="M12 21s-6.5-6.2-6.5-11a6.5 6.5 0 0 1 13 0c0 4.8-6.5 11-6.5 11z"/><circle cx="12" cy="10" r="2.4"/></svg>' },
+    { k: 'web', t: 'Web sitesi', ph: 'www.siteniz.com', mk: u => 'https://' + u, i: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3.5 3 14.5 0 18M12 3c-3 3.5-3 14.5 0 18"/></svg>' }
   ];
+  const socDef = k => SOC.find(d => d.k === k) || {};
+  function socUrl(d, v){
+    v = String(v || '').trim(); if(!v) return '';
+    if(/^https?:\/\//i.test(v)) return v;
+    if(d.k === 'whatsapp'){ let n = v.replace(/\D/g, ''); if(n.slice(0, 2) === '00') n = n.slice(2); else if(/^0\d{10}$/.test(n)) n = '90' + n.slice(1); else if(/^5\d{9}$/.test(n)) n = '90' + n; return n ? d.mk(n) : ''; }
+    if(d.k === 'maps') return d.mk(v);
+    if(d.k === 'web') return d.mk(v.replace(/^\/+/, ''));
+    const u = v.replace(/^@+/, '').replace(/[^\w.\-]/g, ''); return u ? d.mk(u) : '';
+  }
+  function socialList(){ const st = settings.social || {}; return SOC.map(d => { const x = st[d.k] || {}; return (x.on && x.v) ? { k: d.k, t: d.t, u: socUrl(d, x.v) } : null; }).filter(x => x && x.u); }
+  function pubSocial(){ const pd = getPub(); return pd ? arr(pd.social) : socialList(); }
+  function wifiInfo(){ const pd = getPub(), src = pd || settings, on = pd ? pd.wifiOn !== false : settings.wifiOn !== false; return { on: on && !!src.wifiPass, pw: src.wifiPass || '', nm: src.wifiName || '' }; }
+  const escA = x => String(x).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
   function renderSocial(){
     const el = $id('cSocial'); if(!el) return;
-    el.innerHTML = SOCIAL.map(x => '<a href="' + x.u + '" target="_blank" rel="noopener noreferrer" aria-label="' + x.t + '" title="' + x.t + '">' + x.i + '</a>').join('') +
-      '<button type="button" id="cWifi" aria-label="Wi-Fi şifresini kopyala" title="Wi-Fi"><svg viewBox="0 0 24 24"><path d="M2.5 9a14 14 0 0 1 19 0"/><path d="M5.8 12.6a9.3 9.3 0 0 1 12.4 0"/><path d="M9 16a4.6 4.6 0 0 1 6 0"/><circle class="fl" cx="12" cy="19.2" r="1.3"/></svg></button>';
-    $id('cWifi').addEventListener('click', copyWifi);
+    let h = pubSocial().filter(x => x && /^https?:\/\//i.test(x.u || '')).map(x => '<a href="' + escA(x.u) + '" target="_blank" rel="noopener noreferrer" aria-label="' + escA(x.t) + '" title="' + escA(x.t) + '">' + (socDef(x.k).i || '') + '</a>').join('');
+    if(wifiInfo().on) h += '<button type="button" id="cWifi" aria-label="Wi-Fi" title="Wi-Fi"><svg viewBox="0 0 24 24"><path d="M2.5 9a14 14 0 0 1 19 0"/><path d="M5.8 12.6a9.3 9.3 0 0 1 12.4 0"/><path d="M9 16a4.6 4.6 0 0 1 6 0"/><circle class="fl" cx="12" cy="19.2" r="1.3"/></svg></button>';
+    el.innerHTML = h; const b = $id('cWifi'); if(b) b.addEventListener('click', showWifiCard);
   }
-  function copyWifi(){
-    const pw = (pubData ? pubData.wifiPass : settings.wifiPass) || '', nm = (pubData ? pubData.wifiName : settings.wifiName) || '';
-    if(!pw){ showSaveBanner('Wi-Fi şifresi tanımlı değil', 'Lütfen personelden öğrenin.', true, 5000); return; }
-    const done = () => showSaveBanner('Wi-Fi şifresi kopyalandı', (nm ? nm + ' · ' : '') + 'Şifre: ' + pw, false, 5000);
-    const fb = () => { const ta = document.createElement('textarea'); ta.value = pw; ta.style.cssText = 'position:fixed;opacity:0'; document.body.appendChild(ta); ta.select(); let ok = false; try{ ok = document.execCommand('copy'); }catch(e){} ta.remove(); ok ? done() : showSaveBanner('Şifre', pw, false, 5000); };
+  function copyText(pw, done, fail){
+    const fb = () => { const ta = document.createElement('textarea'); ta.value = pw; ta.style.cssText = 'position:fixed;opacity:0'; document.body.appendChild(ta); ta.select(); let ok = false; try{ ok = document.execCommand('copy'); }catch(e){} ta.remove(); ok ? done() : fail(); };
     if(navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(pw).then(done, fb); else fb();
   }
-  function renderLogos(){
+  function showWifiCard(){
+    const w = wifiInfo(); if(!w.on) return;
+    const bg = document.createElement('div'); bg.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:3000;display:flex;align-items:center;justify-content:center;padding:20px';
+    const box = document.createElement('div'); box.setAttribute('role', 'dialog'); box.style.cssText = 'background:var(--panel,#fff);color:var(--ink,#26221f);border-radius:18px;padding:22px;max-width:340px;width:100%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.35)';
+    box.innerHTML = '<div style="font-size:30px">📶</div><div style="font-weight:700;font-size:17px;margin:6px 0 2px">Wi-Fi</div>' + (w.nm ? '<div style="color:var(--ink-dim,#6b6560);font-size:14px">' + escA(w.nm) + '</div>' : '') +
+      '<div style="margin:14px 0;padding:12px;border:1px dashed var(--line,#ddd);border-radius:12px;font:600 20px/1.3 monospace;letter-spacing:.5px;word-break:break-all;user-select:all">' + escA(w.pw) + '</div>' +
+      '<button type="button" id="wfCopy" style="width:100%;padding:12px;border:0;border-radius:12px;background:' + (getComputedStyle($id('customerView')).getPropertyValue('--red').trim() || '#cf2e2e') + ';color:#fff;font:600 15px inherit;cursor:pointer">Şifreyi kopyala</button>' +
+      '<button type="button" id="wfClose" style="width:100%;padding:10px;margin-top:8px;border:0;background:transparent;color:var(--ink-dim,#6b6560);font:inherit;cursor:pointer">Kapat</button>';
+    bg.appendChild(box); document.body.appendChild(bg);
+    const close = () => bg.remove(); bg.addEventListener('click', e => { if(e.target === bg) close(); }); box.querySelector('#wfClose').addEventListener('click', close);
+    const cb = box.querySelector('#wfCopy');
+    cb.addEventListener('click', () => copyText(w.pw, () => { cb.textContent = '✓ Kopyalandı'; setTimeout(() => { cb.textContent = 'Şifreyi kopyala'; }, 2500); }, () => { cb.textContent = 'Şifreyi seçip kopyalayın'; }));
+  }
+  // ---- Ayarlar ekranı: sosyal medya / Wi-Fi anahtarları ----
+  function applySocialUI(){
+    const box = $id('socRows'); if(!box) return; const st = settings.social || {};
+    box.querySelectorAll('[data-soc-v]').forEach(inp => { if(document.activeElement !== inp) inp.value = (st[inp.dataset.socV] || {}).v || ''; });
+    box.querySelectorAll('[data-soc-t]').forEach(t => { const on = !!(st[t.dataset.socT] || {}).on; t.classList.toggle('on', on); t.classList.toggle('off', !on); t.setAttribute('aria-checked', on); });
+    const w = $id('wifiOnTgl'); if(w){ const on = settings.wifiOn !== false; w.classList.toggle('on', on); w.classList.toggle('off', !on); w.setAttribute('aria-checked', on); }
+  }
+  (function(){
+    const flip = t => { const on = !t.classList.contains('on'); t.classList.toggle('on', on); t.classList.toggle('off', !on); t.setAttribute('aria-checked', on); };
+    const box = $id('socRows'); if(box) box.addEventListener('click', e => { const t = e.target.closest('[data-soc-t]'); if(t) flip(t); });
+    const w = $id('wifiOnTgl'); if(w) w.addEventListener('click', () => flip(w));
+    const save = msg => () => { readSettings(); saveState(); showToast(msg); };
+    const b1 = $id('btnWifiSave'), b2 = $id('btnSocSave');
+    if(b1) b1.addEventListener('click', save('Wi-Fi güncellendi.')); if(b2) b2.addEventListener('click', save('Sosyal medya güncellendi.'));
+  })();
+  // ---- marka: renk yardımcıları ----
+  const hxC = c => { c = String(c || '').replace('#', ''); if(c.length === 3) c = c.split('').map(x => x + x).join(''); return [0, 2, 4].map(i => parseInt(c.substr(i, 2), 16) || 0); };
+  const toHexC = a => '#' + a.map(v => Math.max(0, Math.min(255, Math.round(v))).toString(16).padStart(2, '0')).join('');
+  const mixC = (a, b, t) => { const x = hxC(a), y = hxC(b); return toHexC(x.map((v, i) => v + (y[i] - v) * t)); };
+  const lumC = c => { const [r, g, b] = hxC(c); return (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255; };
+  const distC = (a, b) => { const x = hxC(a), y = hxC(b); return Math.sqrt(x.reduce((s, v, i) => s + (v - y[i]) * (v - y[i]), 0)); };
+  const isHexC = c => /^#[0-9a-f]{6}$/i.test(String(c || ''));
+  const accentFix = a => { let c = a, n = 0; while(lumC(c) > .5 && n++ < 8) c = mixC(c, '#000000', .15); return c; };
+  const BR_FONTS = [
+    { k: 'auto', t: 'Zarif (varsayılan)', f: 'Cormorant Garamond,Playfair Display,Georgia,serif', f2: 'Montserrat,Helvetica Neue,Arial,sans-serif', up: 1 },
+    { k: 'playfair', t: 'Klasik serif (Playfair)', f: 'Playfair Display,Georgia,serif', f2: 'Montserrat,Arial,sans-serif', up: 1 },
+    { k: 'cinzel', t: 'Roma harfleri (Cinzel)', f: 'Cinzel,Georgia,serif', f2: 'Cinzel,Georgia,serif', up: 1 },
+    { k: 'montserrat', t: 'Modern (Montserrat)', f: 'Montserrat,Helvetica Neue,Arial,sans-serif', f2: 'Montserrat,Arial,sans-serif', up: 1 },
+    { k: 'poppins', t: 'Yuvarlak modern (Poppins)', f: 'Poppins,Arial,sans-serif', f2: 'Poppins,Arial,sans-serif', up: 1 },
+    { k: 'oswald', t: 'İnce uzun (Oswald)', f: 'Oswald,Arial Narrow,sans-serif', f2: 'Oswald,Arial Narrow,sans-serif', up: 1 },
+    { k: 'pacifico', t: 'El yazısı (Pacifico)', f: 'Pacifico,cursive', f2: 'Pacifico,cursive', up: 0 },
+    { k: 'lobster', t: 'El yazısı (Lobster)', f: 'Lobster,cursive', f2: 'Lobster,cursive', up: 0 },
+    { k: 'dancing', t: 'İmza (Dancing Script)', f: 'Dancing Script,cursive', f2: 'Dancing Script,cursive', up: 0 }
+  ];
+  const RINGS = '<circle cx="70" cy="70" r="60" fill="none" stroke="url(#lgR)" stroke-width="2.2"/><circle cx="70" cy="70" r="51" fill="none" stroke="url(#lgR)" stroke-width="1.4" stroke-dasharray="1.5 6" stroke-linecap="round" opacity=".75"/>';
+  const CUP_EMBLEM = RINGS + '<path d="M70 14l2.6 6.6 6.6 2.6-6.6 2.6L70 32.4l-2.6-6.6-6.6-2.6 6.6-2.6z" fill="url(#lgR)"/><path d="M50 66h40v9a20 20 0 0 1-40 0z" fill="url(#lgR)"/><path d="M90 70h4a7 7 0 0 1 0 14h-5" fill="none" stroke="url(#lgR)" stroke-width="4" stroke-linecap="round"/><path d="M44 102h52" stroke="url(#lgR)" stroke-width="4" stroke-linecap="round"/><path d="M60 58q-4-5 0-10M70 58q-4-5 0-10M80 58q-4-5 0-10" fill="none" stroke="url(#lgR)" stroke-width="2.6" stroke-linecap="round"/>';
+  const BR_DEF = { mode: 'text', l1: '', l2: '', font: 'auto', w: '700', 'case': 'auto', cstyle: 'auto', color: '#d9a441', color2: '#8a5a12', spread: true, rule: true, align: 'start', emblem: 'auto', imgScale: 100, shape: 'none', bg: 'none', bgColor: '#ffffff', iconBg: '#0F1A2C', accentAuto: true, accent: '#cf2e2e' };
+  const getPub = () => { try{ return pubData; }catch(e){ return null; } };
+  const getStaff = () => { try{ return staffMode; }catch(e){ return false; } };
+  const IMG_OK = /^data:image\/(png|webp|jpeg|gif);base64,[A-Za-z0-9+\/=]+$/;
+  // etkin marka: Ayarlar'da kaydedilmişse o, yoksa config.js
+  function brandEff(ov){
+    const cfg = (window.APP_CONFIG && APP_CONFIG.brand) || {}, pd = getPub();
+    const o = ov || ((getStaff() && settings.brand) ? settings.brand : (pd && pd.brand) ? pd.brand : settings.brand) || null;
+    const r = { name: cfg.name || '', cfgEmblem: cfg.emblem || '', custom: !!o, mode: 'text', l1: cfg.line1 || cfg.name || '', l2: cfg.line2 || '', font: 'auto', w: '700', 'case': 'auto', cstyle: 'auto', align: 'start', emblem: 'auto', shape: 'none', bg: 'none', bgColor: '#ffffff', iconBg: '#0F1A2C', color: null, color2: null, spread: null, rule: true, imgScale: 100, img: '', emblemImg: '', ac: null, pal: [] };
+    if(o){
+      r.mode = o.mode === 'img' ? 'img' : 'text';
+      if(o.l1 != null && String(o.l1).trim() !== ''){ r.l1 = String(o.l1); r.l2 = String(o.l2 || ''); }
+      ['font', 'w', 'case', 'cstyle', 'align', 'emblem', 'shape', 'bg'].forEach(k => { if(o[k]) r[k] = String(o[k]); });
+      ['color', 'color2', 'bgColor', 'iconBg'].forEach(k => { if(isHexC(o[k])) r[k] = o[k]; });
+      if(o.spread != null) r.spread = !!o.spread; if(o.rule != null) r.rule = !!o.rule;
+      if(o.imgScale) r.imgScale = Math.max(40, Math.min(100, +o.imgScale || 100));
+      if(o.img && IMG_OK.test(o.img)) r.img = o.img; if(o.emblemImg && IMG_OK.test(o.emblemImg)) r.emblemImg = o.emblemImg;
+      r.pal = Array.isArray(o.pal) ? o.pal.filter(isHexC).slice(0, 6) : [];
+      r.ac = o.accentAuto === false ? (isHexC(o.accent) ? o.accent : null) : (r.mode === 'img' ? (isHexC(o.ac) ? o.ac : null) : r.color);
+      if(r.mode === 'img' && !r.img) r.mode = 'text';
+    }
+    return r;
+  }
+  function applyAccent(){
+    const cv = $id('customerView'); if(!cv) return; const a = brandEff().ac;
+    if(a){ const c = accentFix(a); cv.style.setProperty('--red', c); cv.style.setProperty('--red-dark', mixC(c, '#000000', .2)); cv.style.setProperty('--soc-b1', mixC(c, '#000000', .5)); cv.style.setProperty('--soc-b2', mixC(c, '#000000', .72)); cv.style.setProperty('--soc-ic', mixC(c, '#ffffff', .62)); cv.style.setProperty('--soc-bd', mixC(c, '#ffffff', .4)); }
+    else ['--red', '--red-dark', '--soc-b1', '--soc-b2', '--soc-ic', '--soc-bd'].forEach(k => cv.style.removeProperty(k));
+  }
+  function logoSVG(mode, ov){
+    const b = brandEff(ov), ea = x => String(x).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    const fx = BR_FONTS.find(f => f.k === b.font) || BR_FONTS[0], lab = ea(b.name || b.l1), c1 = b.color || '#d9a441';
+    const st = b.cstyle === 'solid' ? [c1, c1, c1] : b.cstyle === 'two' ? [c1, mixC(c1, b.color2 || '#8a5a12', .5), b.color2 || '#8a5a12'] : (b.color ? [mixC(c1, '#ffffff', .38), c1, mixC(c1, '#000000', .3)] : ['#f4d98c', '#d9a441', '#b57d1e']);
+    const D = '<linearGradient id="lgR" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="0" y2="140"><stop offset="0" stop-color="' + st[0] + '"/><stop offset=".55" stop-color="' + st[1] + '"/><stop offset="1" stop-color="' + st[2] + '"/></linearGradient>';
+    const bgc = b.bg === 'white' ? '#ffffff' : b.bg === 'dark' ? '#0F1A2C' : b.bg === 'custom' ? b.bgColor : '';
+    const X = '<svg xmlns="http://www.w3.org/2000/svg" ';
+    if(b.mode === 'img'){
+      if(mode === 'mark') return X + 'viewBox="0 0 100 100" role="img" aria-label="' + lab + '"><rect width="100" height="100" rx="24" fill="' + (bgc || '#ffffff') + '"/><image href="' + b.img + '" x="10" y="10" width="80" height="80" preserveAspectRatio="xMidYMid meet"/></svg>';
+      const s = b.imgScale / 100, bw = 410 * s, bh = 140 * s, bx = (410 - bw) / 2, by = (140 - bh) / 2, pad = bgc ? 8 * s : 0; let defs = '', body = '';
+      if(b.shape === 'circle'){ const r = 70 * s; defs = '<clipPath id="lgC"><circle cx="205" cy="70" r="' + r + '"/></clipPath>'; body = (bgc ? '<circle cx="205" cy="70" r="' + r + '" fill="' + bgc + '"/>' : '') + '<image href="' + b.img + '" x="' + (205 - r) + '" y="' + (70 - r) + '" width="' + 2 * r + '" height="' + 2 * r + '" clip-path="url(#lgC)" preserveAspectRatio="xMidYMid slice"/>'; }
+      else { const rx = b.shape === 'round' ? 18 * s : 0; defs = '<clipPath id="lgC"><rect x="' + bx + '" y="' + by + '" width="' + bw + '" height="' + bh + '" rx="' + rx + '"/></clipPath>'; body = (bgc ? '<rect x="' + bx + '" y="' + by + '" width="' + bw + '" height="' + bh + '" rx="' + rx + '" fill="' + bgc + '"/>' : '') + '<image href="' + b.img + '" x="' + (bx + pad) + '" y="' + (by + pad) + '" width="' + (bw - 2 * pad) + '" height="' + (bh - 2 * pad) + '" clip-path="url(#lgC)" preserveAspectRatio="xMidYMid meet"/>'; }
+      return X + 'viewBox="0 0 410 140" role="img" aria-label="' + lab + '"><defs>' + defs + '</defs>' + body + '</svg>';
+    }
+    const cs = b.case === 'auto' ? (fx.up ? 'upper' : 'none') : b.case, tr = t => { t = String(t); return cs === 'upper' ? t.toLocaleUpperCase('tr-TR') : cs === 'lower' ? t.toLocaleLowerCase('tr-TR') : cs === 'title' ? t.toLocaleLowerCase('tr-TR').replace(/(^|\s)(\S)/g, (m, a, c) => a + c.toLocaleUpperCase('tr-TR')) : t; };
+    const l1 = tr(b.l1), l2 = tr(b.l2), init = ea(String(b.l1).charAt(0).toLocaleUpperCase('tr-TR')), hasE = b.emblem !== 'none';
+    let E = '';
+    if(b.emblem === 'cup') E = CUP_EMBLEM;
+    else if(b.emblem === 'letter') E = RINGS + '<text x="70" y="92" text-anchor="middle" font-family="' + fx.f + '" font-size="66" font-weight="700" fill="url(#lgR)">' + init + '</text>';
+    else if(b.emblem === 'img' && b.emblemImg) E = RINGS + '<clipPath id="lgCe"><circle cx="70" cy="70" r="46"/></clipPath><image href="' + b.emblemImg + '" x="24" y="24" width="92" height="92" clip-path="url(#lgCe)" preserveAspectRatio="xMidYMid slice"/>';
+    else E = b.cfgEmblem || CUP_EMBLEM;
+    if(mode === 'mark'){
+      const inner = hasE ? '<g transform="translate(50 50) scale(.62) translate(-70 -70)">' + E + '</g>' : '<text x="50" y="68" text-anchor="middle" font-family="' + fx.f + '" font-size="54" font-weight="700" fill="url(#lgR)">' + init + '</text>';
+      return X + 'viewBox="0 0 100 100" role="img" aria-label="' + lab + '"><rect width="100" height="100" rx="24" fill="' + b.iconBg + '"/><defs>' + D + '</defs>' + inner + '</svg>';
+    }
+    const mid = !hasE && b.align === 'middle', vw = hasE ? 410 : 252, x0 = hasE ? 164 : (mid ? 126 : 10), W = 232, stretch = b.spread == null ? !!fx.up : b.spread, an = mid ? ' text-anchor="middle"' : '';
+    const f1 = Math.max(26, Math.min(66, Math.floor(W / Math.max(l1.length, 1) / (fx.up ? .8 : .52)))), tl1 = (stretch && l1.length <= 6) ? ' textLength="' + W + '" lengthAdjust="spacing"' : '';
+    const f2 = Math.max(12, Math.min(fx.up ? 21 : 30, Math.floor(W / Math.max(l2.length, 1) / (fx.up ? .95 : .52)))), tl2 = (stretch && l2.length <= 6) ? ' textLength="' + W + '" lengthAdjust="spacing"' : '';
+    let t = '<text x="' + x0 + '" y="' + (l2 ? 84 : 92) + '"' + an + ' font-family="' + fx.f + '" font-size="' + f1 + '" font-weight="' + b.w + '"' + tl1 + ' fill="url(#lgR)">' + ea(l1) + '</text>';
+    if(l2){ if(b.rule) t += '<path d="M' + (mid ? x0 - W / 2 : x0) + ' 97h' + W + '" stroke="url(#lgR)" stroke-width="1.2" opacity=".6"/>'; t += '<text x="' + x0 + '" y="124"' + an + ' font-family="' + fx.f2 + '" font-size="' + f2 + '" font-weight="500"' + tl2 + ' fill="url(#lgR)">' + ea(l2) + '</text>'; }
+    return X + 'viewBox="0 0 ' + vw + ' 140" role="img" aria-label="' + lab + '"><defs>' + D + '</defs>' + (hasE ? E : '') + t + '</svg>';
+  }
+  // ---- Ayarlar > Marka & Logo ----
+  const BRC = [['mode', 'brMode', 's'], ['l1', 'brL1', 's'], ['l2', 'brL2', 's'], ['font', 'brFont', 's'], ['w', 'brW', 's'], ['case', 'brCase', 's'], ['cstyle', 'brCStyle', 's'], ['color', 'brColor', 's'], ['color2', 'brColor2', 's'], ['spread', 'brSpread', 'b'], ['rule', 'brRule', 'b'], ['align', 'brAlign', 's'], ['emblem', 'brEmblem', 's'], ['imgScale', 'brScale', 'n'], ['shape', 'brShape', 's'], ['bg', 'brBg', 's'], ['bgColor', 'brBgColor', 's'], ['iconBg', 'brIconBg', 's'], ['accentAuto', 'brAccAuto', 'b'], ['accent', 'brAccent', 's']];
+  const BR_PRESETS = [
+    { t: '✨ Altın klasik', v: { mode: 'text', font: 'auto', w: '700', cstyle: 'auto', color: '#d9a441', emblem: 'auto', spread: true, rule: true, iconBg: '#0F1A2C', accentAuto: true } },
+    { t: '⚫ Siyah modern', v: { mode: 'text', font: 'montserrat', w: '700', cstyle: 'solid', color: '#1a1a1a', emblem: 'none', align: 'start', spread: true, rule: true, iconBg: '#ffffff', accentAuto: true } },
+    { t: '🌿 Doğal yeşil', v: { mode: 'text', font: 'playfair', w: '700', cstyle: 'auto', color: '#2f7d4f', emblem: 'cup', spread: true, rule: true, iconBg: '#f3f7f1', accentAuto: true } },
+    { t: '🔥 Canlı kırmızı', v: { mode: 'text', font: 'poppins', w: '700', cstyle: 'solid', color: '#d62828', emblem: 'cup', spread: true, rule: true, iconBg: '#ffffff', accentAuto: true } },
+    { t: '🌊 Okyanus mavisi', v: { mode: 'text', font: 'cinzel', w: '700', cstyle: 'two', color: '#2a8fd6', color2: '#0b3c5d', emblem: 'letter', spread: true, rule: true, iconBg: '#0b2239', accentAuto: true } },
+    { t: '✍️ El yazısı', v: { mode: 'text', font: 'pacifico', w: '500', 'case': 'none', cstyle: 'solid', color: '#c2185b', emblem: 'none', align: 'middle', spread: false, rule: false, iconBg: '#fff0f5', accentAuto: true } }
+  ];
+  let brandDirty = false, brImg = { data: '', ac: '', pal: [] }, brEmb = '';
+  const setT = (id, on) => { const t = $id(id); if(!t) return; t.classList.toggle('on', !!on); t.classList.toggle('off', !on); t.setAttribute('aria-checked', !!on); };
+  function brandDraft(){
+    const d = {}; BRC.forEach(([k, id, t]) => { const el = $id(id); if(!el) return; d[k] = t === 'b' ? el.classList.contains('on') : t === 'n' ? (+el.value || 100) : el.value; });
+    d.l1 = String(d.l1 || '').trim(); d.l2 = String(d.l2 || '').trim(); d.img = brImg.data; d.ac = brImg.ac; d.pal = brImg.pal; d.emblemImg = brEmb; return d;
+  }
+  function readBrand(){ if(!brandDirty || !$id('brMode')) return; settings.brand = brandDraft(); }
+  function brandPreview(){
+    const L = $id('brPrevL'); if(!L) return; const d = brandDraft(), e = brandEff(d), sv = logoSVG('full', d), sm = logoSVG('mark', d), u = (x, k) => x.replace(/lgR|lgC/g, m => m + k), show = (id, on) => { const el = $id(id); if(el) el.style.display = on ? '' : 'none'; };
+    L.innerHTML = u(sv, 'pl'); $id('brPrevD').innerHTML = u(sv, 'pd'); $id('brPrevI').innerHTML = u(sm, 'pi');
+    const ac = e.ac ? accentFix(e.ac) : '#cf2e2e'; $id('brPrevBtn').style.background = ac; $id('brPrevBtn').style.color = lumC(ac) > .6 ? '#111' : '#fff';
+    $id('brAccSw').innerHTML = e.ac ? 'Menü rengi: <b style="display:inline-block;width:14px;height:14px;border-radius:50%;vertical-align:-2px;background:' + ac + '"></b> ' + ac : 'Menü rengi: varsayılan';
+    const img = d.mode === 'img'; show('brTextBox', !img); show('brImgBox', img); show('brColor2Row', d.cstyle === 'two'); show('brEmbImgRow', d.emblem === 'img'); show('brBgColorRow', d.bg === 'custom'); show('brAccRow', !d.accentAuto); show('brAlignRow', d.emblem === 'none');
+    const pal = brImg.pal || []; $id('brPal').innerHTML = pal.map(c => '<button type="button" class="brChip" data-c="' + c + '" title="' + c + '" style="background:' + c + '"></button>').join('') + (pal.length ? '<span style="font-size:.78rem;color:var(--ink-faint)">logodaki renkler — dokunup menü rengi yap</span>' : '');
+  }
+  function fillBrand(o){
+    BRC.forEach(([k, id, t]) => { if(o[k] == null) return; const el = $id(id); if(!el) return; if(t === 'b') setT(id, !!o[k]); else el.value = o[k]; });
+    if(o.img !== undefined) brImg = { data: IMG_OK.test(o.img || '') ? o.img : '', ac: isHexC(o.ac) ? o.ac : '', pal: Array.isArray(o.pal) ? o.pal.filter(isHexC).slice(0, 6) : [] };
+    if(o.emblemImg !== undefined) brEmb = IMG_OK.test(o.emblemImg || '') ? o.emblemImg : '';
+    $id('brImgInfo').textContent = brImg.data ? '✓ Görsel yüklendi' : 'Henüz görsel yüklenmedi'; $id('brEmbInfo').textContent = brEmb ? '✓ Simge görseli yüklendi' : 'Henüz simge görseli yok'; brandPreview();
+  }
+  function applyBrandUI(force){
+    if(!$id('brMode') || (brandDirty && !force)) return; const cfg = (window.APP_CONFIG && APP_CONFIG.brand) || {}, o = settings.brand || {};
+    const d = Object.assign({}, BR_DEF, { l1: cfg.line1 || '', l2: cfg.line2 || '' }); BRC.forEach(([k]) => { if(o[k] != null) d[k] = o[k]; });
+    const act = document.activeElement; if(act && act.id && BRC.some(c => c[1] === act.id)) delete d[BRC.find(c => c[1] === act.id)[0]];
+    d.img = o.img || ''; d.ac = o.ac || ''; d.pal = o.pal || []; d.emblemImg = o.emblemImg || ''; fillBrand(d);
+  }
+  function brandColors(x, w, h){
+    const d = x.getImageData(0, 0, w, h).data, bins = {};
+    for(let i = 0; i < d.length; i += 4){
+      if(d[i + 3] < 128) continue; const r = d[i], g = d[i + 1], b = d[i + 2], mx = Math.max(r, g, b), mn = Math.min(r, g, b);
+      if(mn > 232 || mx < 40) continue; const k = (r >> 4) + ',' + (g >> 4) + ',' + (b >> 4), o = bins[k] || (bins[k] = { n: 0, c: 0, r: 0, g: 0, b: 0 });
+      o.n += (mx - mn) < 25 ? .15 : 1; o.c++; o.r += r; o.g += g; o.b += b;
+    }
+    const list = Object.keys(bins).map(k => bins[k]).sort((a, b) => b.n - a.n).map(o => toHexC([o.r / o.c, o.g / o.c, o.b / o.c])), pal = [];
+    for(const c of list){ if(pal.every(p => distC(p, c) > 70)) pal.push(c); if(pal.length >= 5) break; } return pal;
+  }
+  function brandLoadImage(file, maxW, maxH, maxLen, cb){
+    const r = new FileReader(); r.onerror = () => cb('', []);
+    r.onload = () => { const im = new Image(); im.onerror = () => cb('', []); im.onload = () => {
+      let w = im.naturalWidth || 300, h = im.naturalHeight || 100, sc = Math.min(1, maxW / w, maxH / h); w = Math.max(1, Math.round(w * sc)); h = Math.max(1, Math.round(h * sc));
+      let url = '', c, x, tries = 0;
+      do{ c = document.createElement('canvas'); c.width = w; c.height = h; x = c.getContext('2d'); x.drawImage(im, 0, 0, w, h);
+        url = c.toDataURL('image/webp', .9); if(!/^data:image\/webp/.test(url)) url = c.toDataURL('image/png');
+        if(url.length > maxLen){ w = Math.max(1, Math.round(w * .7)); h = Math.max(1, Math.round(h * .7)); } else break; } while(++tries < 5);
+      if(url.length > maxLen * 1.4){ cb('', []); return; }
+      let pal = []; try{ pal = brandColors(x, w, h); }catch(e){} cb(url, pal); };
+      im.src = r.result; };
+    r.readAsDataURL(file);
+  }
+  (function(){
+    if(!$id('brMode')) return;
+    const stl = document.createElement('style'); stl.textContent = '.brSec{border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-bottom:12px}.brSec h4{margin:0 0 6px;font-size:.92rem}.brSec p{margin:0 0 6px;font-size:.78rem;color:var(--ink-faint)}.brIn{width:100%;padding:9px;margin-top:6px;border:1px solid var(--line);border-radius:8px;background:var(--panel);color:inherit;font:inherit;box-sizing:border-box}.brRow{display:flex;align-items:center;gap:10px;margin-top:8px;flex-wrap:wrap}.brChip{width:30px;height:30px;border-radius:50%;border:2px solid var(--line);cursor:pointer;padding:0}.brPre{border:1px solid var(--line);border-radius:12px;padding:10px;max-width:320px;margin-top:8px}.brPre svg{width:100%;height:auto;display:block}#brPrevI svg{width:72px;height:72px}.brPB{border:1px solid var(--line);border-radius:999px;padding:7px 12px;background:var(--panel);color:inherit;font:inherit;font-size:.85rem;cursor:pointer}';
+    document.head.appendChild(stl);
+    $id('brFont').innerHTML = BR_FONTS.map(f => '<option value="' + f.k + '">' + f.t + '</option>').join('');
+    $id('brPresets').innerHTML = BR_PRESETS.map((p, i) => '<button type="button" class="brPB" data-p="' + i + '">' + p.t + '</button>').join('');
+    const dirty = () => { brandDirty = true; brandPreview(); };
+    BRC.forEach(([k, id, t]) => { const el = $id(id); if(!el) return; if(t === 'b') el.addEventListener('click', () => { setT(id, !el.classList.contains('on')); dirty(); }); else { el.addEventListener('input', dirty); el.addEventListener('change', dirty); } });
+    $id('brFont').addEventListener('change', () => { const f = BR_FONTS.find(x => x.k === $id('brFont').value) || BR_FONTS[0]; setT('brSpread', !!f.up); $id('brCase').value = 'auto'; dirty(); });
+    $id('brPresets').addEventListener('click', e => { const b = e.target.closest('[data-p]'); if(!b) return; fillBrand(Object.assign({ align: 'start', 'case': 'auto' }, BR_PRESETS[+b.dataset.p].v)); dirty(); });
+    $id('brPal').addEventListener('click', e => { const b = e.target.closest('[data-c]'); if(!b) return; $id('brAccent').value = b.dataset.c; setT('brAccAuto', false); dirty(); });
+    $id('brFile').addEventListener('change', e => { const f = e.target.files && e.target.files[0]; if(!f) return; $id('brImgInfo').textContent = 'İşleniyor…';
+      brandLoadImage(f, 480, 180, 140000, (url, pal) => { if(!url){ $id('brImgInfo').textContent = 'Görsel okunamadı veya çok büyük. Daha küçük bir PNG/JPG deneyin.'; return; } brImg = { data: url, ac: pal[0] || '', pal }; $id('brImgInfo').textContent = '✓ Görsel yüklendi' + (pal[0] ? ' · logo rengi bulundu: ' + pal[0] : ''); dirty(); }); });
+    $id('brEmbFile').addEventListener('change', e => { const f = e.target.files && e.target.files[0]; if(!f) return; $id('brEmbInfo').textContent = 'İşleniyor…';
+      brandLoadImage(f, 160, 160, 60000, url => { if(!url){ $id('brEmbInfo').textContent = 'Simge okunamadı veya çok büyük.'; return; } brEmb = url; $id('brEmbInfo').textContent = '✓ Simge görseli yüklendi'; dirty(); }); });
+    const brOK = () => !!(curUser && (curUser.sup || (RT.local && curUser.admin)));
+    $id('btnBrandSave').addEventListener('click', () => { if(!brOK()) return; brandDirty = true; readBrand(); saveState(); renderLogos(); showToast('Logo ve marka güncellendi.'); });
+    $id('btnBrandReset').addEventListener('click', () => { if(!brOK()) return; delete settings.brand; brandDirty = false; brImg = { data: '', ac: '', pal: [] }; brEmb = ''; applyBrandUI(true); saveState(); renderLogos(); showToast('Varsayılan logoya dönüldü.'); });
+    $id('btnBrandExp').addEventListener('click', () => { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([JSON.stringify(brandDraft())], { type: 'application/json' })); a.download = 'marka-ayarlari.json'; document.body.appendChild(a); a.click(); a.remove(); });
+    $id('btnBrandImp').addEventListener('click', () => $id('brImpFile').click());
+    $id('brImpFile').addEventListener('change', e => { const f = e.target.files && e.target.files[0]; if(!f) return; const r = new FileReader(); r.onload = () => { try{ const o = JSON.parse(r.result); if(!o || typeof o !== 'object') throw 0; fillBrand(o); dirty(); showToast('Marka ayarları yüklendi. "Güncelle"ye basın.'); }catch(x){ showToast('Dosya okunamadı.'); } }; r.readAsText(f); e.target.value = ''; });
+  })();
+  let _bSig = '';
+  function refreshBrandUI(){ const pd = getPub(), sig = JSON.stringify([pd && pd.brand, pd && pd.social, pd && pd.wifiOn, pd && pd.wifiPass]); if(sig === _bSig) return; _bSig = sig; renderLogos(); }
+  function renderLogos(){ try{ applyAccent(); }catch(e){}
     $id('cLogo').innerHTML = logoSVG('full'); $id('sbLogo').innerHTML = logoSVG('full').replace(/lgR/g, 'lgRsb'); renderSocial();
     const fav = logoSVG('mark');
     $id('favi').href = 'data:image/svg+xml,' + encodeURIComponent(fav);
@@ -4984,7 +5214,7 @@ ${st('M50 58c-5-6 5-10 0-17', 0)}${st('M60 56c-5-7 5-11 0-19', 1.05)}${st('M70 5
   // ======================================================================
   // PROFESYONEL EKLER — kalıcı kayıt, canlı eşitleme, gerçek raporlar
   // ======================================================================
-  const STORE_KEY = 'seyirCafeV2', THEME_KEY = 'seyirTheme', DEV = 'd' + Math.random().toString(36).slice(2, 8);
+  const STORE_KEY = 'posAppV2', THEME_KEY = 'posTheme', DEV = 'd' + Math.random().toString(36).slice(2, 8);
   let lastSaved = '', lastSavedAt = 0, storageOK = true, warned = false;
   const LISTKEYS = ['birimler', 'ozellikler', 'kdv', 'indirimler', 'odenmezler', 'zayi'];
   function money(v){ return '₺' + v.toLocaleString('tr-TR', { minimumFractionDigits: 2 }); }
@@ -5007,12 +5237,14 @@ ${st('M50 58c-5-6 5-10 0-17', 0)}${st('M60 56c-5-7 5-11 0-19', 1.05)}${st('M70 5
     settings.firstOrderNo = t('setFirstOrderNo') || '101';
     settings.shiftSplit = /^\d{1,2}:\d{2}$/.test(t('setShift')) ? t('setShift') : '15:00';
     settings.wifiName = t('setWifiName'); settings.wifiPass = t('setWifiPass');
+    const wt = $id('wifiOnTgl'); if(wt) settings.wifiOn = wt.classList.contains('on'); try{ readBrand(); }catch(e){}
+    const sr = $id('socRows'); if(sr){ const inps = sr.querySelectorAll('[data-soc-v]'); if(inps.length){ const st = {}; inps.forEach(inp => { const k = inp.dataset.socV, tg = sr.querySelector('[data-soc-t="' + k + '"]'); st[k] = { on: !!(tg && tg.classList.contains('on')), v: inp.value.trim().replace(/^@+/, '') }; }); settings.social = st; } }
   }
   function applySettings(){
     $id('setRestName').textContent = settings.restName; $id('restName').value = settings.restName;
     $id('setDayStart').textContent = settings.dayStart; $id('setFirstOrderNo').textContent = settings.firstOrderNo;
     $id('setPin').value = ''; $id('setShift').textContent = settings.shiftSplit || '15:00';
-    $id('setWifiName').textContent = settings.wifiName || ''; $id('setWifiPass').textContent = settings.wifiPass || '';
+    $id('setWifiName').textContent = settings.wifiName || ''; $id('setWifiPass').textContent = settings.wifiPass || ''; try{ applySocialUI(); }catch(e){} try{ applyBrandUI(); }catch(e){}
     document.title = 'İŞLETMEM — ' + settings.restName; uiReady = true;
   }
   $id('restName').addEventListener('input', e => { $id('setRestName').textContent = e.target.value; });
@@ -5023,7 +5255,7 @@ ${st('M50 58c-5-6 5-10 0-17', 0)}${st('M60 56c-5-7 5-11 0-19', 1.05)}${st('M70 5
     const d = new Date(); d.setHours(h || 0, m || 0, 0, 0); if(d > new Date()) d.setDate(d.getDate() - 1);
     return Math.max(d.getTime(), closedAt || 0);
   }
-  function todayPays(){ const s = dayStart(); return payLog.filter(p => p.ts >= s); }
+  function todayPays(){ const s = dayStart(); return payLog.filter(p => p && p.ts >= s); }
   function todaySales(){ const s = dayStart(); return saleLog.filter(p => p.ts >= s); }
   function recomputeStats(){
     const P = todayPays();
@@ -5263,6 +5495,7 @@ ${st('M50 58c-5-6 5-10 0-17', 0)}${st('M60 56c-5-7 5-11 0-19', 1.05)}${st('M70 5
   let adminReady = false, lastPriv = '', lastPrivAt = 0;
   function privGet(k){ return ({ saleLog, payLog, giderler, dayReports, colLog, waiveLog, cancelLog })[k]; }
   function privSet(k, v){
+    if(Array.isArray(v)) v = v.filter(x => x != null);
     switch(k){
       case 'saleLog': saleLog = v; break; case 'payLog': payLog = v; break; case 'giderler': giderler = v; break; case 'dayReports': dayReports = v; break;
       case 'colLog': colLog = v; break; case 'waiveLog': waiveLog = v; break; case 'cancelLog': cancelLog = v; break; case 'closedAt': closedAt = v; break;
@@ -5317,21 +5550,21 @@ ${st('M50 58c-5-6 5-10 0-17', 0)}${st('M60 56c-5-7 5-11 0-19', 1.05)}${st('M70 5
     if(!s || typeof s !== 'object') return;
     const fill = (t, d) => { Object.keys(t).forEach(k => delete t[k]); Object.assign(t, d && typeof d === 'object' ? d : {}); };
     fill(carts, s.carts); fill(tableLabels, s.tableLabels); fill(tableGuest, s.tableGuest); fill(orderOpenedAt, s.orderOpenedAt); fill(adisyonNoByKey, s.adisyonNoByKey); fill(discountByKey, s.discountByKey); fill(guestsByKey, s.guestsByKey);
-    if(Array.isArray(s.regions) && s.regions.length) regions = s.regions;
-    if(Array.isArray(s.categories) && s.categories.length) categories = s.categories;
+    if(Array.isArray(s.regions) && s.regions.length) regions = s.regions.filter(x => x != null);
+    if(Array.isArray(s.categories) && s.categories.length) categories = s.categories.filter(x => x != null);
     stripOldImgs(categories);
-    let seeded = false; if(s.menuVer !== MENU_VER){ categories = buildSeedMenu(); seeded = true; }
+    let seeded = false; if(!(s.categories && s.categories.length)){ categories = buildSeedMenu(); seeded = true; }
     groupMeta = seeded ? [] : normGM(s.groupMeta);
     if(s.nextTableNo) nextTableNo = s.nextTableNo;
     paidByKey = s.paidByKey || {}; paymentHistoryByKey = s.paymentHistoryByKey || {};
-    if(Array.isArray(s.customers)) customers = s.customers;
+    if(Array.isArray(s.customers)) customers = s.customers.filter(x => x != null);
     if(Array.isArray(s.mutfakGruplari) && s.mutfakGruplari.length) mutfakGruplari = s.mutfakGruplari;
     if(seeded) ensureSeedGroups();
     adisyonSeq = s.adisyonSeq || 0;
     if(s.lists) LISTKEYS.forEach(k => { if(Array.isArray(s.lists[k])) lists[k] = s.lists[k]; });
     if(Array.isArray(s.payTypes) && s.payTypes.length) payTypes = s.payTypes;
     if(s.settings) Object.assign(settings, s.settings);
-    if(Array.isArray(s.staffUsers)) staffUsers = s.staffUsers;
+    if(Array.isArray(s.staffUsers)) staffUsers = s.staffUsers.filter(x => x != null);
     if(s.pin) settings.pin = s.pin;
     extOrders = (s.extOrders && typeof s.extOrders === 'object') ? s.extOrders : {}; extSeq = s.extSeq || 0;
     perms = normPerms(s.perms);
@@ -5386,8 +5619,8 @@ ${st('M50 58c-5-6 5-10 0-17', 0)}${st('M60 56c-5-7 5-11 0-19', 1.05)}${st('M70 5
       RT.on('inbox', v => { lastInbox = v; if(adminReady) mergeInbox(v); });
     }
   }
-  window.addEventListener('storage', e => { if(e.key === STORE_KEY && e.newValue){ try{ applyState(JSON.parse(e.newValue), false); }catch(err){} } });
-  $id('btnBackup').addEventListener('click', () => downloadFile('seyir-yedek-' + new Date().toISOString().slice(0, 10) + '.json', JSON.stringify(Object.assign(JSON.parse(fullStr()), { savedAt: Date.now() })), 'application/json'));
+  window.addEventListener('storage', e => { if(e.key === window.__nsk(STORE_KEY) && e.newValue){ try{ applyState(JSON.parse(e.newValue), false); }catch(err){} } });
+  $id('btnBackup').addEventListener('click', () => downloadFile('pos-yedek-' + new Date().toISOString().slice(0, 10) + '.json', JSON.stringify(Object.assign(JSON.parse(fullStr()), { savedAt: Date.now() })), 'application/json'));
   $id('btnRestore').addEventListener('click', () => $id('restoreFile').click());
   $id('restoreFile').addEventListener('change', e => {
     const f = e.target.files[0]; if(!f) return;
@@ -5411,12 +5644,12 @@ ${st('M50 58c-5-6 5-10 0-17', 0)}${st('M60 56c-5-7 5-11 0-19', 1.05)}${st('M70 5
 
   // ---- açılış: tohum veriler → kayıtlı veri → ilk çizim ----
   seedLists(); seedPay(); ensurePayTypes();
-  try{ localStorage.setItem('seyirProbe', '1'); localStorage.removeItem('seyirProbe'); }catch(e){ storageOK = false; }
+  try{ localStorage.setItem('posProbe', '1'); localStorage.removeItem('posProbe'); }catch(e){ storageOK = false; }
   try{
     const raw = localStorage.getItem(STORE_KEY); let s = null;
     try{ s = JSON.parse(raw || 'null'); }catch(e){ if(raw) try{ localStorage.setItem(STORE_KEY + '_bozuk', raw); }catch(e2){} }
     if(s){ lastSavedAt = s.savedAt || 0; applyState(s, false); } else renderAll();
-  }catch(e){ console.error(e); renderAll(); }
+  }catch(e){ console.error(e); try{ renderAll(); }catch(e2){ console.error(e2); } }
   try{ if(localStorage.getItem(THEME_KEY) === 'dark'){ document.body.setAttribute('data-theme', 'dark'); $id('eyeIcon').textContent = '🌙'; $id('eyeLabel').textContent = 'Karanlık mod açık'; } }catch(e){}
 
   // ---- ek: tarayıcı alert'i yerine uygulama bildirimi; ikon butonlara otomatik erişilebilirlik etiketi ----
@@ -5455,16 +5688,16 @@ ${st('M50 58c-5-6 5-10 0-17', 0)}${st('M60 56c-5-7 5-11 0-19', 1.05)}${st('M70 5
     if(staffMode) return;
     if(RT.local || !RT.staffAuth){ dirReady = true; _enterStaff(); endRestoring(); return; }
     RT.staffAuth(!!(curUser && curUser.admin)).then(async ok => {
-      if(!ok){ curUser = null; sessionStorage.removeItem('seyirUser'); showToast('Firebase personel girişi gerekli.'); endRestoring(); return; }
+      if(!ok){ curUser = null; sessionStorage.removeItem('posUser'); showToast('Firebase personel girişi gerekli.'); endRestoring(); return; }
       if(curUser && curUser.admin) await pullStaffDir();
       watchRole();
-      if(!adminDev()){ PRIV_KEYS.forEach(k => privSet(k, k === 'closedAt' ? 0 : [])); try{ localStorage.removeItem('seyirCancelLog'); }catch(_){} lastSaved = ''; saveState(); }
+      if(!adminDev()){ PRIV_KEYS.forEach(k => privSet(k, k === 'closedAt' ? 0 : [])); try{ localStorage.removeItem('posCancelLog'); }catch(_){} lastSaved = ''; saveState(); }
       _enterStaff(); endRestoring();
     });
   };
   // 1) İptal: neden + yönetici PIN'i + kayıt
   const CANCEL_REASONS = ['Müşteri Vazgeçti', 'Yanlış Sipariş', 'Döküldü / Mutfak Hatası', 'Diğer'];
-  if(!cancelLog.length) cancelLog = (() => { try{ return JSON.parse(localStorage.getItem('seyirCancelLog')) || []; }catch(e){ return []; } })();
+  if(!cancelLog.length) cancelLog = (() => { try{ return JSON.parse(localStorage.getItem('posCancelLog')) || []; }catch(e){ return []; } })();
   async function askManagerPin(){
     if(curUser && curUser.admin) return true;
     return pinOK(await askSecret('Yönetici PIN kodu:'));
@@ -5478,7 +5711,7 @@ ${st('M50 58c-5-6 5-10 0-17', 0)}${st('M60 56c-5-7 5-11 0-19', 1.05)}${st('M70 5
     if(!(n >= 1 && n <= CANCEL_REASONS.length)) return;
     if(!(await askManagerPin())){ showToast('PIN hatalı, iptal yapılmadı.'); return; }
     logPriv('cancelLog', { ts: Date.now(), key: k, reason: CANCEL_REASONS[n - 1], total: grossTotal(k), by: uname(), items: carts[k].map(i => i.qty + '× ' + i.name) });
-    if(adminDev()) try{ localStorage.setItem('seyirCancelLog', JSON.stringify(cancelLog.slice(0, 500))); }catch(_){}
+    if(adminDev()) try{ localStorage.setItem('posCancelLog', JSON.stringify(cancelLog.slice(0, 500))); }catch(_){}
     carts[k] = []; delete discountByKey[k]; delete guestsByKey[k];
     afterOrderChange(); if(extOrders[k]) dropExt(k); showScreen(currentBackScreen); renderSiparisMasa();
     showToast('Adisyon iptal edildi: ' + CANCEL_REASONS[n - 1]);
@@ -5585,7 +5818,7 @@ ${st('M50 58c-5-6 5-10 0-17', 0)}${st('M60 56c-5-7 5-11 0-19', 1.05)}${st('M70 5
     } finally { btn.disabled = false; }
   });
   $id('btnOwnerAcc').addEventListener('click', async () => {
-    if(!(curUser && curUser.sup) || RT.local || !(RT.isRoot && RT.isRoot()) || !RT.createStaff){ showToast('Bu işlem için Admin olarak Firebase hesabıyla bağlı olmalısınız.'); return; }
+    if(!(curUser && curUser.sup) || RT.local || !(RT.isRoot && RT.isRoot()) || !RT.createStaff){ showToast('Bu işlem şu an yapılamıyor.'); return; }
     const pw = $id('setOwnerPw').value.trim();
     if(pw.length < 6 || /\s/.test(pw)){ showToast('Şifre en az 6 karakter olmalı, boşluk içermemeli.'); return; }
     const btn = $id('btnOwnerAcc'); btn.disabled = true;
@@ -5606,7 +5839,7 @@ ${st('M50 58c-5-6 5-10 0-17', 0)}${st('M60 56c-5-7 5-11 0-19', 1.05)}${st('M70 5
     } finally { btn.disabled = false; }
   });
   $id('btnGuncelle').addEventListener('click', () => {
-    if(!(curUser && curUser.admin) || curUser.owner){ showToast('PIN\'i yalnızca eski PIN ile giren yönetici/Admin değiştirebilir. Yönetici şifresi için "Şifremi değiştir" alanını kullanın.'); return; }
+    if(!(curUser && curUser.admin) || curUser.owner){ if($id('setPin').value.trim() || ($id('setSupPin') && $id('setSupPin').value.trim())) showToast('PIN değiştirilemez. Yönetici şifresi için "Şifremi değiştir" alanını kullanın.'); return; }
     const p = $id('setPin').value.trim(), sp = $id('setSupPin') ? $id('setSupPin').value.trim() : '';
     if(!p && !sp) return;
     const chk = (x, min) => {
@@ -5616,17 +5849,17 @@ ${st('M50 58c-5-6 5-10 0-17', 0)}${st('M60 56c-5-7 5-11 0-19', 1.05)}${st('M70 5
     };
     if(p && !chk(p, 4)) return;
     if(sp){
-      if(RT.local || !(curUser.sup || (!supExists && !isHash(settings.supPin)))){ showToast('Admin PIN\'ini yalnızca Admin değiştirebilir.'); return; }
+      if(RT.local || !(curUser.sup || (!supExists && !isHash(settings.supPin)))){ showToast('Bu işlem için yetkiniz yok.'); return; }
       if(!chk(sp, 6)) return;
       if(sp === p || pwHash(sp) === settings.pin){ showToast('Admin PIN\'i Yönetici PIN\'inden farklı olmalı.'); return; }
     }
     if(p){
-      if(settings.supPin && pwHash(p) === settings.supPin){ showToast('Yönetici PIN\'i Admin PIN\'inden farklı olmalı.'); return; }
+      if(settings.supPin && pwHash(p) === settings.supPin){ showToast('Bu PIN kullanılamaz, farklı bir PIN seçin.'); return; }
       settings.pin = pwHash(p);
     }
     if(sp){ settings.supPin = pwHash(sp); supExists = true; }
     $id('setPin').value = ''; if($id('setSupPin')) $id('setSupPin').value = '';
-    saveState(); applyPerms(); showToast((p && sp) ? 'PIN\'ler güncellendi.' : sp ? 'Admin PIN güncellendi.' : 'PIN güncellendi.');
+    saveState(); lastDirSig = ''; try{ syncStaffDir(); }catch(e){ console.error(e); } applyPerms(); showToast((p && sp) ? 'PIN\'ler güncellendi.' : sp ? 'Admin PIN güncellendi.' : 'PIN güncellendi.');
   });
   $id('btnBackup').addEventListener('click', () => { settings.lastBackup = Date.now(); });
   setInterval(() => { if(staffMode && curUser && curUser.admin && !window._bkWarned && Date.now() - (settings.lastBackup || 0) > 7 * 864e5){ window._bkWarned = 1; showToast('⚠ Son yedek 7 günden eski. Ayarlar > Yedek & Sistem\'den yedek indirin.'); } }, 60000);
@@ -5668,7 +5901,7 @@ ${st('M50 58c-5-6 5-10 0-17', 0)}${st('M60 56c-5-7 5-11 0-19', 1.05)}${st('M70 5
   }
 
   // ---- bağlantı durumu ve gerçek yenileme ----
-  let connState = 'unk', lastSyncAt = 0;
+  var connState = 'unk', lastSyncAt = 0;
   function setConn(st){ connState = st; const d = $id('smConnDot'); if(d) d.className = 'cdot ' + (st === 'ok' ? 'ok' : st === 'bad' ? 'bad' : st === 'loc' ? 'loc' : ''); }
   function markSync(){ lastSyncAt = Date.now(); }
   window.addEventListener('offline', () => setConn('bad'));
@@ -5706,7 +5939,7 @@ ${st('M50 58c-5-6 5-10 0-17', 0)}${st('M60 56c-5-7 5-11 0-19', 1.05)}${st('M70 5
   // ---- PC'de tam ekran masa görünümü (ayar hatırlanır) ----
   const SM_SIZES = [140, 180, 230, 300, 380];
   let smFullPref = false, smSize = 2, smFsTried = false;
-  try{ smFullPref = localStorage.getItem('seyirSmFull') === '1'; const v = parseInt(localStorage.getItem('seyirSmSize')); if(!isNaN(v)) smSize = Math.min(4, Math.max(0, v)); }catch(e){}
+  try{ smFullPref = localStorage.getItem('posSmFull') === '1'; const v = parseInt(localStorage.getItem('posSmSize')); if(!isNaN(v)) smSize = Math.min(4, Math.max(0, v)); }catch(e){}
   let smScreen = 'siparis-masa';
   function smFullApply(name){
     if(name) smScreen = name;
@@ -5716,7 +5949,7 @@ ${st('M50 58c-5-6 5-10 0-17', 0)}${st('M60 56c-5-7 5-11 0-19', 1.05)}${st('M70 5
     document.body.style.setProperty('--tsh', Math.round(SM_SIZES[smSize] * 0.62) + 'px');
     const b = $id('smIconFull'); if(b) b.classList.toggle('on', smFullPref);
   }
-  function smSave(){ try{ localStorage.setItem('seyirSmFull', smFullPref ? '1' : '0'); localStorage.setItem('seyirSmSize', String(smSize)); }catch(e){} }
+  function smSave(){ try{ localStorage.setItem('posSmFull', smFullPref ? '1' : '0'); localStorage.setItem('posSmSize', String(smSize)); }catch(e){} }
   $id('smIconFull').addEventListener('click', () => {
     smFullPref = !smFullPref; smSave(); smFullApply();
     try{
@@ -6034,7 +6267,7 @@ ${st('M50 58c-5-6 5-10 0-17', 0)}${st('M60 56c-5-7 5-11 0-19', 1.05)}${st('M70 5
   // =====================================================================
   // YÖNETİCİ SORU-CEVAP + OTOMATİK ÜRÜN GÖRSELİ
   // =====================================================================
-  const APP_GUIDE = `Sistem: SEYİR CAFE adisyon / dijital menü uygulaması. Sol menü ve ekranlar:
+  const APP_GUIDE = `Sistem: ${APP_CONFIG.brand.name} adisyon / dijital menü uygulaması. Sol menü ve ekranlar:
 - Ana Sayfa: bugünkü satış, misafir, açık sipariş, gider ve grafikler (yalnızca rapor yetkisi olanlar).
 - Dijital Menü: masa seçip müşteri QR kodunu gösterir/yazdırmaya hazırlar.
 - Yapay Zekâ: satış özeti, menü açıklaması yazma, menü çevirisi, stok/fiyat önerisi, fotoğraftan gider girişi, bağlantı testi.
@@ -6239,8 +6472,8 @@ ${st('M50 58c-5-6 5-10 0-17', 0)}${st('M60 56c-5-7 5-11 0-19', 1.05)}${st('M70 5
   // MÜŞTERİ EKRANI ŞİFRESİ + YENİ KENAR MENÜ İŞLEVLERİ
   // Not: şifre kapısı arayüz düzeyindedir (menüyü yalnızca masadakilere göstermek / sahte siparişi azaltmak için); veritabanı kuralı değildir.
   // =====================================================================
-  const custHashOf = pw => sha256('seyirmusteri|' + pw);
-  const CU_KEY = 'seyirCustOK'; let custOKmem = '', custFails = 0, custLockUntil = 0;
+  const custHashOf = pw => sha256('posmusteri|' + pw);
+  const CU_KEY = 'posCustOK'; let custOKmem = '', custFails = 0, custLockUntil = 0;
   function custPwHash(){ if(pubData) return pubData.custPw || ''; return (typeof RT !== 'undefined' && RT.local && settings.custPw) ? custHashOf(settings.custPw) : ''; }
   function custGateNeeded(){
     const h = custPwHash(); if(!h) return false;
@@ -6397,6 +6630,8 @@ ${st('M50 58c-5-6 5-10 0-17', 0)}${st('M60 56c-5-7 5-11 0-19', 1.05)}${st('M70 5
   // STOK MODÜLÜ — malzeme, reçete, otomatik düşüm, kritik uyarı, fire, mal kabul, rapor
   // ======================================================================
   const STK = { items: [], rec: {}, log: [] };
+  STK.prod = {}; STK.plog = []; STK.pset = { cust: 'out', staff: true, block: true, low: 5 };
+  let stkMode = 'live', skVis = false, skF = { q: '', cat: '', f: 'tracked' }, skSel = {}, skShMode = 'add', skShQ = '', skShCat = '';
   let stkTab = 'stok', stkR = { f: new Date(Date.now() - 29 * 864e5).toISOString().slice(0, 10), t: new Date().toISOString().slice(0, 10) };
   const stkUnits = ['Adet', 'gr', 'kg', 'lt', 'ml', 'Porsiyon'], stkLbl = { in: 'Mal kabul', sale: 'Satış', fire: 'Fire', adj: 'Sayım' };
   const stkId = () => 's' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5);
@@ -6412,9 +6647,10 @@ ${st('M50 58c-5-6 5-10 0-17', 0)}${st('M60 56c-5-7 5-11 0-19', 1.05)}${st('M70 5
     STK.log.push({ ts: Date.now(), t, id: x.id, q, c: cost == null ? x.cost : cost, note: note || '', u: uname() });
     if(STK.log.length > 4000) STK.log.splice(0, STK.log.length - 4000);
   }
-  function stkBadge(){ const n = STK.items.filter(x => x.qty <= x.min).length, b = document.getElementById('sbStk'); if(b){ b.textContent = n; b.classList.toggle('on', n > 0); } }
+  function stkBadge(){ let n = STK.items.filter(x => x.qty <= x.min).length; try{ n += Object.keys(STK.prod).filter(k => stkStatus(k)[0] !== 'ok').length; }catch(e){} const b = document.getElementById('sbStk'); if(b){ b.textContent = n; b.classList.toggle('on', n > 0); } }
   function stkSave(){ stkBadge(); saveState(); stkRender(); }
   function stkConsume(e){   // her satışta reçeteye göre otomatik düşüm
+    ((e && e.items) || []).forEach(i => { if(i && stkTracked(i.name)) stkPMove(i.name, -(+i.qty || 1), 'sale'); });
     ((e && e.items) || []).forEach(i => (STK.rec[i.name] || []).forEach(r => { const x = stkItem(r.id); if(x) stkMove('sale', x, -(r.q * (i.qty || 1)), i.name); }));
     stkBadge();
   }
@@ -6563,7 +6799,9 @@ ${st('M50 58c-5-6 5-10 0-17', 0)}${st('M60 56c-5-7 5-11 0-19', 1.05)}${st('M70 5
     return L.length ? '<div class="ct-tablewrap"><table class="ct-table"><thead><tr><th>Tarih</th><th>Malzeme</th><th>İşlem</th><th>Miktar</th><th>Not</th><th>Kullanıcı</th></tr></thead><tbody>' + L.map(e => { const x = stkItem(e.id); return '<tr><td>' + new Date(e.ts).toLocaleString('tr-TR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }) + '</td><td>' + esc(x ? x.name : '(silinmiş)') + '</td><td>' + (stkLbl[e.t] || e.t) + '</td><td>' + (e.q > 0 ? '+' : '') + stkFmt(e.q) + '</td><td>' + esc(e.note) + '</td><td>' + esc(e.u || '') + '</td></tr>'; }).join('') + '</tbody></table></div>' : '<div class="stk-empty">Henüz hareket yok.</div>';
   }
   function stkRender(){
+    try{ stkLiveRender(); }catch(err){ console.error(err); }
     const el = $id('stkBody'); if(!el) return; stkBadge();
+    if(stkMode !== 'adv') return;
     document.querySelectorAll('#stkTabs .tab').forEach(t => t.classList.toggle('active', t.dataset.t === stkTab));
     el.innerHTML = ({ stok: stkViewStock, recete: stkViewRecipes, rapor: stkViewReport, hareket: stkViewLog })[stkTab]();
   }
@@ -6579,15 +6817,287 @@ ${st('M50 58c-5-6 5-10 0-17', 0)}${st('M60 56c-5-7 5-11 0-19', 1.05)}${st('M70 5
   }, true);
   document.addEventListener('change', e => { const r = e.target.dataset && e.target.dataset.r; if(r && e.target.closest('#screen-stok') && e.target.value){ stkR[r] = e.target.value; stkRender(); } });
   // ---- uygulama ile bağlantı: kayıt/senkron, ekran yönlendirme, satış kancası ----
-  const _snap = snapshot; snapshot = function(){ const o = _snap.apply(this, arguments); o.stock = STK; return o; };
+  const _snap = snapshot; snapshot = function(){ const o = _snap.apply(this, arguments); o.stock = Object.assign({}, STK, { prod: skPack() }); return o; };
   const _apply = applyState; applyState = function(s, p){
-    if(s && s.stock && typeof s.stock === 'object'){ STK.items = Array.isArray(s.stock.items) ? s.stock.items : []; STK.rec = s.stock.rec && typeof s.stock.rec === 'object' ? s.stock.rec : {}; STK.log = Array.isArray(s.stock.log) ? s.stock.log : []; }
+    if(s && s.stock && typeof s.stock === 'object'){ STK.items = Array.isArray(s.stock.items) ? s.stock.items : []; STK.rec = s.stock.rec && typeof s.stock.rec === 'object' ? s.stock.rec : {}; STK.log = Array.isArray(s.stock.log) ? s.stock.log : [];
+      STK.prod = {}; arr(s.stock.prod).forEach(x => { if(x && x.n) STK.prod[x.n] = { q: +x.q || 0, min: (x.m == null ? undefined : +x.m) }; });
+      STK.plog = Array.isArray(s.stock.plog) ? s.stock.plog.filter(Boolean) : []; STK.pset = Object.assign({ cust: 'out', staff: true, block: true, low: 5 }, (s.stock.pset && typeof s.stock.pset === 'object') ? s.stock.pset : {}); }
     const r = _apply.apply(this, arguments); stkBadge(); return r;
   };
   const _lp = logPriv; logPriv = function(k, e){ if(k === 'saleLog'){ try{ stkConsume(e); }catch(err){ console.error(err); } } return _lp.apply(this, arguments); };
   const _show = showScreen; showScreen = function(n){ const r = _show.apply(this, arguments); if(n === 'stok') stkRender(); return r; };
-  titles.stok = 'Stok Yönetimi'; SCR_PERM.stok = 'expenses';
+  titles.stok = 'Stok'; SCR_PERM.stok = 'stock';
   setInterval(stkBadge, 4000);
+
+  // ======================================================================
+  // CANLI ÜRÜN STOĞU — menüdeki ürünler üzerinden adet takibi, sade ve canlı
+  // ======================================================================
+  const SK_LBL = { in: 'Giriş', out: 'Çıkış', sale: 'Satış', set: 'Sayım', start: 'Takip başladı', stop: 'Takip bitti' };
+  const skInt = v => { const n = parseInt(String(v).replace(',', '.'), 10); return isFinite(n) ? n : NaN; };
+  const skEsc = x => esc(String(x == null ? '' : x));
+  const stkTracked = n => Object.prototype.hasOwnProperty.call(STK.prod, n);
+  const stkLow = n => { const t = STK.prod[n]; return (t && isFinite(t.min) && t.min !== null && t.min !== '') ? +t.min : (+STK.pset.low || 5); };
+  function stkReserved(n){ let q = 0; Object.keys(carts).forEach(k => (carts[k] || []).forEach(it => { if(it && it.name === n) q += (+it.qty || 0); })); return q; }
+  function stkAvail(n){ return stkTracked(n) ? Math.max(0, Math.floor(STK.prod[n].q) - stkReserved(n)) : null; }
+  function stkStatus(n, av){ av = av == null ? stkAvail(n) : av; return av <= 0 ? ['bad', 'Tükendi'] : av <= stkLow(n) ? ['warn', 'Azalıyor'] : ['ok', 'Yeterli']; }
+  function stkPMove(n, d, t, note){
+    const x = STK.prod[n]; if(!x || !isFinite(d)) return;
+    const nq = Math.max(0, Math.round((x.q + d) * 1000) / 1000), real = nq - x.q; x.q = nq;
+    if(real !== 0 || t === 'start' || t === 'stop') STK.plog.push({ ts: Date.now(), n, d: real, t, note: note || '', u: uname() });
+    if(STK.plog.length > 2000) STK.plog.splice(0, STK.plog.length - 2000);
+  }
+  function skAll(){
+    const a = [], seen = new Set();
+    categories.forEach(c => (c.products || []).forEach(p => { if(p && p.name && !seen.has(p.name)){ seen.add(p.name); a.push({ p, cat: c.grp || c.name }); } }));
+    return a;
+  }
+  const skSee = () => !!(curUser && (curUser.admin || can('stock') || STK.pset.staff !== false));
+  const skChip = n => { if(!stkTracked(n) || !skSee()) return ''; const av = stkAvail(n), s = stkStatus(n, av); return '<span class="sk-mini ' + s[0] + '">' + (av <= 0 ? 'Tükendi' : av + ' adet') + '</span>'; };
+  function stkPublic(){
+    const P = STK.pset, o = [], l = [];
+    if(P.cust === 'hide') return { m: 'hide' };
+    Object.keys(STK.prod).forEach(n => { const av = stkAvail(n); if(av <= 0) o.push(n); else if(P.cust === 'low' && av <= stkLow(n)) l.push({ n, q: av }); });
+    return { m: P.cust === 'low' ? 'low' : 'out', b: P.block ? 1 : 0, o, l };
+  }
+  let _skPubSig = '', _skPubFail = 0;
+  function stkPushPublic(){
+    if(RT.local || !staffMode || !curUser || Date.now() - _skPubFail < 60000) return;
+    let d; try{ d = stkPublic(); }catch(e){ return; }
+    const sig = JSON.stringify(d); if(sig === _skPubSig) return; _skPubSig = sig;
+    try{ Promise.resolve(RT.set('public/stock', d)).catch(() => { _skPubFail = Date.now(); _skPubSig = ''; }); }catch(e){ _skPubFail = Date.now(); }
+  }
+  function skSave(){ stkBadge(); saveState(); stkRender(); try{ stkPushPublic(); }catch(e){} }
+  // ---- görünümler ----
+  function skModesUI(){
+    const adv = stkMode === 'adv', live = $id('stkLive'); if(!live) return;
+    live.style.display = adv ? 'none' : ''; $id('stkAdv').style.display = adv ? '' : 'none';
+    $id('stkHeadLive').style.display = adv ? 'none' : ''; $id('stkHeadAdv').style.display = adv ? '' : 'none';
+    document.querySelectorAll('#stkModes button').forEach(b => b.classList.toggle('on', b.dataset.sm === stkMode));
+    const p = $id('stkSub'); if(p) p.textContent = adv ? 'Malzeme stokları, reçeteler, fire ve tüketim raporları' : 'Ürünlerinizin canlı adet stoğu';
+  }
+  function skStatusCard(n){ const av = stkAvail(n), s = stkStatus(n, av); return { av, s }; }
+  function skGridHtml(){
+    const q = skF.q.trim().toLocaleLowerCase('tr-TR');
+    let L = skAll().filter(x => (!skF.cat || x.cat === skF.cat) && (!q || x.p.name.toLocaleLowerCase('tr-TR').includes(q)));
+    const sev = n => { const s = stkStatus(n)[0]; return s === 'bad' ? 0 : s === 'warn' ? 1 : 2; };
+    if(skF.f === 'untracked') L = L.filter(x => !stkTracked(x.p.name));
+    else{
+      L = L.filter(x => stkTracked(x.p.name));
+      if(skF.f === 'low') L = L.filter(x => stkStatus(x.p.name)[0] === 'warn');
+      if(skF.f === 'out') L = L.filter(x => stkStatus(x.p.name)[0] === 'bad');
+      L.sort((a, b) => sev(a.p.name) - sev(b.p.name) || a.p.name.localeCompare(b.p.name, 'tr'));
+    }
+    if(!L.length){
+      const none = !Object.keys(STK.prod).length && !skF.q && !skF.cat && skF.f === 'tracked';
+      return '<div class="sk-empty"><div class="sk-ei">📦</div><b>' + (none ? 'Stok takibi henüz başlamadı' : 'Bu görünümde ürün yok') + '</b><p>' + (none ? 'Ürünleri menüdeki gibi seçin, adetlerini yazın; satış yapıldıkça stok kendiliğinden düşer.' : 'Filtreyi veya aramayı değiştirin.') + '</p>' + (none ? '<button class="sk-primary" data-sa="add">＋ Stok ekle</button>' : '') + '</div>';
+    }
+    return '<div class="sk-grid">' + L.map(x => {
+      const p = x.p, n = p.name, tr = stkTracked(n), en = skEsc(n);
+      if(!tr) return '<div class="sk-card off"><div class="sk-top"><div class="sk-vis">' + visHtml(p, '', 'v-mp') + '</div><div class="sk-nm"><b>' + en + '</b><small>' + skEsc(x.cat) + '</small></div></div><div class="sk-nt">Stok takibi kapalı</div><div class="sk-act"><button class="sk-btn" data-sa="on" data-n="' + en + '">Takibe al</button></div></div>';
+      const { av, s } = skStatusCard(n), q = Math.floor(STK.prod[n].q), rs = stkReserved(n), lo = stkLow(n), pct = Math.max(0, Math.min(100, av / Math.max(lo * 3, 1) * 100));
+      return '<div class="sk-card ' + s[0] + '"><div class="sk-top"><div class="sk-vis">' + visHtml(p, '', 'v-mp') + '</div><div class="sk-nm"><b>' + en + '</b><small>' + skEsc(x.cat) + '</small></div><span class="sk-pill ' + s[0] + '">' + s[1] + '</span></div>' +
+        '<div class="sk-q"><b>' + q + '</b><span>adet</span>' + (rs ? '<em>' + rs + ' adisyonda</em>' : '') + '</div><div class="sk-bar"><i class="' + s[0] + '" style="width:' + pct + '%"></i></div>' +
+        '<div class="sk-act"><button class="sk-sq" data-sa="dec" data-n="' + en + '" aria-label="Azalt">−</button><button class="sk-sq" data-sa="inc" data-n="' + en + '" aria-label="Artır">＋</button><button class="sk-btn" data-sa="set" data-n="' + en + '">Sayım</button><button class="sk-btn ghost" data-sa="off" data-n="' + en + '" title="Takibi bırak">⋯</button></div></div>';
+    }).join('') + '</div>';
+  }
+  function skVisPanel(){
+    const P = STK.pset, can2 = !!(curUser && (curUser.admin || can('settings'))), dis = can2 ? '' : ' disabled';
+    const seg = (k, t) => '<button class="' + (P.cust === k ? 'on' : '') + '" data-sa="cust:' + k + '"' + dis + '>' + t + '</button>';
+    const tg = (k, t, d) => '<div class="sk-row"><div><b>' + t + '</b><small>' + d + '</small></div><button class="sk-tg ' + (P[k] !== false && P[k] ? 'on' : '') + '" data-sa="tg:' + k + '"' + dis + ' role="switch" aria-checked="' + !!P[k] + '"><i></i></button></div>';
+    return '<div class="sk-vp"><div class="sk-vph"><b>Stok görünürlüğü</b><small>' + (can2 ? 'Stoğun kime ve nasıl gösterileceğini seçin.' : 'Bu ayarları yalnızca yönetici değiştirebilir.') + '</small></div>' +
+      '<div class="sk-row col"><div><b>Müşteri menüsünde</b><small>Müşteri sipariş verirken ürünün durumunu görür.</small></div><div class="sk-seg">' + seg('hide', 'Gösterme') + seg('out', '“Tükendi”') + seg('low', 'Tükendi + Son adetler') + '</div></div>' +
+      tg('staff', 'Personel ekranlarında stok görünsün', 'Kapalıysa yalnızca stok yetkisi olanlar görür.') + tg('block', 'Tükenen ürün sipariş edilemesin', 'Hem müşteri hem personel tükenen ürünü ekleyemez.') +
+      '<div class="sk-row"><div><b>Azalıyor uyarısı</b><small>Bu adedin altına inen ürün “Azalıyor” olur.</small></div><input type="number" min="1" max="999" class="sk-num" id="skLow" value="' + (+P.low || 5) + '"' + dis + '></div></div>';
+  }
+  function skLiveView(){
+    const all = skAll(), tr = all.filter(x => stkTracked(x.p.name)), st = x => stkStatus(x.p.name)[0];
+    const nW = tr.filter(x => st(x) === 'warn').length, nB = tr.filter(x => st(x) === 'bad').length, cats = []; all.forEach(x => { if(cats.indexOf(x.cat) < 0) cats.push(x.cat); });
+    const fb = (k, t) => '<button class="' + (skF.f === k ? 'on' : '') + '" data-sf="' + k + '">' + t + '</button>';
+    return '<div class="sk-kpis"><div class="sk-kpi"><small>Takipteki ürün</small><b>' + tr.length + '</b></div><div class="sk-kpi warn"><small>Azalan</small><b>' + nW + '</b></div><div class="sk-kpi bad"><small>Tükenen</small><b>' + nB + '</b></div></div>' +
+      (skVis ? skVisPanel() : '') +
+      '<div class="sk-tools"><input id="skSearch" class="sk-search" type="search" placeholder="Ürün ara…" value="' + skEsc(skF.q) + '" autocomplete="off"><div class="sk-seg">' + fb('tracked', 'Takipte') + fb('low', 'Azalan') + fb('out', 'Tükenen') + fb('untracked', 'Takipte değil') + '</div></div>' +
+      '<div class="sk-chips"><button class="sk-chip ' + (!skF.cat ? 'on' : '') + '" data-sc="">Tümü</button>' + cats.map(c => '<button class="sk-chip ' + (skF.cat === c ? 'on' : '') + '" data-sc="' + skEsc(c) + '">' + skEsc(c) + '</button>').join('') + '</div><div id="skGrid">' + skGridHtml() + '</div>';
+  }
+  function skLogView(){
+    const L = STK.plog.slice(-200).reverse();
+    if(!L.length) return '<div class="sk-empty"><div class="sk-ei">🕘</div><b>Henüz hareket yok</b><p>Stok girişleri, sayımlar ve satışlar burada listelenir.</p></div>';
+    return '<div class="sk-log">' + L.map(e => '<div class="sk-lr"><div class="sk-ld ' + (e.d > 0 ? 'in' : e.d < 0 ? 'out' : '') + '">' + (e.d > 0 ? '+' : '') + (e.d || 0) + '</div><div class="sk-lm"><b>' + skEsc(e.n) + '</b><small>' + (SK_LBL[e.t] || e.t) + (e.note ? ' · ' + skEsc(e.note) : '') + (e.u ? ' · ' + skEsc(e.u) : '') + '</small></div><time>' + new Date(e.ts).toLocaleString('tr-TR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }) + '</time></div>').join('') + '</div>';
+  }
+  function stkLiveRender(){
+    const h = $id('stkLive'); if(!h) return; skModesUI();
+    if(stkMode === 'adv') return;
+    const keep = document.activeElement && document.activeElement.id === 'skSearch';
+    h.innerHTML = stkMode === 'log' ? skLogView() : skLiveView();
+    if(keep){ const i = $id('skSearch'); if(i){ i.focus(); i.setSelectionRange(i.value.length, i.value.length); } }
+  }
+  // ---- "Stok ekle" penceresi: ürünleri menüdeki gibi seç, adedi yaz ----
+  function skSheetEl(){ let ov = document.getElementById('skSheet'); if(!ov){ ov = document.createElement('div'); ov.id = 'skSheet'; ov.className = 'sk-ov'; document.body.appendChild(ov); } return ov; }
+  function skOpenSheet(){ skSel = {}; skShMode = 'add'; skShQ = ''; skShCat = ''; const ov = skSheetEl(); ov.style.display = 'flex'; skSheetRender(); setTimeout(() => { const i = document.getElementById('skShSearch'); if(i) i.focus(); }, 60); }
+  function skCloseSheet(){ const ov = document.getElementById('skSheet'); if(ov) ov.style.display = 'none'; }
+  function skShGrid(){
+    const q = skShQ.trim().toLocaleLowerCase('tr-TR'), L = skAll().filter(x => (!skShCat || x.cat === skShCat) && (!q || x.p.name.toLocaleLowerCase('tr-TR').includes(q)));
+    if(!L.length) return '<p class="sk-none">Ürün bulunamadı.</p>';
+    return L.map(x => {
+      const n = x.p.name, en = skEsc(n), on = Object.prototype.hasOwnProperty.call(skSel, n), cur = stkTracked(n) ? Math.floor(STK.prod[n].q) + ' adet' : 'takipte değil';
+      return '<div class="sk-tile' + (on ? ' on' : '') + '" data-sn="' + en + '"><div class="sk-vis">' + visHtml(x.p, '', 'v-mp') + '</div><b>' + en + '</b><small>Stok: ' + cur + '</small>' +
+        (on ? '<div class="sk-tctl"><button data-sp="-1" aria-label="Azalt">−</button><input type="number" inputmode="numeric" min="0" data-sq value="' + skSel[n] + '" aria-label="Adet"><button data-sp="1" aria-label="Artır">＋</button></div>' : '<div class="sk-tctl pick">＋ Seç</div>') + '</div>';
+    }).join('');
+  }
+  function skShSum(){
+    const ks = Object.keys(skSel), tot = ks.reduce((a, k) => a + (skSel[k] || 0), 0), b = document.getElementById('skShOk'), s = document.getElementById('skShSum');
+    if(s) s.innerHTML = ks.length ? '<b>' + ks.length + ' ürün</b> · ' + (skShMode === 'add' ? 'toplam +' : 'sayım toplamı ') + tot + ' adet' : 'Ürün seçin';
+    if(b){ b.disabled = !ks.length; b.textContent = skShMode === 'add' ? 'Stoğa ekle' : 'Sayımı kaydet'; }
+  }
+  function skSheetRender(){
+    const ov = skSheetEl(), cats = []; skAll().forEach(x => { if(cats.indexOf(x.cat) < 0) cats.push(x.cat); });
+    const gs = ov.querySelector('#skShGrid'), st = gs ? gs.scrollTop : 0;
+    ov.innerHTML = '<div class="sk-sheet" role="dialog" aria-label="Stok ekle"><div class="sk-sh-head"><div><b>' + (skShMode === 'add' ? 'Stok ekle' : 'Stok sayımı') + '</b><small>' + (skShMode === 'add' ? 'Ürünleri menüdeki gibi seçin, eklenecek adedi yazın.' : 'Raftaki gerçek adedi yazın; stok bu sayıya eşitlenir.') + '</small></div><button class="sk-x" data-sx="close" aria-label="Kapat">✕</button></div>' +
+      '<div class="sk-seg sk-seg2"><button class="' + (skShMode === 'add' ? 'on' : '') + '" data-sx="m:add">Stoğa ekle</button><button class="' + (skShMode === 'set' ? 'on' : '') + '" data-sx="m:set">Sayıma eşitle</button></div>' +
+      '<input id="skShSearch" class="sk-search" type="search" placeholder="Ürün ara…" value="' + skEsc(skShQ) + '" autocomplete="off">' +
+      '<div class="sk-chips"><button class="sk-chip ' + (!skShCat ? 'on' : '') + '" data-sx="c:">Tümü</button>' + cats.map(c => '<button class="sk-chip ' + (skShCat === c ? 'on' : '') + '" data-sx="c:' + skEsc(c) + '">' + skEsc(c) + '</button>').join('') + '</div>' +
+      '<div class="sk-sh-grid" id="skShGrid">' + skShGrid() + '</div><div class="sk-sh-foot"><div id="skShSum"></div><button class="sk-primary" id="skShOk" data-sx="ok">Stoğa ekle</button></div></div>';
+    const g = ov.querySelector('#skShGrid'); if(g) g.scrollTop = st; skShSum();
+  }
+  function skApply(){
+    const ks = Object.keys(skSel); if(!ks.length) return;
+    const done = [];
+    ks.forEach(n => {
+      const q = Math.max(0, skInt(skSel[n]) || 0); if(skShMode === 'add' && q <= 0) return;
+      if(!stkTracked(n)){ STK.prod[n] = { q: 0 }; stkPMove(n, 0, 'start'); }
+      if(skShMode === 'add') stkPMove(n, q, 'in'); else stkPMove(n, q - STK.prod[n].q, 'set');
+      done.push(q + ' ' + n);
+    });
+    skCloseSheet(); if(!done.length) return; skSave();
+    showToast(done.slice(0, 3).join(', ') + (done.length > 3 ? ' +' + (done.length - 3) + ' ürün' : '') + (skShMode === 'add' ? ' stoğa eklendi.' : ' olarak sayıldı.'));
+  }
+  function skSetForm(n){
+    if(!stkTracked(n)) return; const x = STK.prod[n];
+    openForm({ title: n, sub: 'Raftaki gerçek adedi yazın; stok bu sayıya eşitlenir.', fields: [
+      { id: 'qty', label: 'Mevcut adet', type: 'number', step: '1', value: Math.floor(x.q) },
+      { id: 'min', label: 'Azalınca uyar (adet)', type: 'number', step: '1', value: stkLow(n) }
+    ], onOk(v){
+      const q = skInt(v.qty), m = skInt(v.min);
+      if(!(q >= 0)) return 'Adet 0 veya daha büyük olmalı.'; if(!(m >= 0)) return 'Uyarı adedi geçersiz.';
+      x.min = m; if(q !== Math.floor(x.q)) stkPMove(n, q - x.q, 'set'); skSave();
+    } });
+  }
+  // ---- olaylar ----
+  document.addEventListener('click', e => {
+    const sh = e.target.closest('#skSheet');
+    if(sh){
+      if(e.target.id === 'skSheet'){ skCloseSheet(); return; }
+      const sx = e.target.closest('[data-sx]');
+      if(sx){ const v = sx.dataset.sx;
+        if(v === 'close') skCloseSheet(); else if(v === 'ok') skApply();
+        else if(v.indexOf('m:') === 0){ skShMode = v.slice(2); skSheetRender(); }
+        else if(v.indexOf('c:') === 0){ skShCat = v.slice(2); skSheetRender(); }
+        return; }
+      const tile = e.target.closest('.sk-tile'); if(!tile) return; const n = tile.dataset.sn, sp = e.target.closest('[data-sp]');
+      if(e.target.closest('[data-sq]')) return;
+      if(sp){ const d = +sp.dataset.sp, cur = skInt(skSel[n]); skSel[n] = Math.max(skShMode === 'add' ? 1 : 0, (isFinite(cur) ? cur : 0) + d); if(skSel[n] === 0 && skShMode === 'add') delete skSel[n]; }
+      else if(Object.prototype.hasOwnProperty.call(skSel, n)){ if(!e.target.closest('.sk-tctl')) delete skSel[n]; }
+      else skSel[n] = skShMode === 'add' ? 1 : (stkTracked(n) ? Math.floor(STK.prod[n].q) : 0);
+      skSheetRender(); return;
+    }
+    if(!e.target.closest('#screen-stok')) return;
+    const sm = e.target.closest('#stkModes [data-sm]'); if(sm){ stkMode = sm.dataset.sm; stkRender(); return; }
+    const sf = e.target.closest('[data-sf]'); if(sf){ skF.f = sf.dataset.sf; stkRender(); return; }
+    const sc = e.target.closest('[data-sc]'); if(sc){ skF.cat = sc.dataset.sc; stkRender(); return; }
+    const b = e.target.closest('[data-sa]'); if(!b || b.disabled) return; e.stopPropagation();
+    const a = b.dataset.sa, n = b.dataset.n;
+    if(a === 'add') skOpenSheet();
+    else if(a === 'vis'){ skVis = !skVis; stkRender(); }
+    else if(a === 'inc' && stkTracked(n)){ stkPMove(n, 1, 'in'); skSave(); }
+    else if(a === 'dec' && stkTracked(n)){ stkPMove(n, -1, 'out'); skSave(); }
+    else if(a === 'set') skSetForm(n);
+    else if(a === 'on'){ STK.prod[n] = { q: 0 }; stkPMove(n, 0, 'start'); skSave(); skSetForm(n); }
+    else if(a === 'off' && stkTracked(n)){ if(confirm(n + ' için stok takibi bırakılsın mı? Ürün normal şekilde satılmaya devam eder.')){ stkPMove(n, 0, 'stop'); delete STK.prod[n]; skSave(); } }
+    else if(a.indexOf('cust:') === 0){ STK.pset.cust = a.slice(5); skSave(); }
+    else if(a.indexOf('tg:') === 0){ const k = a.slice(3); STK.pset[k] = !STK.pset[k]; skSave(); }
+  }, true);
+  document.addEventListener('input', e => {
+    if(e.target.id === 'skSearch'){ skF.q = e.target.value; const g = $id('skGrid'); if(g) g.innerHTML = skGridHtml(); return; }
+    if(e.target.id === 'skShSearch'){ skShQ = e.target.value; const g = document.getElementById('skShGrid'); if(g) g.innerHTML = skShGrid(); return; }
+    if(e.target.matches && e.target.matches('#skSheet [data-sq]')){ const t = e.target.closest('.sk-tile'); if(t){ const v = skInt(e.target.value); skSel[t.dataset.sn] = isFinite(v) ? Math.max(0, v) : 0; skShSum(); } }
+  });
+  document.addEventListener('change', e => { if(e.target.id === 'skLow' && e.target.closest('#screen-stok')){ const v = skInt(e.target.value); if(v >= 1 && v <= 999){ STK.pset.low = v; skSave(); } else e.target.value = STK.pset.low; } });
+  // ---- stil ----
+  (function(){
+    const st = document.createElement('style'); st.textContent = `
+.stk2 .sk-seg{display:inline-flex;background:rgba(120,120,128,.13);border-radius:12px;padding:3px;gap:2px;flex-wrap:wrap}
+.stk2 .sk-seg button,.sk-ov .sk-seg button{border:0;background:transparent;color:var(--ink-dim,#666);padding:7px 13px;border-radius:10px;font:600 .85rem inherit;cursor:pointer}
+.stk2 .sk-seg button.on,.sk-ov .sk-seg button.on{background:var(--panel,#fff);color:var(--ink,#222);box-shadow:0 1px 4px rgba(0,0,0,.14)}
+.stk2 .sk-seg button:disabled{opacity:.5;cursor:not-allowed}
+#stkModes{margin:4px 0 16px}
+.sk-kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px}
+.sk-kpi{border:1px solid var(--line,#e3e3e3);background:var(--panel,#fff);border-radius:14px;padding:12px 14px}.sk-kpi small{display:block;color:var(--ink-dim,#777);font-size:.76rem}.sk-kpi b{font-size:1.6rem;line-height:1.2}
+.sk-kpi.warn b{color:#d98c00}.sk-kpi.bad b{color:#d64545}
+.sk-tools{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:10px}
+.sk-search{flex:1;min-width:150px;padding:10px 14px;border:1px solid var(--line,#ddd);border-radius:12px;background:var(--panel,#fff);color:inherit;font:inherit;box-sizing:border-box}
+.sk-chips{display:flex;gap:6px;overflow-x:auto;padding:2px 0 8px;margin-bottom:6px;scrollbar-width:none}.sk-chips::-webkit-scrollbar{display:none}
+.sk-chip{white-space:nowrap;border:1px solid var(--line,#ddd);background:var(--panel,#fff);color:inherit;border-radius:999px;padding:6px 13px;font:500 .82rem inherit;cursor:pointer}
+.sk-chip.on{background:var(--ink,#222);color:var(--panel,#fff);border-color:transparent}
+.sk-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(215px,1fr));gap:12px}
+.sk-card{border:1px solid var(--line,#e3e3e3);background:var(--panel,#fff);border-radius:16px;padding:13px;display:flex;flex-direction:column;gap:9px;transition:box-shadow .15s}
+.sk-card:hover{box-shadow:0 4px 16px rgba(0,0,0,.07)}.sk-card.off{opacity:.7}
+.sk-card.bad{border-color:rgba(214,69,69,.4)}.sk-card.warn{border-color:rgba(217,140,0,.4)}
+.sk-top{display:flex;gap:10px;align-items:center}.sk-vis{width:46px;height:46px;flex:0 0 46px;border-radius:12px;overflow:hidden;position:relative}
+.sk-vis .vis{width:100%!important;height:100%!important;min-height:0!important;border-radius:12px;aspect-ratio:auto}
+.sk-nm{flex:1;min-width:0}.sk-nm b{display:block;font-size:.93rem;line-height:1.25;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}.sk-nm small{color:var(--ink-faint,#999);font-size:.74rem}
+.sk-pill{font-size:.7rem;font-weight:700;padding:3px 9px;border-radius:999px;white-space:nowrap}
+.sk-pill.ok{background:rgba(31,157,106,.14);color:#1f9d6a}.sk-pill.warn{background:rgba(217,140,0,.16);color:#c07a00}.sk-pill.bad{background:rgba(214,69,69,.15);color:#d64545}
+.sk-q{display:flex;align-items:baseline;gap:6px}.sk-q b{font-size:2rem;line-height:1}.sk-q span{color:var(--ink-dim,#777);font-size:.85rem}.sk-q em{margin-left:auto;font-style:normal;font-size:.74rem;color:var(--ink-faint,#999)}
+.sk-bar{height:6px;border-radius:6px;background:rgba(120,120,128,.15);overflow:hidden}.sk-bar i{display:block;height:100%;border-radius:6px}
+.sk-bar i.ok{background:#1f9d6a}.sk-bar i.warn{background:#e0a100}.sk-bar i.bad{background:#d64545}
+.sk-act{display:flex;gap:6px;align-items:center}.sk-nt{font-size:.8rem;color:var(--ink-faint,#999)}
+.sk-sq{width:38px;height:38px;border-radius:11px;border:1px solid var(--line,#ddd);background:var(--panel,#fff);color:inherit;font-size:1.15rem;cursor:pointer}
+.sk-btn{border:1px solid var(--line,#ddd);background:var(--panel,#fff);color:inherit;border-radius:11px;padding:0 14px;height:38px;font:600 .84rem inherit;cursor:pointer}.sk-btn.ghost{margin-left:auto;padding:0 12px}
+.sk-sq:hover,.sk-btn:hover{border-color:var(--ink-dim,#999)}
+.sk-primary{border:0;background:var(--red,#cf2e2e);color:#fff;border-radius:12px;padding:11px 20px;font:700 .92rem inherit;cursor:pointer}.sk-primary:disabled{opacity:.45;cursor:not-allowed}
+.sk-empty{text-align:center;padding:42px 16px;color:var(--ink-dim,#777)}.sk-empty b{display:block;font-size:1.05rem;color:var(--ink,#222);margin:6px 0 4px}.sk-empty p{max-width:380px;margin:0 auto 16px;font-size:.88rem}.sk-ei{font-size:2.4rem}
+.sk-vp{border:1px solid var(--line,#e3e3e3);background:var(--panel,#fff);border-radius:16px;padding:14px 16px;margin-bottom:14px}.sk-vph{margin-bottom:6px}.sk-vph small{display:block;color:var(--ink-faint,#999);font-size:.78rem}
+.sk-row{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:11px 0;border-top:1px solid var(--line,#eee)}.sk-row.col{flex-direction:column;align-items:flex-start}
+.sk-row small{display:block;color:var(--ink-faint,#999);font-size:.76rem;margin-top:2px}
+.sk-tg{width:46px;height:26px;border-radius:99px;border:0;background:rgba(120,120,128,.3);position:relative;cursor:pointer;flex:0 0 46px;transition:background .15s}
+.sk-tg i{position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.3);transition:left .15s}.sk-tg.on{background:#1f9d6a}.sk-tg.on i{left:23px}.sk-tg:disabled{opacity:.5}
+.sk-num{width:78px;padding:8px;border:1px solid var(--line,#ddd);border-radius:10px;background:var(--panel,#fff);color:inherit;font:inherit;text-align:center}
+.sk-log{border:1px solid var(--line,#e3e3e3);border-radius:16px;overflow:hidden;background:var(--panel,#fff)}
+.sk-lr{display:flex;align-items:center;gap:12px;padding:11px 14px;border-top:1px solid var(--line,#eee)}.sk-lr:first-child{border-top:0}
+.sk-ld{min-width:52px;text-align:center;font-weight:700;padding:5px 8px;border-radius:9px;background:rgba(120,120,128,.13)}.sk-ld.in{background:rgba(31,157,106,.14);color:#1f9d6a}.sk-ld.out{background:rgba(214,69,69,.13);color:#d64545}
+.sk-lm{flex:1;min-width:0}.sk-lm small{display:block;color:var(--ink-faint,#999);font-size:.76rem}.sk-lr time{color:var(--ink-faint,#999);font-size:.76rem;white-space:nowrap}
+.sk-ov{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:2500;display:none;align-items:center;justify-content:center;padding:14px}
+.sk-sheet{background:var(--panel,#fff);color:var(--ink,#222);width:100%;max-width:860px;max-height:92vh;border-radius:20px;display:flex;flex-direction:column;padding:18px;gap:10px;box-shadow:0 24px 70px rgba(0,0,0,.35)}
+.sk-sh-head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}.sk-sh-head b{font-size:1.15rem}.sk-sh-head small{display:block;color:var(--ink-faint,#888);font-size:.8rem;margin-top:2px}
+.sk-x{border:0;background:rgba(120,120,128,.15);width:34px;height:34px;border-radius:50%;cursor:pointer;color:inherit;font-size:1rem}
+.sk-seg2{align-self:flex-start}
+.sk-sh-grid{flex:1;overflow:auto;display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;padding:2px;align-content:start;min-height:180px}
+.sk-tile{border:1.5px solid var(--line,#e3e3e3);border-radius:14px;padding:10px;display:flex;flex-direction:column;gap:5px;cursor:pointer;background:var(--panel,#fff)}
+.sk-tile .sk-vis{width:100%;height:78px;flex:none}.sk-tile b{font-size:.85rem;line-height:1.25;min-height:2.1em}.sk-tile small{color:var(--ink-faint,#999);font-size:.72rem}
+.sk-tile.on{border-color:var(--red,#cf2e2e);box-shadow:0 0 0 2px rgba(207,46,46,.12)}
+.sk-tctl{display:flex;align-items:center;gap:4px;margin-top:2px}.sk-tctl.pick{justify-content:center;color:var(--red,#cf2e2e);font-weight:700;font-size:.82rem;padding:6px 0}
+.sk-tctl button{width:30px;height:32px;border:1px solid var(--line,#ddd);background:var(--panel,#fff);color:inherit;border-radius:9px;font-size:1rem;cursor:pointer}
+.sk-tctl input{flex:1;min-width:0;width:100%;height:32px;border:1px solid var(--line,#ddd);border-radius:9px;text-align:center;font:700 .95rem inherit;background:var(--panel,#fff);color:inherit}
+.sk-sh-foot{display:flex;align-items:center;justify-content:space-between;gap:12px;border-top:1px solid var(--line,#eee);padding-top:12px}#skShSum{font-size:.9rem;color:var(--ink-dim,#666)}
+.sk-none{grid-column:1/-1;text-align:center;color:var(--ink-faint,#999);padding:30px 0}
+.sk-mini{position:absolute;top:8px;right:8px;font-size:.7rem;font-weight:700;padding:3px 8px;border-radius:999px;z-index:2;backdrop-filter:blur(4px)}
+.sk-mini.ok{background:rgba(31,157,106,.9);color:#fff}.sk-mini.warn{background:rgba(224,161,0,.95);color:#fff}.sk-mini.bad{background:rgba(214,69,69,.95);color:#fff}
+.mp-card{position:relative}
+.c-item{position:relative}.c-stk{display:inline-block;margin-top:4px;font-size:.72rem;font-weight:700;padding:2px 9px;border-radius:999px}
+.c-stk.out{background:rgba(214,69,69,.14);color:#d64545}.c-stk.low{background:rgba(224,161,0,.18);color:#b57d00}
+.c-item.c-out .vis{filter:grayscale(1);opacity:.55}.c-item.c-out .nm b{opacity:.6}.c-soldout{font-size:.78rem;font-weight:700;color:#d64545}
+@media(max-width:560px){.sk-kpis{gap:8px}.sk-kpi{padding:10px}.sk-kpi b{font-size:1.35rem}.sk-grid{grid-template-columns:repeat(2,1fr)}.sk-sheet{max-height:96vh;padding:14px}.sk-sh-grid{grid-template-columns:repeat(2,1fr)}.sk-tools .sk-seg{width:100%}}
+`; document.head.appendChild(st);
+  })();
+
+  const skPack = () => Object.keys(STK.prod).map(n => ({ n, q: STK.prod[n].q, m: (STK.prod[n].min == null || !isFinite(STK.prod[n].min)) ? null : STK.prod[n].min }));
+  function custStk(n){
+    const pd = getPub(), st = pd && pd.stock; if(!st || !st.m || st.m === 'hide') return null;
+    if(arr(st.o).indexOf(n) >= 0) return { out: 1, b: st.b };
+    const l = arr(st.l).find(x => x && x.n === n); if(st.m === 'low' && l) return { left: +l.q, b: st.b };
+    return null;
+  }
+  const _ssv = saveState; saveState = function(){ const r = _ssv.apply(this, arguments); try{ stkPushPublic(); }catch(e){} return r; };
+  setInterval(() => { try{ const sc = $id('screen-stok'), a = document.activeElement, sh = document.getElementById('skSheet'); if(sc && sc.offsetParent && stkMode !== 'adv' && !(a && /INPUT|TEXTAREA|SELECT/.test(a.tagName)) && !(sh && sh.style.display === 'flex')) stkLiveRender(); }catch(e){} }, 5000);
 
   smFullApply('siparis-masa');
   bootApp();
