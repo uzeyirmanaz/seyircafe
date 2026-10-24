@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-<script src="config.js"></script>
+<script>(function(){ var m = /[?&]i=([A-Za-z0-9_-]{1,40})(?:&|#|$)/.exec(location.search), id = m ? m[1].toLowerCase() : ''; window.__cfgId = id; document.write('<script src="' + (id ? 'configs/' + id + '.js' : 'config.js') + '"><\/script>'); })();</script>
 <script>(function(){
   var C = window.APP_CONFIG = window.APP_CONFIG || {}, B = C.brand = C.brand || {};
   B.name = String(B.name || 'İŞLETMEM'); var w = B.name.trim().split(/\s+/);
@@ -9,7 +9,7 @@
   if(!B.initials) B.initials = (w.length > 1 ? w[0].charAt(0) + w[1].charAt(0) : B.name.slice(0, 2)).toLocaleUpperCase('tr-TR');
   C.firebase = C.firebase || {}; C.adminEmail = C.adminEmail || '';
   // Aynı alan adında (örn. kullanici.github.io) birden çok işletme çalışabilir: yerel kayıtlar işletmeye özel önekle ayrılır
-  var ns = String(C.firebase.projectId || '').replace(/[^A-Za-z0-9_-]/g, '') || ('p' + location.pathname.replace(/[^A-Za-z0-9]/g, ''));
+  var ns = (String(C.firebase.projectId || '') + (window.__cfgId ? '-' + window.__cfgId : '')).replace(/[^A-Za-z0-9_-]/g, '') || ('p' + location.pathname.replace(/[^A-Za-z0-9]/g, ''));
   window.__nsk = function(k){ return /^pos[A-Z]/.test(k) ? ns + ':' + k : k; };
   try{ var P = Storage.prototype, g0 = P.getItem, s0 = P.setItem, r0 = P.removeItem;
     P.getItem = function(k){ return g0.call(this, window.__nsk(k)); }; P.setItem = function(k, v){ return s0.call(this, window.__nsk(k), v); }; P.removeItem = function(k){ return r0.call(this, window.__nsk(k)); }; }catch(e){}
@@ -25,7 +25,7 @@
 <style>html.restoring #customerView{display:none!important}</style><script>try{if(sessionStorage.getItem('posUser')){document.documentElement.classList.add('restoring');setTimeout(function(){document.documentElement.classList.remove('restoring')},10000)}}catch(e){}</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="build" content="20261024-2">
+<meta name="build" content="20261024-3">
 <script>(function(){ if(!/^https?:/.test(location.protocol)) return; try{ const now = Date.now(), last = +sessionStorage.getItem('posChk') || 0; if(now - last < 600000) return; sessionStorage.setItem('posChk', now); const f = new URL(location.href); f.searchParams.set('_t', Date.now());
   fetch(f.toString(), { cache: 'no-store' }).then(r => r.text()).then(t => { const m = t.match(/name="build" content="([^"]+)"/), cur = document.querySelector('meta[name=build]').content;
     if(m && m[1] !== cur && sessionStorage.getItem('posReload') !== m[1]){ sessionStorage.setItem('posReload', m[1]); const u = new URL(location.href); u.searchParams.set('_v', m[1]); location.replace(u.toString()); } }).catch(() => {}); }catch(e){} })();</script>
@@ -36,7 +36,7 @@
 <script>(function(){ try{ const c = document.createElement('canvas'); c.width = c.height = 192; const x = c.getContext('2d');
   x.fillStyle = '#0F1A2C'; x.fillRect(0,0,192,192); x.fillStyle = '#fff'; x.font = '800 92px system-ui,sans-serif'; x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillText(APP_CONFIG.brand.initials, 96, 100);
   const u = c.toDataURL('image/png'); document.getElementById('appleIcon').href = u;
-  if(/^https?:/.test(location.protocol)){ const m = { name:APP_CONFIG.brand.name, short_name:String(APP_CONFIG.brand.line1 || APP_CONFIG.brand.name).slice(0, 12), start_url: location.origin + location.pathname, scope: location.origin + location.pathname.replace(/[^\/]*$/, ''), display:'standalone', background_color:'#ffffff', theme_color:'#0F1A2C', lang:'tr', icons:[{ src:u, sizes:'192x192', type:'image/png', purpose:'any' }] };
+  if(/^https?:/.test(location.protocol)){ const m = { name:APP_CONFIG.brand.name, short_name:String(APP_CONFIG.brand.line1 || APP_CONFIG.brand.name).slice(0, 12), start_url: location.origin + location.pathname + (window.__cfgId ? '?i=' + window.__cfgId : ''), scope: location.origin + location.pathname.replace(/[^\/]*$/, ''), display:'standalone', background_color:'#ffffff', theme_color:'#0F1A2C', lang:'tr', icons:[{ src:u, sizes:'192x192', type:'image/png', purpose:'any' }] };
     const l = document.createElement('link'); l.rel = 'manifest'; l.href = URL.createObjectURL(new Blob([JSON.stringify(m)], { type:'application/manifest+json' })); document.head.appendChild(l); }
 }catch(e){} })();</script>
 <meta name="theme-color" content="#0F1A2C">
@@ -5420,7 +5420,7 @@ ${st('M50 58c-5-6 5-10 0-17', 0)}${st('M60 56c-5-7 5-11 0-19', 1.05)}${st('M70 5
     const sel = $id('qrMasa'), cur = sel.value, tb = regions.flatMap(r => r.tables);
     sel.innerHTML = tb.map(n => '<option value="' + n + '">' + esc(tableLabels[n] || 'Masa ' + n) + '</option>').join('');
     if(cur) sel.value = cur;
-    const url = location.href.split('#')[0].split('?')[0] + '?masa=' + sel.value;
+    const url = location.href.split('#')[0].split('?')[0] + '?' + (window.__cfgId ? 'i=' + window.__cfgId + '&' : '') + 'masa=' + sel.value;
     $id('qrLink').textContent = (location.protocol === 'file:' ? '⚠ Dosya bilgisayardan açık: QR’ın telefonda çalışması için siteyi internete yükleyin. ' : '') + url;
     $id('qrOut').innerHTML = '';
     if(window.QRCode && sel.value) new QRCode($id('qrOut'), { text: url, width: 180, height: 180 });
@@ -7110,3 +7110,4 @@ ${st('M50 58c-5-6 5-10 0-17', 0)}${st('M60 56c-5-7 5-11 0-19', 1.05)}${st('M70 5
 </script>
 </body>
 </html>
+                
