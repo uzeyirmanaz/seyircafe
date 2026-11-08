@@ -5,8 +5,8 @@ window.APP_CONFIG = {
   // reCAPTCHA / Firebase App Check — işletmeye özel SITE (herkese açık) anahtarı.
   // Boş bırakılırsa App Check devre dışı kalır. Sağlayıcı "reCAPTCHA Enterprise" ise enterprise: true yapın.
   recaptcha: {
-    siteKey: "6LdLPxYuAAAAABVDWM0_EB2gKxAX8bjvT69fL49Y",
-    enterprise: false
+    siteKey: "6LdLPxYuAAAAAGKK33ENvj9GwECQTnhmfDvc5EYW",
+    enterprise: true
   },
   firebase: {
     apiKey: "AIzaSyBk6MiwRxwzs1tVtxb9-49i-hQbw0N7E60",
