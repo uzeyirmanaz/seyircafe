@@ -6,7 +6,7 @@ window.APP_CONFIG = {
   // Boş bırakılırsa App Check devre dışı kalır. Sağlayıcı "reCAPTCHA Enterprise" ise enterprise: true yapın.
   recaptcha: {
     siteKey: "6LfmZBYuAAAAAAMVgcp4HIrzhrUkHyrIdxukGTYw",
-    enterprise: false
+    enterprise: true
   },
   firebase: {
     apiKey: "AIzaSyBk6MiwRxwzs1tVtxb9-49i-hQbw0N7E60",
