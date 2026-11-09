@@ -1402,6 +1402,31 @@ button,input,select,textarea{ font-family:inherit; }
 }
 :where(input,select,textarea):focus{ border-color:var(--accent); outline:none; box-shadow:0 0 0 3px var(--accent-soft); }
 .field label{ font-weight:500; color:var(--ink-dim); font-size:.8rem; }
+/* ---- Ayarlar: düzenli bölümler ---- */
+.settings-head{padding:20px 24px;border-bottom:1px solid var(--line);margin:0;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.settings-head h2{margin:0;font-size:1.1rem;font-weight:650}.settings-head p{margin:2px 0 0;font-size:.82rem;color:var(--ink-faint)}
+.settings-head .btn-update{margin-left:auto}
+.settings-card > .tabs{padding:0 24px;margin:0;gap:4px;border-bottom:1px solid var(--line);flex-wrap:wrap;background:var(--panel)}
+.settings-card > .tabs .tab{padding:13px 16px;font-size:.9rem;white-space:nowrap}
+.settings-card > div[id^="tab-"]{padding:22px 24px 8px;background:var(--panel-2,transparent)}
+.sg{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px 20px 6px;margin:0 0 18px;max-width:880px}
+.sg > header{margin:0 0 16px;padding-bottom:12px;border-bottom:1px solid var(--line)}
+.sg > header h3{margin:0;font-size:.98rem;font-weight:650;color:var(--ink)}
+.sg > header p{margin:4px 0 0;font-size:.8rem;color:var(--ink-faint);line-height:1.45}
+.sg .field{margin:0 0 18px}
+.sg .field label{display:block;font-size:.82rem;font-weight:600;color:var(--ink);margin:0 0 4px}
+.sg .field .hint{display:block;font-size:.76rem;color:var(--ink-faint);margin:-1px 0 8px;line-height:1.4}
+.sg .field .val[contenteditable],.sg input.val{border:1px solid var(--line)!important;border-radius:10px;padding:10px 12px!important;background:var(--panel-2,var(--panel))!important;font-weight:600;min-height:42px;box-sizing:border-box;outline:none;transition:border-color .15s,box-shadow .15s}
+.sg .field .val[contenteditable]:focus,.sg input.val:focus{border-color:var(--accent,var(--red))!important;box-shadow:0 0 0 3px rgba(120,120,128,.18)}
+.sg .field #sysStatus{font-weight:500;line-height:1.5}
+.sg-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0 16px}
+.sg .btn-update{margin-top:10px}
+.sg-actions{display:flex;flex-wrap:wrap;gap:10px;margin:0 0 16px}
+.sg-danger{border-color:rgba(214,69,69,.4)}.sg-danger > header h3{color:#d64545}
+.sg-pay .toggle-row{display:flex;align-items:center;gap:12px;padding:12px 14px;border:1px solid var(--line);border-radius:12px;margin-bottom:8px;background:var(--panel-2,var(--panel))}
+.sg-pay .toggle-row .name{flex:1;font-weight:600;outline:none}
+@media(max-width:720px){.sg-grid{grid-template-columns:1fr}.settings-card > div[id^="tab-"]{padding:14px 12px 4px}.settings-head{padding:16px 14px}.settings-card > .tabs{padding:0 8px;overflow-x:auto;flex-wrap:nowrap}.sg{padding:16px 14px 4px}}
+
 
 /* Birincil eylemler */
 .btn-mini,.btn-save,.btn-pay,.btn-add,.btn-update,#custGate button.go{
@@ -1547,7 +1572,7 @@ button,input,select,textarea{ font-family:inherit; }
     <input id="loginName" type="text" placeholder="Ad Soyad (kayıttaki gibi)" autocomplete="username" autocapitalize="words">
     <input id="loginPass" type="password" placeholder="Şifre" autocomplete="current-password">
     <div id="loginErr" style="color:var(--red);font-size:.85rem;min-height:18px;"></div>
-    <div style="font-size:.76rem;color:var(--ink-faint);">Yönetici şifresini unuttuysa: isim "Yönetici", şifre boş, Giriş → bağlı Google hesabı.</div>
+    <div id="loginRecover" style="display:none;font-size:.82rem;color:var(--ink-dim);background:rgba(120,120,128,.1);border-radius:10px;padding:10px 12px;line-height:1.55"></div>
     <div style="display:flex;gap:8px;"><button class="btn-save" id="loginOk" style="margin:0;">Giriş</button><button class="btn-save" id="loginCancel" style="margin:0;background:var(--ink-faint);">Vazgeç</button></div>
   </div></div>
   <div class="modal-bg" id="coModal"><div class="modal-box">
@@ -1588,14 +1613,15 @@ button,input,select,textarea{ font-family:inherit; }
       </div>
 
       <nav class="sb-nav">
+        <div class="nav-sec">
+          <div class="nav-item active" data-screen="home"><span class="ic">🏠</span>Ana Sayfa</div>
+          <div class="nav-item" data-screen="siparis-masa"><span class="ic">🛒</span>Masalar / Sipariş</div>
+        </div>
+
         <div class="nav-sec nav-acc open">
           <div class="nav-label" role="button" tabindex="0"><span>Günlük işler</span><span class="chev">▾</span></div>
           <div class="nav-accbody">
-          <div class="nav-item active" data-screen="home"><span class="ic">🏠</span>Ana Sayfa</div>
-          <div class="nav-item" data-screen="siparis-masa"><span class="ic">🛒</span>Masalar / Sipariş</div>
-          <div class="nav-item" data-screen="paketler"><span class="ic">📦</span>Paket / Gel-Al</div>
           <div class="nav-item" data-screen="mutfak"><span class="ic">👨‍🍳</span>Mutfak Ekranı<span class="nb" id="sbK">0</span></div>
-          <div class="nav-item" id="navCO" role="button"><span class="ic">🔔</span>Müşteri Siparişleri<span class="nb" id="sbCO">0</span></div>
           </div>
         </div>
 
@@ -1728,46 +1754,66 @@ button,input,select,textarea{ font-family:inherit; }
             <div class="settings-head">
               <div class="icn">⚙️</div>
               <div>
-                <h2>Restaurant Tanımlamaları</h2>
-                <p>Restaurantınız ile ilgili tanımlamaları bu alandan yapabilirsiniz.</p>
+                <h2>Ayarlar</h2>
+                <p>İşletme bilgileri, ödeme yöntemleri, güvenlik ve yedekleme</p>
               </div>
               <button class="btn-update" id="btnGuncelle">💾 Güncelle</button>
             </div>
             <div class="tabs">
-              <div class="tab active" data-tab="genel">Genel Ayarlar</div>
-              <div class="tab" data-tab="odeme">Ödeme Tipleri</div>
-              <div class="tab" data-tab="sistem">Yedek &amp; Sistem</div>
+              <div class="tab active" data-tab="genel">Genel</div>
+              <div class="tab" data-tab="odeme">Ödeme</div>
+              <div class="tab" data-tab="guvenlik">Güvenlik</div>
+              <div class="tab" data-tab="sistem">Yedek</div>
               <div class="tab" data-tab="marka" id="tabMarka" style="display:none">🎨 Marka &amp; Logo</div>
             </div>
 
-            <div id="tab-genel">
-              <div class="field"><label>Restaurant Adı</label><div class="val" id="setRestName" contenteditable="true"></div></div>
-              <div class="field"><label>Gün Başlangıç (gün sonu raporu bu saatte başlar)</label><div class="val" id="setDayStart" contenteditable="true">05:00</div></div>
-              <div class="field"><label>Vardiya değişim saati (sabah / akşam ayrımı)</label><div class="val" id="setShift" contenteditable="true">15:00</div></div>
-              <div class="field"><label>İlk adisyon numarası</label><div class="val" id="setFirstOrderNo" contenteditable="true">101</div></div>
-              <div class="field" id="wifiBlock"><label>Wi-Fi — müşteri menüsünde göster</label><div class="toggle-row" style="border:0;padding:6px 0"><div class="mini-toggle on" id="wifiOnTgl" role="switch" aria-checked="true" tabindex="0" style="cursor:pointer"><span class="k"></span></div><div class="name">Menüde Wi-Fi butonu görünsün</div></div><label style="margin-top:8px">Ağ adı</label><div class="val" id="setWifiName" contenteditable="true"></div><label style="margin-top:8px">Şifre (menüde görünür ve müşteri tek dokunuşla kopyalar)</label><div class="val" id="setWifiPass" contenteditable="true"></div><button class="btn-update" id="btnWifiSave" type="button" style="margin-top:10px">📶 Wi-Fi'yi güncelle</button></div>
-              <div class="field" id="socialBlock"><label>Sosyal medya — hesabınız varsa açın, kullanıcı adını yazın; menüde simge olarak görünür, dokununca hesabınıza gider</label><div id="socRows"><div class="toggle-row"><div class="mini-toggle off" data-soc-t="instagram" role="switch" aria-checked="false" tabindex="0" style="cursor:pointer"><span class="k"></span></div><div class="name" style="flex:0 0 130px">Instagram</div><input class="val" data-soc-v="instagram" placeholder="kullanıcı adı" autocomplete="off" style="flex:1;min-width:0;border:0;background:transparent;font:inherit;color:inherit"></div><div class="toggle-row"><div class="mini-toggle off" data-soc-t="tiktok" role="switch" aria-checked="false" tabindex="0" style="cursor:pointer"><span class="k"></span></div><div class="name" style="flex:0 0 130px">TikTok</div><input class="val" data-soc-v="tiktok" placeholder="kullanıcı adı" autocomplete="off" style="flex:1;min-width:0;border:0;background:transparent;font:inherit;color:inherit"></div><div class="toggle-row"><div class="mini-toggle off" data-soc-t="facebook" role="switch" aria-checked="false" tabindex="0" style="cursor:pointer"><span class="k"></span></div><div class="name" style="flex:0 0 130px">Facebook</div><input class="val" data-soc-v="facebook" placeholder="sayfa adı" autocomplete="off" style="flex:1;min-width:0;border:0;background:transparent;font:inherit;color:inherit"></div><div class="toggle-row"><div class="mini-toggle off" data-soc-t="x" role="switch" aria-checked="false" tabindex="0" style="cursor:pointer"><span class="k"></span></div><div class="name" style="flex:0 0 130px">X (Twitter)</div><input class="val" data-soc-v="x" placeholder="kullanıcı adı" autocomplete="off" style="flex:1;min-width:0;border:0;background:transparent;font:inherit;color:inherit"></div><div class="toggle-row"><div class="mini-toggle off" data-soc-t="youtube" role="switch" aria-checked="false" tabindex="0" style="cursor:pointer"><span class="k"></span></div><div class="name" style="flex:0 0 130px">YouTube</div><input class="val" data-soc-v="youtube" placeholder="kanal adı" autocomplete="off" style="flex:1;min-width:0;border:0;background:transparent;font:inherit;color:inherit"></div><div class="toggle-row"><div class="mini-toggle off" data-soc-t="whatsapp" role="switch" aria-checked="false" tabindex="0" style="cursor:pointer"><span class="k"></span></div><div class="name" style="flex:0 0 130px">WhatsApp</div><input class="val" data-soc-v="whatsapp" placeholder="telefon (905xxxxxxxxx)" autocomplete="off" style="flex:1;min-width:0;border:0;background:transparent;font:inherit;color:inherit"></div><div class="toggle-row"><div class="mini-toggle off" data-soc-t="maps" role="switch" aria-checked="false" tabindex="0" style="cursor:pointer"><span class="k"></span></div><div class="name" style="flex:0 0 130px">Konum (Harita)</div><input class="val" data-soc-v="maps" placeholder="Google Haritalar bağlantısı veya adres" autocomplete="off" style="flex:1;min-width:0;border:0;background:transparent;font:inherit;color:inherit"></div><div class="toggle-row"><div class="mini-toggle off" data-soc-t="web" role="switch" aria-checked="false" tabindex="0" style="cursor:pointer"><span class="k"></span></div><div class="name" style="flex:0 0 130px">Web sitesi</div><input class="val" data-soc-v="web" placeholder="www.siteniz.com" autocomplete="off" style="flex:1;min-width:0;border:0;background:transparent;font:inherit;color:inherit"></div></div><button class="btn-update" id="btnSocSave" type="button" style="margin-top:10px">🔗 Sosyal medyayı güncelle</button></div>
-              <div class="field" id="ownerPwField"><label>Şifremi değiştir (Admin veya Yönetici; yeni şifre en az 6 karakter. eski şifreyi unuttuysan Google ile girdikten hemen sonra eski şifreyi boş bırak; Admin ilk kez şifre belirliyorsa da boş bırakır)</label><input type="password" class="val" id="ownerOldPw" autocomplete="current-password" placeholder="Eski şifre" style="width:100%;border:0;background:transparent;font:inherit;color:inherit"><input type="password" class="val" id="ownerNewPw" autocomplete="new-password" placeholder="Yeni şifre" style="width:100%;border:0;background:transparent;font:inherit;color:inherit;margin-top:6px"><button class="btn-update" id="btnOwnerPw" style="margin-top:8px;">🔑 Şifremi değiştir</button></div>
-              <div class="field" id="ownerGoogleField"><label>Kurtarma Google hesabı — şifreni unutursan girişte isim "Yönetici" yaz, şifreyi boş bırakıp Giriş'e bas, bu hesabı seç</label><div class="val" id="ownerGoogleInfo" style="padding:6px 0"></div><button class="btn-update" id="btnOwnerGoogle" style="margin-top:8px;">🔗 Google hesabını bağla / değiştir</button></div>
-              <div class="field" id="ownerAccField"><label>Yönetici hesabı — şifre belirle / unutulduysa sıfırla (en az 6 karakter; Yönetici girişi: isim "Yönetici" + bu şifre)</label><input type="password" class="val" id="setOwnerPw" autocomplete="new-password" placeholder="Yönetici için yeni şifre" style="width:100%;border:0;background:transparent;font:inherit;color:inherit"><button class="btn-update" id="btnOwnerAcc" style="margin-top:8px;">🔑 Yönetici hesabını kaydet</button></div>
-              <div class="field" id="supPinField"><label>Admin PIN (yalnızca Admin değiştirir; en az 6 karakter. Giriş: isim "Admin")</label><input type="password" class="val" id="setSupPin" autocomplete="new-password" placeholder="Admin PIN'i belirlemek/değiştirmek için yazın" style="width:100%;border:0;background:transparent;font:inherit;color:inherit"></div>
-              <div class="field"><label>Yönetici PIN (personel girişi, bu cihaz)</label><input type="password" class="val" id="setPin" autocomplete="new-password" placeholder="Değiştirmek için yeni PIN yazın (en az 4 hane)" style="width:100%;border:0;background:transparent;font:inherit;color:inherit"></div>
+<div id="tab-genel">
+              <section class="sg"><header><h3>İşletme</h3><p>Menüde ve raporlarda görünen temel bilgiler</p></header>
+                <div class="field"><label>İşletme adı</label><div class="val" id="setRestName" contenteditable="true"></div></div>
+              </section>
+              <section class="sg"><header><h3>Gün ve vardiya düzeni</h3><p>Gün sonu raporu ve adisyon numaralandırması bu değerlere göre çalışır</p></header>
+                <div class="sg-grid"><div class="field"><label>Gün başlangıç saati</label><small class="hint">Gün sonu raporu bu saatte başlar</small><div class="val" id="setDayStart" contenteditable="true">05:00</div></div><div class="field"><label>Vardiya değişim saati</label><small class="hint">Sabah / akşam ayrımı</small><div class="val" id="setShift" contenteditable="true">15:00</div></div><div class="field"><label>İlk adisyon no</label><small class="hint">Numaralandırma buradan başlar</small><div class="val" id="setFirstOrderNo" contenteditable="true">101</div></div></div>
+              </section>
+              <section class="sg"><header><h3>Müşteri menüsü</h3><p>Müşterilerin menüde göreceği bağlantılar</p></header>
+                <div class="field" id="wifiBlock"><label>Wi-Fi — müşteri menüsünde göster</label><div class="toggle-row" style="border:0;padding:6px 0"><div class="mini-toggle on" id="wifiOnTgl" role="switch" aria-checked="true" tabindex="0" style="cursor:pointer"><span class="k"></span></div><div class="name">Menüde Wi-Fi butonu görünsün</div></div><label style="margin-top:8px">Ağ adı</label><div class="val" id="setWifiName" contenteditable="true"></div><label style="margin-top:8px">Şifre (menüde görünür ve müşteri tek dokunuşla kopyalar)</label><div class="val" id="setWifiPass" contenteditable="true"></div><button class="btn-update" id="btnWifiSave" type="button" style="margin-top:10px">📶 Wi-Fi'yi güncelle</button></div>
+                <div class="field" id="socialBlock"><label>Sosyal medya — hesabınız varsa açın, kullanıcı adını yazın; menüde simge olarak görünür, dokununca hesabınıza gider</label><div id="socRows"><div class="toggle-row"><div class="mini-toggle off" data-soc-t="instagram" role="switch" aria-checked="false" tabindex="0" style="cursor:pointer"><span class="k"></span></div><div class="name" style="flex:0 0 130px">Instagram</div><input class="val" data-soc-v="instagram" placeholder="kullanıcı adı" autocomplete="off" style="flex:1;min-width:0;border:0;background:transparent;font:inherit;color:inherit"></div><div class="toggle-row"><div class="mini-toggle off" data-soc-t="tiktok" role="switch" aria-checked="false" tabindex="0" style="cursor:pointer"><span class="k"></span></div><div class="name" style="flex:0 0 130px">TikTok</div><input class="val" data-soc-v="tiktok" placeholder="kullanıcı adı" autocomplete="off" style="flex:1;min-width:0;border:0;background:transparent;font:inherit;color:inherit"></div><div class="toggle-row"><div class="mini-toggle off" data-soc-t="facebook" role="switch" aria-checked="false" tabindex="0" style="cursor:pointer"><span class="k"></span></div><div class="name" style="flex:0 0 130px">Facebook</div><input class="val" data-soc-v="facebook" placeholder="sayfa adı" autocomplete="off" style="flex:1;min-width:0;border:0;background:transparent;font:inherit;color:inherit"></div><div class="toggle-row"><div class="mini-toggle off" data-soc-t="x" role="switch" aria-checked="false" tabindex="0" style="cursor:pointer"><span class="k"></span></div><div class="name" style="flex:0 0 130px">X (Twitter)</div><input class="val" data-soc-v="x" placeholder="kullanıcı adı" autocomplete="off" style="flex:1;min-width:0;border:0;background:transparent;font:inherit;color:inherit"></div><div class="toggle-row"><div class="mini-toggle off" data-soc-t="youtube" role="switch" aria-checked="false" tabindex="0" style="cursor:pointer"><span class="k"></span></div><div class="name" style="flex:0 0 130px">YouTube</div><input class="val" data-soc-v="youtube" placeholder="kanal adı" autocomplete="off" style="flex:1;min-width:0;border:0;background:transparent;font:inherit;color:inherit"></div><div class="toggle-row"><div class="mini-toggle off" data-soc-t="whatsapp" role="switch" aria-checked="false" tabindex="0" style="cursor:pointer"><span class="k"></span></div><div class="name" style="flex:0 0 130px">WhatsApp</div><input class="val" data-soc-v="whatsapp" placeholder="telefon (905xxxxxxxxx)" autocomplete="off" style="flex:1;min-width:0;border:0;background:transparent;font:inherit;color:inherit"></div><div class="toggle-row"><div class="mini-toggle off" data-soc-t="maps" role="switch" aria-checked="false" tabindex="0" style="cursor:pointer"><span class="k"></span></div><div class="name" style="flex:0 0 130px">Konum (Harita)</div><input class="val" data-soc-v="maps" placeholder="Google Haritalar bağlantısı veya adres" autocomplete="off" style="flex:1;min-width:0;border:0;background:transparent;font:inherit;color:inherit"></div><div class="toggle-row"><div class="mini-toggle off" data-soc-t="web" role="switch" aria-checked="false" tabindex="0" style="cursor:pointer"><span class="k"></span></div><div class="name" style="flex:0 0 130px">Web sitesi</div><input class="val" data-soc-v="web" placeholder="www.siteniz.com" autocomplete="off" style="flex:1;min-width:0;border:0;background:transparent;font:inherit;color:inherit"></div></div><button class="btn-update" id="btnSocSave" type="button" style="margin-top:10px">🔗 Sosyal medyayı güncelle</button></div>
+              </section>
+            </div>
+            <div id="tab-guvenlik" style="display:none;">
+              <section class="sg"><header><h3>Giriş ve şifre</h3><p>Hesap güvenliği ve kurtarma seçenekleri</p></header>
+                <div class="field" id="ownerPwField"><label id="ownerPwLbl" data-keep="1">Şifremi değiştir (yeni şifre en az 6 karakter. Eski şifreyi unuttuysanız Google ile girdikten hemen sonra eski şifre alanını boş bırakın)</label><input type="password" class="val" id="ownerOldPw" autocomplete="current-password" placeholder="Eski şifre" style="width:100%;border:0;background:transparent;font:inherit;color:inherit"><input type="password" class="val" id="ownerNewPw" autocomplete="new-password" placeholder="Yeni şifre" style="width:100%;border:0;background:transparent;font:inherit;color:inherit;margin-top:6px"><button class="btn-update" id="btnOwnerPw" style="margin-top:8px;">🔑 Şifremi değiştir</button></div>
+                <div class="field" id="ownerGoogleField"><label>Kurtarma Google hesabı</label><small class="hint">Şifrenizi unutursanız bu hesapla giriş yapıp yeni şifre belirleyebilirsiniz</small><div class="val" id="ownerGoogleInfo" style="padding:6px 0"></div><button class="btn-update" id="btnOwnerGoogle" style="margin-top:8px;">🔗 Google hesabını bağla / değiştir</button></div>
+                <div class="field" id="ownerAccField"><label>Yönetici hesabı şifresi</label><small class="hint">En az 6 karakter. Şifre unutulduysa buradan yenisi belirlenir</small><input type="password" class="val" id="setOwnerPw" autocomplete="new-password" placeholder="Yönetici için yeni şifre" style="width:100%;border:0;background:transparent;font:inherit;color:inherit"><button class="btn-update" id="btnOwnerAcc" style="margin-top:8px;">🔑 Yönetici hesabını kaydet</button></div>
+                <div class="field" id="supPinField"><label>Özel PIN</label><small class="hint">En az 6 karakter</small><input type="password" class="val" id="setSupPin" autocomplete="new-password" placeholder="Admin PIN'i belirlemek/değiştirmek için yazın" style="width:100%;border:0;background:transparent;font:inherit;color:inherit"></div>
+                <div class="field"><label>Yönetici PIN</label><small class="hint">Bu cihazdaki personel girişi için, en az 4 hane</small><input type="password" class="val" id="setPin" autocomplete="new-password" placeholder="Değiştirmek için yeni PIN yazın (en az 4 hane)" style="width:100%;border:0;background:transparent;font:inherit;color:inherit"></div>
+              </section>
             </div>
             <div id="tab-marka" style="display:none;"><div class="brSec"><h4>🎯 Hazır tasarımlar</h4><p>Birine dokunun, yazı tipi ve renkler otomatik ayarlansın. Sonra isteğinize göre değiştirin.</p><div id="brPresets" class="brRow" style="margin-top:0"></div></div><div class="brSec"><h4>Logo türü</h4><select id="brMode" class="brIn"><option value="text">Yazı logosu — isim yaz, yazı tipi ve renk seç</option><option value="img">Görsel logosu — kendi logo resmini yükle</option></select></div><div id="brTextBox"><div class="brSec"><h4>Yazı</h4><input id="brL1" class="brIn" placeholder="Büyük yazı (örn. KAFE ADI)" autocomplete="off"><input id="brL2" class="brIn" placeholder="Küçük yazı (örn. COFFEE) — isteğe bağlı" autocomplete="off"><select id="brFont" class="brIn"></select><select id="brW" class="brIn"><option value="500">Yazı kalınlığı: Normal</option><option value="700">Yazı kalınlığı: Kalın</option></select><select id="brCase" class="brIn"><option value="auto">Harf: otomatik</option><option value="upper">HEPSİ BÜYÜK</option><option value="lower">hepsi küçük</option><option value="title">Baş Harfler Büyük</option><option value="none">Yazdığım gibi</option></select><select id="brCStyle" class="brIn"><option value="auto">Renk: yumuşak geçiş (tek renkten)</option><option value="solid">Renk: düz tek renk</option><option value="two">Renk: iki renk geçişi</option></select><div class="brRow"><span>Yazı rengi</span><input type="color" id="brColor" value="#d9a441" style="width:48px;height:34px;border:0;padding:0;background:none"></div><div id="brColor2Row"><div class="brRow"><span>İkinci renk</span><input type="color" id="brColor2" value="#8a5a12" style="width:48px;height:34px;border:0;padding:0;background:none"></div></div><div class="brRow"><div class="mini-toggle on" id="brSpread" role="switch" aria-checked="true" tabindex="0" style="cursor:pointer"><span class="k"></span></div><div class="name">Harfleri genişçe yay (kısa isimlerde şık durur)</div></div><div class="brRow"><div class="mini-toggle on" id="brRule" role="switch" aria-checked="true" tabindex="0" style="cursor:pointer"><span class="k"></span></div><div class="name">Büyük ve küçük yazı arasında ince çizgi</div></div><div id="brAlignRow"><select id="brAlign" class="brIn"><option value="start">Hizalama: sola</option><option value="middle">Hizalama: ortaya</option></select></div></div><div class="brSec"><h4>Simge</h4><select id="brEmblem" class="brIn"><option value="auto">Varsayılan simge</option><option value="cup">Fincan</option><option value="letter">İlk harf rozeti</option><option value="img">Kendi simge görselim</option><option value="none">Simge yok (sadece yazı)</option></select><div id="brEmbImgRow" class="brRow"><input type="file" id="brEmbFile" accept="image/*"><span id="brEmbInfo" style="font-size:.8rem;color:var(--ink-dim)"></span></div></div></div><div id="brImgBox" style="display:none"><div class="brSec"><h4>Görsel logo</h4><p>Şeffaf arka planlı PNG en iyi sonucu verir. Büyük görseller otomatik küçültülür.</p><input type="file" id="brFile" accept="image/*"><div id="brImgInfo" style="font-size:.82rem;color:var(--ink-dim);margin-top:6px"></div><div class="brRow"><span>Boyut</span><input type="range" id="brScale" min="40" max="100" value="100" style="flex:1"></div><select id="brShape" class="brIn"><option value="none">Çerçeve: yok</option><option value="round">Çerçeve: yuvarlatılmış köşe</option><option value="circle">Çerçeve: daire (kırpar)</option></select><select id="brBg" class="brIn"><option value="none">Logo zemini: şeffaf</option><option value="white">Logo zemini: beyaz</option><option value="dark">Logo zemini: koyu lacivert</option><option value="custom">Logo zemini: özel renk</option></select><div id="brBgColorRow"><div class="brRow"><span>Zemin rengi</span><input type="color" id="brBgColor" value="#ffffff" style="width:48px;height:34px;border:0;padding:0;background:none"></div></div></div></div><div class="brSec"><h4>Menü rengi (müşteri menüsü)</h4><p>Düğmeler ve vurgular bu renkle boyanır. Otomatik açıkken logonuzun rengi kullanılır, uğraşmanız gerekmez.</p><div class="brRow"><div class="mini-toggle on" id="brAccAuto" role="switch" aria-checked="true" tabindex="0" style="cursor:pointer"><span class="k"></span></div><div class="name">Menü rengini logodan otomatik al</div></div><div id="brAccRow"><div class="brRow"><span>Menü rengi (elle)</span><input type="color" id="brAccent" value="#cf2e2e" style="width:48px;height:34px;border:0;padding:0;background:none"></div></div><div id="brPal" class="brRow"></div><div id="brAccSw" style="font-size:.85rem;margin-top:8px"></div></div><div class="brSec"><h4>Uygulama ikonu</h4><p>Telefon ana ekranına eklenince ve tarayıcı sekmesinde görünen küçük simgenin zemin rengi.</p><div class="brRow"><span>Zemin rengi</span><input type="color" id="brIconBg" value="#0F1A2C" style="width:48px;height:34px;border:0;padding:0;background:none"></div></div><div class="brSec"><h4>👁 Önizleme</h4><div class="brPre" id="brPrevL" style="background:#fff"></div><div class="brPre" id="brPrevD" style="background:#0F1A2C"></div><div class="brRow"><div id="brPrevI"></div><button type="button" id="brPrevBtn" style="border:0;border-radius:999px;padding:10px 18px;font:600 .9rem inherit;cursor:default">Sepete ekle</button></div></div><div class="brRow"><button class="btn-update" id="btnBrandSave" type="button">🎨 Logo ve markayı güncelle</button><button class="btn-mini" id="btnBrandReset" type="button">Varsayılana dön</button><button class="btn-mini" id="btnBrandExp" type="button">⬇ Ayarları indir</button><button class="btn-mini" id="btnBrandImp" type="button">⬆ Ayarları yükle</button><input type="file" id="brImpFile" accept=".json" style="display:none"></div></div>
 
             <div id="tab-sistem" style="display:none;">
-              <div class="field"><label>Durum</label><div class="val" id="sysStatus"></div></div>
-              <div class="link-row" style="margin-top:14px;"><button class="btn-mini" id="btnBackup">⬇ Yedeği İndir</button><button class="btn-mini" id="btnRestore">⬆ Yedekten Yükle</button><button class="btn-mini" id="btnWipe" style="background:var(--red);">Tüm Verileri Sıfırla</button></div>
+              <section class="sg"><header><h3>Durum</h3><p>Kayıt ve bağlantı durumu</p></header>
+                <div class="field"><div class="val" id="sysStatus"></div></div>
+              </section>
+              <section class="sg"><header><h3>Yedekleme</h3><p>Verilerinizin bir kopyasını indirin ya da daha önce aldığınız yedeği geri yükleyin</p></header>
+                <div class="link-row sg-actions"><button class="btn-mini" id="btnBackup">⬇ Yedeği indir</button><button class="btn-mini" id="btnRestore">⬆ Yedekten yükle</button></div>
+              </section>
+              <section class="sg sg-danger"><header><h3>Tehlikeli işlem</h3><p>Tüm adisyon, satış, müşteri ve ürün verilerini siler. İptal kayıtları silinmez.</p></header>
+                <div class="link-row sg-actions"><button class="btn-mini" id="btnWipe" style="background:var(--red);">Tüm verileri sıfırla</button></div>
+              </section>
               <input type="file" id="restoreFile" accept=".json" style="display:none;">
             </div>
 
             <div id="tab-odeme" style="display:none;">
+              <section class="sg"><header><h3>Ödeme yöntemleri</h3><p>Açık olanlar ödeme ekranında görünür. Adlara dokunarak düzenleyebilirsiniz.</p></header>
+              <div class="sg-pay">
               <div class="toggle-row"><div class="mini-toggle on"><span class="k"></span></div><div class="name pay-name" contenteditable="true">Nakit</div><span class="pay-edit-hint">✎</span></div>
               <div class="toggle-row"><div class="mini-toggle on"><span class="k"></span></div><div class="name pay-name" contenteditable="true">Kredi Kartı</div><span class="pay-edit-hint">✎</span></div>
               <div class="toggle-row"><div class="mini-toggle off"><span class="k"></span></div><div class="name pay-name" contenteditable="true">Multinet</div><span class="pay-edit-hint">✎</span></div>
               <div class="toggle-row"><div class="mini-toggle off"><span class="k"></span></div><div class="name pay-name" contenteditable="true">Smart Ticket</div><span class="pay-edit-hint">✎</span></div>
               <div class="toggle-row"><div class="mini-toggle off"><span class="k"></span></div><div class="name pay-name" contenteditable="true">SetCard</div><span class="pay-edit-hint">✎</span></div>
-              <div class="link-btn" id="btnOdemeTipiEkle" style="margin-top:14px;">＋ Yeni Ödeme Tipi</div>
+              </div>
+              <div class="link-btn" id="btnOdemeTipiEkle" style="margin:6px 0 14px;">＋ Yeni ödeme tipi</div>
+              </section>
             </div>
           </div>
         </div>
@@ -1810,7 +1856,7 @@ button,input,select,textarea{ font-family:inherit; }
               </select>
             </div>
             <div class="toggle-row"><div class="mini-toggle off" id="tglBlocked" data-toggle><span class="k"></span></div><div class="name">Kullanıcı girişi engellensin</div></div>
-            <div style="font-size:.78rem;color:var(--ink-faint);margin-top:4px;">Personel <b>Ad Soyad + şifre</b> ile girer. Şifre en az 6 karakter olmalı (Firebase hesabı bunu şart koşar). Şifre veritabanına yazılmaz.</div>
+            <div style="font-size:.78rem;color:var(--ink-faint);margin-top:4px;">Personel <b>Ad Soyad + şifre</b> ile girer. Şifre en az 6 karakter olmalı (Sunucu hesabı bunu şart koşar). Şifre veritabanına yazılmaz.</div>
             <div id="usrErr" style="color:var(--red);font-size:.85rem;min-height:18px;margin:6px 0;"></div>
             <button class="btn-add" id="btnEkleKullanici">Ekle</button>
             <div style="clear:both;"></div>
@@ -1898,6 +1944,7 @@ button,input,select,textarea{ font-family:inherit; }
                   <div class="pp-stepper"><button id="ppSplitMinus" aria-label="Kişi azalt">−</button><input id="ppSplitCount" type="number" min="1" step="1" value="2" aria-label="Kişi sayısı"><button id="ppSplitPlus" aria-label="Kişi artır">+</button><span style="font-size:.8rem;color:var(--ink-dim);padding:0 6px 0 2px">kişi</span></div>
                   <button class="pp-chip" id="btnSplitCalc">Böl</button>
                 </div>
+                <div id="ppSplitInfo" style="display:none;margin-top:10px;font-size:.85rem;color:var(--ink-dim)"></div>
               </div>
               <div class="pp-lbl" style="margin:4px 4px 8px">Ödeme Yöntemi</div>
               <div class="pp-methods" id="ppMethods"></div>
@@ -2119,13 +2166,7 @@ button,input,select,textarea{ font-family:inherit; }
         </div>
 
         <!-- SİPARİŞ (order type) -->
-        <div class="screen" id="screen-paketler">
-          <div class="panel-card">
-            <div class="panel-head"><div class="pi">📦</div><div><h2>Paket / Gel-Al</h2><p>Her sipariş kendi adisyonunu açar</p></div><button class="btn-mini" id="btnYeniExt">＋ Yeni Sipariş</button></div>
-            <div class="sm-switch" style="margin:8px 0 14px;width:fit-content;"><div class="sm-switch-btn active" id="pkTabPaket">📦 Paket</div><div class="sm-switch-btn" id="pkTabGelal">🛍️ Gel-Al</div></div>
-            <div class="plist" id="pkList"></div>
-          </div>
-        </div>
+        <div id="legacyPaketStub" hidden><button id="btnYeniExt"></button><span id="pkTabPaket"></span><span id="pkTabGelal"></span><div id="pkList"></div></div>
 
         <!-- SİPARİŞ > MASA (operational Bölgeler / Siparişler screen) -->
         <div class="screen" id="screen-siparis-masa">
@@ -2133,6 +2174,7 @@ button,input,select,textarea{ font-family:inherit; }
             <div class="sm-switch">
               <div class="sm-switch-btn active" id="smTabBolgeler">▦ Bölgeler</div>
               <div class="sm-switch-btn" id="smTabSiparisler">🧾 Siparişler</div>
+              <div class="sm-switch-btn" id="smTabKapanan" style="display:none">↩ Kapananlar</div>
             </div>
             <div class="sm-icons">
               <span class="sm-ic" id="smIconFull" title="Tam ekran masa görünümü">⛶</span>
@@ -2159,6 +2201,34 @@ button,input,select,textarea{ font-family:inherit; }
                 <div class="sm-col-head sm-col-wait" id="smWaitHead">🕐 Bekleyen Müşteri Siparişleri (0)</div><div class="sm-col-body" id="smWaitBody"></div>
               </div>
             </div>
+          </div>
+
+          <div id="smKapananView" style="display:none;">
+            <style>
+              .kp-bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:4px 0 10px}
+              .kp-bar label{font-size:.75rem;color:var(--ink-faint);display:flex;flex-direction:column;gap:2px}
+              .kp-bar input,.kp-bar select{padding:7px 9px;border:1px solid var(--line);border-radius:8px;background:var(--panel-2);color:var(--ink);font:inherit;font-size:.85rem}
+              .kp-bar #kpQ{flex:1;min-width:140px}
+              .kp-chips{display:inline-flex;background:rgba(120,120,128,.13);border-radius:10px;padding:2px;gap:2px}
+              .kp-chips button{border:0;background:transparent;color:var(--ink-dim);padding:6px 11px;border-radius:8px;font:600 .82rem inherit;cursor:pointer}
+              .kp-chips button.on{background:var(--panel);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.18)}
+              .kp-sum{font-size:.88rem;margin:2px 0 10px;color:var(--ink-dim)}.kp-by{margin-top:4px;font-size:.78rem;color:var(--ink-faint)}
+              .kp-row{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:var(--panel);margin-bottom:8px}
+              .kp-row.cancel{border-left:4px solid #d64545}.kp-row.sale{border-left:4px solid #1f9d6a}.kp-row.done{opacity:.72}
+              .kp-ic{font-size:1.2rem;line-height:1.3}.kp-main{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+              .kp-main span{font-size:.8rem;color:var(--ink-faint)}.kp-main .kp-it{color:var(--ink-dim)}.kp-main .kp-b{color:#c07a00;font-weight:600}
+              .kp-act{white-space:nowrap}
+            </style>
+            <div class="kp-bar">
+              <div class="kp-chips"><button type="button" data-kt="all" class="on">Hepsi</button><button type="button" data-kt="sale">✅ Kapanan</button><button type="button" data-kt="cancel">❌ İptal</button></div>
+              <label>Başlangıç<input type="datetime-local" id="kpFrom"></label>
+              <label>Bitiş<input type="datetime-local" id="kpTo"></label>
+              <select id="kpWho"><option value="">Tüm personel</option></select>
+              <span class="link-btn" id="kpToday">Bugün</span><span class="link-btn" id="kpAll">Tümü</span>
+              <input id="kpQ" placeholder="🔍 Masa, ürün, neden, personel…">
+            </div>
+            <div class="kp-sum" id="kpSum"></div>
+            <div id="kpList"></div>
           </div>
         </div>
 
@@ -2365,6 +2435,7 @@ button,input,select,textarea{ font-family:inherit; }
     'rapor-fire': 'Fire Raporu', ciro: 'Ciro Takibi', mutfak: 'Mutfak Ekranı'
   };
   function showScreen(name){
+    if(name === 'paketler') name = 'siparis-masa';   // Paket / Gel-Al bölümü kaldırıldı
     if(!screenAllowed(name)){
       showToast('Bu bölüm için yetkiniz yok.');
       const f = ['home', 'siparis-masa', 'paketler', 'mutfak'].find(screenAllowed);
@@ -2475,16 +2546,27 @@ button,input,select,textarea{ font-family:inherit; }
     renderTableGrid();
     showToast('Masa ' + n + ' eklendi.');
   });
-  document.getElementById('btnTopluMasa').addEventListener('click', async () => {
-    const count = parseInt(await uiPrompt('Kaç masa eklensin?', '4')) || 0;
-    for(let k = 0; k < count; k++){
-      const n = nextTableNo++;
-      carts['table_' + n] = [];
-      tableLabels[n] = 'Masa ' + n;
-      regions[activeRegion].tables.push(n);
-    }
-    renderTableGrid();
-    if(count) showToast(count + ' masa eklendi.');
+  document.getElementById('btnTopluMasa').addEventListener('click', () => {
+    const rname = (regions[activeRegion] || {}).name || '';
+    openForm({ title: 'Toplu Masa Ekleme', sub: 'Bölge: ' + rname + '. Masalara isim vermek için ön ek yazın (örn. "Bahçe" → Bahçe 1, Bahçe 2…) ya da aşağıya her satıra bir masa adı yazın.', fields: [
+      { id: 'count', label: 'Kaç masa eklensin?', type: 'number', value: 4 },
+      { id: 'prefix', label: 'Masa adı ön eki (boşsa "Masa")', value: '', placeholder: 'Örn: Bahçe, Teras, VIP' },
+      { id: 'start', label: 'Numara başlangıcı', type: 'number', value: 1 },
+      { id: 'names', label: 'İsteğe bağlı: her satıra bir masa adı (doluysa yukarıdakiler yok sayılır)', type: 'textarea', value: '' }
+    ], okText: 'Ekle', onOk(v){
+      const names = String(v.names || '').split(/\n/).map(s => s.trim()).filter(Boolean);
+      const count = names.length || Math.floor(v.count) || 0;
+      if(!(count >= 1 && count <= 200)) return '1 ile 200 arasında masa sayısı girin.';
+      const pre = String(v.prefix || '').trim(), st = Number.isFinite(v.start) ? Math.floor(v.start) : 1;
+      for(let k = 0; k < count; k++){
+        const n = nextTableNo++;
+        carts['table_' + n] = [];
+        tableLabels[n] = names.length ? names[k] : (pre ? pre + ' ' + (st + k) : 'Masa ' + n);
+        regions[activeRegion].tables.push(n);
+      }
+      renderTableGrid(); try{ renderSiparisMasa(); }catch(e){} try{ saveState(); }catch(e){}
+      showToast(count + ' masa eklendi.');
+    } });
   });
   document.getElementById('btnBolgeleriDuzenle').addEventListener('click', async () => {
     const r = regions[activeRegion]; if(!r) return;
@@ -2550,24 +2632,23 @@ button,input,select,textarea{ font-family:inherit; }
 
 
   function renderSiparisMasa(){
+    { let ok = false; try{ ok = !!adminDev(); }catch(e){} const kt = document.getElementById('smTabKapanan'); if(kt) kt.style.display = ok ? '' : 'none'; if(!ok && kt && kt.classList.contains('active')) smShowTab('b'); }
     renderSmRegionTabs();
     renderSmTableGrid();
     renderSmKanban();
   }
 
-  document.getElementById('smTabBolgeler').addEventListener('click', () => {
-    document.getElementById('smTabBolgeler').classList.add('active');
-    document.getElementById('smTabSiparisler').classList.remove('active');
-    document.getElementById('smBolgelerView').style.display = 'block';
-    document.getElementById('smSiparislerView').style.display = 'none';
-  });
-  document.getElementById('smTabSiparisler').addEventListener('click', () => {
-    document.getElementById('smTabSiparisler').classList.add('active');
-    document.getElementById('smTabBolgeler').classList.remove('active');
-    document.getElementById('smBolgelerView').style.display = 'none';
-    document.getElementById('smSiparislerView').style.display = 'block';
-    renderSmKanban();
-  });
+  function smShowTab(c){
+    [['smTabBolgeler', 'smBolgelerView', 'b'], ['smTabSiparisler', 'smSiparislerView', 's'], ['smTabKapanan', 'smKapananView', 'k']].forEach(([tb, vw, k]) => {
+      document.getElementById(tb).classList.toggle('active', k === c);
+      document.getElementById(vw).style.display = k === c ? 'block' : 'none';
+    });
+    if(c === 's') renderSmKanban();
+    if(c === 'k' && typeof renderSmKapanan === 'function') renderSmKapanan();
+  }
+  document.getElementById('smTabBolgeler').addEventListener('click', () => smShowTab('b'));
+  document.getElementById('smTabSiparisler').addEventListener('click', () => smShowTab('s'));
+  document.getElementById('smTabKapanan').addEventListener('click', () => smShowTab('k'));
   document.getElementById('smOrderSearch').addEventListener('input', (e) => {
     smSearch = e.target.value;
     renderSmKanban();
@@ -2585,7 +2666,7 @@ button,input,select,textarea{ font-family:inherit; }
   let currentBackScreen = 'tables';
   function openOrder(key, title, backScreen){
     currentCartKey = key;
-    currentBackScreen = backScreen || 'tables';
+    currentBackScreen = (backScreen === 'paketler' ? 'siparis-masa' : backScreen) || 'tables';
     mvSel.clear(); mpDraft = [];
     if(key.startsWith('table_')) title = orderLabel(key);
     document.getElementById('orderTableTitle').textContent = title;
@@ -2751,6 +2832,7 @@ button,input,select,textarea{ font-family:inherit; }
   // ---- payment: split/partial payment support, closes the table once fully paid ----
   let dailyStats = { sales: 0, guests: 0, cashTotal: 0, cardTotal: 0 };
   let paidByKey = {};
+  let splitByKey = {};   // hesap bölme: { n: kişi sayısı, share: kişi başı tutar } — bölündükten sonra pay sabit kalır
   let paymentHistoryByKey = {};
   const paymentIcons = { 'Nakit':'💵', 'Kredi Kartı':'💳', 'Multinet':'🍽️', 'Smart Ticket':'🎫', 'SetCard':'💳' };
 
@@ -2780,8 +2862,14 @@ button,input,select,textarea{ font-family:inherit; }
     document.getElementById('ppSummaryTotal').textContent = '₺' + total.toLocaleString('tr-TR', {minimumFractionDigits:2});
     document.getElementById('ppSummaryPaid').textContent = '₺' + paid.toLocaleString('tr-TR', {minimumFractionDigits:2});
     document.getElementById('ppSummaryRemaining').textContent = '₺' + remaining.toLocaleString('tr-TR', {minimumFractionDigits:2});
-    document.getElementById('ppAmountInput').value = remaining.toFixed(2);
-    document.getElementById('ppSplitCount').value = 2;
+    const sp = splitByKey[key]; let amt = remaining, cnt = 2, left = 0;
+    if(sp && remaining > 0.005 && sp.share > 0){
+      left = Math.max(1, Math.min(sp.n, Math.ceil(remaining / sp.share - 0.02)));
+      amt = left <= 1 ? remaining : Math.min(sp.share, remaining); cnt = left;
+    } else if(sp) delete splitByKey[key];
+    document.getElementById('ppAmountInput').value = amt.toFixed(2);
+    document.getElementById('ppSplitCount').value = cnt;
+    ppRenderInfo(left, amt);
     const pg = document.getElementById('ppProg'); if(pg) pg.style.width = (total > 0 ? Math.min(100, Math.round(paid / total * 100)) : 0) + '%';
     renderPaymentMethods();
     fillDiscSel();
@@ -2801,11 +2889,37 @@ button,input,select,textarea{ font-family:inherit; }
   });
 
   // hesabı böl: fills the amount field with the per-person share of what's still remaining
-  document.getElementById('btnSplitCalc').addEventListener('click', () => {
-    const n = Math.max(1, parseInt(document.getElementById('ppSplitCount').value) || 1);
-    const share = remainingForKey(currentCartKey) / n;
-    document.getElementById('ppAmountInput').value = share.toFixed(2);
-    showToast(n + ' kişiye bölündü — kişi başı ₺' + share.toLocaleString('tr-TR', {minimumFractionDigits:2}));
+  function ppSetSplit(n, quiet){
+    const key = currentCartKey, rem = remainingForKey(key); n = Math.max(1, parseInt(n) || 1);
+    if(n <= 1) delete splitByKey[key]; else splitByKey[key] = { n, share: Math.round(rem / n * 100) / 100 };
+    renderPaymentPanel();
+    if(!quiet && n > 1) showToast(n + ' kişiye bölündü — kişi başı ₺' + splitByKey[key].share.toLocaleString('tr-TR', {minimumFractionDigits:2}) + '. Her ödemeden sonra sıradaki kişinin payı otomatik gelir.', 3800);
+  }
+  function ppRenderInfo(left, amt){
+    const el = document.getElementById('ppSplitInfo'); if(!el) return;
+    const key = currentCartKey, sp = splitByKey[key], rem = remainingForKey(key), paid = paidByKey[key] || 0;
+    let h = '';
+    if(sp && rem > 0.005) h = '👥 Hesap <b>' + sp.n + '</b> kişiye bölündü · <b>' + (sp.n - left) + '/' + sp.n + '</b> ödedi · sıradaki: <b>₺' + amt.toLocaleString('tr-TR', {minimumFractionDigits:2}) + '</b> <span class="link-btn" id="ppSplitOff">✕ Bölmeyi kaldır</span>';
+    else if(rem <= 0.005 && paid > 0 && (carts[key] || []).length){
+      const over = Math.round((paid - cartTotal(key)) * 100) / 100;
+      if(over > 0.005) h = 'Fazla ödeme <b>₺' + over.toLocaleString('tr-TR', {minimumFractionDigits:2}) + '</b> var (adisyon tutarı düştü). İade edip kapat: ' + getActivePaymentTypes().filter(m => m !== 'Açık Hesap').map(m => '<span class="link-btn" data-refund="' + esc(m) + '">' + esc(m) + '</span>').join(' · ');
+      else h = 'Kalan tutar yok. <span class="link-btn" id="ppCloseNow">✔ Adisyonu kapat</span>';
+    }
+    el.innerHTML = h; el.style.display = h ? '' : 'none';
+  }
+  document.getElementById('btnSplitCalc').addEventListener('click', () => ppSetSplit(document.getElementById('ppSplitCount').value));
+  document.getElementById('ppSplitInfo').addEventListener('click', e => {
+    if(e.target.id === 'ppSplitOff'){ delete splitByKey[currentCartKey]; renderPaymentPanel(); }
+    else if(e.target.dataset && e.target.dataset.refund){
+      if(!can('pay')){ showToast('Ödeme alma yetkiniz yok.'); return; }
+      const key = currentCartKey, over = Math.round(((paidByKey[key] || 0) - cartTotal(key)) * 100) / 100, m = e.target.dataset.refund;
+      if(!(over > 0.005)) return;
+      paidByKey[key] = Math.round(((paidByKey[key] || 0) - over) * 100) / 100;
+      (paymentHistoryByKey[key] = paymentHistoryByKey[key] || []).push({ method: 'İade · ' + m, amount: -over, waive: false, refund: true });
+      logPriv('payLog', { ts: Date.now(), amount: -over, method: m, label: orderLabel(key), user: uname(), refund: true });
+      finalizeOrder(key, money(over) + ' ' + m + ' iade edildi — adisyon kapatıldı.'); saveState();
+    }
+    else if(e.target.id === 'ppCloseNow'){ if(!can('pay')){ showToast('Ödeme alma yetkiniz yok.'); return; } finalizeOrder(currentCartKey, 'Adisyon kapatıldı.'); }
   });
 
 
@@ -2815,7 +2929,7 @@ button,input,select,textarea{ font-family:inherit; }
       document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
       tab.classList.add('active');
       const which = tab.getAttribute('data-tab');
-      ['genel','odeme','sistem','marka'].forEach(t => document.getElementById('tab-' + t).style.display = which === t ? 'block' : 'none');
+      ['genel','odeme','guvenlik','sistem','marka'].forEach(t => { const el = document.getElementById('tab-' + t); if(el) el.style.display = which === t ? 'block' : 'none'; });
       if(which === 'sistem') updateSysStatus();
     });
   });
@@ -3044,7 +3158,7 @@ button,input,select,textarea{ font-family:inherit; }
   function artHue(s){ let h = 0; for(const c of String(s || '')) h = (h * 31 + c.charCodeAt(0)) % 360; return h; }
   function imgOk(u){ return /^https:\/\//i.test(u || '') || /^data:image\/(jpeg|png|webp);base64,/.test(u || ''); }
   // görsel varsa fotoğraf, yoksa renkli zemin üstünde ürün/kategori emojisi (görsel bozuksa da emoji kalır)
-  let holdImgs = false; // Firebase'den güncel veri gelene kadar eski (yerel) görseller çizilmesin
+  let holdImgs = false; // sunucudan güncel veri gelene kadar eski (yerel) görseller çizilmesin
   function visHtml(o, fallbackIcon, cls){
     const ic = o.icon || fallbackIcon || '🍽️', ok = imgOk(o.img) && !holdImgs, fb = illus(o.name), src = ok ? o.img : fb;
     return '<div class="vis ' + cls + '" style="--h:' + artHue(o.name || ic) + '">' + (src && !ok ? '' : '<span class="vi">' + _e(ic) + '</span>') + (src ? '<img src="' + _e(src) + '" alt="" decoding="async" loading="lazy" referrerpolicy="no-referrer" style="opacity:0;transition:opacity .25s" onload="this.style.opacity=1"' + (ok ? ' data-fb="' + _e(fb) + '" onerror="this.onerror=null;if(this.dataset.fb)this.src=this.dataset.fb;else this.remove()"' : '') + '>' : '') + '</div>';
@@ -3777,10 +3891,10 @@ button,input,select,textarea{ font-family:inherit; }
       const app = initializeApp(c), db = getDatabase(app), auth = getAuth(app); window.__fbApp = app;
       if(auth.authStateReady) await auth.authStateReady();
       if(!auth.currentUser) await signInAnonymously(auth);
-      const AUTH_MSG = { 'auth/invalid-credential': 'E-posta veya şifre hatalı.', 'auth/wrong-password': 'Şifre hatalı.', 'auth/user-not-found': 'Bu e-posta ile hesap yok.', 'auth/invalid-email': 'E-posta biçimi geçersiz.', 'auth/too-many-requests': 'Çok fazla deneme. Biraz bekleyin.', 'auth/network-request-failed': 'İnternet bağlantısı yok.', 'auth/operation-not-allowed': 'Firebase’de E-posta/Şifre girişi açık değil.' };
+      const AUTH_MSG = { 'auth/invalid-credential': 'E-posta veya şifre hatalı.', 'auth/wrong-password': 'Şifre hatalı.', 'auth/user-not-found': 'Bu e-posta ile hesap yok.', 'auth/invalid-email': 'E-posta biçimi geçersiz.', 'auth/too-many-requests': 'Çok fazla deneme. Biraz bekleyin.', 'auth/network-request-failed': 'İnternet bağlantısı yok.', 'auth/operation-not-allowed': 'Sunucuda E-posta/Şifre girişi açık değil.' };
       const _rtSeen = {};
-      const rtErr = (op, p, e) => { const c = (e && e.code) || 'hata'; console.error('Firebase ' + op + ' hatası (' + p + '):', c); const k = op + p + c; if(_rtSeen[k] && Date.now() - _rtSeen[k] < 60000) return; _rtSeen[k] = Date.now();
-        try{ showToast('⚠ Senkron ' + op + ' hatası: ' + p.split('/')[0] + ' (' + c + ')' + (/permission/i.test(c) ? ' — bu cihaz Firebase personel hesabıyla bağlı değil veya kurallar eşleşmiyor' : '')); }catch(_){} };
+      const rtErr = (op, p, e) => { const c = (e && e.code) || 'hata'; console.error('Sunucu ' + op + ' hatası (' + p + '):', c); const k = op + p + c; if(_rtSeen[k] && Date.now() - _rtSeen[k] < 60000) return; _rtSeen[k] = Date.now();
+        try{ showToast('⚠ Senkron ' + op + ' hatası: ' + p.split('/')[0] + ' (' + c + ')' + (/permission/i.test(c) ? ' — bu cihaz sunucu personel hesabıyla bağlı değil veya kurallar eşleşmiyor' : '')); }catch(_){} };
       const isAdminAcc = () => !!(auth.currentUser && !auth.currentUser.isAnonymous && (auth.currentUser.email || '').toLowerCase() === FIREBASE_ADMIN_EMAIL.toLowerCase());
       let ownerUid = null;   // Yönetici (işletme sahibi) hesabının uid'si; yalnızca giriş/oturum geri yükleme sırasında işaretlenir
       const isOwnerAcc = () => !!(ownerUid && auth.currentUser && !auth.currentUser.isAnonymous && auth.currentUser.uid === ownerUid);
@@ -3790,7 +3904,7 @@ button,input,select,textarea{ font-family:inherit; }
           if(!needAdmin || isAdminAny()) return true;
           try{ await signOut(auth); await signInAnonymously(auth); }catch(e){}
         }
-        let err = needAdmin ? 'Devam etmek için Firebase hesabını girin.' : '';
+        let err = needAdmin ? 'Devam etmek için sunucu hesabını girin.' : '';
         for(;;){
           const c = await askCred(err); if(!c) return false;
           try{
@@ -3879,7 +3993,7 @@ button,input,select,textarea{ font-family:inherit; }
       // Admin girişi: isim "Admin" + Firebase admin hesabının şifresi (PIN / içe aktarma yok)
       const adminLogin = async (pw) => {
         if(!FIREBASE_ADMIN_EMAIL) return { code: 'noadmin' };
-        if(!pw){   // şifre yok: Google ile doğrula (hesap e-postası Google tarafından doğrulanır, Firebase'e kullanıcı eklemek gerekmez)
+        if(!pw){   // şifre yok: Google ile doğrula (hesap e-postası Google tarafından doğrulanır, sunucuya kullanıcı eklemek gerekmez)
           try{
             const prov = new GoogleAuthProvider(); prov.setCustomParameters({ login_hint: FIREBASE_ADMIN_EMAIL, prompt: 'select_account' });
             await signInWithPopup(auth, prov);
@@ -3930,15 +4044,15 @@ button,input,select,textarea{ font-family:inherit; }
         get: p => get(ref(db, p)).then(s => s.val()),
         on: (p, cb) => onValue(ref(db, p), s => cb(s.val()), err => rtErr('okuma', p, err))
       };
-    }catch(e){ console.error('Firebase başlatılamadı, yerel moda geçildi:', e); RT = LocalRT; }
+    }catch(e){ console.error('Sunucu başlatılamadı, yerel moda geçildi:', e); RT = LocalRT; }
   }
 
   const $id = id => document.getElementById(id);
   function askCred(err){
     return new Promise(res => {
       const bg = document.createElement('div'); bg.className = 'modal-bg show'; bg.style.zIndex = 1200;
-      bg.innerHTML = '<div class="modal-box"><h3 style="margin:0 0 6px">Cihaz Yetkilendirme</h3><p style="margin:0 0 8px;font-size:.82rem;color:var(--ink-faint)">Bu cihaz ilk kez personel olarak bağlanıyor. Firebase personel hesabını (e-posta/şifre) bir kez girin; cihaz hatırlar.</p>' +
-        '<input type="email" id="crEm" placeholder="Firebase e-posta" autocomplete="username" style="width:100%;padding:10px;margin:4px 0"><input type="password" id="crPw" placeholder="Firebase şifre" autocomplete="current-password" style="width:100%;padding:10px;margin:4px 0">' +
+      bg.innerHTML = '<div class="modal-box"><h3 style="margin:0 0 6px">Cihaz Yetkilendirme</h3><p style="margin:0 0 8px;font-size:.82rem;color:var(--ink-faint)">Bu cihaz ilk kez personel olarak bağlanıyor. Sunucu personel hesabını (e-posta/şifre) bir kez girin; cihaz hatırlar.</p>' +
+        '<input type="email" id="crEm" placeholder="Hesap e-postası" autocomplete="username" style="width:100%;padding:10px;margin:4px 0"><input type="password" id="crPw" placeholder="Sunucu şifre" autocomplete="current-password" style="width:100%;padding:10px;margin:4px 0">' +
         '<div style="color:var(--red);font-size:.85rem;min-height:18px">' + esc(err || '') + '</div><div style="display:flex;gap:8px"><button class="btn-save" id="crOk" style="margin:0">Bağlan</button><button class="btn-save" id="crNo" style="margin:0;background:var(--ink-faint)">Vazgeç</button></div></div>';
       document.body.appendChild(bg); const em = bg.querySelector('#crEm'), pw = bg.querySelector('#crPw'); em.focus();
       const ok = () => { if(!em.value.trim() || !pw.value) return; bg.remove(); res({ em: em.value.trim(), pw: pw.value }); };
@@ -4143,7 +4257,7 @@ button,input,select,textarea{ font-family:inherit; }
   function enterStaff(){
     if(staffMode) return;
     staffMode = true; document.body.classList.add('staff'); if(window.__staffUI) window.__staffUI.show();
-    $id('rtMode').textContent = RT.local ? '● Yerel mod (Firebase ayarsız)' : '● Canlı bağlantı';
+    $id('rtMode').textContent = RT.local ? '● Yerel mod (Sunucu ayarsız)' : '● Canlı bağlantı';
     RT.on('customerOrders', v => {
       coData = v || {};
       const pend = pendingCO(); let fresh = 0;
@@ -4215,7 +4329,7 @@ button,input,select,textarea{ font-family:inherit; }
   const roleLabel = u => u.sup ? 'Admin' : u.admin ? 'Yönetici' : u.gorev;
   function applyPerms(){
     document.querySelectorAll('.sidebar .nav-item[data-screen]').forEach(el => { el.style.display = screenAllowed(el.dataset.screen) ? '' : 'none'; });
-    const coOk = can('orders'); $id('navCO').style.display = coOk ? '' : 'none';
+    const coOk = can('orders'); if($id('navCO')) $id('navCO').style.display = coOk ? '' : 'none';
     document.querySelectorAll('.sidebar .nav-fold').forEach(f => { f.style.display = [...f.querySelectorAll('.nav-item[data-screen]')].some(x => x.style.display !== 'none') ? '' : 'none'; });
     document.querySelectorAll('.sidebar .nav-sec').forEach(sec => {
       const vis = [...sec.querySelectorAll('.nav-item[data-screen], #navCO')].some(x => x.style.display !== 'none' && (!x.closest('.nav-fold') || x.closest('.nav-fold').style.display !== 'none'));
@@ -4223,6 +4337,7 @@ button,input,select,textarea{ font-family:inherit; }
     });
     $id('custLockCard').style.display = can('settings') ? '' : 'none';
     { const pf = $id('setPin') && $id('setPin').closest('.field'); if(pf) pf.style.display = (curUser && curUser.admin && !curUser.owner && RT.local) ? '' : 'none';
+      { const lb = $id('ownerPwLbl'); if(lb) lb.textContent = (curUser && curUser.sup) ? 'Şifremi değiştir (yeni şifre en az 6 karakter. Eski şifreyi unuttuysan Google ile girdikten hemen sonra eski şifreyi boş bırak; ilk kez şifre belirliyorsan da boş bırak)' : 'Şifremi değiştir (yeni şifre en az 6 karakter. Eski şifreyi unuttuysanız Google ile girdikten hemen sonra eski şifre alanını boş bırakın)'; }
       const op = $id('ownerPwField'); if(op) op.style.display = (curUser && (curUser.owner || curUser.sup) && !RT.local) ? '' : 'none';
       const og = $id('ownerGoogleField'); if(og){ const okg = !!(curUser && curUser.owner && !RT.local); og.style.display = okg ? '' : 'none'; if(okg){ const ge = RT.ownerGoogleEmail ? RT.ownerGoogleEmail() : ''; $id('ownerGoogleInfo').textContent = ge ? ('Bağlı hesap: ' + ge) : 'Bağlı Google hesabı yok — şifreni unutursan Admin sıfırlamak zorunda kalır.'; } }
       const of = $id('ownerAccField'); if(of) of.style.display = (curUser && curUser.sup && !RT.local) ? '' : 'none';
@@ -4349,7 +4464,7 @@ button,input,select,textarea{ font-family:inherit; }
       return RT.set('staffDir', dir);
     }).then(() => RT.set('staffMeta/ready', true)).catch(e => {
       lastDirSig = '';
-      if(!dirWarned){ dirWarned = true; showToast('⚠ Personel listesi Firebase’e yazılamadı (' + ((e && e.code) || 'hata') + '). Firebase Rules ayarını kontrol edin.'); }
+      if(!dirWarned){ dirWarned = true; showToast('⚠ Personel listesi sunucuya yazılamadı (' + ((e && e.code) || 'hata') + '). Sunucu erişim kurallarını kontrol edin.'); }
     });
   }
   async function pullStaffDir(){
@@ -4365,7 +4480,7 @@ button,input,select,textarea{ font-family:inherit; }
       dirReady = true; if(!(d && Object.keys(d).length)) syncStaffDir(); else Promise.resolve().then(() => RT.set('staffMeta/ready', true)).catch(() => {}); renderUsers(); saveState(); await pullStaffRoles();
     }catch(e){
       console.error('Personel listesi okunamadı:', e); dirReady = false;
-      showToast('⚠ Personel listesi Firebase’den okunamadı (' + ((e && e.code) || 'hata') + '). Rules ayarını kontrol edin.');
+      showToast('⚠ Personel listesi sunucudan okunamadı (' + ((e && e.code) || 'hata') + '). Erişim kurallarını kontrol edin.');
     }
   }
   async function remoteStaff(pw){
@@ -4377,6 +4492,17 @@ button,input,select,textarea{ font-family:inherit; }
   // ---- giriş / çıkış ----
   let loginFails = 0, loginLockUntil = 0, loginBusy = false;
   const LOGIN_GEN = 'İsim veya şifre hatalı.';
+  // Yönetici şifresi 6 kez yanlış girilirse: kurtarma adresi (maskeli) ve giriş bağlantısı gösterilir
+  const maskMail = m => { m = String(m || ''); const i = m.indexOf('@'); return i < 1 ? '' : m.slice(0, Math.min(2, i)) + '***' + m.slice(i); };
+  function ownerHintSync(){ try{ if(RT.local || !(curUser && curUser.owner) || !RT.ownerGoogleEmail) return; const g = RT.ownerGoogleEmail(); RT.set('staffMeta/ownerHint', g && g.indexOf('@') > 0 ? maskMail(g) : null); }catch(e){} }
+  async function showOwnerRecover(){
+    const box = $id('loginRecover'); if(!box) return;
+    let hint = ''; try{ hint = RT.local ? '' : ((await RT.get('staffMeta/ownerHint')) || ''); }catch(e){}
+    box.style.display = '';
+    box.innerHTML = hint ? 'Şifrenizi mi unuttunuz? Hesabınıza bağlı adres: <b>' + esc(String(hint)) + '</b><br><span class="link-btn" id="loginRecoverGo">Bu hesapla giriş yap ve yeni şifre belirle →</span>' : 'Şifrenizi mi unuttunuz? Bu hesaba bağlı bir kurtarma adresi tanımlı değil.';
+  }
+  function ownerFailN(){ let n = 6; try{ n = (+sessionStorage.getItem('posOF') || 0) + 1; sessionStorage.setItem('posOF', String(n)); }catch(e){} if(n >= 6) showOwnerRecover(); }
+  document.addEventListener('click', e => { if(e.target && e.target.id === 'loginRecoverGo'){ const n = $id('loginName'), pw = $id('loginPass'); if(n) n.value = 'Yönetici'; if(pw) pw.value = ''; tryLogin(); } });
   async function tryLogin(){
     if(loginBusy) return;
     const now = Date.now(), err = $id('loginErr');
@@ -4394,13 +4520,13 @@ button,input,select,textarea{ font-family:inherit; }
         else if(r.code === 'limit'){ err.textContent = 'Çok fazla deneme. Biraz bekleyin.'; return; }
         else if(r.code === 'net'){ err.textContent = 'İnternet bağlantısı yok.'; return; }
         else if(r.code === 'noadmin'){ err.textContent = 'config.js içinde adminEmail yok.'; return; }
-        else if(r.code === 'off'){ err.textContent = 'Firebase\'de E-posta/Şifre girişi kapalı.'; return; }
+        else if(r.code === 'off'){ err.textContent = 'Sunucuda E-posta/Şifre girişi kapalı.'; return; }
         else if(r.code === 'cancel') return;
         else if(r.code === 'popup'){ err.textContent = 'Açılır pencere engellendi. İzin verip tekrar deneyin.'; return; }
-        else if(r.code === 'goff'){ err.textContent = 'Firebase\'de Google girişi kapalı (Authentication → Sign-in method → Google).'; return; }
-        else if(r.code === 'domain'){ err.textContent = 'Bu site adresi Firebase\'de yetkili değil (Authentication → Ayarlar → Yetkili alan adları).'; return; }
-        else if(r.code === 'wrong'){ err.textContent = 'Bu Google hesabı Admin hesabı değil.'; return; }
-        else if(!user){ err.textContent = pw ? 'Şifre hatalı. Admin şifresi belirlemediysen şifre alanını boş bırakıp giriş yap (Google ile doğrulanır).' : 'Google girişi başarısız, tekrar deneyin.'; return; }
+        else if(r.code === 'goff'){ err.textContent = 'Sunucuda Google girişi kapalı (Authentication → Sign-in method → Google).'; return; }
+        else if(r.code === 'domain'){ err.textContent = 'Bu site adresi sunucuda yetkili değil (Authentication → Ayarlar → Yetkili alan adları).'; return; }
+        else if(r.code === 'wrong'){ err.textContent = 'Giriş başarısız.'; return; }
+        else if(!user){ err.textContent = 'Giriş başarısız, tekrar deneyin.'; return; }
       }
       if(!pw && nmN === 'yonetici' && !RT.local){
         adminDone = true; err.textContent = 'Kontrol ediliyor…';
@@ -4410,7 +4536,7 @@ button,input,select,textarea{ font-family:inherit; }
           setTimeout(() => showToast('Giriş yapıldı. Yeni şifre için: Ayarlar → Şifremi değiştir (eski şifre alanı boş kalsın).'), 900);
         }
         else if(r.code === 'cancel') return;
-        else { err.textContent = { notlinked: 'Bu Google hesabı bir Yönetici hesabına bağlı değil.', blocked: 'Bu kullanıcının girişi engellenmiş.', popup: 'Açılır pencere engellendi. İzin verip tekrar deneyin.', goff: 'Firebase\'de Google girişi kapalı.', domain: 'Bu site adresi Firebase\'de yetkili değil.', net: 'İnternet bağlantısı yok.' }[r.code] || 'Google girişi başarısız, tekrar deneyin.'; return; }
+        else { err.textContent = { notlinked: 'Bu Google hesabı bir Yönetici hesabına bağlı değil.', blocked: 'Bu kullanıcının girişi engellenmiş.', popup: 'Açılır pencere engellendi. İzin verip tekrar deneyin.', goff: 'Sunucuda Google girişi kapalı.', domain: 'Bu site adresi sunucuda yetkili değil.', net: 'İnternet bağlantısı yok.' }[r.code] || 'Google girişi başarısız, tekrar deneyin.'; return; }
       }
       if(!RT.local){ try{ ownerExists = (await RT.get('staffVer/yonetici')) != null; }catch(e){} if(ownerExists && !nmN){ nm = 'Yönetici'; nmN = 'yonetici'; } }
       if(adminDone){ /* Admin girişi yukarıda işlendi */ }
@@ -4463,10 +4589,10 @@ button,input,select,textarea{ font-family:inherit; }
       if(firstOk){
         if(pw.length < 4){ err.textContent = 'İlk kurulum: en az 4 haneli bir PIN yazın.'; return; }
         if(!RT.local){
-          err.textContent = 'Firebase kontrol ediliyor…';
+          err.textContent = 'Kontrol ediliyor…';
           const okA = RT.staffAuth ? await RT.staffAuth(true) : false; err.textContent = '';
           if(!okA) return;
-          let d = null; try{ d = await RT.get('staffDir'); }catch(e){ err.textContent = 'Firebase okunamadı. Rules ayarını kontrol edin.'; return; }
+          let d = null; try{ d = (await RT.get('staffMeta/ready')) ? { x: 1 } : null; }catch(e){ err.textContent = 'Sunucudan okunamadı. Erişim kurallarını kontrol edin.'; return; }
           if(d && Object.keys(d).length){ err.textContent = LOGIN_GEN; return; }
         }
         if(!await uiConfirm('İlk kurulum: yazdığınız şifre yönetici PIN\'i olarak kaydedilsin mi?')) return;
@@ -4475,11 +4601,12 @@ button,input,select,textarea{ font-family:inherit; }
       if(user && user.admin && settings.pin === pw) settings.pin = pwHash(pw);
       if(!user){
         if(remoteErr){ err.textContent = 'Sunucuya ulaşılamadı. İnterneti kontrol edin.'; return; }
+        if(nmN === 'yonetici' || (!nmN && ownerExists)){ try{ ownerFailN(); }catch(e){} }
         loginFails++; if(loginFails >= 5){ loginLockUntil = Date.now() + 30000; loginFails = 0; err.textContent = 'Çok fazla hatalı deneme. 30 sn bekleyin.'; }
         else err.textContent = LOGIN_GEN;
         return;
       }
-      loginFails = 0; curUser = user; sessionStorage.setItem('posUser', JSON.stringify(user)); sessionStorage.removeItem('posScreen');
+      loginFails = 0; try{ sessionStorage.removeItem('posOF'); }catch(_){} curUser = user; setTimeout(() => { try{ ownerHintSync(); }catch(e){} }, 1500); sessionStorage.setItem('posUser', JSON.stringify(user)); sessionStorage.removeItem('posScreen');
       $id('loginModal').classList.remove('show'); $id('loginPass').value = ''; if($id('loginName')) $id('loginName').value = ''; enterStaff(); saveState();
     } finally { loginBusy = false; }
   }
@@ -4958,12 +5085,17 @@ ${st('M50 58c-5-6 5-10 0-17', 0)}${st('M60 56c-5-7 5-11 0-19', 1.05)}${st('M70 5
     const key = 'table_' + o.table;
     if(!carts[key]) carts[key] = [];
     const by = {};
-    arr(o.items).forEach(it => {
+    let skipped = 0;
+    arr(o.items).forEach(raw => {
+      const fp = findProd(raw && raw.name), q = Math.max(1, Math.min(50, Math.floor(+(raw && raw.qty)) || 1));
+      if(!fp || !isFinite(+fp.price)){ skipped++; return; }   // menüde olmayan ürün alınmaz; fiyat her zaman menüden gelir
+      const it = { name: fp.name, sub: (raw && raw.sub) || 'tam', unit: +fp.price, qty: q };
       const ex = carts[key].find(i => i.name === it.name && i.unit === it.unit && !i.note && i.by === 'Müşteri (QR)');
       if(ex){ ex.qty += it.qty; ex.sent = (ex.sent || 0) + it.qty; }
-      else carts[key].push({ name: it.name, sub: it.sub || 'tam', unit: it.unit, qty: it.qty, sent: it.qty, by: 'Müşteri (QR)', at: Date.now() });
+      else carts[key].push({ name: it.name, sub: it.sub, unit: it.unit, qty: it.qty, sent: it.qty, by: 'Müşteri (QR)', at: Date.now() });
       const g = grpOf(it.name); (by[g] = by[g] || []).push({ name: it.name, qty: it.qty });
     });
+    if(skipped) showToast(skipped + ' ürün menüde bulunamadığı için alınmadı.', 4200);
     Object.keys(by).forEach(g => RT.push('kitchen', { table: key, label: o.label, grp: g, items: by[g], note: o.note || '', ts: Date.now(), status: 'hazirlaniyor', src: 'müşteri', by: uname() }));
     RT.set('customerOrders/' + id + '/status', 'onaylandi');
     renderTableGrid(); renderSiparisMasa(); updateHomeStats(); saveState();
@@ -5019,7 +5151,7 @@ ${st('M50 58c-5-6 5-10 0-17', 0)}${st('M60 56c-5-7 5-11 0-19', 1.05)}${st('M70 5
   }
   $id('pkTabPaket').addEventListener('click', () => { pkTab = 'paket'; renderPaketler(); });
   $id('pkTabGelal').addEventListener('click', () => { pkTab = 'gelal'; renderPaketler(); });
-  function dropExt(key){ delete carts[key]; delete extOrders[key]; [paidByKey, paymentHistoryByKey, discountByKey, guestsByKey, orderOpenedAt, adisyonNoByKey].forEach(o => delete o[key]); }
+  function dropExt(key){ delete carts[key]; delete extOrders[key]; [paidByKey, paymentHistoryByKey, discountByKey, guestsByKey, orderOpenedAt, adisyonNoByKey, splitByKey].forEach(o => delete o[key]); }
   $id('pkList').addEventListener('click', async e => {
     const b = e.target.closest('[data-pk]'); if(!b) return;
     const k = b.dataset.k, o = extOrders[k]; if(!o) return;
@@ -5120,10 +5252,11 @@ ${st('M50 58c-5-6 5-10 0-17', 0)}${st('M60 56c-5-7 5-11 0-19', 1.05)}${st('M70 5
   function finalizeOrder(key, msg){
     const hist = paymentHistoryByKey[key] || [], wv = hist.filter(h => h.waive).reduce((s, h) => s + h.amount, 0);
     logPriv('saleLog', { ts: Date.now(), label: orderLabel(key), total: cartTotal(key), gross: grossTotal(key), waived: wv, guests: Math.max(1, parseInt(guestsByKey[key]) || 1), user: uname(),
-      items: carts[key].map(i => ({ name: i.name, qty: i.qty, unit: i.unit, by: i.by || '', kdv: kdvRateOf(i.name) })) });
+      items: carts[key].map(i => ({ name: i.name, qty: i.qty, unit: i.unit, by: i.by || '', kdv: kdvRateOf(i.name) })),
+      key, lines: JSON.parse(JSON.stringify(carts[key])), pays: JSON.parse(JSON.stringify(hist)), disc: discountByKey[key] ? JSON.parse(JSON.stringify(discountByKey[key])) : null, adNo: adisyonNoByKey[key] || 0 });
     carts[key] = [];
     if(key.startsWith('table_')) delete tableGuest[+key.slice(6)];
-    [orderOpenedAt, adisyonNoByKey, paidByKey, paymentHistoryByKey, discountByKey, guestsByKey].forEach(o => delete o[key]);
+    [orderOpenedAt, adisyonNoByKey, paidByKey, paymentHistoryByKey, discountByKey, guestsByKey, splitByKey].forEach(o => delete o[key]);
     closeMenuPicker(); mpDraft = [];
     const back = currentBackScreen;
     renderOrderLines(); renderTableGrid(); renderSiparisMasa(); updateHomeStats(); renderGunSonu();
@@ -5187,11 +5320,11 @@ ${st('M50 58c-5-6 5-10 0-17', 0)}${st('M60 56c-5-7 5-11 0-19', 1.05)}${st('M70 5
 
   // ---- kullanıcılar ----
   // ---- kişiye özel Firebase hesabı yönetimi (yalnızca yönetici Firebase oturumuyla) ----
-  const fbErr = e => ({ 'auth/weak-password': 'Şifre en az 6 karakter olmalı (Firebase şartı).', 'auth/operation-not-allowed': 'Firebase’de E-posta/Şifre girişi kapalı.', 'auth/network-request-failed': 'İnternet bağlantısı yok.', 'auth/invalid-email': 'İsim e-postaya çevrilemedi, farklı bir isim deneyin.', 'auth/too-many-requests': 'Çok fazla deneme, biraz bekleyin.' }[(e && e.code) || ''] || ('Hata: ' + ((e && e.code) || (e && e.message) || 'bilinmiyor')));
+  const fbErr = e => ({ 'auth/weak-password': 'Şifre en az 6 karakter olmalı (Sunucu şartı).', 'auth/operation-not-allowed': 'Sunucuda E-posta/Şifre girişi kapalı.', 'auth/network-request-failed': 'İnternet bağlantısı yok.', 'auth/invalid-email': 'İsim e-postaya çevrilemedi, farklı bir isim deneyin.', 'auth/too-many-requests': 'Çok fazla deneme, biraz bekleyin.' }[(e && e.code) || ''] || ('Hata: ' + ((e && e.code) || (e && e.message) || 'bilinmiyor')));
   async function fbCreateStaff(u, pw){
-    if(!(RT.isAdmin && RT.isAdmin()) || !RT.createStaff){ showToast('Önce yönetici Firebase hesabıyla bağlanın (yönetici olarak çıkış-giriş yapıp Firebase hesabını girin).'); return false; }
+    if(!(RT.isAdmin && RT.isAdmin()) || !RT.createStaff){ showToast('Önce yönetici sunucu hesabıyla bağlanın (yönetici olarak çıkış-giriş yapıp sunucu hesabını girin).'); return false; }
     const n = normName(u.ad); if(!n){ showToast('İsim en az bir harf veya rakam içermeli.'); return false; }
-    let cur = 0; try{ cur = +(await RT.get('staffVer/' + n)) || 0; }catch(e){ showToast('Firebase okunamadı: ' + fbErr(e)); return false; }
+    let cur = 0; try{ cur = +(await RT.get('staffVer/' + n)) || 0; }catch(e){ showToast('Sunucudan okunamadı: ' + fbErr(e)); return false; }
     let v = cur + 1, nid = null, tries = 0;
     while(!nid && tries++ < 6){
       try{ nid = await RT.createStaff(staffEmail(n, v), pw); }
@@ -5240,8 +5373,8 @@ ${st('M50 58c-5-6 5-10 0-17', 0)}${st('M60 56c-5-7 5-11 0-19', 1.05)}${st('M70 5
     else if(b.dataset.ua === 'role') openForm({ title: u.ad + ' — Görev', fields: [{ id: 'g', label: 'Görev', type: 'select', options: ROLES, value: u.gorev }], onOk(v){
       u.gorev = v.g; if(u.uid && !RT.local) Promise.resolve(RT.set('staffRoles/' + u.uid + '/gorev', v.g)).catch(err => showToast('Görev yazılamadı: ' + fbErr(err)));
       renderUsers(); saveState(); } });
-    else openForm({ title: u.ad + (fb && !u.uid ? ' — Şifre Belirle (geçiş)' : ' — Yeni Şifre'), fields: [{ id: 'p', label: 'Yeni şifre (en az ' + minL + ' karakter' + (fb ? ', Firebase şartı' : '') + ')', type: 'password' }], onOk(v){
-      if(!v.p || v.p.length < minL) return 'Şifre en az ' + minL + ' karakter olmalı' + (fb ? ' (Firebase hesabı için gerekli).' : '.');
+    else openForm({ title: u.ad + (fb && !u.uid ? ' — Şifre Belirle (geçiş)' : ' — Yeni Şifre'), fields: [{ id: 'p', label: 'Yeni şifre (en az ' + minL + ' karakter' + (fb ? ', sunucu şartı' : '') + ')', type: 'password' }], onOk(v){
+      if(!v.p || v.p.length < minL) return 'Şifre en az ' + minL + ' karakter olmalı' + (fb ? ' (Sunucu hesabı için gerekli).' : '.');
       if(pinOK(v.p)) return 'Şifre yönetici PIN\'i ile aynı olamaz.';
       if(fb){ fbCreateStaff(u, v.p).then(ok => { if(ok){ renderUsers(); saveState(); showToast('Şifre ayarlandı: ' + u.ad); } }); return; }
       if(pwTaken(v.p, u.ad)) return 'Bu şifre başka birinde kullanılıyor.';
@@ -5256,7 +5389,7 @@ ${st('M50 58c-5-6 5-10 0-17', 0)}${st('M60 56c-5-7 5-11 0-19', 1.05)}${st('M70 5
     if(!ad || !sifre){ fail('Ad Soyad ve Şifre zorunludur.'); return; }
     if(!normName(ad)){ fail('İsim en az bir harf veya rakam içermeli.'); return; }
     if(normName(ad) === 'yonetici' || normName(ad) === 'admin'){ fail('Bu isim yönetici için ayrılmış, başka bir isim yazın.'); return; }
-    if(sifre.length < minL){ fail('Şifre en az ' + minL + ' karakter olmalı' + (fb ? ' (Firebase hesabı için gerekli).' : '.')); return; }
+    if(sifre.length < minL){ fail('Şifre en az ' + minL + ' karakter olmalı' + (fb ? ' (Sunucu hesabı için gerekli).' : '.')); return; }
     if(staffUsers.some(u => normName(u.ad) === normName(ad))){ fail('Bu isimde bir kullanıcı var.'); return; }
     if(pinOK(sifre)){ fail('Şifre yönetici PIN\'i ile aynı olamaz.'); return; }
     if(!fb && pwTaken(sifre)){ fail('Bu şifre başka birinde kullanılıyor, farklı bir şifre seçin.'); return; }
@@ -5324,7 +5457,7 @@ ${st('M50 58c-5-6 5-10 0-17', 0)}${st('M60 56c-5-7 5-11 0-19', 1.05)}${st('M70 5
     const open = Object.keys(carts).filter(k => (carts[k] || []).length).length;
     if(!await uiConfirm((open ? '⚠ ' + open + ' açık adisyon var; kapanmayacak, yeni güne devredecek.\n' : '') + 'Gün kapatılsın mı? Bugünkü toplamlar arşive alınıp sıfırlanacak.')) return;
     dayReports.unshift({ ts: Date.now(), sales: dailyStats.sales, cash: dailyStats.cashTotal, card: dailyStats.cardTotal, open: dailyStats.openTotal || 0, guests: dailyStats.guests, orders: todaySales().length, expense: todayExpense(), kdv: todayKdv() });
-    dayReports = dayReports.slice(0, 120); closedAt = Date.now();
+    closedAt = Date.now();
     updateHomeStats(); renderGunSonu(); saveState(); showToast('Gün kapatıldı, rapor arşive alındı.');
   }
   $id('btnCloseDay').addEventListener('click', closeDay);
@@ -5475,7 +5608,7 @@ ${st('M50 58c-5-6 5-10 0-17', 0)}${st('M60 56c-5-7 5-11 0-19', 1.05)}${st('M70 5
     if(!(carts[k] || []).length){ showToast('Sepet zaten boş.'); return; }
     if(paidByKey[k]){ showToast('Ödeme alınmış adisyon iptal edilemez.'); return; }
     if(!await uiConfirm('Adisyon iptal edilsin mi? Tüm kalemler silinecek.')) return;
-    carts[k] = []; delete discountByKey[k]; delete guestsByKey[k];
+    carts[k] = []; delete discountByKey[k]; delete guestsByKey[k]; delete splitByKey[k];
     afterOrderChange(); if(extOrders[k]) dropExt(k); showScreen(currentBackScreen); renderSiparisMasa(); showToast('Adisyon iptal edildi.');
   });
   // ---- masa müşteri adı ----
@@ -5621,8 +5754,18 @@ ${st('M50 58c-5-6 5-10 0-17', 0)}${st('M60 56c-5-7 5-11 0-19', 1.05)}${st('M70 5
     if(Array.isArray(v)) v = v.filter(x => x != null);
     switch(k){
       case 'saleLog': saleLog = v; break; case 'payLog': payLog = v; break; case 'giderler': giderler = v; break; case 'dayReports': dayReports = v; break;
-      case 'colLog': colLog = v; break; case 'waiveLog': waiveLog = v; break; case 'cancelLog': cancelLog = v; break; case 'closedAt': closedAt = v; break;
+      case 'colLog': colLog = v; break; case 'waiveLog': waiveLog = v; break; case 'cancelLog': cancelLog = kpKeepCancels(cancelLog, v); break; case 'closedAt': closedAt = v; break;
     }
+  }
+  // İptal kayıtları yalnızca eklenir; hiçbir yolla (yedek, eşitleme, sıfırlama) silinemez. Yönetici cihazında eksik kalan kayıt geri eklenir.
+  function kpKeepCancels(old, nw){
+    if(!Array.isArray(nw)) return Array.isArray(old) ? old : [];
+    const fl = +(settings && settings.cancelFloor) || 0; if(fl){ nw = nw.filter(x => !x || (x.ts || 0) >= fl); if(Array.isArray(old)) old = old.filter(x => !x || (x.ts || 0) >= fl); }
+    if(!adminDev() || !Array.isArray(old) || !old.length) return nw;
+    const id = x => (x.ts || 0) + '|' + (x.key || '') + '|' + (x.by || ''), seen = new Set(nw.filter(Boolean).map(id)), keep = new Map(old.filter(Boolean).map(x => [id(x), x]));
+    const out = nw.map(x => (x && keep.has(id(x)) && keep.get(id(x)).reactivated && !x.reactivated) ? Object.assign({}, x, { reactivated: keep.get(id(x)).reactivated }) : x);
+    old.forEach(x => { if(x && !seen.has(id(x))) out.push(x); });
+    return out.filter(Boolean).sort((a, b) => (b.ts || 0) - (a.ts || 0));
   }
   function privObj(){ const o = {}; PRIV_KEYS.forEach(k => { o[k] = k === 'closedAt' ? closedAt : privGet(k); }); return o; }
   function logPriv(k, e){
@@ -5653,7 +5796,7 @@ ${st('M50 58c-5-6 5-10 0-17', 0)}${st('M60 56c-5-7 5-11 0-19', 1.05)}${st('M70 5
   function fullStr(){ return JSON.stringify(Object.assign({}, snapshot(), localExtra())); }
   function updateSysStatus(){
     const el = document.getElementById('sysStatus'); if(!el) return;
-    el.textContent = (storageOK ? '✔ Tarayıcıya otomatik kayıt çalışıyor' : '✖ Kayıt YAPILAMIYOR (tarayıcı depolaması kapalı) — Yedeği İndir kullanın') + ' · ' + (RT.local ? 'Yerel mod (Firebase ayarlı değil: diğer cihazlarla canlı eşleşme yok)' : 'Canlı bağlantı aktif');
+    el.textContent = (storageOK ? '✔ Tarayıcıya otomatik kayıt çalışıyor' : '✖ Kayıt YAPILAMIYOR (tarayıcı depolaması kapalı) — Yedeği İndir kullanın') + ' · ' + (RT.local ? 'Yerel mod (Sunucu ayarlı değil: diğer cihazlarla canlı eşleşme yok)' : 'Canlı bağlantı aktif');
   }
   function saveState(){
     const full = fullStr(); if(full === lastSaved) return; lastSaved = full;
@@ -5668,6 +5811,7 @@ ${st('M50 58c-5-6 5-10 0-17', 0)}${st('M60 56c-5-7 5-11 0-19', 1.05)}${st('M70 5
       if(adm && adminReady){ const ps = JSON.stringify(priv); if(ps !== lastPriv){ lastPriv = ps; lastPrivAt = savedAt; try{ RT.set('adminState', Object.assign(priv, { savedAt, dev: DEV })); }catch(e){} } }
     }
     try{ syncStaffDir(); }catch(e){ console.error(e); }
+    try{ autoTrim(); }catch(e){ console.error(e); }
   }
   function applyState(s, persist){
     if(!s || typeof s !== 'object') return;
@@ -5758,7 +5902,7 @@ ${st('M50 58c-5-6 5-10 0-17', 0)}${st('M60 56c-5-7 5-11 0-19', 1.05)}${st('M70 5
     r.readAsText(f); e.target.value = '';
   });
   $id('btnWipe').addEventListener('click', async () => {
-    if(!await uiConfirm('TÜM veriler (adisyonlar, satışlar, müşteriler, ürünler) silinecek. Emin misiniz?')) return;
+    if(!await uiConfirm('TÜM veriler (adisyonlar, satışlar, müşteriler, ürünler) silinecek. İptal kayıtları silinmez, korunur. Emin misiniz?')) return;
     if(await uiPrompt('Onaylamak için SIL yazın') !== 'SIL') return;
     try{ localStorage.removeItem(STORE_KEY); }catch(e){}
     if(!RT.local) try{ RT.remove('state'); }catch(e){}
@@ -5811,7 +5955,7 @@ ${st('M50 58c-5-6 5-10 0-17', 0)}${st('M60 56c-5-7 5-11 0-19', 1.05)}${st('M70 5
     if(staffMode) return;
     if(RT.local || !RT.staffAuth){ dirReady = true; _enterStaff(); endRestoring(); return; }
     RT.staffAuth(!!(curUser && curUser.admin)).then(async ok => {
-      if(!ok){ curUser = null; sessionStorage.removeItem('posUser'); showToast('Firebase personel girişi gerekli.'); endRestoring(); return; }
+      if(!ok){ curUser = null; sessionStorage.removeItem('posUser'); showToast('Sunucu personel girişi gerekli.'); endRestoring(); return; }
       if(curUser && curUser.admin) await pullStaffDir();
       watchRole();
       if(!adminDev()){ PRIV_KEYS.forEach(k => privSet(k, k === 'closedAt' ? 0 : [])); try{ localStorage.removeItem('posCancelLog'); }catch(_){} lastSaved = ''; saveState(); }
@@ -5833,12 +5977,172 @@ ${st('M50 58c-5-6 5-10 0-17', 0)}${st('M60 56c-5-7 5-11 0-19', 1.05)}${st('M70 5
     const n = parseInt(await uiPrompt('İptal nedeni:\n' + CANCEL_REASONS.map((r, i) => (i + 1) + ' - ' + r).join('\n')), 10);
     if(!(n >= 1 && n <= CANCEL_REASONS.length)) return;
     if(!(await askManagerPin())){ showToast('PIN hatalı, iptal yapılmadı.'); return; }
-    logPriv('cancelLog', { ts: Date.now(), key: k, reason: CANCEL_REASONS[n - 1], total: grossTotal(k), by: uname(), items: carts[k].map(i => i.qty + '× ' + i.name) });
-    if(adminDev()) try{ localStorage.setItem('posCancelLog', JSON.stringify(cancelLog.slice(0, 500))); }catch(_){}
-    carts[k] = []; delete discountByKey[k]; delete guestsByKey[k];
+    logPriv('cancelLog', { ts: Date.now(), key: k, label: orderLabel(k), reason: CANCEL_REASONS[n - 1], total: grossTotal(k), by: uname(), items: carts[k].map(i => i.qty + '× ' + i.name),
+      lines: JSON.parse(JSON.stringify(carts[k])), guests: guestsByKey[k] || 0, disc: discountByKey[k] ? JSON.parse(JSON.stringify(discountByKey[k])) : null, adNo: adisyonNoByKey[k] || 0 });
+    if(adminDev()) try{ localStorage.setItem('posCancelLog', JSON.stringify(cancelLog)); }catch(_){}
+    carts[k] = []; delete discountByKey[k]; delete guestsByKey[k]; delete splitByKey[k];
     afterOrderChange(); if(extOrders[k]) dropExt(k); showScreen(currentBackScreen); renderSiparisMasa();
     showToast('Adisyon iptal edildi: ' + CANCEL_REASONS[n - 1]);
   }, true);
+
+  // ---- Otomatik alan yönetimi ----
+  // Hiçbir kayıt kendiliğinden silinmez. Kullanım sınırın %90'ına ulaşırsa (sessizce) en eski aydan başlayarak, önce gereksiz
+  // kayıtlardan, kullanım %85'in altına inene dek eski kayıtlar silinir. Günlük özetler (gün sonu) ve içinde bulunulan ay korunur.
+  // Sınır varsayılan 1 GB'dır; config.js içinde storage: { limitMB: 1024 } ile değiştirilebilir. Kullanım bir TAHMİNDİR (istemci gerçek değeri okuyamaz).
+  const STORAGE_LIMIT = (+((APP_CONFIG.storage || {}).limitMB) || 1024) * 1048576;
+  let trimBusy = false, lastTrimAt = 0;
+  function dbBytes(){
+    const sz = s => { try{ return new Blob([s]).size; }catch(e){ return String(s).length * 2; } };
+    let b = sz(fullStr());
+    try{ b += sz(typeof lastPub === 'string' ? lastPub : ''); }catch(e){}
+    try{ b += sz(JSON.stringify(lastInbox || {})); }catch(e){}
+    return b;
+  }
+  function autoTrim(force){
+    if(trimBusy || RT.local || !adminDev() || !adminReady) return;
+    if(!force && Date.now() - lastTrimAt < 600000) return; lastTrimAt = Date.now();
+    let used = dbBytes(); if(used < STORAGE_LIMIT * 0.90) return;
+    trimBusy = true;
+    try{
+      const target = STORAGE_LIMIT * 0.85, now = new Date(), curM = now.getFullYear() * 12 + now.getMonth();
+      const mk = ts => { const d = new Date(ts); return d.getFullYear() * 12 + d.getMonth(); };
+      const dm = s => { const m = /^(\d{1,2})\.(\d{1,2})\.(\d{4})$/.exec(String(s || '')); return m ? (+m[3]) * 12 + (+m[2] - 1) : null; };
+      const sz = o => { try{ return new Blob([JSON.stringify(o)]).size; }catch(e){ return 200; } };
+      // 0) geçici kayıtlar: 2 günden eski bitmiş müşteri siparişleri ve mutfak fişleri
+      Promise.all([RT.get('customerOrders'), RT.get('kitchen')]).then(([co, kt]) => {
+        const old = Date.now() - 2 * 864e5;
+        Object.entries(co || {}).forEach(([id, o]) => { if(o && (o.ts || 0) < old && o.status !== 'bekliyor') Promise.resolve(RT.remove('customerOrders/' + id)).catch(() => {}); });
+        Object.entries(kt || {}).forEach(([id, o]) => { if(o && (o.ts || 0) < old) Promise.resolve(RT.remove('kitchen/' + id)).catch(() => {}); });
+      }).catch(() => {});
+      // sıra: gereksiz -> gerekli (her katmanda en eski ay önce)
+      const tiers = [
+        { get: () => STK.log, set: v => { STK.log = v; }, m: x => mk(x.ts || 0) },
+        { get: () => STK.plog, set: v => { STK.plog = v; }, m: x => mk(x.ts || 0) },
+        { get: () => waiveLog, set: v => { waiveLog = v; }, m: x => mk(x.ts || 0) },
+        { get: () => colLog, set: v => { colLog = v; }, m: x => mk(x.ts || 0) },
+        { get: () => payLog, set: v => { payLog = v; }, m: x => mk(x.ts || 0) },
+        { get: () => saleLog, set: v => { saleLog = v; }, m: x => mk(x.ts || 0) },
+        { get: () => giderler, set: v => { giderler = v; }, m: x => dm(x.date) },
+        { get: () => cancelLog, set: v => { cancelLog = v; }, m: x => mk(x.ts || 0), cancel: true }
+      ];
+      let guard = 0, changed = false;
+      while(used > target && guard++ < 400){
+        let done = false;
+        for(const tr of tiers){
+          const a = tr.get() || []; let min = null;
+          a.forEach(x => { if(!x) return; const m = tr.m(x); if(m != null && m < curM && (min == null || m < min)) min = m; });
+          if(min == null) continue;
+          const rm = a.filter(x => x && tr.m(x) === min);
+          tr.set(a.filter(x => !(x && tr.m(x) === min)));
+          if(tr.cancel){ const mx = Math.max.apply(null, rm.map(x => x.ts || 0)); settings.cancelFloor = Math.max(+settings.cancelFloor || 0, mx + 1); }
+          used -= sz(rm); done = true; changed = true; break;
+        }
+        if(!done) break;
+      }
+      if(changed) setTimeout(() => { try{ lastSaved = ''; recomputeStats(); saveState(); }catch(e){ console.error(e); } }, 0);
+    }catch(e){ console.error(e); }
+    finally{ trimBusy = false; }
+  }
+  setInterval(() => { try{ autoTrim(); }catch(e){} }, 1800000);
+
+  // ---- Kapananlar / İptaller: tarih-saat filtreli geçmiş + yanlış kapanan / iptal edilen fişi geri açma ----
+  // İptal kayıtları SİLİNEMEZ: silme düğmesi yok; geri açılan kayıt silinmez, "geri açıldı" işaretiyle kalır.
+  const kpF = { type: 'all', from: '', to: '', q: '', who: '', max: 100 };
+  const kpWhen = x => new Date(x).toLocaleString('tr-TR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+  const kpDT = s => { const v = s ? new Date(s).getTime() : NaN; return isFinite(v) ? v : null; };
+  const kpIso = d => new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+  function kpIsAdmin(){ try{ return !!adminDev(); }catch(e){ return false; } }
+  function kpItems(x){ if(x.t === 'cancel') return arr(x.e.items).map(String); const s = x.e.reopened && x.e.orig ? x.e.orig : x.e; return arr(s.items).map(i => i.qty + '× ' + i.name); }
+  function kpLabel(x){ try{ return x.e.label || (x.e.key ? orderLabel(x.e.key) : ''); }catch(e){ return x.e.label || ''; } }
+  function kpAmount(x){ return x.t === 'sale' && x.e.reopened && x.e.orig ? (+x.e.orig.total || 0) : (+x.e.total || 0); }
+  function kpList(){
+    const t0 = kpDT(kpF.from), t1 = kpDT(kpF.to), q = kpF.q.trim().toLocaleLowerCase('tr-TR'), a = [];
+    saleLog.forEach(e => { if(e) a.push({ t: 'sale', e }); });
+    cancelLog.forEach(e => { if(e) a.push({ t: 'cancel', e }); });
+    return a.filter(x => (kpF.type === 'all' || kpF.type === x.t) && (t0 == null || (x.e.ts || 0) >= t0) && (t1 == null || (x.e.ts || 0) <= t1)
+      && (!kpF.who || (x.t === 'sale' ? x.e.user : x.e.by) === kpF.who)
+      && (!q || (kpLabel(x) + ' ' + kpItems(x).join(' ') + ' ' + (x.e.reason || '') + ' ' + (x.e.user || x.e.by || '')).toLocaleLowerCase('tr-TR').indexOf(q) >= 0))
+      .sort((p, r) => (r.e.ts || 0) - (p.e.ts || 0));
+  }
+  function renderSmKapanan(){
+    const box = $id('kpList'), sum = $id('kpSum'); if(!box) return;
+    if(!kpIsAdmin()){ sum.textContent = ''; box.innerHTML = '<p style="color:var(--ink-faint);padding:12px">Satış ve iptal kayıtları yalnızca yönetici hesabında tutulur; bu bölüm yönetici cihazında görünür.</p>'; return; }
+    const who = new Set(); saleLog.forEach(s => s && s.user && who.add(s.user)); cancelLog.forEach(c => c && c.by && who.add(c.by));
+    const sel = $id('kpWho'), opts = '<option value="">Tüm personel</option>' + [...who].sort().map(w => '<option value="' + esc(w) + '"' + (w === kpF.who ? ' selected' : '') + '>' + esc(w) + '</option>').join('');
+    if(sel.dataset.o !== opts){ sel.dataset.o = opts; sel.innerHTML = opts; }
+    const all = kpList(), rows = all.slice(0, kpF.max); let sn = 0, st = 0, cn = 0, ct = 0; const by = {};
+    all.forEach(x => { const v = kpAmount(x); if(x.t === 'cancel'){ cn++; ct += v; } else if(!x.e.reopened){ sn++; st += v; const u = x.e.user || '—'; by[u] = (by[u] || 0) + v; } });
+    sum.innerHTML = '✅ <b>' + sn + '</b> kapanan fiş · <b>' + money(st) + '</b> &nbsp;|&nbsp; ❌ <b>' + cn + '</b> iptal · <b>' + money(ct) + '</b>' + (Object.keys(by).length ? '<div class="kp-by">' + Object.keys(by).sort((a, b) => by[b] - by[a]).slice(0, 8).map(u => '👤 ' + esc(u) + ' ' + money(by[u])).join(' · ') + '</div>' : '');
+    const html = rows.map(x => {
+      const e = x.e, isS = x.t === 'sale', done = isS ? e.reopened : e.reactivated, it = kpItems(x);
+      return '<div class="kp-row ' + x.t + (done ? ' done' : '') + '"><div class="kp-ic">' + (isS ? '✅' : '❌') + '</div><div class="kp-main"><b>' + esc(kpLabel(x)) + ' · ' + money(kpAmount(x)) + '</b>' +
+        '<span>' + kpWhen(e.ts) + ' · ' + esc((isS ? e.user : e.by) || '—') + (isS ? '' : ' · ' + esc(e.reason || '')) + '</span>' +
+        '<span class="kp-it">' + esc(it.slice(0, 6).join(', ') + (it.length > 6 ? ' +' + (it.length - 6) : '')) + '</span>' +
+        (done ? '<span class="kp-b">' + (isS ? '↩ Yeniden açıldı' : '♻ Yeniden aktifleştirildi') + ' · ' + esc(done.by || '') + ' · ' + kpWhen(done.ts) + '</span>' : '') + '</div>' +
+        (done ? '' : '<button type="button" class="btn-mini kp-act" data-kp="re" data-t="' + x.t + '" data-ts="' + (e.ts || 0) + '">' + (isS ? '↩ Yeniden aç' : '♻ Yeniden aktif et') + '</button>') + '</div>';
+    }).join('');
+    box.innerHTML = (html || '<p style="color:var(--ink-faint);padding:12px">Bu filtreye uyan kayıt yok.</p>') + (all.length > rows.length ? '<div class="link-btn" id="kpMore">Daha fazla göster (' + (all.length - rows.length) + ')</div>' : '');
+  }
+  function kpKeyOf(rec){
+    if(rec.key) return rec.key; const lb = String(rec.label || '');
+    for(const r of regions) for(const n of r.tables){ let l = ''; try{ l = orderLabel('table_' + n); }catch(e){} if(l === lb || ('Masa ' + n) === lb) return 'table_' + n; }
+    return '';
+  }
+  function stkRestore(items){
+    arr(items).forEach(i => { try{ if(i && stkTracked(i.name)) stkPMove(i.name, +(+i.qty || 1), 'set', 'adisyon yeniden açıldı'); }catch(e){} });
+    arr(items).forEach(i => { try{ (STK.rec[i.name] || []).forEach(r => { const x = stkItem(r.id); if(x) stkMove('set', x, r.q * (i.qty || 1), i.name + ' (yeniden açıldı)'); }); }catch(e){} });
+    try{ stkBadge(); }catch(e){}
+  }
+  async function kpReopen(t, ts){
+    const rec = (t === 'sale' ? saleLog : cancelLog).find(x => x && (x.ts || 0) === ts); if(!rec) return;
+    if(rec.reopened || rec.reactivated){ showToast('Bu kayıt zaten geri açılmış.'); return; }
+    const key = kpKeyOf(rec);
+    if(!/^table_\d+$/.test(key) || !regions.some(r => r.tables.indexOf(+key.slice(6)) >= 0)){ showToast('Bu fişin masası bulunamadı (paket / eski kayıt / silinmiş masa); geri açılamıyor.', 4200); return; }
+    if((carts[key] || []).length){ showToast(orderLabel(key) + ' şu an dolu. Önce o adisyonu kapatın ya da başka masaya taşıyın.', 4200); return; }
+    let lines = arr(rec.lines).length ? JSON.parse(JSON.stringify(rec.lines)) : null, legacy = false;
+    if(!lines){
+      legacy = true;
+      lines = t === 'sale' ? arr(rec.items).map(i => ({ name: i.name, qty: i.qty, unit: i.unit, by: i.by || '', sent: i.qty }))
+        : arr(rec.items).map(s => { const m = /^(\d+(?:[.,]\d+)?)× (.+)$/.exec(String(s)); if(!m) return null; const q = parseFloat(m[1].replace(',', '.')) || 1, p = findProd(m[2]); return { name: m[2], qty: q, unit: p ? p.price : 0, by: '', sent: q }; }).filter(Boolean);
+    }
+    if(!lines.length){ showToast('Kayıtta ürün bilgisi yok, geri açılamıyor.'); return; }
+    if(!await uiConfirm((t === 'sale' ? 'Kapanmış adisyon yeniden açılsın mı?' : 'İptal edilen adisyon yeniden aktif edilsin mi?') + '\n' + orderLabel(key) + ' · ' + money(kpAmount({ t, e: rec })) + (t === 'sale' ? '\nAlınan ödemeler adisyonda kalır; ürün ekleyip/çıkarıp tekrar kapatabilirsiniz.' : '') + (legacy ? '\n⚠ Eski kayıt: ürün fiyatları kayıttan/güncel menüden alınır.' : ''))) return;
+    if(!(await askManagerPin())){ showToast('PIN hatalı, işlem yapılmadı.'); return; }
+    if((carts[key] || []).length) return;
+    carts[key] = lines;
+    guestsByKey[key] = Math.max(1, parseInt(rec.guests) || 1);
+    if(rec.disc) discountByKey[key] = JSON.parse(JSON.stringify(rec.disc));
+    adisyonNoByKey[key] = rec.adNo || ((parseInt(settings.firstOrderNo) || 1) + (adisyonSeq++));
+    orderOpenedAt[key] = Date.now();
+    if(t === 'sale'){
+      let pays = arr(rec.pays);
+      if(!pays.length){ pays = [{ method: 'Önceki ödeme', amount: +rec.total || 0 }]; const g = +rec.gross || 0, tt = +rec.total || 0; if(g > tt + 0.005 && !rec.disc) discountByKey[key] = { type: 'tl', v: Math.round((g - tt) * 100) / 100, name: 'Önceki indirim' }; }
+      paymentHistoryByKey[key] = JSON.parse(JSON.stringify(pays));
+      paidByKey[key] = Math.round(pays.reduce((s, p) => s + (+p.amount || 0), 0) * 100) / 100;
+      stkRestore(rec.items);
+      rec.orig = { total: rec.total, gross: rec.gross, waived: rec.waived, items: rec.items };   // kayıt silinmez; tutarlar sıfırlanır, aslı orig içinde kalır
+      rec.reopened = { ts: Date.now(), by: uname() }; rec.total = 0; rec.gross = 0; rec.waived = 0; rec.items = [];
+    } else {
+      rec.reactivated = { ts: Date.now(), by: uname() };
+      try{ if(adminDev()) localStorage.setItem('posCancelLog', JSON.stringify(cancelLog)); }catch(_){}
+    }
+    lastSaved = ''; renderTableGrid(); renderSiparisMasa(); updateHomeStats(); renderGunSonu(); saveState(); renderSmKapanan();
+    showToast(orderLabel(key) + ' yeniden açıldı' + (legacy ? ' (eski kayıt)' : '') + '.', 3600);
+    openOrder(key, orderLabel(key), 'siparis-masa');
+  }
+  document.addEventListener('click', e => {
+    const v = e.target.closest && e.target.closest('#smKapananView'); if(!v) return;
+    const kt = e.target.closest('[data-kt]');
+    if(kt){ kpF.type = kt.dataset.kt; kpF.max = 100; v.querySelectorAll('[data-kt]').forEach(b => b.classList.toggle('on', b === kt)); renderSmKapanan(); return; }
+    if(e.target.id === 'kpMore'){ kpF.max += 100; renderSmKapanan(); return; }
+    if(e.target.id === 'kpToday'){ $id('kpFrom').value = kpIso(new Date(dayStart())); $id('kpTo').value = ''; kpF.from = $id('kpFrom').value; kpF.to = ''; kpF.max = 100; renderSmKapanan(); return; }
+    if(e.target.id === 'kpAll'){ ['kpFrom', 'kpTo', 'kpQ'].forEach(i => { $id(i).value = ''; }); kpF.from = kpF.to = kpF.q = kpF.who = ''; kpF.max = 100; renderSmKapanan(); return; }
+    const b = e.target.closest('[data-kp="re"]'); if(b) kpReopen(b.dataset.t, +b.dataset.ts);
+  });
+  ['input', 'change'].forEach(ev => document.addEventListener(ev, e => {
+    const id = e.target && e.target.id; if(!id || ['kpFrom', 'kpTo', 'kpQ', 'kpWho'].indexOf(id) < 0) return;
+    kpF.from = $id('kpFrom').value; kpF.to = $id('kpTo').value; kpF.q = $id('kpQ').value; kpF.who = $id('kpWho').value; kpF.max = 100; renderSmKapanan();
+  }));
 
   // 2) Yemek Kartı ödeme tipi
   const _ept = ensurePayTypes;
@@ -5938,7 +6242,7 @@ ${st('M50 58c-5-6 5-10 0-17', 0)}${st('M60 56c-5-7 5-11 0-19', 1.05)}${st('M70 5
     try{
       const r = (!o && isSup && RT.adminSetPassword) ? await RT.adminSetPassword(n) : (!o && isOwn && RT.ownerResetPassword) ? await RT.ownerResetPassword(n) : await RT.changePassword(o, n);
       if(r.code === 'ok'){ $id('ownerOldPw').value = ''; $id('ownerNewPw').value = ''; showToast('Şifreniz değiştirildi.'); }
-      else showToast({ wrong: 'Eski şifre hatalı.', weak: 'Yeni şifre çok zayıf (en az 6 karakter).', limit: 'Çok fazla deneme, biraz bekleyin.', net: 'İnternet bağlantısı yok.', recent: 'Güvenlik için çıkış yapıp şifresiz (Google ile) tekrar girin, sonra deneyin.', has: 'Zaten bir şifre var; eski şifreyi de yazın.', off: 'Firebase\'de E-posta/Şifre girişi kapalı.' }[r.code] || 'Şifre değiştirilemedi, tekrar deneyin.');
+      else showToast({ wrong: 'Eski şifre hatalı.', weak: 'Yeni şifre çok zayıf (en az 6 karakter).', limit: 'Çok fazla deneme, biraz bekleyin.', net: 'İnternet bağlantısı yok.', recent: 'Güvenlik için çıkış yapıp şifresiz (Google ile) tekrar girin, sonra deneyin.', has: 'Zaten bir şifre var; eski şifreyi de yazın.', off: 'Sunucuda E-posta/Şifre girişi kapalı.' }[r.code] || 'Şifre değiştirilemedi, tekrar deneyin.');
     } finally { btn.disabled = false; }
   });
   $id('btnOwnerGoogle').addEventListener('click', async () => {
@@ -5948,7 +6252,8 @@ ${st('M50 58c-5-6 5-10 0-17', 0)}${st('M60 56c-5-7 5-11 0-19', 1.05)}${st('M70 5
     const btn = $id('btnOwnerGoogle'); btn.disabled = true;
     try{
       const r = await RT.ownerLinkGoogle();
-      if(r.code !== 'cancel') showToast({ ok: 'Google hesabı bağlandı.', popup: 'Açılır pencere engellendi. İzin verip tekrar deneyin.', goff: 'Firebase\'de Google girişi kapalı.', domain: 'Bu site adresi Firebase\'de yetkili değil.', net: 'İnternet bağlantısı yok.', used: 'Bu Google hesabı başka bir hesaba bağlı, farklı bir hesap seçin.', recent: 'Güvenlik için çıkış yapıp tekrar girin, sonra deneyin.' }[r.code] || 'Google hesabı bağlanamadı, tekrar deneyin.');
+      if(r.code === 'ok'){ try{ ownerHintSync(); }catch(e){} }
+      if(r.code !== 'cancel') showToast({ ok: 'Google hesabı bağlandı.', popup: 'Açılır pencere engellendi. İzin verip tekrar deneyin.', goff: 'Sunucuda Google girişi kapalı.', domain: 'Bu site adresi sunucuda yetkili değil.', net: 'İnternet bağlantısı yok.', used: 'Bu Google hesabı başka bir hesaba bağlı, farklı bir hesap seçin.', recent: 'Güvenlik için çıkış yapıp tekrar girin, sonra deneyin.' }[r.code] || 'Google hesabı bağlanamadı, tekrar deneyin.');
       applyPerms();
     } finally { btn.disabled = false; }
   });
@@ -5958,7 +6263,7 @@ ${st('M50 58c-5-6 5-10 0-17', 0)}${st('M60 56c-5-7 5-11 0-19', 1.05)}${st('M70 5
     if(pw.length < 6 || /\s/.test(pw)){ showToast('Şifre en az 6 karakter olmalı, boşluk içermemeli.'); return; }
     const btn = $id('btnOwnerAcc'); btn.disabled = true;
     try{
-      let cur = 0; try{ cur = +(await RT.get('staffVer/yonetici')) || 0; }catch(e){ showToast('Firebase okunamadı: ' + fbErr(e)); return; }
+      let cur = 0; try{ cur = +(await RT.get('staffVer/yonetici')) || 0; }catch(e){ showToast('Sunucudan okunamadı: ' + fbErr(e)); return; }
       let v = cur + 1, nid = null, tries = 0;
       while(!nid && tries++ < 6){
         try{ nid = await RT.createStaff(staffEmail('yonetici', v), pw); }
@@ -6057,7 +6362,7 @@ ${st('M50 58c-5-6 5-10 0-17', 0)}${st('M60 56c-5-7 5-11 0-19', 1.05)}${st('M70 5
     return ok;
   }
   function showConnInfo(){
-    const info = RT.local ? ['#e0a340', 'Yerel mod', 'Firebase ayarlı değil; sistem yalnızca bu cihazda çalışıyor.']
+    const info = RT.local ? ['#e0a340', 'Yerel mod', 'Sunucu ayarlı değil; sistem yalnızca bu cihazda çalışıyor.']
       : connState === 'ok' ? ['#2e9d57', 'Canlı bağlantı', 'Siparişler ve mutfak diğer cihazlarla anlık eşleşiyor.']
       : connState === 'bad' ? ['#d93025', 'Bağlantı yok', 'İnternet gelince sistem kendiliğinden yeniden bağlanır. "Şimdi Yenile" ile elle de deneyebilirsiniz.']
       : ['#9a9a9a', 'Bağlanıyor…', 'Sunucuyla bağlantı kuruluyor.'];
@@ -6137,7 +6442,7 @@ ${st('M50 58c-5-6 5-10 0-17', 0)}${st('M60 56c-5-7 5-11 0-19', 1.05)}${st('M70 5
   function ppSetAmount(v){ $id('ppAmountInput').value = (Math.max(0, Math.round(v * 100) / 100)).toFixed(2); }
   $id('ppAll').addEventListener('click', () => ppSetAmount(remainingForKey(currentCartKey)));
   $id('ppHalf').addEventListener('click', () => ppSetAmount(remainingForKey(currentCartKey) / 2));
-  const ppStep = d => { const el = $id('ppSplitCount'); const n = Math.max(1, (parseInt(el.value) || 1) + d); el.value = n; ppSetAmount(remainingForKey(currentCartKey) / n); };
+  const ppStep = d => { ppSetSplit(Math.max(1, (parseInt($id('ppSplitCount').value) || 1) + d), true); };
   $id('ppSplitMinus').addEventListener('click', () => ppStep(-1));
   $id('ppSplitPlus').addEventListener('click', () => ppStep(1));
 
@@ -6218,12 +6523,12 @@ ${st('M50 58c-5-6 5-10 0-17', 0)}${st('M60 56c-5-7 5-11 0-19', 1.05)}${st('M70 5
   async function aiAsk(prompt, parts){ return (await aiGen('text', parts ? [prompt].concat(parts) : prompt)).trim(); }
   async function aiJSON(prompt, parts){ return JSON.parse((await aiGen('json', parts ? [prompt].concat(parts) : prompt)).replace(/```json|```/g, '').trim()); }
   function aiErr(e){
-    const m = String(((e && e.code) ? e.code + ' ' : '') + ((e && e.message) || e || '')).replace(/https?:\/\/\S+/g, '').replace(/\s+/g, ' ');
-    if(/app.?check/i.test(m)) return 'App Check doğrulaması başarısız. Firebase Console > App Check kaydını yapıp config dosyasındaki recaptcha.siteKey alanını doldurun.';
+    const m = String(((e && e.code) ? e.code + ' ' : '') + ((e && e.message) || e || '')).replace(/https?:\/\/\S+/g, '').replace(/\s+/g, ' ').replace(/firebase/gi, 'sunucu');
+    if(/app.?check/i.test(m)) return 'App Check doğrulaması başarısız. Sunucu paneli > App Check kaydını yapıp config dosyasındaki recaptcha.siteKey alanını doldurun.';
     if(/dynamically imported|importing a module|module script/i.test(m)) return 'Yapay zekâ modülü yüklenemedi (SDK dosyası açılamadı).';
     if(/\[\s*(500|502|503|504)\s*\]|high demand|overload|unavailable/i.test(m)) return 'Yapay zekâ şu an çok yoğun (Google tarafında geçici). Birkaç dakika sonra tekrar deneyin.';
     if(/404|not.?found|no longer available/i.test(m)) return 'Yapay zekâ modeli bulunamadı veya kapatılmış. Ayrıntı: ' + m.slice(0, 200);
-    if(/api.?not.?enabled|403|permission|api.?key|forbidden/i.test(m)) return 'Yapay zekâ erişimi reddedildi. Firebase Console > AI Logic bölümünü etkinleştirdiniz mi? (' + m.slice(0, 120) + ')';
+    if(/api.?not.?enabled|403|permission|api.?key|forbidden/i.test(m)) return 'Yapay zekâ erişimi reddedildi. Sunucu paneli > AI Logic bölümünü etkinleştirdiniz mi? (' + m.slice(0, 120) + ')';
     if(/quota|429|resource.?exhausted/i.test(m)) return 'Yapay zekânın ücretsiz kotası doldu (dakikalık veya günlük). Birkaç dakika sonra tekrar deneyin; günlük kota yaklaşık sabah 10:00\'da (Türkiye saati) yenilenir.';
     if(navigator.onLine === false) return 'İnternet bağlantısı yok.';
     return 'Yapay zekâ hatası: ' + m.slice(0, 260);
@@ -6466,7 +6771,7 @@ ${st('M50 58c-5-6 5-10 0-17', 0)}${st('M60 56c-5-7 5-11 0-19', 1.05)}${st('M70 5
   $id('aiTestBtn').addEventListener('click', async () => {
     const o = $id('aiTestOut'); o.style.display = ''; o.textContent = '⏳ Test ediliyor…';
     try{ const t = await aiAsk('Sadece "tamam" yaz.'); o.textContent = '✔ Çalışıyor. Yanıt: ' + t; }
-    catch(e){ console.error('AI', e); o.textContent = '✖ ' + aiErr(e) + '\n\nTeknik ayrıntı:\n' + String((e && e.code) || '') + ' ' + String((e && e.message) || e).slice(0, 700) + '\n\nApp Check anahtarı: ' + (APPCHECK_SITE_KEY ? 'tanımlı (' + (APPCHECK_ENTERPRISE ? 'Enterprise' : 'v3') + ')' : 'boş') + '\nSDK: ' + window.__fbB; }
+    catch(e){ console.error('AI', e); o.textContent = '✖ ' + aiErr(e) + '\n\nTeknik ayrıntı:\n' + String((e && e.code) || '') + ' ' + String((e && e.message) || e).replace(/firebase/gi, 'sunucu').replace(/https?:\/\/\S+/g, '').slice(0, 700) + '\n\nApp Check anahtarı: ' + (APPCHECK_SITE_KEY ? 'tanımlı (' + (APPCHECK_ENTERPRISE ? 'Enterprise' : 'v3') + ')' : 'boş') ; }
   });
   document.querySelectorAll('.nav-item[data-screen="ai"]').forEach(el => el.addEventListener('click', aiRefreshUI));
   aiRefreshUI();
@@ -6482,7 +6787,6 @@ ${st('M50 58c-5-6 5-10 0-17', 0)}${st('M60 56c-5-7 5-11 0-19', 1.05)}${st('M70 5
 - Tanımlamalar: Masa/Bölgeler (bölge, masa ekleme, toplu masa, ad değiştirme/silme), Menü/Ürünler (ana kategori > alt kategori, ürün ekle/düzenle, toplu fiyat düzenleme, toplu fotoğraf, "Sadece menü modu" anahtarı), Birimler, Özellikler (sipariş notları), KDV Oranları (★ ile varsayılan), İndirimler, Mutfak Grupları (Mutfak/Bar/Nargile ekranlarına yönlendirme), Müşteriler (açık hesap, tahsilat, CSV indir), Ödenmezler (ikram gerekçeleri).
 - Sipariş: Bölgeler (masalar; beyaz boş, kırmızı sipariş bekliyor/mutfakta, yeşil teslim edilmiş) ve Siparişler (kanban) sekmeleri; ⛶ tam ekran, 📶 bağlantı durumu, ↻ yenile. Masaya tıklayınca menüden ürün seçilir, "Sepeti Gör > Onayla ve Kaydet" ile mutfağa gider.
 - Adisyon ekranında: kişi sayısı, ürün notu, ⇄ Ürün/Masa Taşı, ✕ Adisyonu İptal (neden + yönetici PIN), 💳 Ödeme Al (nakit, kart, açık hesap, hesap bölme, indirim, ikram), 🖨️ fiş yazdır, ✎ masaya müşteri adı.
-- Paket / Gel-Al: yeni sipariş, yola çıktı / hazır işaretleme.
 - İşlemler: Gider/Masraf, Zayi.
 - Kullanıcılar: kullanıcı ekleme (görev, şifre, bölge, engelleme) ve Yetkiler tablosu (görev bazlı).
 - Raporlar: Ürün Satış, Gün Sonu (Günü Kapat, geçmiş günler, iptal kayıtları, CSV), Vardiya, Restaurant İstatistikleri, Fire.
@@ -6728,7 +7032,7 @@ ${st('M50 58c-5-6 5-10 0-17', 0)}${st('M60 56c-5-7 5-11 0-19', 1.05)}${st('M70 5
     const off = bg.querySelector('#cpOff'); if(off) off.onclick = () => { settings.custPw = ''; finish('Şifre kaldırıldı: menü herkese açık.'); };
   }
   $id('custLockCard').addEventListener('click', openCustPw);
-  $id('navCO').addEventListener('click', () => { $id('sidebar').classList.remove('open'); $id('btnCO').click(); });
+  ($id('navCO') || { addEventListener(){} }).addEventListener('click', () => { $id('sidebar').classList.remove('open'); $id('btnCO').click(); });
   $id('sbLogout').addEventListener('click', () => $id('btnLogout').click());
   setInterval(() => { [['coBadge', 'sbCO'], ['kBadge', 'sbK']].forEach(([a, b]) => { const x = $id(a), y = $id(b); if(x && y){ y.textContent = x.textContent; y.classList.toggle('on', x.classList.contains('on')); } }); if(staffMode) custLockRender(); }, 1000);
 
@@ -6853,7 +7157,6 @@ ${st('M50 58c-5-6 5-10 0-17', 0)}${st('M60 56c-5-7 5-11 0-19', 1.05)}${st('M70 5
   function stkMove(t, x, q, note, cost){
     x.qty = Math.round((x.qty + q) * 1000) / 1000;
     STK.log.push({ ts: Date.now(), t, id: x.id, q, c: cost == null ? x.cost : cost, note: note || '', u: uname() });
-    if(STK.log.length > 4000) STK.log.splice(0, STK.log.length - 4000);
   }
   function stkBadge(){ let n = STK.items.filter(x => x.qty <= x.min).length; try{ n += Object.keys(STK.prod).filter(k => stkStatus(k)[0] !== 'ok').length; }catch(e){} const b = document.getElementById('sbStk'); if(b){ b.textContent = n; b.classList.toggle('on', n > 0); } }
   function stkSave(){ stkBadge(); saveState(); stkRender(); }
@@ -7052,7 +7355,6 @@ ${st('M50 58c-5-6 5-10 0-17', 0)}${st('M60 56c-5-7 5-11 0-19', 1.05)}${st('M70 5
     const x = STK.prod[n]; if(!x || !isFinite(d)) return;
     const nq = Math.max(0, Math.round((x.q + d) * 1000) / 1000), real = nq - x.q; x.q = nq;
     if(real !== 0 || t === 'start' || t === 'stop') STK.plog.push({ ts: Date.now(), n, d: real, t, note: note || '', u: uname() });
-    if(STK.plog.length > 2000) STK.plog.splice(0, STK.plog.length - 2000);
   }
   function skAll(){
     const a = [], seen = new Set();
@@ -7278,6 +7580,11 @@ ${st('M50 58c-5-6 5-10 0-17', 0)}${st('M60 56c-5-7 5-11 0-19', 1.05)}${st('M70 5
 .sk-sh-head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}.sk-sh-head b{font-size:1.15rem}.sk-sh-head small{display:block;color:var(--ink-faint,#888);font-size:.8rem;margin-top:2px}
 .sk-x{border:0;background:rgba(120,120,128,.15);width:34px;height:34px;border-radius:50%;cursor:pointer;color:inherit;font-size:1rem}
 .sk-seg2{align-self:flex-start}
+.sk-sheet{height:min(92vh,900px);height:min(92dvh,900px);overflow:hidden}
+.sk-sheet>.sk-sh-head,.sk-sheet>.sk-seg2,.sk-sheet>.sk-search,.sk-sheet>.sk-chips,.sk-sheet>.sk-sh-foot{flex:0 0 auto}
+.sk-sheet>.sk-chips{position:relative;z-index:2;min-height:40px}
+.sk-sheet .sk-sh-grid{flex:1 1 0;min-height:0;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+@media(max-width:560px){.sk-sheet{height:96vh;height:96dvh}}
 .sk-sh-grid{flex:1;overflow:auto;display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;padding:2px;align-content:start;min-height:180px}
 .sk-tile{border:1.5px solid var(--line,#e3e3e3);border-radius:14px;padding:10px;display:flex;flex-direction:column;gap:5px;cursor:pointer;background:var(--panel,#fff)}
 .sk-tile .sk-vis{width:100%;height:78px;flex:none}.sk-tile b{font-size:.85rem;line-height:1.25;min-height:2.1em}.sk-tile small{color:var(--ink-faint,#999);font-size:.72rem}
